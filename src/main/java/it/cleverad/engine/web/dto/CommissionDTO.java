@@ -18,23 +18,28 @@ public class CommissionDTO {
     private Boolean status;
     private String idType;
     private LocalDate dueDate;
-    private Long campaignId;
-
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
 
-    public CommissionDTO(long id, String name, String value, String description, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate) {
+    private Long campaignId;
+    private String typeName;
+
+    public CommissionDTO(long id, String name, String value, String description, Boolean status, String idType, LocalDate dueDate, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long campaignId, String typeName) {
         this.id = id;
         this.name = name;
         this.value = value;
         this.description = description;
         this.status = status;
+        this.idType = idType;
+        this.dueDate = dueDate;
         this.creationDate = creationDate;
         this.lastModificationDate = lastModificationDate;
+        this.campaignId = campaignId;
+        this.typeName = typeName;
     }
 
     public static CommissionDTO from(Commission comission) {
-        return new CommissionDTO(comission.getId(), comission.getName(), comission.getValue(), comission.getDescription(), comission.getStatus(), comission.getCreationDate(), comission.getLastModificationDate());
+        return new CommissionDTO(comission.getId(), comission.getName(), comission.getValue(), comission.getDescription(), comission.getStatus(), comission.getIdType(), comission.getDueDate(), comission.getCreationDate(), comission.getLastModificationDate(), comission.getCampaign().getId(), comission.getDictionary().getName());
     }
 
 }

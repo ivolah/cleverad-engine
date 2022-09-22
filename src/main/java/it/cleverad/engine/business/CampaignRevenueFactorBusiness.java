@@ -92,6 +92,7 @@ public class CampaignRevenueFactorBusiness {
             mapper.map(filter, campaignDTOfrom);
 
             CampaignRevenueFactor mappedEntity = mapper.map(ommission, CampaignRevenueFactor.class);
+            mappedEntity.setLastModificationDate(LocalDateTime.now());
             mapper.map(campaignDTOfrom, mappedEntity);
 
             return CampaignRevenueFactorDTO.from(repository.save(mappedEntity));
@@ -159,9 +160,6 @@ public class CampaignRevenueFactorBusiness {
     public static class BaseCreateRequest {
         private Long campaignId;
         private Long revenuefactorId;
-
-        private LocalDateTime creationDate;
-        private LocalDateTime lastModificationDate;
     }
 
     @Data

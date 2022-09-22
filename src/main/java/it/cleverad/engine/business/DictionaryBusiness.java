@@ -82,7 +82,6 @@ public class DictionaryBusiness {
         return page.map(DictionaryDTO::from);
     }
 
-
     public Page<DictionaryDTO> getTypeStatus(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         request.setType("STATUS");
@@ -93,6 +92,14 @@ public class DictionaryBusiness {
     public Page<DictionaryDTO> getTypeRole(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         request.setType("ROLE");
+        Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(DictionaryDTO::from);
+    }
+
+    public Page<DictionaryDTO> getTypeCommission() {
+        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Filter request = new Filter();
+        request.setType("COMMISSION");
         Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
         return page.map(DictionaryDTO::from);
     }

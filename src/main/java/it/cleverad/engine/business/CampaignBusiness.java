@@ -136,6 +136,7 @@ public class CampaignBusiness {
             CampaignDTO campaignDTOfrom = CampaignDTO.from(campaign);
             mapper.map(filter, campaignDTOfrom);
             Campaign mappedEntity = mapper.map(campaign, Campaign.class);
+            mappedEntity.setLastModificationDate(LocalDateTime.now());
             mapper.map(campaignDTOfrom, mappedEntity);
             return CampaignDTO.from(repository.save(mappedEntity));
         } catch (Exception e) {

@@ -1,9 +1,11 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
+import it.cleverad.engine.persistence.model.Campaign;
 import it.cleverad.engine.persistence.model.Commission;
 import it.cleverad.engine.persistence.repository.CommissionRepository;
 import it.cleverad.engine.web.dto.CommissionDTO;
+import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.exception.PostgresCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +40,9 @@ public class CommissionBusiness {
     private CommissionRepository repository;
 
     @Autowired
+    private DictionaryBusiness dictionaryBusiness;
+
+    @Autowired
     private Mapper mapper;
 
     /**
@@ -48,6 +54,9 @@ public class CommissionBusiness {
         Commission map = mapper.map(request, Commission.class);
         map.setCreationDate(LocalDateTime.now());
         map.setLastModificationDate(LocalDateTime.now());
+        Campaign cc = new Campaign();
+        cc.setId(request.campaignId);
+        map.setCampaign(cc);
         return CommissionDTO.from(repository.save(map));
     }
 
@@ -55,7 +64,7 @@ public class CommissionBusiness {
     public CommissionDTO findById(Long id) {
         try {
             Commission commission = repository.findById(id).orElseThrow(Exception::new);
-            return  CommissionDTO.from(commission);
+            return CommissionDTO.from(commission);
         } catch (Exception e) {
             log.error("Errore in findById", e);
             return null;
@@ -86,9 +95,10 @@ public class CommissionBusiness {
             Commission ommission = repository.findById(id).orElseThrow(Exception::new);
             CommissionDTO campaignDTOfrom = CommissionDTO.from(ommission);
 
-            mapper.map(filter,campaignDTOfrom );
+            mapper.map(filter, campaignDTOfrom);
 
             Commission mappedEntity = mapper.map(ommission, Commission.class);
+            mappedEntity.setLastModificationDate(LocalDateTime.now());
             mapper.map(campaignDTOfrom, mappedEntity);
 
             return CommissionDTO.from(repository.save(mappedEntity));
@@ -98,6 +108,9 @@ public class CommissionBusiness {
         }
     }
 
+    public Page<DictionaryDTO> getTypes() {
+        return dictionaryBusiness.getTypeCommission();
+    }
 
     /**
      * ============================================================================================================
@@ -144,6 +157,7 @@ public class CommissionBusiness {
         };
     }
 
+
     /**
      * ============================================================================================================
      **/
@@ -152,17 +166,14 @@ public class CommissionBusiness {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class BaseCreateRequest {
-
         private String name;
         private String value;
         private String description;
         private Boolean status;
         private String idType;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dueDate;
         private Long campaignId;
-
-        private LocalDateTime creationDate;
-        private LocalDateTime lastModificationDate;
     }
 
     @Data

@@ -32,8 +32,9 @@ public class CampaignDTO {
     private List<BasicCategoryDTO> categories;
     private List<BasicCookieDTO> cookies;
     private List<RevenueFactorDTO> revenues;
+    private List<AffiliateChannelCommissionCampaignDTO> affiliateChannelCommissionCampaigns;
 
-    public CampaignDTO(long id, String name, String shortDescription, String longDescription, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, LocalDate startDate, LocalDate endDate, String idFile, String valuta, Long budget, List<BasicMediaDTO> medias, List<BasicAffiliateDTO> affiliates, List<CommissionDTO> commissions, List<BasicCategoryDTO> categories, List<BasicCookieDTO> cookies, List<RevenueFactorDTO> revenues) {
+    public CampaignDTO(long id, String name, String shortDescription, String longDescription, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, LocalDate startDate, LocalDate endDate, String idFile, String valuta, Long budget, List<BasicMediaDTO> medias, List<BasicAffiliateDTO> affiliates, List<CommissionDTO> commissions, List<BasicCategoryDTO> categories, List<BasicCookieDTO> cookies, List<RevenueFactorDTO> revenues, List<AffiliateChannelCommissionCampaignDTO> affiliateChannelCommissionCampaigns) {
         this.id = id;
         this.name = name;
         this.shortDescription = shortDescription;
@@ -52,6 +53,7 @@ public class CampaignDTO {
         this.categories = categories;
         this.cookies = cookies;
         this.revenues = revenues;
+        this.affiliateChannelCommissionCampaigns = affiliateChannelCommissionCampaigns;
     }
 
     public static CampaignDTO from(Campaign campaign) {
@@ -78,10 +80,6 @@ public class CampaignDTO {
                 dto.setId(affiliateCampaign.getAffiliate().getId());
                 dto.setName(affiliateCampaign.getAffiliate().getName());
                 dto.setPrimaryMail(affiliateCampaign.getAffiliate().getPrimaryMail());
-                affiliateCampaign.getAffiliate().getCommissionCampaigns().stream().forEach(commissionCampaign -> {
-                    dto.setIdCommission(String.valueOf(commissionCampaign.getCommission().getId()));
-                });
-
                 return dto;
             }).collect(Collectors.toList());
         }
@@ -93,6 +91,13 @@ public class CampaignDTO {
                 dto.setId(commissionCampaign.getId());
                 dto.setName(commissionCampaign.getName());
                 dto.setValue(commissionCampaign.getValue());
+                dto.setDescription(commissionCampaign.getDescription());
+                dto.setStatus(commissionCampaign.getStatus());
+                dto.setIdType(commissionCampaign.getIdType());
+                dto.setDueDate(commissionCampaign.getDueDate());
+                dto.setCampaignId(commissionCampaign.getCampaign().getId());
+                dto.setCreationDate(commissionCampaign.getCreationDate());
+                dto.setLastModificationDate(commissionCampaign.getLastModificationDate());
                 return dto;
             }).collect(Collectors.toList());
         }
@@ -128,10 +133,32 @@ public class CampaignDTO {
                 dto.setId(factor.getRevenuefactor().getId());
                 dto.setRevenue(factor.getRevenuefactor().getRevenue());
                 dto.setStatus(factor.getRevenuefactor().isStatus());
+                dto.setIdType(factor.getRevenuefactor().getIdType());
+                dto.setDueDate(factor.getRevenuefactor().getDueDate());
+                dto.setCreationDate(factor.getRevenuefactor().getCreationDate());
+                dto.setLastModificationDate(factor.getRevenuefactor().getLastModificationDate());
                 return dto;
             }).collect(Collectors.toList());
         }
 
-        return new CampaignDTO(campaign.getId(), campaign.getName(), campaign.getShortDescription(), campaign.getLongDescription(), campaign.getStatus(), campaign.getCreationDate(), campaign.getLastModificationDate(), campaign.getStartDate(), campaign.getEndDate(), campaign.getIdFile(), campaign.getValuta(), campaign.getBudget(), medias, affiliates, null, campaigns, cookie, revenues);
+        List<AffiliateChannelCommissionCampaignDTO> accc = null;
+        if (campaign.getAffiliateChannelCommissionCampaigns() != null) {
+            accc = campaign.getAffiliateChannelCommissionCampaigns().stream().map(acccc -> {
+                AffiliateChannelCommissionCampaignDTO dto = new AffiliateChannelCommissionCampaignDTO();
+                dto.setId(acccc.getId());
+                dto.setCampaignId(acccc.getCampaign().getId());
+                dto.setAffiliateId(acccc.getAffiliate().getId());
+                dto.setAffilateName(acccc.getAffiliate().getName());
+                dto.setChannelId(acccc.getChannel().getId());
+                dto.setChannelName(acccc.getChannel().getName());
+                dto.setCommissionId(acccc.getCommission().getId());
+                dto.setCommissionName(acccc.getCommission().getName());
+                dto.setCreationDate(acccc.getCreationDate());
+                dto.setLastModificationDate(acccc.getLastModificationDate());
+                return dto;
+            }).collect(Collectors.toList());
+        }
+
+        return new CampaignDTO(campaign.getId(), campaign.getName(), campaign.getShortDescription(), campaign.getLongDescription(), campaign.getStatus(), campaign.getCreationDate(), campaign.getLastModificationDate(), campaign.getStartDate(), campaign.getEndDate(), campaign.getIdFile(), campaign.getValuta(), campaign.getBudget(), medias, affiliates, commissions, campaigns, cookie, revenues, accc);
     }
 }

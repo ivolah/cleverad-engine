@@ -90,6 +90,7 @@ public class RevenueFactorBusiness {
             mapper.map(filter,campaignDTOfrom );
 
             RevenueFactor mappedEntity = mapper.map(ommission, RevenueFactor.class);
+            mappedEntity.setLastModificationDate(LocalDateTime.now());
             mapper.map(campaignDTOfrom, mappedEntity);
 
             return RevenueFactorDTO.from(repository.save(mappedEntity));
@@ -148,11 +149,7 @@ public class RevenueFactorBusiness {
         private Long revenue;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dueDate;
-
         private Boolean status;
-
-        private LocalDateTime creationDate;
-        private LocalDateTime lastModificationDate;
     }
 
     @Data

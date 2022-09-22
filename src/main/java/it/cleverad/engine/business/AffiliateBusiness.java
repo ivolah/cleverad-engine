@@ -14,7 +14,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -83,6 +82,7 @@ public class AffiliateBusiness {
             mapper.map(filter, affiliateDTOfrom);
 
             Affiliate mappedEntity = mapper.map(affiliate, Affiliate.class);
+            mappedEntity.setLastModificationDate(LocalDate.now());
             mapper.map(affiliateDTOfrom, mappedEntity);
 
             return AffiliateDTO.from(repository.save(mappedEntity));
@@ -169,10 +169,6 @@ public class AffiliateBusiness {
         private String primaryMail;
         private String secondaryMail;
         private String status;
-        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-        private LocalDateTime creationDate;
-        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-        private LocalDateTime lastModificationDate;
     }
 
     @Data

@@ -89,6 +89,7 @@ public class CategoryBusiness {
             mapper.map(filter, categoryDTO);
 
             Category mappedEntity = mapper.map(category, Category.class);
+            mappedEntity.setLastModificationDate(LocalDateTime.now());
             mapper.map(categoryDTO, mappedEntity);
 
             return CategoryDTO.from(repository.save(mappedEntity));

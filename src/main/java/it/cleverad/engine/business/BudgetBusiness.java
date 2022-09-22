@@ -83,6 +83,7 @@ public class BudgetBusiness {
             mapper.map(filter, BudgetDTOfrom);
 
             Budget mappedEntity = mapper.map(Budget, Budget.class);
+            mappedEntity.setLastModificationDate(LocalDateTime.now());
             mapper.map(BudgetDTOfrom, mappedEntity);
 
             return BudgetDTO.from(repository.save(mappedEntity));

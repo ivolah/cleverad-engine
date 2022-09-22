@@ -89,6 +89,7 @@ public class CookieBusiness {
             mapper.map(filter, campaignDTOfrom);
 
             Cookie mappedEntity = mapper.map(channel, Cookie.class);
+            mappedEntity.setLastModificationDate(LocalDateTime.now());
             mapper.map(campaignDTOfrom, mappedEntity);
 
             return CookieDTO.from(repository.save(mappedEntity));

@@ -83,6 +83,7 @@ public class ChannelBusiness {
             mapper.map(filter,campaignDTOfrom );
 
             Channel mappedEntity = mapper.map(channel, Channel.class);
+            mappedEntity.setLastModificationDate(LocalDateTime.now());
             mapper.map(campaignDTOfrom, mappedEntity);
 
             return ChannelDTO.from(repository.save(mappedEntity));

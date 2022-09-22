@@ -15,7 +15,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +33,6 @@ public class AffiliateChannelCommissionCampaignBusiness {
 
     @Autowired
     private Mapper mapper;
-
 
     /**
      * ============================================================================================================
@@ -96,6 +94,8 @@ public class AffiliateChannelCommissionCampaignBusiness {
         filter.setCampaignId(campaignId);
         log.info(">>> " + campaignId);
         Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
+
+
         return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
 
@@ -114,7 +114,13 @@ public class AffiliateChannelCommissionCampaignBusiness {
                 predicates.add(cb.equal(root.get("affiliateId"), request.getAffiliateId()));
             }
             if (request.getCampaignId() != null) {
-                predicates.add(cb.equal(root.get("campaignId"), request.getCampaignId()));
+                predicates.add(cb.equal(root.get("campaign_id"), request.getCampaignId()));
+            }
+            if (request.getChannelId() != null) {
+                predicates.add(cb.equal(root.get("channelId"), request.getChannelId()));
+            }
+            if (request.getCommissionId() != null) {
+                predicates.add(cb.equal(root.get("commissionId"), request.getCommissionId()));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -135,11 +141,6 @@ public class AffiliateChannelCommissionCampaignBusiness {
         private Long affiliateId;
         private Long channelId;
         private Long commissionId;
-
-        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-        private LocalDateTime creationDate;
-        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-        private LocalDateTime lastModificationDate;
     }
 
     @Data

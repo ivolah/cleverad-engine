@@ -92,6 +92,7 @@ public class CampaignCategoryBusiness {
             mapper.map(filter,campaignDTOfrom );
 
             CampaignCategory mappedEntity = mapper.map(channel, CampaignCategory.class);
+            mappedEntity.setLastModificationDate(LocalDateTime.now());
             mapper.map(campaignDTOfrom, mappedEntity);
 
             return CampaignCategoryDTO.from(repository.save(mappedEntity));

@@ -11,7 +11,6 @@ public class BasicAffiliateDTO {
     private long id;
     private String name;
     private String primaryMail;
-    private String idCommission;
 
     public BasicAffiliateDTO(long id, String name, String primaryMail) {
         this.id = id;

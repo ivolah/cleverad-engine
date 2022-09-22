@@ -26,6 +26,10 @@ public class Commission {
     @JoinColumn(name = "campaign_id")
     private Campaign campaign;
 
+    @ManyToOne
+    @JoinColumn(name = "dictionary_id")
+    private Dictionary dictionary;
+
     private String name;
     private String value;
     private String description;

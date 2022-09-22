@@ -51,6 +51,7 @@ public class MediaBusiness {
     public MediaDTO create(BaseCreateRequest request) {
         Media map = mapper.map(request, Media.class);
         map.setCreationDate(LocalDateTime.now());
+        map.setLastModificationDate(LocalDateTime.now());
         MediaDTO mediaDTO = MediaDTO.from(repository.save(map));
 
         // aggiungo riferimento campagna se c'è

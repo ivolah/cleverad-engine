@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.cleverad.engine.business.CommissionBusiness;
 import it.cleverad.engine.web.dto.CommissionDTO;
+import it.cleverad.engine.web.dto.DictionaryDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -57,6 +58,13 @@ public class CommissionController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void delete(@PathVariable Long id) {
         this.business.delete(id);
+    }
+
+    @Operation(summary = "Lists the Commissions typess", description = "Lists the Commissions, searched and paginated")
+    @GetMapping("/types")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<DictionaryDTO> getTypes() {
+        return business.getTypes();
     }
 
     /**

@@ -92,6 +92,7 @@ public class CampaignCookieBusiness {
             mapper.map(filter,campaignDTOfrom );
 
             CampaignCookie mappedEntity = mapper.map(channel, CampaignCookie.class);
+            mappedEntity.setLastModificationDate(LocalDateTime.now());
             mapper.map(campaignDTOfrom, mappedEntity);
 
             return CampaignCookieDTO.from(repository.save(mappedEntity));
@@ -148,10 +149,8 @@ public class CampaignCookieBusiness {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class BaseCreateRequest {
-
         private Long campaignId;
         private Long cookieId;
-
     }
 
     @Data
