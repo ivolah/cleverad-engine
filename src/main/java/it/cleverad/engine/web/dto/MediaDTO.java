@@ -1,0 +1,61 @@
+package it.cleverad.engine.web.dto;
+
+import it.cleverad.engine.persistence.model.Media;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import java.time.LocalDateTime;
+
+@Slf4j
+@Data
+@NoArgsConstructor
+public class MediaDTO {
+
+    private long id;
+    private String name;
+
+    private String url;
+    private String target;
+    private String bannerCode;
+    private String note;
+
+    private String idFile;
+    private String status;
+    private LocalDateTime creationDate;
+    private LocalDateTime lastModificationDate;
+
+    private Long campaignId;
+    private String campaignName;
+
+    private Long typeId;
+    private String typeName;
+
+    public MediaDTO(long id, String name, String url, String target, String bannerCode, String note, String idFile, String status, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long campaignId, String campaignName, Long typeId) {
+        this.id = id;
+        this.name = name;
+        this.url = url;
+        this.target = target;
+        this.bannerCode = bannerCode;
+        this.note = note;
+        this.idFile = idFile;
+        this.status = status;
+        this.creationDate = creationDate;
+        this.lastModificationDate = lastModificationDate;
+        this.campaignId = campaignId;
+        this.campaignName = campaignName;
+        this.typeId = typeId;
+    }
+
+    public static MediaDTO from(Media media) {
+        Long idC = null;
+        String nameC = "NON ASSOCIATO A CAMPAGNA";
+        if (media.getMediaCampaign() != null) {
+            idC = media.getMediaCampaign().getCampaign().getId();
+            nameC = media.getMediaCampaign().getCampaign().getName();
+        }
+
+        return new MediaDTO(media.getId(), media.getName(), media.getUrl(), media.getTarget(), media.getBannerCode(), media.getNote(), media.getIdFile(), media.getStatus(), media.getCreationDate(), media.getLastModificationDate(), idC, nameC, media.getTypeId());
+    }
+
+}

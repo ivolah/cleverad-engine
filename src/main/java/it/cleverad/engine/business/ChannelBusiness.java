@@ -1,0 +1,180 @@
+package it.cleverad.engine.business;
+
+import com.github.dozermapper.core.Mapper;
+import it.cleverad.engine.persistence.model.Channel;
+import it.cleverad.engine.persistence.repository.ChannelRepository;
+import it.cleverad.engine.web.dto.ChannelDTO;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.criteria.Predicate;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+
+@Slf4j
+@Component
+@Transactional
+public class ChannelBusiness {
+
+    @Autowired
+    private ChannelRepository repository;
+
+    @Autowired
+    private Mapper mapper;
+
+    /**
+     * ============================================================================================================
+     **/
+
+    // CREATE
+    public ChannelDTO create(BaseCreateRequest request) {
+        Channel map = mapper.map(request, Channel.class);
+        map.setCreationDate(LocalDateTime.now());
+        map.setLastModificationDate(LocalDateTime.now());
+        return ChannelDTO.from(repository.save(map));
+    }
+
+    // GET BY ID
+    public ChannelDTO findById(Long id) {
+        try {
+            Channel channel = repository.findById(id).orElseThrow(Exception::new);
+            return  ChannelDTO.from(channel);
+        } catch (Exception e) {
+            log.error("Errore in findById", e);
+            return null;
+        }
+    }
+
+    // DELETE BY ID
+    public void delete(Long id) {
+        repository.deleteById(id);
+    }
+
+    // SEARCH PAGINATED
+    public Page<ChannelDTO> search(Filter request, Pageable pageableRequest) {
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Page<Channel> page = repository.findAll(getSpecification(request), pageable);
+
+        return page.map(ChannelDTO::from);
+    }
+
+    // UPDATE
+    public ChannelDTO update(Long id, Filter filter) {
+        try {
+            Channel channel = repository.findById(id).orElseThrow(Exception::new);
+            ChannelDTO campaignDTOfrom = ChannelDTO.from(channel);
+
+            mapper.map(filter,campaignDTOfrom );
+
+            Channel mappedEntity = mapper.map(channel, Channel.class);
+            mapper.map(campaignDTOfrom, mappedEntity);
+
+            return ChannelDTO.from(repository.save(mappedEntity));
+        } catch (Exception e) {
+            log.error("Errore in update", e);
+            return null;
+        }
+    }
+
+
+    /**
+     * ============================================================================================================
+     **/
+    private Specification<Channel> getSpecification(Filter request) {
+        return (root, query, cb) -> {
+            Predicate completePredicate = null;
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (request.getId() != null) {
+                predicates.add(cb.equal(root.get("id"), request.getId()));
+            }
+            if (request.getName() != null) {
+                predicates.add(cb.equal(root.get("name"), request.getName()));
+            }
+            if (request.getShortDescription() != null) {
+                predicates.add(cb.equal(root.get("shortDescription"), request.getShortDescription()));
+            }
+            if (request.getType() != null) {
+                predicates.add(cb.equal(root.get("type"), request.getType()));
+            }
+            if (request.getStatus() != null) {
+                predicates.add(cb.equal(root.get("status"), request.getStatus()));
+            }
+
+            if (request.getCreationDateFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("creationDate"), LocalDateTime.ofInstant(request.getCreationDateFrom(), ZoneOffset.UTC)));
+            }
+            if (request.getCreationDateTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("creationDate"), LocalDateTime.ofInstant(request.getCreationDateTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
+            }
+
+            if (request.getLastModificationDateFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("lastModificationDate"), LocalDateTime.ofInstant(request.getLastModificationDateFrom(), ZoneOffset.UTC)));
+            }
+            if (request.getLastModificationDateTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("lastModificationDate"), LocalDateTime.ofInstant(request.getLastModificationDateTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
+            }
+            completePredicate = cb.and(predicates.toArray(new Predicate[0]));
+
+            return completePredicate;
+        };
+    }
+
+    /**
+     * ============================================================================================================
+     **/
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class BaseCreateRequest {
+        private String name;
+        private String shortDescription;
+        private String type;
+        private String approvazione;
+        private String url;
+
+        private Boolean status;
+        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        private LocalDate startDate;
+        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        private LocalDate endDate;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Filter {
+        private Long id;
+
+        private String name;
+        private String shortDescription;
+        private String type;
+        private String approvazione;
+        private String url;
+
+        private Boolean status;
+        private Instant creationDateFrom;
+        private Instant creationDateTo;
+        private Instant lastModificationDateFrom;
+        private Instant lastModificationDateTo;
+    }
+
+}
+
