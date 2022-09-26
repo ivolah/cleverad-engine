@@ -77,7 +77,7 @@ public class CommissionBusiness {
             repository.deleteById(id);
         } catch (DataIntegrityViolationException ee) {
             log.warn("Impossibile cancellare commissione.");
-            throw new PostgresCleveradException("Impossibile cancellare commissione perchè già utilizzata in una campagna");
+            throw new PostgresCleveradException("Impossibile cancellare commissione ");
         }
     }
 
@@ -108,8 +108,18 @@ public class CommissionBusiness {
         }
     }
 
+    //  GET TIPI
     public Page<DictionaryDTO> getTypes() {
         return dictionaryBusiness.getTypeCommission();
+    }
+
+// GET CCOMMISION BY CAMPAIGN
+    public Page<CommissionDTO> getByIdCampaign(Long id) {
+        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Filter request = new Filter();
+        request.setCampaignId(id);
+        Page<Commission> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(CommissionDTO::from);
     }
 
     /**
@@ -136,6 +146,10 @@ public class CommissionBusiness {
             }
             if (request.getStatus() != null) {
                 predicates.add(cb.equal(root.get("status"), request.getStatus()));
+            }
+
+            if (request.getCampaignId() != null) {
+                predicates.add(cb.equal(root.get("campaign").get("id"), request.getCampaignId()));
             }
 
             if (request.getCreationDateFrom() != null) {
@@ -180,7 +194,6 @@ public class CommissionBusiness {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Filter {
-
         private Long id;
 
         private String name;
@@ -195,7 +208,6 @@ public class CommissionBusiness {
         private Instant creationDateTo;
         private Instant lastModificationDateFrom;
         private Instant lastModificationDateTo;
-
     }
 
 }

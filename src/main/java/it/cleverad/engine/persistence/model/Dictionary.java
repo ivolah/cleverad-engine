@@ -26,7 +26,8 @@ public class Dictionary {
     private String type;
     private boolean status;
 
-    @OneToMany(mappedBy = "commission")
-    private Set<Commission> commissions;
+    @OneToMany
+    @JoinColumn(name = "id")
+    private Set<Commission> commission;
 
 }

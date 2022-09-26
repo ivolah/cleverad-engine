@@ -31,19 +31,12 @@ public class AffiliateChannelCommissionCampaignController {
         return business.create(request);
     }
 
-//    @Operation(summary = "Lists the AffiliateChannelCommissionCampaigns", description = "Lists the AffiliateChannelCommissionCampaigns, searched and paginated")
-//    @GetMapping
-//    @ResponseStatus(HttpStatus.ACCEPTED)
-//    public Page<AffiliateChannelCommissionCampaignDTO> search(AffiliateChannelCommissionCampaignBusiness.Filter request, Pageable pageable) {
-//        return business.search(request, pageable);
-//    }
-
-//    @Operation(summary = "Update the AffiliateChannelCommissionCampaign", description = "Update the specific AffiliateChannelCommissionCampaign")
-//    @PatchMapping(path = "/{id}")
-//    @ResponseStatus(HttpStatus.ACCEPTED)
-//    public AffiliateChannelCommissionCampaignDTO update(@PathVariable Long id, @RequestBody AffiliateChannelCommissionCampaignBusiness.Filter request) {
-//        return business.update(id, request);
-//    }
+    @Operation(summary = "Lists the AffiliateChannelCommissionCampaigns", description = "Lists the AffiliateChannelCommissionCampaigns, searched and paginated")
+    @GetMapping
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<AffiliateChannelCommissionCampaignDTO> search(AffiliateChannelCommissionCampaignBusiness.Filter request, Pageable pageable) {
+        return business.search(request, pageable);
+    }
 
     @Operation(summary = "Get the AffiliateChannelCommissionCampaign", description = "Get the specific AffiliateChannelCommissionCampaign")
     @GetMapping("/{id}")

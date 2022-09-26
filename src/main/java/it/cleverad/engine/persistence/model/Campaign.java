@@ -63,28 +63,7 @@ public class Campaign {
     @OneToMany(mappedBy = "campaign")
     private Set<AffiliateBudgetCampaign> affiliateBudgets;
 
-    public Campaign(Long id, String name, String shortDescription, String longDescription, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, LocalDate startDate, LocalDate endDate, String idFile, String defaultCommissionId, String valuta, Long budget, Set<MediaCampaign> mediaCampaignList, Set<AffiliateChannelCommissionCampaign> affiliateChannelCommissionCampaigns, Set<AffiliateCampaign> affiliateCampaigns, Set<Commission> commissionCampaigns, Set<CampaignCategory> campaignCategories, Set<CampaignCookie> campaignCookies, Set<CampaignRevenueFactor> campaignRevenueFactors, Set<AffiliateBudgetCampaign> affiliateBudgets) {
-        this.id = id;
-        this.name = name;
-        this.shortDescription = shortDescription;
-        this.longDescription = longDescription;
-        this.status = status;
-        this.creationDate = creationDate;
-        this.lastModificationDate = lastModificationDate;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.idFile = idFile;
-        this.defaultCommissionId = defaultCommissionId;
-        this.valuta = valuta;
-        this.budget = budget;
-        this.mediaCampaignList = mediaCampaignList;
-        this.affiliateChannelCommissionCampaigns = affiliateChannelCommissionCampaigns;
-        this.affiliateCampaigns = affiliateCampaigns;
-        this.commissionCampaigns = commissionCampaigns;
-        this.campaignCategories = campaignCategories;
-        this.campaignCookies = campaignCookies;
-        this.campaignRevenueFactors = campaignRevenueFactors;
-        this.affiliateBudgets = affiliateBudgets;
-    }
+    @OneToMany(mappedBy = "campaign")
+    private Set<Transaction> transactions;
 
 }

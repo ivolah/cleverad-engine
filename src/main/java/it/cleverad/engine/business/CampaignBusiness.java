@@ -29,6 +29,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -69,9 +70,7 @@ public class CampaignBusiness {
 
         //Category
         if (StringUtils.isNotBlank(request.getCategories())) {
-            Arrays.stream(request.getCategories().split(",")).forEach(s -> {
-                campaignCategoryBusiness.create(new CampaignCategoryBusiness.BaseCreateRequest(dto.getId(), Long.valueOf(s)));
-            });
+            Arrays.stream(request.getCategories().split(",")).forEach(s -> campaignCategoryBusiness.create(new CampaignCategoryBusiness.BaseCreateRequest(dto.getId(), Long.valueOf(s))));
         }
 
         //Cookie
@@ -93,7 +92,6 @@ public class CampaignBusiness {
             } else {
                 Filter request = new Filter();
                 request.setId(id);
-//                Page<Campaign> page = repository.findAll(getSpecification(request), Pageable.unpaged());
                 campaign = repository.findById(id).orElse(null);
             }
 
@@ -108,8 +106,9 @@ public class CampaignBusiness {
 
     // DELETE BY ID
     public void delete(Long id) {
-        Campaign campaign = repository.findById(id).orElse(null);
-        campaign.getMediaCampaignList().stream().forEach(mediaCampaign -> mediaCampaignBusiness.delete(mediaCampaign.getId()));
+        Optional<Campaign> campaign = repository.findById(id);
+        if (campaign.isPresent())
+            campaign.get().getMediaCampaignList().stream().forEach(mediaCampaign -> mediaCampaignBusiness.delete(mediaCampaign.getId()));
         try {
             repository.deleteById(id);
         } catch (DataIntegrityViolationException ee) {
@@ -149,7 +148,6 @@ public class CampaignBusiness {
     public Page<CampaignDTO> getCampaigns(Long affiliateId, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Page<Campaign> page = repository.findAffiliateCampaigns(affiliateId, pageable);
-//        return page.stream().map(CampaignDTO::from).collect(Collectors.toList());
         return page.map(CampaignDTO::from);
     }
 

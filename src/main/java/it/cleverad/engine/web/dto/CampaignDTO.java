@@ -93,7 +93,6 @@ public class CampaignDTO {
                 dto.setValue(commissionCampaign.getValue());
                 dto.setDescription(commissionCampaign.getDescription());
                 dto.setStatus(commissionCampaign.getStatus());
-                dto.setIdType(commissionCampaign.getIdType());
                 dto.setDueDate(commissionCampaign.getDueDate());
                 dto.setCampaignId(commissionCampaign.getCampaign().getId());
                 dto.setCreationDate(commissionCampaign.getCreationDate());

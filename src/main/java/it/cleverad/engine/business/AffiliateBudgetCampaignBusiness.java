@@ -73,8 +73,8 @@ public class AffiliateBudgetCampaignBusiness {
     // GET BY ID
     public AffiliateBudgetCampaignDTO findById(Long id) {
         try {
-            AffiliateBudgetCampaign AffiliateBudgetCampaign = repository.findById(id).orElseThrow(Exception::new);
-            return AffiliateBudgetCampaignDTO.from(AffiliateBudgetCampaign);
+            AffiliateBudgetCampaign affiliateBudgetCampaign = repository.findById(id).orElseThrow(Exception::new);
+            return AffiliateBudgetCampaignDTO.from(affiliateBudgetCampaign);
         } catch (Exception e) {
             log.error("Errore in findById", e);
             return null;

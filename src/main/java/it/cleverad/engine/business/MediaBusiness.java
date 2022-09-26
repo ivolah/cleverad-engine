@@ -121,7 +121,7 @@ public class MediaBusiness {
     public Page<MediaDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Page<Media> page = repository.findAll(getSpecification(request), pageable);
-        Page<MediaDTO> rr = page.map(media -> {
+        return page.map(media -> {
             MediaDTO dto = MediaDTO.from(media);
             if (dto.getTypeId() != null) {
                 MediaTypeDTO mtDto = mediaTypeBusiness.findById(dto.getTypeId());
@@ -129,17 +129,12 @@ public class MediaBusiness {
             }
             return dto;
         });
-        return rr;
     }
 
     public Page<MediaDTO> getByCampaignId(Long id, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Page<Media> page = repository.findMediaCampaigns(id, pageable);
-//        return page.stream().map(MediaDTO::from).collect(Collectors.toList());
-//        Filter request = null;
-//        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-//        Page<Media> page = repository.findAll(getSpecification(request), pageable);
-        Page<MediaDTO> rr = page.map(media -> {
+        return page.map(media -> {
             MediaDTO dto = MediaDTO.from(media);
             if (dto.getTypeId() != null) {
                 MediaTypeDTO mtDto = mediaTypeBusiness.findById(dto.getTypeId());
@@ -147,7 +142,6 @@ public class MediaBusiness {
             }
             return dto;
         });
-        return rr;
     }
 
     /**

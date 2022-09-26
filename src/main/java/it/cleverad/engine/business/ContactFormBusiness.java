@@ -50,8 +50,8 @@ public class ContactFormBusiness {
     // GET BY ID
     public ContactFormDTO findById(Long id) {
         try {
-            ContactForm ContactForm = repository.findById(id).orElseThrow(Exception::new);
-            return ContactFormDTO.from(ContactForm);
+            ContactForm form = repository.findById(id).orElseThrow(Exception::new);
+            return ContactFormDTO.from(form);
         } catch (Exception e) {
             log.error("Errore in findById", e);
             return null;
@@ -74,13 +74,13 @@ public class ContactFormBusiness {
     // UPDATE
     public ContactFormDTO update(Long id, Filter filter) {
         try {
-            ContactForm ContactForm = repository.findById(id).orElseThrow(Exception::new);
-            ContactFormDTO ContactFormDTOfrom = ContactFormDTO.from(ContactForm);
+            ContactForm entity = repository.findById(id).orElseThrow(Exception::new);
+            ContactFormDTO formDTO = ContactFormDTO.from(entity);
 
-            mapper.map(filter, ContactFormDTOfrom);
+            mapper.map(filter, formDTO);
 
-            ContactForm mappedEntity = mapper.map(ContactForm, ContactForm.class);
-            mapper.map(ContactFormDTOfrom, mappedEntity);
+            ContactForm mappedEntity = mapper.map(entity, ContactForm.class);
+            mapper.map(formDTO, mappedEntity);
 
             return ContactFormDTO.from(repository.save(mappedEntity));
         } catch (Exception e) {

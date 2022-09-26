@@ -1,46 +1,53 @@
 package it.cleverad.engine.persistence.model;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Entity
-@Table(name = "t_commision")
+@Table(name = "t_transaction")
 @Inheritance(strategy = InheritanceType.JOINED)
-//@Data
+@Data
 @Getter
 @Setter
 @NoArgsConstructor
-public class Commission {
+public class Transaction {
 
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-    private String value;
-    private String description;
-    private Boolean status;
-    private LocalDate dueDate;
+    private LocalDateTime dateTime;
+    private String type;
+    private Double value;
+    private Boolean approved;
 
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
+
+    @ManyToOne
+    @JoinColumn(name = "wallet_id")
+    private Wallet wallet;
+
+    @ManyToOne
+    @JoinColumn(name = "affiliate_id")
+    private Affiliate affiliate;
 
     @ManyToOne
     @JoinColumn(name = "campaign_id")
     private Campaign campaign;
 
     @ManyToOne
-    @JoinColumn(name = "dictionary_id")
-    private Dictionary dictionary;
+    @JoinColumn(name = "commission_id")
+    private Commission commission;
 
-    @OneToMany(mappedBy = "commission")
-    private Set<Transaction> transactions;
+    @ManyToOne
+    @JoinColumn(name = "channel_id")
+    private Channel channel;
 
 }

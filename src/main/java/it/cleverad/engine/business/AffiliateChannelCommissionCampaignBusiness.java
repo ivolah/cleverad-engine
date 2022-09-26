@@ -79,8 +79,8 @@ public class AffiliateChannelCommissionCampaignBusiness {
     // GET BY ID
     public AffiliateChannelCommissionCampaignDTO findById(Long id) {
         try {
-            AffiliateChannelCommissionCampaign AffiliateChannelCommissionCampaign = repository.findById(id).orElseThrow(Exception::new);
-            return AffiliateChannelCommissionCampaignDTO.from(AffiliateChannelCommissionCampaign);
+            AffiliateChannelCommissionCampaign affiliateChannelCommissionCampaign = repository.findById(id).orElseThrow(Exception::new);
+            return AffiliateChannelCommissionCampaignDTO.from(affiliateChannelCommissionCampaign);
         } catch (Exception e) {
             log.error("Errore in findById", e);
             return null;
@@ -94,8 +94,6 @@ public class AffiliateChannelCommissionCampaignBusiness {
         filter.setCampaignId(campaignId);
         log.info(">>> " + campaignId);
         Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
-
-
         return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
 
@@ -111,22 +109,28 @@ public class AffiliateChannelCommissionCampaignBusiness {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
             if (request.getAffiliateId() != null) {
-                predicates.add(cb.equal(root.get("affiliateId"), request.getAffiliateId()));
+                predicates.add(cb.equal(root.get("affiliate").get("id"), request.getAffiliateId()));
             }
             if (request.getCampaignId() != null) {
-                predicates.add(cb.equal(root.get("campaign_id"), request.getCampaignId()));
+                predicates.add(cb.equal(root.get("campaign").get("id"), request.getCampaignId()));
             }
             if (request.getChannelId() != null) {
-                predicates.add(cb.equal(root.get("channelId"), request.getChannelId()));
+                predicates.add(cb.equal(root.get("channel").get("id"), request.getChannelId()));
             }
             if (request.getCommissionId() != null) {
-                predicates.add(cb.equal(root.get("commissionId"), request.getCommissionId()));
+                predicates.add(cb.equal(root.get("commission").get("id"), request.getCommissionId()));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 
             return completePredicate;
         };
+    }
+
+    public Page<AffiliateChannelCommissionCampaignDTO> search(Filter request, Pageable pageableR) {
+        Pageable pageable = PageRequest.of(pageableR.getPageNumber(), pageableR.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
 
     /**

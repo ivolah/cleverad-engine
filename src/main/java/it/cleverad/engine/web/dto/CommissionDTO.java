@@ -16,7 +16,7 @@ public class CommissionDTO {
     private String value;
     private String description;
     private Boolean status;
-    private String idType;
+    private Long dictionaryId;
     private LocalDate dueDate;
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
@@ -24,13 +24,13 @@ public class CommissionDTO {
     private Long campaignId;
     private String typeName;
 
-    public CommissionDTO(long id, String name, String value, String description, Boolean status, String idType, LocalDate dueDate, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long campaignId, String typeName) {
+    public CommissionDTO(long id, String name, String value, String description, Boolean status, Long dictionaryId, LocalDate dueDate, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long campaignId, String typeName) {
         this.id = id;
         this.name = name;
         this.value = value;
         this.description = description;
         this.status = status;
-        this.idType = idType;
+        this.dictionaryId = dictionaryId;
         this.dueDate = dueDate;
         this.creationDate = creationDate;
         this.lastModificationDate = lastModificationDate;
@@ -39,7 +39,6 @@ public class CommissionDTO {
     }
 
     public static CommissionDTO from(Commission comission) {
-        return new CommissionDTO(comission.getId(), comission.getName(), comission.getValue(), comission.getDescription(), comission.getStatus(), comission.getIdType(), comission.getDueDate(), comission.getCreationDate(), comission.getLastModificationDate(), comission.getCampaign().getId(), comission.getDictionary().getName());
+        return new CommissionDTO(comission.getId(), comission.getName(), comission.getValue(), comission.getDescription(), comission.getStatus(), comission.getDictionary().getId(), comission.getDueDate(), comission.getCreationDate(), comission.getLastModificationDate(), comission.getCampaign().getId(), comission.getDictionary().getName());
     }
-
 }

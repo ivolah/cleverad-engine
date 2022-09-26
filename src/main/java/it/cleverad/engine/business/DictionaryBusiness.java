@@ -55,7 +55,6 @@ public class DictionaryBusiness {
 
     // DELETE BY ID
     public void delete(Long id) {
-        Dictionary media = repository.findById(id).orElse(null);
         repository.deleteById(id);
     }
 

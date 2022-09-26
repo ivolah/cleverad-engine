@@ -9,25 +9,23 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "t_visit")
+@Table(name = "t_cpl")
 @Inheritance(strategy = InheritanceType.JOINED)
 @Data
 @Getter
 @Setter
 @NoArgsConstructor
-public class Visit {
+public class Cpl {
 
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long reffweralId;
-    private Long campaignId;
+
+    private String refferal;
     private String data;
-    private String url;
-    private String cookie;
-    private boolean status;
-    private boolean read;
-    private LocalDateTime creationDate;
-    
+
+    private LocalDateTime date;
+    private Boolean status;
+
 }

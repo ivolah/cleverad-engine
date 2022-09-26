@@ -34,7 +34,6 @@ public class UserDTO {
         this.statusId = statusId;
         this.affiliateId = affiliateId;
         this.roleId = roleId;
-        this.affiliateName = affiliateName;
         this.creationDate = creationDate;
         this.lastLogin = lastLogin;
     }

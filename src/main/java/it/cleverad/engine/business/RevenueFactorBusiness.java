@@ -55,8 +55,8 @@ public class RevenueFactorBusiness {
     // GET BY ID
     public RevenueFactorDTO findById(Long id) {
         try {
-            RevenueFactor RevenueFactor = repository.findById(id).orElseThrow(Exception::new);
-            return  RevenueFactorDTO.from(RevenueFactor);
+            RevenueFactor entity = repository.findById(id).orElseThrow(Exception::new);
+            return  RevenueFactorDTO.from(entity);
         } catch (Exception e) {
             log.error("Errore in findById", e);
             return null;
@@ -69,7 +69,7 @@ public class RevenueFactorBusiness {
             repository.deleteById(id);
         } catch (DataIntegrityViolationException ee) {
             log.warn("Impossibile cancellare RevenueFactore.");
-            throw new PostgresCleveradException("Impossibile cancellare RevenueFactore perchè già utilizzata in una campagna");
+            throw new PostgresCleveradException("Impossibile cancellare RevenueFactore ");
         }
     }
 

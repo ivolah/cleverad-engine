@@ -36,13 +36,11 @@ public class AuthenticationController {
     private UserDetailsService jwtInMemoryUserDetailsService;
 
     @PostMapping(value = "/authenticate")
-    public ResponseEntity<?> generateAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws DisabledException, BadCredentialsException {
+    public ResponseEntity<JwtResponse> generateAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws DisabledException, BadCredentialsException {
 
-        log.info("LOGIN!!!!!!!");
+        log.info(">>>>> LOGIN <<<<<");
         this.authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
-
         final UserDetails userDetails = jwtInMemoryUserDetailsService.loadUserByUsername(authenticationRequest.getUsername());
-
         final String token = jwtTokenUtil.generateToken(userDetails);
 
         UserDTO user = userBusiness.findByUsername(authenticationRequest.getUsername());
@@ -51,6 +49,7 @@ public class AuthenticationController {
         } else {
             return ResponseEntity.ok(new JwtResponse(token, 0L));
         }
+
     }
 
     private void authenticate(String username, String password) throws DisabledException, BadCredentialsException {

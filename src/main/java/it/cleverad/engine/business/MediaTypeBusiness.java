@@ -55,7 +55,6 @@ public class MediaTypeBusiness {
 
     // DELETE BY ID
     public void delete(Long id) {
-        MediaType media = repository.findById(id).orElse(null);
         repository.deleteById(id);
     }
 

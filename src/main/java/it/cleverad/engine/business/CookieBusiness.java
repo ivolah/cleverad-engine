@@ -69,7 +69,7 @@ public class CookieBusiness {
             repository.deleteById(id);
         } catch (DataIntegrityViolationException ee) {
             log.warn("Impossibile cancellare commissione.");
-            throw new PostgresCleveradException("Impossibile cancellare cookie perchè già utilizzata in una campagna");
+            throw new PostgresCleveradException("Impossibile cancellare cookie ");
         }
     }
 

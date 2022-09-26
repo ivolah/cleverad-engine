@@ -35,17 +35,16 @@ public class JwtUserDetailsService implements UserDetailsService {
 
         String[] chunks = token.split("\\.");
         Base64.Decoder decoder = Base64.getUrlDecoder();
-        String header = new String(decoder.decode(chunks[0]));
+        //String header = new String(decoder.decode(chunks[0]));
         String payload = new String(decoder.decode(chunks[1]));
 
-        String username = new JSONObject(payload).getString("sub");
-        return username;
+        return new JSONObject(payload).getString("sub");
     }
 
     public Long getAffiliateID() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         if (userBusiness.findByUsername(username).getAffiliateId() != null)
-            return Long.valueOf(userBusiness.findByUsername(username).getAffiliateId());
+            return userBusiness.findByUsername(username).getAffiliateId();
         else return 0L;
     }
 

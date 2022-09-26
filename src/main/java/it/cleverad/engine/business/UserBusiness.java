@@ -62,7 +62,7 @@ public class UserBusiness {
         try {
             User uuu = repository.findById(id).orElseThrow(Exception::new);
             UserDTO dto = UserDTO.from(uuu);
-            AffiliateDTO affiliate = affiliateBusiness.findById(Long.valueOf(dto.getAffiliateId()));
+            AffiliateDTO affiliate = affiliateBusiness.findById(dto.getAffiliateId());
             dto.setAffiliateName(affiliate.getName());
 
             if (dto.getRoleId() == 3) {
@@ -84,7 +84,7 @@ public class UserBusiness {
             Filter request = new Filter();
             request.setUsername(username);
             UserDTO dto = UserDTO.from(repository.findOne(getSpecification(request)).orElseThrow(Exception::new));
-            AffiliateDTO affiliate = affiliateBusiness.findById(Long.valueOf(dto.getAffiliateId()));
+            AffiliateDTO affiliate = affiliateBusiness.findById(dto.getAffiliateId());
             dto.setAffiliateName(affiliate.getName());
             if (dto.getRoleId() == 3) {
                 dto.setRole("Admin");
@@ -110,11 +110,11 @@ public class UserBusiness {
         Page<User> page = repository.findAll(getSpecification(request), pageable);
 
 
-        Page<UserDTO> rr = page.map(user -> {
+       return page.map(user -> {
             UserDTO dto = UserDTO.from(user);
             if (user.getAffiliateId() != null) {
                 try {
-                    AffiliateDTO affiliate = affiliateBusiness.findById(Long.valueOf(user.getAffiliateId()));
+                    AffiliateDTO affiliate = affiliateBusiness.findById(user.getAffiliateId());
                     dto.setAffiliateName(affiliate.getName());
                 } catch (Exception e) {
                     log.warn("Errore in recupero dati affliliato : " + user.getAffiliateId());
@@ -127,15 +127,6 @@ public class UserBusiness {
             }
             return dto;
         });
-
-
-//        page.forEach(userDTO -> {
-//            UserDTO dto = null;
-//           AffiliateDTO affiliate = affiliateBusiness.findById(Long.valueOf(userDTO.getAffiliateId()));
-//            dto.setAffiliateName(affiliate.getName());
-//        });
-
-        return rr;
     }
 
     // UPDATE

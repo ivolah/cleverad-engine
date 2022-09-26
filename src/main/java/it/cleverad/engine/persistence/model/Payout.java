@@ -7,7 +7,6 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Table(name = "t_payout")
@@ -23,15 +22,7 @@ public class Payout {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long affiliateId;
-    private Long commissionId;
-    private Long clickNumber;
-    private Long visitNumber;
-    private Long total;
-    private String notes;
-    private String value;
-    private boolean status;
-    private String invoiceNumber;
-    private Date invoiceDate;
+
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
 }

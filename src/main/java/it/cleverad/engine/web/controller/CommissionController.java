@@ -60,11 +60,18 @@ public class CommissionController {
         this.business.delete(id);
     }
 
-    @Operation(summary = "Lists the Commissions typess", description = "Lists the Commissions, searched and paginated")
+    @Operation(summary = "Lists the Commissions Types", description = "Lists the Commissions Types, searched and paginated")
     @GetMapping("/types")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<DictionaryDTO> getTypes() {
         return business.getTypes();
+    }
+
+    @Operation(summary = "Lists the Commissions by Campaign ID", description = "Lists the Commissions, searched and paginated")
+    @GetMapping("/{id}/campaign")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<CommissionDTO> getByIdCampaign(@PathVariable Long id) {
+        return business.getByIdCampaign(id);
     }
 
     /**

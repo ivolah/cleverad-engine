@@ -44,23 +44,15 @@ public class Affiliate {
     @OneToMany(mappedBy = "affiliate")
     private Set<AffiliateBudgetCampaign> affiliateBudgets;
 
-    @Override
-    public String toString() {
-        return "Affiliate{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", vatNumber='" + vatNumber + '\'' +
-                ", street='" + street + '\'' +
-                ", streetNumber='" + streetNumber + '\'' +
-                ", city='" + city + '\'' +
-                ", zipCode='" + zipCode + '\'' +
-                ", primaryMail='" + primaryMail + '\'' +
-                ", secondaryMail='" + secondaryMail + '\'' +
-                ", status='" + status + '\'' +
-                ", creationDate=" + creationDate +
-                ", lastModificationDate=" + lastModificationDate +
-                ", affiliateCampaigns=" + affiliateCampaigns +
-                ", commissionCampaigns=" + commissionCampaigns +
-                '}';
+    @OneToMany(mappedBy = "affiliate")
+    private Set<Wallet> wallets;
+
+    @OneToMany(mappedBy = "affiliate")
+    private Set<Transaction> transactions;
+
+    public void addWallet(Wallet wallet){
+        wallet.setAffiliate(this);
+        this.wallets.add(wallet);
     }
+
 }

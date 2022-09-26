@@ -53,8 +53,8 @@ public class BudgetBusiness {
     // GET BY ID
     public BudgetDTO findById(Long id) {
         try {
-            Budget Budget = repository.findById(id).orElseThrow(Exception::new);
-            return BudgetDTO.from(Budget);
+            Budget budget = repository.findById(id).orElseThrow(Exception::new);
+            return BudgetDTO.from(budget);
         } catch (Exception e) {
             log.error("Errore in findById", e);
             return null;
@@ -77,14 +77,14 @@ public class BudgetBusiness {
     // UPDATE
     public BudgetDTO update(Long id, Filter filter) {
         try {
-            Budget Budget = repository.findById(id).orElseThrow(Exception::new);
-            BudgetDTO BudgetDTOfrom = BudgetDTO.from(Budget);
+            Budget budget = repository.findById(id).orElseThrow(Exception::new);
+            BudgetDTO budgetDTO = BudgetDTO.from(budget);
 
-            mapper.map(filter, BudgetDTOfrom);
+            mapper.map(filter, budgetDTO);
 
-            Budget mappedEntity = mapper.map(Budget, Budget.class);
+            Budget mappedEntity = mapper.map(budget, Budget.class);
             mappedEntity.setLastModificationDate(LocalDateTime.now());
-            mapper.map(BudgetDTOfrom, mappedEntity);
+            mapper.map(budgetDTO, mappedEntity);
 
             return BudgetDTO.from(repository.save(mappedEntity));
         } catch (Exception e) {

@@ -29,7 +29,6 @@ public class FileController {
     @PostMapping()
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Long uploadFile(@RequestParam("file") MultipartFile file) {
-        String message = "";
         try {
             return business.store(file);
         } catch (Exception e) {

@@ -6,37 +6,37 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.Set;
 
+
 @Entity
-@Table(name = "t_channel")
+@Table(name = "t_wallet")
 @Inheritance(strategy = InheritanceType.JOINED)
 @Data
 @Getter
 @Setter
 @NoArgsConstructor
-public class Channel {
+public class Wallet {
 
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-    private String shortDescription;
-    private String type;
-    private String approvazione;
-    private String url;
+    private String nome;
+    private String description;
+
+    private Double total;
+    private Double payed;
+    private Double residual;
 
     private Boolean status;
-    private LocalDateTime creationDate;
-    private LocalDateTime lastModificationDate;
 
-    @OneToMany(mappedBy = "channel")
-    private Set<ChannelCategory> channelCategories;
+    @ManyToOne
+    @JoinColumn(name = "affiliate_id")
+    private Affiliate affiliate;
 
-    @OneToMany(mappedBy = "channel")
+    @OneToMany(mappedBy = "wallet")
     private Set<Transaction> transactions;
 
 }

@@ -69,7 +69,7 @@ public class CategoryBusiness {
             repository.deleteById(id);
         } catch (DataIntegrityViolationException ee) {
             log.warn("Impossibile cancellare commissione.");
-            throw new PostgresCleveradException("Impossibile cancellare categoria perchè già utilizzata in una campagna");
+            throw new PostgresCleveradException("Impossibile cancellare categoria ");
         }
     }
 
