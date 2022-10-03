@@ -1,6 +1,5 @@
 package it.cleverad.engine.persistence.model;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,7 +14,6 @@ import java.util.Set;
 @Inheritance(
         strategy = InheritanceType.JOINED
 )
-@Data
 @Getter
 @Setter
 @NoArgsConstructor
@@ -58,12 +56,12 @@ public class Campaign {
     private Set<CampaignCookie> campaignCookies;
 
     @OneToMany(mappedBy = "campaign")
-    private Set<CampaignRevenueFactor> campaignRevenueFactors;
-
-    @OneToMany(mappedBy = "campaign")
     private Set<AffiliateBudgetCampaign> affiliateBudgets;
 
     @OneToMany(mappedBy = "campaign")
     private Set<Transaction> transactions;
+
+    @OneToMany(mappedBy = "campaign")
+    private Set<RevenueFactor> revenueFactors;
 
 }

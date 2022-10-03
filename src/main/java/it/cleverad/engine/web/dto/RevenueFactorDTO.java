@@ -12,26 +12,38 @@ import java.time.LocalDateTime;
 public class RevenueFactorDTO {
 
     private Long id;
-    private String idType;
     private Long revenue;
     private LocalDate dueDate;
-
-    private boolean status;
+    private Long campaignId;
+    private String  campaignName;
+    private Long typeId;
+    private String typeName;
+    private Boolean status;
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
 
-    public RevenueFactorDTO(Long id, String idType, Long revenue, LocalDate dueDate, boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate) {
+    public RevenueFactorDTO(Long id, Long revenue, LocalDate dueDate, Long campaignId, String campaignName, Long typeId, String typeName, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate) {
         this.id = id;
-        this.idType = idType;
         this.revenue = revenue;
         this.dueDate = dueDate;
+        this.campaignId = campaignId;
+        this.campaignName = campaignName;
+        this.typeId = typeId;
+        this.typeName = typeName;
         this.status = status;
         this.creationDate = creationDate;
         this.lastModificationDate = lastModificationDate;
     }
 
     public static RevenueFactorDTO from(RevenueFactor revenueFactor) {
-        return new RevenueFactorDTO(revenueFactor.getId(), revenueFactor.getIdType(), revenueFactor.getRevenue(), revenueFactor.getDueDate(), revenueFactor.isStatus(), revenueFactor.getCreationDate(), revenueFactor.getLastModificationDate());
+        return new RevenueFactorDTO(revenueFactor.getId(),
+                revenueFactor.getRevenue(),
+                revenueFactor.getDueDate(),
+                revenueFactor.getCampaign() != null ? revenueFactor.getCampaign().getId() : null,
+                revenueFactor.getCampaign() != null ? revenueFactor.getCampaign().getName() : null,
+                revenueFactor.getDictionary() != null ? revenueFactor.getDictionary().getId() : null,
+                revenueFactor.getDictionary() != null ? revenueFactor.getDictionary().getName() : null,
+                revenueFactor.isStatus(), revenueFactor.getCreationDate(), revenueFactor.getLastModificationDate());
     }
 
 }

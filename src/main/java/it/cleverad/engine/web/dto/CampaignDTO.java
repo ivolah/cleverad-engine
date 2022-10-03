@@ -126,16 +126,16 @@ public class CampaignDTO {
         }
 
         List<RevenueFactorDTO> revenues = null;
-        if (campaign.getCampaignRevenueFactors() != null) {
-            revenues = campaign.getCampaignRevenueFactors().stream().map(factor -> {
+        if (campaign.getRevenueFactors() != null) {
+            revenues = campaign.getRevenueFactors().stream().map(factor -> {
                 RevenueFactorDTO dto = new RevenueFactorDTO();
-                dto.setId(factor.getRevenuefactor().getId());
-                dto.setRevenue(factor.getRevenuefactor().getRevenue());
-                dto.setStatus(factor.getRevenuefactor().isStatus());
-                dto.setIdType(factor.getRevenuefactor().getIdType());
-                dto.setDueDate(factor.getRevenuefactor().getDueDate());
-                dto.setCreationDate(factor.getRevenuefactor().getCreationDate());
-                dto.setLastModificationDate(factor.getRevenuefactor().getLastModificationDate());
+                dto.setId(factor.getId());
+                dto.setRevenue(factor.getRevenue());
+                dto.setStatus(factor.isStatus());
+                dto.setTypeName(factor.getDictionary().getName());
+                dto.setDueDate(factor.getDueDate());
+                dto.setCreationDate(factor.getCreationDate());
+                dto.setLastModificationDate(factor.getLastModificationDate());
                 return dto;
             }).collect(Collectors.toList());
         }

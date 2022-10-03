@@ -22,6 +22,7 @@ public class ChannelDTO {
     private LocalDateTime lastModificationDate;
 
     private List<CategoryDTO> categoryDTOS;
+    private String campaignID;
 
     public ChannelDTO(long id, String name, String shortDescription, String type, Boolean status, String url, LocalDateTime creationDate, LocalDateTime lastModificationDate, List<CategoryDTO> categoryDTOS) {
         this.id = id;

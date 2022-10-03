@@ -1,6 +1,5 @@
 package it.cleverad.engine.persistence.model;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,7 +12,6 @@ import java.util.Set;
 @Entity
 @Table(name = "t_budget")
 @Inheritance(strategy = InheritanceType.JOINED)
-@Data
 @Getter
 @Setter
 @NoArgsConstructor

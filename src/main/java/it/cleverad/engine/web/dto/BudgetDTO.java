@@ -16,6 +16,8 @@ public class BudgetDTO {
     private Long budget;
     private Date dueDate;
 
+    private String affiliateName;
+
     private boolean status;
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;

@@ -9,9 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "t_media")
-@Inheritance(
-        strategy = InheritanceType.JOINED
-)
+@Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -38,19 +36,6 @@ public class Media {
 
     @Override
     public String toString() {
-        return "Media{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", typeId='" + typeId + '\'' +
-                ", url='" + url + '\'' +
-                ", target='" + target + '\'' +
-                ", bannerCode='" + bannerCode + '\'' +
-                ", note='" + note + '\'' +
-                ", idFile='" + idFile + '\'' +
-                ", status='" + status + '\'' +
-                ", creationDate=" + creationDate +
-                ", lastModificationDate=" + lastModificationDate +
-                ", mediaCampaign=" + mediaCampaign +
-                '}';
+        return "Media{" + "id=" + id + ", name='" + name + '\'' + ", typeId='" + typeId + '\'' + ", url='" + url + '\'' + ", target='" + target + '\'' + ", bannerCode='" + bannerCode + '\'' + ", note='" + note + '\'' + ", idFile='" + idFile + '\'' + ", status='" + status + '\'' + ", creationDate=" + creationDate + ", lastModificationDate=" + lastModificationDate + ", mediaCampaign=" + mediaCampaign + '}';
     }
 }

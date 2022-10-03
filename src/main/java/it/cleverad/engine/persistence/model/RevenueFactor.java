@@ -1,6 +1,5 @@
 package it.cleverad.engine.persistence.model;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,12 +7,10 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Entity
 @Table(name = "t_revenuefactor")
 @Inheritance(strategy = InheritanceType.JOINED)
-@Data
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,15 +21,20 @@ public class RevenueFactor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String idType;
     private Long revenue;
     private LocalDate dueDate;
 
     private boolean status;
+
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
 
-    @OneToMany(mappedBy = "revenuefactor")
-    private Set<CampaignRevenueFactor> campaignRevenueFactors;
+    @ManyToOne()
+    @JoinColumn(name = "campaign_id")
+    private Campaign campaign;
+
+    @ManyToOne()
+    @JoinColumn(name = "type_id")
+    private Dictionary dictionary;
 
 }

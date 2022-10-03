@@ -13,6 +13,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -81,6 +85,12 @@ public class AffiliateBudgetCampaignBusiness {
         }
     }
 
+    public Page<AffiliateBudgetCampaignDTO> search(Filter request, Pageable pageableRequest) {
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Page<AffiliateBudgetCampaign> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(AffiliateBudgetCampaignDTO::from);
+    }
+
     /**
      * ============================================================================================================
      **/
@@ -93,10 +103,10 @@ public class AffiliateBudgetCampaignBusiness {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
             if (request.getAffiliateId() != null) {
-                predicates.add(cb.equal(root.get("affiliateId"), request.getAffiliateId()));
+                predicates.add(cb.equal(root.get("affiliate").get("id"), request.getAffiliateId()));
             }
             if (request.getCampaignId() != null) {
-                predicates.add(cb.equal(root.get("campaignId"), request.getCampaignId()));
+                predicates.add(cb.equal(root.get("campaign").get("id"), request.getCampaignId()));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));

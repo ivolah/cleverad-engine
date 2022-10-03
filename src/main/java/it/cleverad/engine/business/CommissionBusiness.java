@@ -113,7 +113,7 @@ public class CommissionBusiness {
         return dictionaryBusiness.getTypeCommission();
     }
 
-// GET CCOMMISION BY CAMPAIGN
+    // GET CCOMMISION BY CAMPAIGN
     public Page<CommissionDTO> getByIdCampaign(Long id) {
         Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();

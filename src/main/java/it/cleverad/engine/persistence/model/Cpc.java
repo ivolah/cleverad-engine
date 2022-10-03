@@ -1,6 +1,5 @@
 package it.cleverad.engine.persistence.model;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,7 +10,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "t_cpc")
 @Inheritance(strategy = InheritanceType.JOINED)
-@Data
 @Getter
 @Setter
 @NoArgsConstructor

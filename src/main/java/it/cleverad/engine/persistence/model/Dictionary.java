@@ -7,10 +7,8 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.util.Set;
 
-
 @Entity
 @Table(name = "t_dictionary")
-//@Data
 @Getter
 @Setter
 @NoArgsConstructor
@@ -29,5 +27,9 @@ public class Dictionary {
     @OneToMany
     @JoinColumn(name = "id")
     private Set<Commission> commission;
+
+    @OneToMany
+    @JoinColumn(name = "id")
+    private Set<RevenueFactor> revenueFactors;
 
 }

@@ -24,11 +24,11 @@ public class ChannelCategory {
     private LocalDateTime lastModificationDate;
 
     @ManyToOne
-    @JoinColumn(name="category_id")
+    @JoinColumn(name = "category_id")
     private Category category;
 
     @ManyToOne
-    @JoinColumn(name="channel_id")
+    @JoinColumn(name = "channel_id")
     private Channel channel;
 
 

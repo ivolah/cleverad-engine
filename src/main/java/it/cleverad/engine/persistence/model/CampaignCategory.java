@@ -24,10 +24,10 @@ public class CampaignCategory {
     private LocalDateTime lastModificationDate;
 
     @ManyToOne
-    @JoinColumn(name="category_id")
+    @JoinColumn(name = "category_id")
     private Category category;
 
     @ManyToOne
-    @JoinColumn(name="campaign_id")
+    @JoinColumn(name = "campaign_id")
     private Campaign campaign;
 }

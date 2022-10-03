@@ -3,16 +3,14 @@ package it.cleverad.engine.business;
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.Channel;
 import it.cleverad.engine.persistence.repository.ChannelRepository;
+import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.dto.ChannelDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
@@ -26,6 +24,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -33,10 +32,15 @@ import java.util.List;
 public class ChannelBusiness {
 
     @Autowired
+    AffiliateBusiness affiliateBusiness;
+    @Autowired
+    UserBusiness userBusiness;
+    @Autowired
     private ChannelRepository repository;
-
     @Autowired
     private Mapper mapper;
+    @Autowired
+    private AffiliateChannelCommissionCampaignBusiness accc;
 
     /**
      * ============================================================================================================
@@ -54,7 +58,7 @@ public class ChannelBusiness {
     public ChannelDTO findById(Long id) {
         try {
             Channel channel = repository.findById(id).orElseThrow(Exception::new);
-            return  ChannelDTO.from(channel);
+            return ChannelDTO.from(channel);
         } catch (Exception e) {
             log.error("Errore in findById", e);
             return null;
@@ -80,7 +84,7 @@ public class ChannelBusiness {
             Channel channel = repository.findById(id).orElseThrow(Exception::new);
             ChannelDTO campaignDTOfrom = ChannelDTO.from(channel);
 
-            mapper.map(filter,campaignDTOfrom );
+            mapper.map(filter, campaignDTOfrom);
 
             Channel mappedEntity = mapper.map(channel, Channel.class);
             mappedEntity.setLastModificationDate(LocalDateTime.now());
@@ -93,6 +97,32 @@ public class ChannelBusiness {
         }
     }
 
+    public Page<ChannelDTO> getbyIdAffiliate(Long id, Pageable pageableRequest) {
+
+        AffiliateChannelCommissionCampaignBusiness.Filter rr = new AffiliateChannelCommissionCampaignBusiness.Filter();
+        rr.setAffiliateId(id);
+        Page<AffiliateChannelCommissionCampaignDTO> search = accc.search(rr, pageableRequest);
+
+        List<Channel> channelList = search.stream().map(affiliateChannelCommissionCampaignDTO -> {
+            return repository.findById(affiliateChannelCommissionCampaignDTO.getChannelId()).get();
+        }).collect(Collectors.toList());
+
+        Page<Channel> page = new PageImpl<>(channelList.stream().distinct().collect(Collectors.toList()));
+        return page.map(ChannelDTO::from);
+    }
+
+    public Page<ChannelDTO> getbyIdUser(Long id, Pageable pageableRequest) {
+        AffiliateChannelCommissionCampaignBusiness.Filter rr = new AffiliateChannelCommissionCampaignBusiness.Filter();
+        rr.setAffiliateId(userBusiness.findById(id).getAffiliateId());
+        Page<AffiliateChannelCommissionCampaignDTO> search = accc.search(rr, pageableRequest);
+
+        List<Channel> channelList = search.stream().map(dtos -> {
+            return repository.findById(dtos.getChannelId()).get();
+        }).collect(Collectors.toList());
+
+        Page<Channel> page = new PageImpl<>(channelList.stream().distinct().collect(Collectors.toList()));
+        return page.map(ChannelDTO::from);
+    }
 
     /**
      * ============================================================================================================

@@ -24,10 +24,10 @@ public class CampaignRevenueFactor {
     private LocalDateTime lastModificationDate;
 
     @ManyToOne
-    @JoinColumn(name="revenuefactor_id")
+    @JoinColumn(name = "revenuefactor_id")
     private RevenueFactor revenuefactor;
 
     @ManyToOne
-    @JoinColumn(name="campaign_id")
+    @JoinColumn(name = "campaign_id")
     private Campaign campaign;
 }

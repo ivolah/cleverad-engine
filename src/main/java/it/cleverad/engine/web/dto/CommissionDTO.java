@@ -39,6 +39,12 @@ public class CommissionDTO {
     }
 
     public static CommissionDTO from(Commission comission) {
-        return new CommissionDTO(comission.getId(), comission.getName(), comission.getValue(), comission.getDescription(), comission.getStatus(), comission.getDictionary().getId(), comission.getDueDate(), comission.getCreationDate(), comission.getLastModificationDate(), comission.getCampaign().getId(), comission.getDictionary().getName());
+        return new CommissionDTO(comission.getId(), comission.getName(), comission.getValue(), comission.getDescription(),
+                comission.getStatus(),
+                comission.getDictionary() != null ? comission.getDictionary().getId() : null,
+                comission.getDueDate(), comission.getCreationDate(),
+                comission.getLastModificationDate(),
+                comission.getCampaign() != null ? comission.getCampaign().getId() : null,
+                comission.getDictionary().getName());
     }
 }

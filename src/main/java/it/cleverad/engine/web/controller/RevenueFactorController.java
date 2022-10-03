@@ -3,6 +3,7 @@ package it.cleverad.engine.web.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.cleverad.engine.business.RevenueFactorBusiness;
+import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.RevenueFactorDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -57,6 +58,18 @@ public class RevenueFactorController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void delete(@PathVariable Long id) {
         this.business.delete(id);
+    }
+
+    @GetMapping("/{id}/campaign")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<RevenueFactorDTO> getbyIdCampaign(@PathVariable Long id, Pageable pageable) {
+        return business.getbyIdCampaign(id, pageable);
+    }
+
+    @GetMapping("/types")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<DictionaryDTO> getTypes() {
+        return business.getTypes();
     }
 
     /**

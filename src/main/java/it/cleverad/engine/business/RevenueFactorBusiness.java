@@ -1,8 +1,11 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
+import it.cleverad.engine.persistence.model.Campaign;
+import it.cleverad.engine.persistence.model.Dictionary;
 import it.cleverad.engine.persistence.model.RevenueFactor;
 import it.cleverad.engine.persistence.repository.RevenueFactorRepository;
+import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.RevenueFactorDTO;
 import it.cleverad.engine.web.exception.PostgresCleveradException;
 import lombok.AllArgsConstructor;
@@ -40,6 +43,9 @@ public class RevenueFactorBusiness {
     @Autowired
     private Mapper mapper;
 
+    @Autowired
+    private DictionaryBusiness dictionaryBusiness;
+
     /**
      * ============================================================================================================
      **/
@@ -47,6 +53,12 @@ public class RevenueFactorBusiness {
     // CREATE
     public RevenueFactorDTO create(BaseCreateRequest request) {
         RevenueFactor map = mapper.map(request, RevenueFactor.class);
+        Campaign cc = new Campaign();
+        cc.setId(request.campaignId);
+        map.setCampaign(cc);
+        Dictionary dd = new Dictionary();
+        dd.setId(request.typeId);
+        map.setDictionary(dd);
         map.setCreationDate(LocalDateTime.now());
         map.setLastModificationDate(LocalDateTime.now());
         return RevenueFactorDTO.from(repository.save(map));
@@ -56,7 +68,7 @@ public class RevenueFactorBusiness {
     public RevenueFactorDTO findById(Long id) {
         try {
             RevenueFactor entity = repository.findById(id).orElseThrow(Exception::new);
-            return  RevenueFactorDTO.from(entity);
+            return RevenueFactorDTO.from(entity);
         } catch (Exception e) {
             log.error("Errore in findById", e);
             return null;
@@ -87,7 +99,7 @@ public class RevenueFactorBusiness {
             RevenueFactor ommission = repository.findById(id).orElseThrow(Exception::new);
             RevenueFactorDTO campaignDTOfrom = RevenueFactorDTO.from(ommission);
 
-            mapper.map(filter,campaignDTOfrom );
+            mapper.map(filter, campaignDTOfrom);
 
             RevenueFactor mappedEntity = mapper.map(ommission, RevenueFactor.class);
             mappedEntity.setLastModificationDate(LocalDateTime.now());
@@ -98,6 +110,19 @@ public class RevenueFactorBusiness {
             log.error("Errore in update", e);
             return null;
         }
+    }
+
+    public Page<RevenueFactorDTO> getbyIdCampaign(Long id, Pageable pageableRequest) {
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Filter request = new Filter();
+        request.setCampaignId(id);
+        Page<RevenueFactor> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(RevenueFactorDTO::from);
+    }
+
+    //  GET TIPI
+    public Page<DictionaryDTO> getTypes() {
+        return dictionaryBusiness.getTypeCommission();
     }
 
 
@@ -112,9 +137,15 @@ public class RevenueFactorBusiness {
             if (request.getId() != null) {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
-
             if (request.getStatus() != null) {
                 predicates.add(cb.equal(root.get("status"), request.getStatus()));
+            }
+
+            if (request.getCampaignId() != null) {
+                predicates.add(cb.equal(root.get("campaign").get("id"), request.getCampaignId()));
+            }
+            if (request.getTypeId() != null) {
+                predicates.add(cb.equal(root.get("dictionary").get("id"), request.getTypeId()));
             }
 
             if (request.getCreationDateFrom() != null) {
@@ -144,12 +175,13 @@ public class RevenueFactorBusiness {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class BaseCreateRequest {
-
         private String idType;
         private Long revenue;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dueDate;
         private Boolean status;
+        private Long campaignId;
+        private Long typeId;
     }
 
     @Data
@@ -157,13 +189,13 @@ public class RevenueFactorBusiness {
     @AllArgsConstructor
     public static class Filter {
         private Long id;
-
-        private String idType;
         private Long revenue;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dueDate;
-
         private Boolean status;
+
+        private Long campaignId;
+        private Long typeId;
 
         private Instant creationDateFrom;
         private Instant creationDateTo;

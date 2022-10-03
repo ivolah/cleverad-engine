@@ -10,9 +10,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "t_affiliate")
-@Inheritance(
-        strategy = InheritanceType.JOINED
-)
+@Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -50,7 +48,7 @@ public class Affiliate {
     @OneToMany(mappedBy = "affiliate")
     private Set<Transaction> transactions;
 
-    public void addWallet(Wallet wallet){
+    public void addWallet(Wallet wallet) {
         wallet.setAffiliate(this);
         this.wallets.add(wallet);
     }

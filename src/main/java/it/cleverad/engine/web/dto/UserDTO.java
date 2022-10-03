@@ -16,30 +16,41 @@ public class UserDTO {
     private String name;
     private String surname;
     private String email;
-    private Long statusId;
     private Long affiliateId;
     private Long roleId;
     private String role;
     private String affiliateName;
+    private Boolean status;
     private LocalDateTime creationDate;
     private LocalDateTime lastLogin;
 
-    public UserDTO(long id, String username, String password, String name, String surname, String email, Long statusId, Long affiliateId, Long roleId, LocalDateTime creationDate, LocalDateTime lastLogin) {
+    public UserDTO(Long id, String username, String password, String name, String surname, String email, Long affiliateId, Long roleId, Boolean status, LocalDateTime creationDate, LocalDateTime lastLogin) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.name = name;
         this.surname = surname;
         this.email = email;
-        this.statusId = statusId;
         this.affiliateId = affiliateId;
         this.roleId = roleId;
+        this.role = role;
+        this.status = status;
         this.creationDate = creationDate;
         this.lastLogin = lastLogin;
     }
 
     public static UserDTO from(User user) {
-        return new UserDTO(user.getId(), user.getUsername(), user.getPassword(), user.getName(), user.getSurname(), user.getEmail(), user.getStatusId(), user.getAffiliateId(), user.getRoleId(), user.getCreationDate(), user.getLastLogin());
+        return new UserDTO(user.getId(),
+                user.getUsername(),
+                user.getPassword(),
+                user.getName(),
+                user.getSurname(),
+                user.getEmail(),
+                user.getAffiliateId(),
+                user.getRoleId(),
+                user.getStatus(),
+                user.getCreationDate(),
+                user.getLastLogin());
     }
 
 }

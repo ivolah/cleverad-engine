@@ -12,7 +12,6 @@ import java.util.Set;
 @Entity
 @Table(name = "t_commision")
 @Inheritance(strategy = InheritanceType.JOINED)
-//@Data
 @Getter
 @Setter
 @NoArgsConstructor

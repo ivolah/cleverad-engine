@@ -59,6 +59,12 @@ public class BudgetController {
         this.business.delete(id);
     }
 
+
+    @GetMapping("/{id}/campaign")
+    @ResponseStatus(HttpStatus.OK)
+    public Page<BudgetDTO> getByIdCampaign(@PathVariable Long id) {
+        return business.getByIdCampaign(id);
+    }
     /**
      * ============================================================================================================
      **/

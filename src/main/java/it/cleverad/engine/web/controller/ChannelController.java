@@ -28,7 +28,7 @@ public class ChannelController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ChannelDTO create(@ModelAttribute ChannelBusiness.BaseCreateRequest request) {
-        return   business.create(request);
+        return business.create(request);
     }
 
     @Operation(summary = "Lists the Channels", description = "Lists the Channels, searched and paginated")
@@ -39,10 +39,10 @@ public class ChannelController {
     }
 
     @Operation(summary = "Update the Channel", description = "Update the specific Channel")
-    @PatchMapping(path = "/{id}" )
+    @PatchMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ChannelDTO update(@PathVariable Long id, @RequestBody ChannelBusiness.Filter request) {
-        return  business.update(id, request);
+        return business.update(id, request);
     }
 
     @Operation(summary = "Get the Channel", description = "Get the specific Channel")
@@ -59,8 +59,19 @@ public class ChannelController {
         this.business.delete(id);
     }
 
+    @GetMapping("/{id}/user")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<ChannelDTO> getbyIdUser(@PathVariable Long id, Pageable pageable) {
+        return business.getbyIdUser(id, pageable);
+    }
+
+    @GetMapping("/{id}/affiliate")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<ChannelDTO> getbyIdAffiliate(@PathVariable Long id, Pageable pageable) {
+        return business.getbyIdAffiliate(id, pageable);
+    }
+
     /**
      * ============================================================================================================
      **/
-
 }

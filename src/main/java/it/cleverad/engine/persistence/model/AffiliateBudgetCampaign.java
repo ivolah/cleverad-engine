@@ -9,9 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "t_affiliate_budget_campaign")
-@Inheritance(
-        strategy = InheritanceType.JOINED
-)
+@Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -26,7 +24,7 @@ public class AffiliateBudgetCampaign {
     private LocalDateTime lastModificationDate;
 
     @ManyToOne
-    @JoinColumn(name="affiliate_id")
+    @JoinColumn(name = "affiliate_id")
     private Affiliate affiliate;
 
     @ManyToOne
@@ -34,7 +32,7 @@ public class AffiliateBudgetCampaign {
     private Budget budget;
 
     @ManyToOne
-    @JoinColumn(name="campaign_id")
+    @JoinColumn(name = "campaign_id")
     private Campaign campaign;
 
 }

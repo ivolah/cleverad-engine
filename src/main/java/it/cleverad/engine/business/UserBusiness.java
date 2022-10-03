@@ -109,8 +109,7 @@ public class UserBusiness {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Page<User> page = repository.findAll(getSpecification(request), pageable);
 
-
-       return page.map(user -> {
+        return page.map(user -> {
             UserDTO dto = UserDTO.from(user);
             if (user.getAffiliateId() != null) {
                 try {
@@ -147,13 +146,13 @@ public class UserBusiness {
 
     public UserDTO disableUser(Long id) throws Exception {
         User wser = repository.findById(id).orElseThrow(Exception::new);
-        wser.setStatusId(1L);
+        wser.setStatus(false);
         return UserDTO.from(repository.save(wser));
     }
 
     public UserDTO enableUser(Long id) throws Exception {
         User wser = repository.findById(id).orElseThrow(Exception::new);
-        wser.setStatusId(2L);
+        wser.setStatus(true);
         return UserDTO.from(repository.save(wser));
     }
 
@@ -180,8 +179,8 @@ public class UserBusiness {
             if (request.getEmail() != null) {
                 predicates.add(cb.equal(root.get("email"), request.getEmail()));
             }
-            if (request.getStatusId() != null) {
-                predicates.add(cb.equal(root.get("statusId"), request.getStatusId()));
+            if (request.getStatus() != null) {
+                predicates.add(cb.equal(root.get("status"), request.getStatus()));
             }
             if (request.getAffiliateId() != null) {
                 predicates.add(cb.equal(root.get("companyId"), request.getAffiliateId()));
@@ -215,7 +214,7 @@ public class UserBusiness {
         private String username;
         private String surname;
         private String email;
-        private Long statusId;
+        private Boolean status;
         private Long affiliateId;
         private Long roleId;
         private String password;
@@ -230,7 +229,7 @@ public class UserBusiness {
         private String name;
         private String surname;
         private String email;
-        private Long statusId;
+        private Boolean status;
         private Long affiliateId;
         private Long roleId;
         private Instant lastLoginFrom;

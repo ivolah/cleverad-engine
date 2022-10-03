@@ -24,10 +24,10 @@ public class CampaignCookie {
     private LocalDateTime lastModificationDate;
 
     @ManyToOne
-    @JoinColumn(name="cookie_id")
+    @JoinColumn(name = "cookie_id")
     private Cookie cookie;
 
     @ManyToOne
-    @JoinColumn(name="campaign_id")
+    @JoinColumn(name = "campaign_id")
     private Campaign campaign;
 }

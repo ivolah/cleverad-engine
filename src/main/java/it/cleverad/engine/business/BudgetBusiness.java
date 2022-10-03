@@ -3,16 +3,14 @@ package it.cleverad.engine.business;
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.Budget;
 import it.cleverad.engine.persistence.repository.BudgetRepository;
+import it.cleverad.engine.web.dto.AffiliateBudgetCampaignDTO;
 import it.cleverad.engine.web.dto.BudgetDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
@@ -26,6 +24,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -33,8 +32,11 @@ import java.util.List;
 public class BudgetBusiness {
 
     @Autowired
+    AffiliateBudgetCampaignBusiness affiliateBudgetCampaignBusiness;
+    @Autowired
+    AffiliateBusiness affiliateBusiness;
+    @Autowired
     private BudgetRepository repository;
-
     @Autowired
     private Mapper mapper;
 
@@ -91,6 +93,21 @@ public class BudgetBusiness {
             log.error("Errore in update", e);
             return null;
         }
+    }
+
+    public Page<BudgetDTO> getByIdCampaign(Long id) {
+        AffiliateBudgetCampaignBusiness.Filter reques = new AffiliateBudgetCampaignBusiness.Filter();
+        reques.setCampaignId(id);
+        Page<AffiliateBudgetCampaignDTO> ll = affiliateBudgetCampaignBusiness.search(reques, PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id"))));
+
+        Page<BudgetDTO> listaB = new PageImpl<>(ll.stream().map(affiliateBudgetCampaignDTO -> {
+            BudgetDTO budgetDTO = new BudgetDTO();
+            budgetDTO= this.findById(affiliateBudgetCampaignDTO.getBudgetId());
+            budgetDTO.setAffiliateName(affiliateBusiness.findById(affiliateBudgetCampaignDTO.getAffiliateId()).getName());
+            return budgetDTO;
+        }).collect(Collectors.toList()));
+
+        return listaB;
     }
 
     /**

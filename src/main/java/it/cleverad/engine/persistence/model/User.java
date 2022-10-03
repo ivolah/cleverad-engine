@@ -28,11 +28,13 @@ public class User {
     private String password;
     private String surname;
     private String email;
-    private Long statusId;
+
     private Long affiliateId;
     private Long roleId;
+
+    private Boolean status;
+
     private LocalDateTime creationDate;
     private LocalDateTime lastLogin;
-
 
 }

@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "t_media_campaign")
-//@Data
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,11 +23,11 @@ public class MediaCampaign {
     private LocalDateTime lastModificationDate;
 
     @OneToOne
-    @JoinColumn(name="media_id")
+    @JoinColumn(name = "media_id")
     private Media media;
 
     @ManyToOne
-    @JoinColumn(name="campaign_id")
+    @JoinColumn(name = "campaign_id")
     private Campaign campaign;
 
 }
