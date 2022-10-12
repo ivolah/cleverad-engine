@@ -32,4 +32,8 @@ public class Dictionary {
     @JoinColumn(name = "id")
     private Set<RevenueFactor> revenueFactors;
 
+    @OneToMany
+    @JoinColumn(name = "id")
+    private Set<Channel> channels;
+
 }

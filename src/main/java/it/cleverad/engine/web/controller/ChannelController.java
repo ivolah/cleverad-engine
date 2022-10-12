@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.cleverad.engine.business.ChannelBusiness;
 import it.cleverad.engine.web.dto.ChannelDTO;
+import it.cleverad.engine.web.dto.DictionaryDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -69,6 +70,12 @@ public class ChannelController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<ChannelDTO> getbyIdAffiliate(@PathVariable Long id, Pageable pageable) {
         return business.getbyIdAffiliate(id, pageable);
+    }
+
+    @GetMapping("/types")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<DictionaryDTO> getTypes() {
+        return business.getTypes();
     }
 
     /**

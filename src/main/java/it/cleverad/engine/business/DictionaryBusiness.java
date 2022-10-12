@@ -103,6 +103,14 @@ public class DictionaryBusiness {
         return page.map(DictionaryDTO::from);
     }
 
+    public Page<DictionaryDTO> getTypeChannel() {
+        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Filter request = new Filter();
+        request.setType("CHANNEL");
+        Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(DictionaryDTO::from);
+    }
+
     /**
      * ============================================================================================================
      **/

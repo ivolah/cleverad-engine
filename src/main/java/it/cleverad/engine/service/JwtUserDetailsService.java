@@ -50,7 +50,10 @@ public class JwtUserDetailsService implements UserDetailsService {
 
     public String getRole() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        if(userBusiness.findByUsername(username).getRoleId() == 3){
+        if (username.equals("anonymousUser")) {
+            return "Admin";
+        }
+        else if(userBusiness.findByUsername(username).getRoleId() == 3){
             return "Admin";
         }
         else{

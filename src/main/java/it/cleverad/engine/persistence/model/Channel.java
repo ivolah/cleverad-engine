@@ -37,4 +37,8 @@ public class Channel {
     @OneToMany(mappedBy = "channel")
     private Set<Transaction> transactions;
 
+    @ManyToOne
+    @JoinColumn(name = "dictionary_id")
+    private Dictionary dictionary;
+
 }

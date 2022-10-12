@@ -168,7 +168,7 @@ public class AffiliateBusiness {
         private String zipCode;
         private String primaryMail;
         private String secondaryMail;
-        private String status;
+        private Boolean status;
     }
 
     @Data
@@ -185,7 +185,7 @@ public class AffiliateBusiness {
         private String zipCode;
         private String primaryMail;
         private String secondaryMail;
-        private String status;
+        private Boolean status;
         private Instant creationDateFrom;
         private Instant creationDateTo;
         private Instant lastModificationDateFrom;

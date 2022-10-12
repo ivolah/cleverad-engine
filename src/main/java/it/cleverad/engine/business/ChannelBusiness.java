@@ -5,6 +5,7 @@ import it.cleverad.engine.persistence.model.Channel;
 import it.cleverad.engine.persistence.repository.ChannelRepository;
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.dto.ChannelDTO;
+import it.cleverad.engine.web.dto.DictionaryDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -37,6 +38,8 @@ public class ChannelBusiness {
     UserBusiness userBusiness;
     @Autowired
     private ChannelRepository repository;
+    @Autowired
+    private DictionaryBusiness dictionaryBusiness;
     @Autowired
     private Mapper mapper;
     @Autowired
@@ -122,6 +125,11 @@ public class ChannelBusiness {
 
         Page<Channel> page = new PageImpl<>(channelList.stream().distinct().collect(Collectors.toList()));
         return page.map(ChannelDTO::from);
+    }
+
+    //  GET TIPI
+    public Page<DictionaryDTO> getTypes() {
+        return dictionaryBusiness.getTypeChannel();
     }
 
     /**

@@ -45,6 +45,7 @@ public class CommissionDTO {
                 comission.getDueDate(), comission.getCreationDate(),
                 comission.getLastModificationDate(),
                 comission.getCampaign() != null ? comission.getCampaign().getId() : null,
-                comission.getDictionary().getName());
+                comission.getDictionary() != null ? comission.getDictionary().getName() : null
+        );
     }
 }

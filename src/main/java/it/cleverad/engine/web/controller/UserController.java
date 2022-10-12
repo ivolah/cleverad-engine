@@ -50,7 +50,7 @@ public class UserController {
     @Operation(summary = "Update the User", description = "Update the specific User")
     @PatchMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public UserDTO update(@PathVariable Long id, @RequestBody UserBusiness.Filter request) throws Exception {
+    public UserDTO update(@PathVariable Long id, @RequestBody UserBusiness.Filter request){
         return business.update(id, request);
     }
 

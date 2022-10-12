@@ -1,8 +1,8 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.Campaign;
 import it.cleverad.engine.persistence.model.Commission;
+import it.cleverad.engine.persistence.repository.CampaignRepository;
 import it.cleverad.engine.persistence.repository.CommissionRepository;
 import it.cleverad.engine.web.dto.CommissionDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
@@ -43,6 +43,9 @@ public class CommissionBusiness {
     private DictionaryBusiness dictionaryBusiness;
 
     @Autowired
+    private CampaignRepository campaignRepository;
+
+    @Autowired
     private Mapper mapper;
 
     /**
@@ -54,9 +57,7 @@ public class CommissionBusiness {
         Commission map = mapper.map(request, Commission.class);
         map.setCreationDate(LocalDateTime.now());
         map.setLastModificationDate(LocalDateTime.now());
-        Campaign cc = new Campaign();
-        cc.setId(request.campaignId);
-        map.setCampaign(cc);
+        map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow());
         return CommissionDTO.from(repository.save(map));
     }
 

@@ -29,7 +29,8 @@ public class Affiliate {
     private String zipCode;
     private String primaryMail;
     private String secondaryMail;
-    private String status;
+    private Boolean status;
+
     private LocalDate creationDate;
     private LocalDate lastModificationDate;
 

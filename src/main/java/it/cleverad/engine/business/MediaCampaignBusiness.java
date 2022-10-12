@@ -12,6 +12,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,7 +58,7 @@ public class MediaCampaignBusiness {
             map.setLastModificationDate(LocalDateTime.now());
             dto = MediaCampaignDTO.from(repository.save(map));
         } catch (Exception exception) {
-            throw new PostgresCleveradException("Eccezione nella creazione : " + exception.getLocalizedMessage() );
+            throw new PostgresCleveradException("Eccezione nella creazione : " + exception.getLocalizedMessage());
         }
         return dto;
     }
@@ -75,6 +79,22 @@ public class MediaCampaignBusiness {
         }
     }
 
+    // GET BY ID
+    public MediaCampaignDTO findByIdMedia(Long id) {
+        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Filter request = new Filter();
+        request.setMediaId(id);
+        Page<MediaCampaign> page = repository.findAll(getSpecification(request), pageable);
+        return MediaCampaignDTO.from(page.stream().findFirst().get());
+    }
+
+    public MediaCampaignDTO findByIdCampaign(Long id) {
+        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Filter request = new Filter();
+        request.setCampaignId(id);
+        Page<MediaCampaign> page = repository.findAll(getSpecification(request), pageable);
+        return MediaCampaignDTO.from(page.stream().findFirst().get());
+    }
 
     /**
      * ============================================================================================================
@@ -87,11 +107,12 @@ public class MediaCampaignBusiness {
             if (request.getId() != null) {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
+
             if (request.getMediaId() != null) {
-                predicates.add(cb.equal(root.get("mediaId"), request.getMediaId()));
+                predicates.add(cb.equal(root.get("media").get("id"), request.getMediaId()));
             }
             if (request.getCampaignId() != null) {
-                predicates.add(cb.equal(root.get("campaignId"), request.getCampaignId()));
+                predicates.add(cb.equal(root.get("campaign").get("id"), request.getCampaignId()));
             }
 
             if (request.getCreationDateFrom() != null) {

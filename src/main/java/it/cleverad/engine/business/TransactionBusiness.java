@@ -146,6 +146,7 @@ public class TransactionBusiness {
         private LocalDateTime dateTime;
         private String type;
         private Double value;
+        private Boolean approved;
 
     }
 

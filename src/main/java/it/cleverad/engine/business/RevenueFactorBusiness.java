@@ -1,9 +1,9 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.Campaign;
-import it.cleverad.engine.persistence.model.Dictionary;
 import it.cleverad.engine.persistence.model.RevenueFactor;
+import it.cleverad.engine.persistence.repository.CampaignRepository;
+import it.cleverad.engine.persistence.repository.DictionaryRepository;
 import it.cleverad.engine.persistence.repository.RevenueFactorRepository;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.RevenueFactorDTO;
@@ -46,6 +46,12 @@ public class RevenueFactorBusiness {
     @Autowired
     private DictionaryBusiness dictionaryBusiness;
 
+    @Autowired
+    private CampaignRepository campaignRepository;
+
+    @Autowired
+    private DictionaryRepository dictionaryRepository;
+
     /**
      * ============================================================================================================
      **/
@@ -53,12 +59,8 @@ public class RevenueFactorBusiness {
     // CREATE
     public RevenueFactorDTO create(BaseCreateRequest request) {
         RevenueFactor map = mapper.map(request, RevenueFactor.class);
-        Campaign cc = new Campaign();
-        cc.setId(request.campaignId);
-        map.setCampaign(cc);
-        Dictionary dd = new Dictionary();
-        dd.setId(request.typeId);
-        map.setDictionary(dd);
+        map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow());
+        map.setDictionary(dictionaryRepository.findById(request.idType).orElseThrow());
         map.setCreationDate(LocalDateTime.now());
         map.setLastModificationDate(LocalDateTime.now());
         return RevenueFactorDTO.from(repository.save(map));
@@ -175,13 +177,12 @@ public class RevenueFactorBusiness {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class BaseCreateRequest {
-        private String idType;
         private Long revenue;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dueDate;
         private Boolean status;
         private Long campaignId;
-        private Long typeId;
+        private Long idType;
     }
 
     @Data

@@ -32,8 +32,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         // configure AuthenticationManager so that it knows from where to load
-        // user for matching credentials
-        // Use BCryptPasswordEncoder
+        // user for matching credentials Use BCryptPasswordEncoder
         auth.userDetailsService(jwtUserDetailsService).passwordEncoder(passwordEncoder());
     }
 
@@ -52,11 +51,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         // CSFR
         httpSecurity.csrf().disable().
-				// SESSIONE STATELESS
-				sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+                // SESSIONE STATELESS
+                        sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 // NON AUTENTICO LA CHIAMATE DI AUTENTICAZIONE
-                .authorizeRequests()
-				.antMatchers("/authenticate", "/contactform").permitAll().
+                .authorizeRequests().antMatchers("/authenticate", "/contactform", "/tracking", "/target").permitAll().
                 // TUTTE LE ALTRE RICHIESTO SONO AUTENTICATE
                         anyRequest().authenticated().and().
                 // session won't be used to store user's state.
@@ -64,7 +62,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         // Add a filter to validate the tokens with every request
         httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
-		httpSecurity.headers().cacheControl();
+        httpSecurity.headers().cacheControl();
         httpSecurity.cors();
     }
 

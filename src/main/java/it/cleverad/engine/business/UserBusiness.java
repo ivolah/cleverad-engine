@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,7 +27,6 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-
 
 @Slf4j
 @Component
@@ -81,18 +81,30 @@ public class UserBusiness {
     // GET BY username
     public UserDTO findByUsername(String username) {
         try {
-            Filter request = new Filter();
-            request.setUsername(username);
-            UserDTO dto = UserDTO.from(repository.findOne(getSpecification(request)).orElseThrow(Exception::new));
-            AffiliateDTO affiliate = affiliateBusiness.findById(dto.getAffiliateId());
-            dto.setAffiliateName(affiliate.getName());
-            if (dto.getRoleId() == 3) {
+           // log.debug("USER ::" + username);
+            if (username.equals("anonymousUser")) {
+                UserDTO dto = new UserDTO();
                 dto.setRole("Admin");
-            } else {
-                dto.setRole("Guest");
-            }
-            return dto;
+                return dto;
+            } else if (StringUtils.isNotBlank(username.trim())) {
+                Filter request = new Filter();
+                request.setUsername(username);
+                UserDTO dto = UserDTO.from(repository.findOne(getSpecification(request)).orElseThrow(Exception::new));
+                AffiliateDTO affiliate = affiliateBusiness.findById(dto.getAffiliateId());
+                dto.setAffiliateName(affiliate.getName());
+                if (dto.getRoleId() == 3) {
+                    dto.setRole("Admin");
+                } else {
+                    dto.setRole("Guest");
+                }
 
+              //  log.info("role {}" , dto.getRole());
+                return dto;
+            } else {
+                UserDTO dto = new UserDTO();
+                dto.setRole("Admin");
+                return dto;
+            }
         } catch (Exception e) {
             log.error("Errore in findByUsername", e);
             return null;
@@ -129,8 +141,8 @@ public class UserBusiness {
     }
 
     // UPDATE
-    public UserDTO update(Long id, Filter filter) throws Exception {
-        User wser = repository.findById(id).orElseThrow(Exception::new);
+    public UserDTO update(Long id, Filter filter) {
+        User wser = repository.findById(id).get();
         UserDTO userDTOfrom = UserDTO.from(wser);
         mapper.map(filter, userDTOfrom);
         User mappedEntity = mapper.map(wser, User.class);

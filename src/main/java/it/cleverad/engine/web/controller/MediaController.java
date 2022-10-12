@@ -28,7 +28,7 @@ public class MediaController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public MediaDTO create(@ModelAttribute MediaBusiness.BaseCreateRequest request) {
-        return  business.create(request);
+        return business.create(request);
     }
 
     @Operation(summary = "Lists the Medias", description = "Lists the Medias, searched and paginated")
@@ -39,7 +39,7 @@ public class MediaController {
     }
 
     @Operation(summary = "Update the Media", description = "Update the specific Media")
-    @PatchMapping(path = "/{id}" )
+    @PatchMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public MediaDTO update(@PathVariable Long id, @RequestBody MediaBusiness.Filter request) {
         return business.update(id, request);
@@ -63,7 +63,20 @@ public class MediaController {
     @GetMapping("/{id}/campaign")
     @ResponseStatus(HttpStatus.OK)
     public Page<MediaDTO> getByCampaignId(@PathVariable Long id, Pageable pageable) {
-        return  business.getByCampaignId(id, pageable);
+        return business.getByCampaignId(id, pageable);
+    }
+
+
+    @GetMapping("/{id}/campaign/{idCampaign}")
+    @ResponseStatus(HttpStatus.OK)
+    public MediaDTO getByCampaignId(@PathVariable Long id, @PathVariable Long idCampaign) {
+        return business.getByIdAndCampaignID(id, idCampaign);
+    }
+
+    @GetMapping("/{id}/campaign/{idCampaign}/channel/{idChannel}")
+    @ResponseStatus(HttpStatus.OK)
+    public MediaDTO getByCampaignId(@PathVariable Long id, @PathVariable Long idCampaign, @PathVariable Long idChannel) {
+        return business.getByIdAndCampaignIDChannelID(id, idCampaign, idChannel);
     }
 
     /**

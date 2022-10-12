@@ -21,13 +21,13 @@ public class AffiliateDTO {
     private String zipCode;
     private String primaryMail;
     private String secondaryMail;
-    private String status;
+    private Boolean status;
     private LocalDate creationDate;
     private LocalDate lastModificationDate;
 
     private List<BasicCampaignDTO> basicCampaignDTOS;
 
-    public AffiliateDTO(long id, String name, String vatNumber, String street, String streetNumber, String city, String zipCode, String primaryMail, String secondaryMail, String status, LocalDate creationDate, LocalDate lastModificationDate, List<BasicCampaignDTO> basicCampaignDTOS) {
+    public AffiliateDTO(long id, String name, String vatNumber, String street, String streetNumber, String city, String zipCode, String primaryMail, String secondaryMail, Boolean status, LocalDate creationDate, LocalDate lastModificationDate, List<BasicCampaignDTO> basicCampaignDTOS) {
         this.id = id;
         this.name = name;
         this.vatNumber = vatNumber;
