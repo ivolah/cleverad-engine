@@ -5,6 +5,7 @@ import it.cleverad.engine.persistence.model.Wallet;
 import it.cleverad.engine.persistence.repository.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.WalletRepository;
 import it.cleverad.engine.web.dto.WalletDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -50,7 +51,7 @@ public class WalletBusiness {
     // GET BY ID
     public WalletDTO findById(Long id) {
         try {
-            Wallet channel = repository.findById(id).orElseThrow(Exception::new);
+            Wallet channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return WalletDTO.from(channel);
         } catch (Exception e) {
             log.error("Errore in findById", e);
@@ -87,7 +88,7 @@ public class WalletBusiness {
     // UPDATE
     public WalletDTO update(Long id, Filter filter) {
         try {
-            Wallet channel = repository.findById(id).orElseThrow(Exception::new);
+            Wallet channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             WalletDTO campaignDTOfrom = WalletDTO.from(channel);
 
             mapper.map(filter, campaignDTOfrom);

@@ -6,6 +6,7 @@ import it.cleverad.engine.persistence.model.CampaignCategory;
 import it.cleverad.engine.persistence.model.Category;
 import it.cleverad.engine.persistence.repository.CampaignCategoryRepository;
 import it.cleverad.engine.web.dto.CampaignCategoryDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -61,13 +62,8 @@ public class CampaignCategoryBusiness {
 
     // GET BY ID
     public CampaignCategoryDTO findById(Long id) {
-        try {
-            CampaignCategory channel = repository.findById(id).orElseThrow(Exception::new);
+            CampaignCategory channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return  CampaignCategoryDTO.from(channel);
-        } catch (Exception e) {
-            log.error("Errore in findById", e);
-            return null;
-        }
     }
 
     // DELETE BY ID
@@ -86,7 +82,7 @@ public class CampaignCategoryBusiness {
     // UPDATE
     public CampaignCategoryDTO update(Long id, Filter filter) {
         try {
-            CampaignCategory channel = repository.findById(id).orElseThrow(Exception::new);
+            CampaignCategory channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             CampaignCategoryDTO campaignDTOfrom = CampaignCategoryDTO.from(channel);
 
             mapper.map(filter,campaignDTOfrom );

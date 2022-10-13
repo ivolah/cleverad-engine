@@ -7,6 +7,7 @@ import it.cleverad.engine.persistence.model.Campaign;
 import it.cleverad.engine.persistence.repository.AffiliateChannelCommissionCampaignRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.AffiliateCampaignDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -73,7 +74,7 @@ public class AffiliateCampaignBusiness {
     // GET BY ID
     public AffiliateCampaignDTO findById(Long id) {
         try {
-            AffiliateChannelCommissionCampaign affiliateCampaign = repository.findById(id).orElseThrow(Exception::new);
+            AffiliateChannelCommissionCampaign affiliateCampaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return AffiliateCampaignDTO.from(affiliateCampaign);
         } catch (Exception e) {
             log.error("Errore in findById", e);

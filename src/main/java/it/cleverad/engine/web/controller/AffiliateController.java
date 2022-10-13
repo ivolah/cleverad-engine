@@ -48,7 +48,7 @@ public class AffiliateController {
     @Operation(summary = "Get the Affiliate", description = "Get the specific Affiliate")
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public AffiliateDTO getByUuid(@PathVariable Long id) {
+    public AffiliateDTO getByUuid(@PathVariable Long id)  {
         return business.findById(id);
     }
 

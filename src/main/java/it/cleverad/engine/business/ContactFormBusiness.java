@@ -4,6 +4,7 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.ContactForm;
 import it.cleverad.engine.persistence.repository.ContactFormRepository;
 import it.cleverad.engine.web.dto.ContactFormDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -49,13 +50,8 @@ public class ContactFormBusiness {
 
     // GET BY ID
     public ContactFormDTO findById(Long id) {
-        try {
-            ContactForm form = repository.findById(id).orElseThrow(Exception::new);
+            ContactForm form = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return ContactFormDTO.from(form);
-        } catch (Exception e) {
-            log.error("Errore in findById", e);
-            return null;
-        }
     }
 
     // DELETE BY ID
@@ -74,7 +70,7 @@ public class ContactFormBusiness {
     // UPDATE
     public ContactFormDTO update(Long id, Filter filter) {
         try {
-            ContactForm entity = repository.findById(id).orElseThrow(Exception::new);
+            ContactForm entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             ContactFormDTO formDTO = ContactFormDTO.from(entity);
 
             mapper.map(filter, formDTO);

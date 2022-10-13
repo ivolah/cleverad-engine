@@ -6,11 +6,13 @@ import it.cleverad.engine.persistence.repository.ChannelRepository;
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.dto.ChannelDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -60,7 +62,7 @@ public class ChannelBusiness {
     // GET BY ID
     public ChannelDTO findById(Long id) {
         try {
-            Channel channel = repository.findById(id).orElseThrow(Exception::new);
+            Channel channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return ChannelDTO.from(channel);
         } catch (Exception e) {
             log.error("Errore in findById", e);
@@ -70,7 +72,12 @@ public class ChannelBusiness {
 
     // DELETE BY ID
     public void delete(Long id) {
-        repository.deleteById(id);
+        try {
+            repository.deleteById(id);
+        } catch (DataIntegrityViolationException ee) {
+            log.warn("Impossibile cancellare commissione.");
+            throw new DataIntegrityViolationException("Impossibile cancellare Channel");
+        }
     }
 
     // SEARCH PAGINATED
@@ -84,7 +91,7 @@ public class ChannelBusiness {
     // UPDATE
     public ChannelDTO update(Long id, Filter filter) {
         try {
-            Channel channel = repository.findById(id).orElseThrow(Exception::new);
+            Channel channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             ChannelDTO campaignDTOfrom = ChannelDTO.from(channel);
 
             mapper.map(filter, campaignDTOfrom);

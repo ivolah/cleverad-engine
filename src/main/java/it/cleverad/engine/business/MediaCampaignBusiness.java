@@ -6,6 +6,7 @@ import it.cleverad.engine.persistence.model.Media;
 import it.cleverad.engine.persistence.model.MediaCampaign;
 import it.cleverad.engine.persistence.repository.MediaCampaignRepository;
 import it.cleverad.engine.web.dto.MediaCampaignDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -71,7 +72,7 @@ public class MediaCampaignBusiness {
     // GET BY ID
     public MediaCampaignDTO findById(Long id) {
         try {
-            MediaCampaign mediaCampaign = repository.findById(id).orElseThrow(Exception::new);
+            MediaCampaign mediaCampaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return MediaCampaignDTO.from(mediaCampaign);
         } catch (Exception e) {
             log.error("Errore in findById", e);

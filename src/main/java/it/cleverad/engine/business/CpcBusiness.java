@@ -4,6 +4,7 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.Cpc;
 import it.cleverad.engine.persistence.repository.CpcRepository;
 import it.cleverad.engine.web.dto.CpcDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -52,13 +53,8 @@ public class CpcBusiness {
 
     // GET BY ID
     public CpcDTO findById(Long id) {
-        try {
-            Cpc channel = repository.findById(id).orElseThrow(Exception::new);
+            Cpc channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return CpcDTO.from(channel);
-        } catch (Exception e) {
-            log.error("Errore in findById", e);
-            return null;
-        }
     }
 
     // DELETE BY ID
@@ -81,7 +77,7 @@ public class CpcBusiness {
     // UPDATE
     public CpcDTO update(Long id, Filter filter) {
         try {
-            Cpc channel = repository.findById(id).orElseThrow(Exception::new);
+            Cpc channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             CpcDTO campaignDTOfrom = CpcDTO.from(channel);
 
             mapper.map(filter, campaignDTOfrom);

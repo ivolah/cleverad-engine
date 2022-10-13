@@ -5,6 +5,7 @@ import it.cleverad.engine.persistence.model.Campaign;
 import it.cleverad.engine.persistence.repository.CampaignRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.CampaignDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -84,24 +85,20 @@ public class CampaignBusiness {
 
     // GET BY ID
     public CampaignDTO findById(Long id) {
-        try {
-            Campaign campaign = null;
 
-            if (jwtUserDetailsService.getRole().equals("Admin")) {
-                campaign = repository.findById(id).orElse(null);
-            } else {
-                Filter request = new Filter();
-                request.setId(id);
-                campaign = repository.findById(id).orElse(null);
-            }
+        Campaign campaign = null;
 
-            if (campaign != null) return CampaignDTO.from(campaign);
-            else return null;
-
-        } catch (Exception e) {
-            log.error("Errore in findById", e);
-            return null;
+        if (jwtUserDetailsService.getRole().equals("Admin")) {
+            campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+        } else {
+            Filter request = new Filter();
+            request.setId(id);
+            campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
         }
+
+        if (campaign != null) return CampaignDTO.from(campaign);
+        else return null;
+
     }
 
     // DELETE BY ID
@@ -131,7 +128,7 @@ public class CampaignBusiness {
     // UPDATE
     public CampaignDTO update(Long id, Filter filter) {
         try {
-            Campaign campaign = repository.findById(id).orElseThrow(Exception::new);
+            Campaign campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             CampaignDTO campaignDTOfrom = CampaignDTO.from(campaign);
             mapper.map(filter, campaignDTOfrom);
             Campaign mappedEntity = mapper.map(campaign, Campaign.class);

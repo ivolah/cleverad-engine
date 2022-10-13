@@ -6,6 +6,7 @@ import it.cleverad.engine.persistence.repository.CampaignRepository;
 import it.cleverad.engine.persistence.repository.CommissionRepository;
 import it.cleverad.engine.web.dto.CommissionDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -63,13 +64,8 @@ public class CommissionBusiness {
 
     // GET BY ID
     public CommissionDTO findById(Long id) {
-        try {
-            Commission commission = repository.findById(id).orElseThrow(Exception::new);
+            Commission commission = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return CommissionDTO.from(commission);
-        } catch (Exception e) {
-            log.error("Errore in findById", e);
-            return null;
-        }
     }
 
     // DELETE BY ID
@@ -93,7 +89,7 @@ public class CommissionBusiness {
     // UPDATE
     public CommissionDTO update(Long id, Filter filter) {
         try {
-            Commission ommission = repository.findById(id).orElseThrow(Exception::new);
+            Commission ommission = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             CommissionDTO campaignDTOfrom = CommissionDTO.from(ommission);
 
             mapper.map(filter, campaignDTOfrom);

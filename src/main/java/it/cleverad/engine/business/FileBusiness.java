@@ -4,6 +4,7 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.File;
 import it.cleverad.engine.persistence.repository.FileRepository;
 import it.cleverad.engine.web.dto.FileDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,7 +18,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -57,7 +57,7 @@ public class FileBusiness {
     // GET BY ID
     public FileDTO findById(Long id) {
         try {
-            File file = repository.findById(id).orElseThrow(Exception::new);
+            File file = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return FileDTO.from(file);
         } catch (Exception e) {
             log.error("Errore in findById", e);
@@ -85,7 +85,7 @@ public class FileBusiness {
     // UPDATE
     public FileDTO update(Long id, FileBusiness.Filter filter) {
         try {
-            File fil = repository.findById(id).orElseThrow(Exception::new);
+            File fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             FileDTO from = FileDTO.from(fil);
 
             mapper.map(filter, from);

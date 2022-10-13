@@ -4,6 +4,7 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.*;
 import it.cleverad.engine.persistence.repository.AffiliateChannelCommissionCampaignRepository;
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -79,7 +80,7 @@ public class AffiliateChannelCommissionCampaignBusiness {
     // GET BY ID
     public AffiliateChannelCommissionCampaignDTO findById(Long id) {
         try {
-            AffiliateChannelCommissionCampaign affiliateChannelCommissionCampaign = repository.findById(id).orElseThrow(Exception::new);
+            AffiliateChannelCommissionCampaign affiliateChannelCommissionCampaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return AffiliateChannelCommissionCampaignDTO.from(affiliateChannelCommissionCampaign);
         } catch (Exception e) {
             log.error("Errore in findById", e);

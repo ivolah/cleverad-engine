@@ -4,6 +4,7 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.Category;
 import it.cleverad.engine.persistence.repository.CategoryRepository;
 import it.cleverad.engine.web.dto.CategoryDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -54,13 +55,8 @@ public class CategoryBusiness {
 
     // GET BY ID
     public CategoryDTO findById(Long id) {
-        try {
-            Category category = repository.findById(id).orElseThrow(Exception::new);
+            Category category = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return CategoryDTO.from(category);
-        } catch (Exception e) {
-            log.error("Errore in findById", e);
-            return null;
-        }
     }
 
     // DELETE BY ID
@@ -83,7 +79,7 @@ public class CategoryBusiness {
     // UPDATE
     public CategoryDTO update(Long id, Filter filter) {
         try {
-            Category category = repository.findById(id).orElseThrow(Exception::new);
+            Category category = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             CategoryDTO categoryDTO = CategoryDTO.from(category);
 
             mapper.map(filter, categoryDTO);

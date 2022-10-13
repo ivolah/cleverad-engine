@@ -4,6 +4,7 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.MediaType;
 import it.cleverad.engine.persistence.repository.MediaTypeRepository;
 import it.cleverad.engine.web.dto.MediaTypeDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -45,7 +46,7 @@ public class MediaTypeBusiness {
     // GET BY ID
     public MediaTypeDTO findById(Long id) {
         try {
-            MediaType media = repository.findById(id).orElseThrow(Exception::new);
+            MediaType media = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return MediaTypeDTO.from(media);
         } catch (Exception e) {
             log.error("Errore in findById", e);
@@ -61,7 +62,7 @@ public class MediaTypeBusiness {
     // UPDATE
     public MediaTypeDTO update(Long id, Filter filter) {
         try {
-            MediaType media = repository.findById(id).orElseThrow(Exception::new);
+            MediaType media = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             MediaTypeDTO mediaDTOfrom = MediaTypeDTO.from(media);
             mapper.map(filter, mediaDTOfrom);
 

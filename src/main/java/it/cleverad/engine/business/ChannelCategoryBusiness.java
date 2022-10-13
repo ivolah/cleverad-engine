@@ -6,6 +6,7 @@ import it.cleverad.engine.persistence.model.Channel;
 import it.cleverad.engine.persistence.model.ChannelCategory;
 import it.cleverad.engine.persistence.repository.ChannelCategoryRepository;
 import it.cleverad.engine.web.dto.ChannelCategoryDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -50,7 +51,7 @@ public class ChannelCategoryBusiness {
         map.setCreationDate(LocalDateTime.now());
         map.setLastModificationDate(LocalDateTime.now());
 
-        Category cat= new Category();
+        Category cat = new Category();
         cat.setId(request.getCategoryId());
         map.setCategory(cat);
 
@@ -63,13 +64,8 @@ public class ChannelCategoryBusiness {
 
     // GET BY ID
     public ChannelCategoryDTO findById(Long id) {
-        try {
-            ChannelCategory channel = repository.findById(id).orElseThrow(Exception::new);
-            return  ChannelCategoryDTO.from(channel);
-        } catch (Exception e) {
-            log.error("Errore in findById", e);
-            return null;
-        }
+        ChannelCategory channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+        return ChannelCategoryDTO.from(channel);
     }
 
     // DELETE BY ID
@@ -88,10 +84,10 @@ public class ChannelCategoryBusiness {
     // UPDATE
     public ChannelCategoryDTO update(Long id, Filter filter) {
         try {
-            ChannelCategory channel = repository.findById(id).orElseThrow(Exception::new);
+            ChannelCategory channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             ChannelCategoryDTO campaignDTOfrom = ChannelCategoryDTO.from(channel);
 
-            mapper.map(filter,campaignDTOfrom );
+            mapper.map(filter, campaignDTOfrom);
 
             ChannelCategory mappedEntity = mapper.map(channel, ChannelCategory.class);
             mappedEntity.setLastModificationDate(LocalDateTime.now());

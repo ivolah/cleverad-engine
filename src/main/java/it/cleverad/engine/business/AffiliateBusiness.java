@@ -4,6 +4,7 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.Affiliate;
 import it.cleverad.engine.persistence.repository.AffiliateRepository;
 import it.cleverad.engine.web.dto.AffiliateDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -51,13 +52,8 @@ public class AffiliateBusiness {
 
     // GET BY ID
     public AffiliateDTO findById(Long id) {
-        try {
-            Affiliate affiliate = repository.findById(id).orElseThrow(Exception::new);
+            Affiliate affiliate = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return AffiliateDTO.from(affiliate);
-        } catch (Exception e) {
-            log.error("Errore in findById", e);
-            return null;
-        }
     }
 
     // DELETE BY ID
@@ -76,7 +72,7 @@ public class AffiliateBusiness {
     // UPDATE
     public AffiliateDTO update(Long id, Filter filter) {
         try {
-            Affiliate affiliate = repository.findById(id).orElseThrow(Exception::new);
+            Affiliate affiliate = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             AffiliateDTO affiliateDTOfrom = AffiliateDTO.from(affiliate);
 
             mapper.map(filter, affiliateDTOfrom);

@@ -7,6 +7,7 @@ import it.cleverad.engine.persistence.repository.DictionaryRepository;
 import it.cleverad.engine.persistence.repository.RevenueFactorRepository;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.RevenueFactorDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -69,7 +70,7 @@ public class RevenueFactorBusiness {
     // GET BY ID
     public RevenueFactorDTO findById(Long id) {
         try {
-            RevenueFactor entity = repository.findById(id).orElseThrow(Exception::new);
+            RevenueFactor entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return RevenueFactorDTO.from(entity);
         } catch (Exception e) {
             log.error("Errore in findById", e);
@@ -98,7 +99,7 @@ public class RevenueFactorBusiness {
     // UPDATE
     public RevenueFactorDTO update(Long id, Filter filter) {
         try {
-            RevenueFactor ommission = repository.findById(id).orElseThrow(Exception::new);
+            RevenueFactor ommission = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             RevenueFactorDTO campaignDTOfrom = RevenueFactorDTO.from(ommission);
 
             mapper.map(filter, campaignDTOfrom);

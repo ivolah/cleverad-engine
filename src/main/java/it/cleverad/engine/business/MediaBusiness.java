@@ -6,6 +6,7 @@ import it.cleverad.engine.persistence.repository.MediaRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.MediaDTO;
 import it.cleverad.engine.web.dto.MediaTypeDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -85,7 +86,7 @@ public class MediaBusiness {
     // GET BY ID
     public MediaDTO findById(Long id) {
         try {
-            Media media = repository.findById(id).orElseThrow(Exception::new);
+            Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             MediaDTO dto = MediaDTO.from(media);
             if (dto.getTypeId() != null) {
                 MediaTypeDTO mtDto = mediaTypeBusiness.findById(dto.getTypeId());
@@ -110,7 +111,7 @@ public class MediaBusiness {
     // UPDATE
     public MediaDTO update(Long id, Filter filter) {
         try {
-            Media media = repository.findById(id).orElseThrow(Exception::new);
+            Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             MediaDTO mediaDTOfrom = MediaDTO.from(media);
             mapper.map(filter, mediaDTOfrom);
 

@@ -6,6 +6,7 @@ import it.cleverad.engine.persistence.model.CampaignCookie;
 import it.cleverad.engine.persistence.model.Cookie;
 import it.cleverad.engine.persistence.repository.CampaignCookieRepository;
 import it.cleverad.engine.web.dto.CampaignCookieDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -61,13 +62,8 @@ public class CampaignCookieBusiness {
 
     // GET BY ID
     public CampaignCookieDTO findById(Long id) {
-        try {
-            CampaignCookie channel = repository.findById(id).orElseThrow(Exception::new);
+            CampaignCookie channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return  CampaignCookieDTO.from(channel);
-        } catch (Exception e) {
-            log.error("Errore in findById", e);
-            return null;
-        }
     }
 
     // DELETE BY ID
@@ -86,7 +82,7 @@ public class CampaignCookieBusiness {
     // UPDATE
     public CampaignCookieDTO update(Long id, Filter filter) {
         try {
-            CampaignCookie channel = repository.findById(id).orElseThrow(Exception::new);
+            CampaignCookie channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             CampaignCookieDTO campaignDTOfrom = CampaignCookieDTO.from(channel);
 
             mapper.map(filter,campaignDTOfrom );

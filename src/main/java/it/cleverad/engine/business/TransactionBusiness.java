@@ -4,6 +4,7 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.Transaction;
 import it.cleverad.engine.persistence.repository.TransactionRepository;
 import it.cleverad.engine.web.dto.TransactionDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -48,7 +49,7 @@ public class TransactionBusiness {
     // GET BY ID
     public TransactionDTO findById(Long id) {
         try {
-            Transaction channel = repository.findById(id).orElseThrow(Exception::new);
+            Transaction channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return TransactionDTO.from(channel);
         } catch (Exception e) {
             log.error("Errore in findById", e);
@@ -76,7 +77,7 @@ public class TransactionBusiness {
     // UPDATE
     public TransactionDTO update(Long id, Filter filter) {
         try {
-            Transaction channel = repository.findById(id).orElseThrow(Exception::new);
+            Transaction channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             TransactionDTO campaignDTOfrom = TransactionDTO.from(channel);
 
             mapper.map(filter, campaignDTOfrom);

@@ -5,6 +5,7 @@ import it.cleverad.engine.persistence.model.User;
 import it.cleverad.engine.persistence.repository.UserRepository;
 import it.cleverad.engine.web.dto.AffiliateDTO;
 import it.cleverad.engine.web.dto.UserDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -60,7 +61,7 @@ public class UserBusiness {
     // GET BY ID
     public UserDTO findById(Long id) {
         try {
-            User uuu = repository.findById(id).orElseThrow(Exception::new);
+            User uuu = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             UserDTO dto = UserDTO.from(uuu);
             AffiliateDTO affiliate = affiliateBusiness.findById(dto.getAffiliateId());
             dto.setAffiliateName(affiliate.getName());
@@ -151,19 +152,19 @@ public class UserBusiness {
     }
 
     public UserDTO resetPassword(Long id, String password) throws Exception {
-        User wser = repository.findById(id).orElseThrow(Exception::new);
+        User wser = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
         wser.setPassword(password);
         return UserDTO.from(repository.save(wser));
     }
 
     public UserDTO disableUser(Long id) throws Exception {
-        User wser = repository.findById(id).orElseThrow(Exception::new);
+        User wser = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
         wser.setStatus(false);
         return UserDTO.from(repository.save(wser));
     }
 
     public UserDTO enableUser(Long id) throws Exception {
-        User wser = repository.findById(id).orElseThrow(Exception::new);
+        User wser = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
         wser.setStatus(true);
         return UserDTO.from(repository.save(wser));
     }

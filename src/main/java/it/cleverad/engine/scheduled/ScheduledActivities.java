@@ -36,57 +36,60 @@ public class ScheduledActivities {
     private AffiliateChannelCommissionCampaignBusiness affiliateChannelCommissionCampaignBusiness;
 
     // controlla quotidianamente se la data scadenza delle campagne è stata superata
-    @Scheduled(fixedRateString = "30000")
+    @Scheduled(fixedRateString = "60000")
     public void trasformaTracking() {
+        try {
+            // trovo uttti i tracking con read == false
+            trackingBusiness.getUnread().stream().forEach(trackingDTO -> {
 
-        // trovo uttti i tracking con read == false
-        trackingBusiness.getUnread().stream().forEach(trackingDTO -> {
+                // prendo reffereal e lo leggo
+                String refferal = trackingDTO.getRefferalId();
+                log.trace("REFF {}", refferal);
 
-            // prendo reffereal e lo leggo
-            String refferal = trackingDTO.getRefferalId();
-            log.info("REFF {}", refferal);
+                byte[] decoder = Base64.getDecoder().decode(refferal);
+                String str = new String(decoder);
+                log.trace("TTTT {}", str);
 
-            byte[] decoder = Base64.getDecoder().decode(refferal);
-            String str = new String(decoder);
-            log.info("TTTT {}", str);
+                String[] tokens = str.split("\\|\\|");
+                String mediaID = tokens[1];
 
-            String[] tokens = str.split("\\|\\|");
-            String mediaID = tokens[1];
+                // setta transazione
+                TransactionBusiness.BaseCreateRequest rr = new TransactionBusiness.BaseCreateRequest();
+                rr.setAffiliateId(Long.valueOf(tokens[2]));
+                rr.setCampaignId(Long.valueOf(tokens[0]));
+                rr.setChannelId(Long.valueOf(tokens[3]));
+                rr.setType("CPC");
+                rr.setDateTime(trackingDTO.getCreationDate());
+                rr.setApproved(false);
 
-            // setta transazione
-            TransactionBusiness.BaseCreateRequest rr = new TransactionBusiness.BaseCreateRequest();
-            rr.setAffiliateId(Long.valueOf(tokens[2]));
-            rr.setCampaignId(Long.valueOf(tokens[0]));
-            rr.setChannelId(Long.valueOf(tokens[3]));
-            rr.setType("CPC");
-            rr.setDateTime(trackingDTO.getCreationDate());
-            rr.setApproved(false);
+                // associo a wallet
+                WalletDTO walletDTO = walletBusiness.findByIdAffilaite(Long.valueOf(tokens[2])).stream().findFirst().get();
+                rr.setWalletId(walletDTO.getId());
 
-            // associo a wallet
-            WalletDTO walletDTO = walletBusiness.findByIdAffilaite(Long.valueOf(tokens[2])).stream().findFirst().get();
-            rr.setWalletId(walletDTO.getId());
+                // g4esione commisione
+                AffiliateChannelCommissionCampaignBusiness.Filter request = new AffiliateChannelCommissionCampaignBusiness.Filter();
+                request.setAffiliateId(Long.valueOf(tokens[2]));
+                request.setChannelId(Long.valueOf(tokens[3]));
+                request.setCampaignId(Long.valueOf(tokens[0]));
+                Page<AffiliateChannelCommissionCampaignDTO> ress = affiliateChannelCommissionCampaignBusiness.search(request, PageRequest.of(0, 10000, Sort.by(Sort.Order.asc("id"))));
+                List<Long> cid = ress.stream().map(AffiliateChannelCommissionCampaignDTO::getCommissionId).collect(Collectors.toList());
+                log.trace("DIM COMM {}", cid.size());
+                cid.stream().forEach(aLong -> {
 
-            // g4esione commisione
-            AffiliateChannelCommissionCampaignBusiness.Filter request = new AffiliateChannelCommissionCampaignBusiness.Filter();
-            request.setAffiliateId(Long.valueOf(tokens[2]));
-            request.setChannelId(Long.valueOf(tokens[3]));
-            request.setCampaignId(Long.valueOf(tokens[0]));
-            Page<AffiliateChannelCommissionCampaignDTO> ress = affiliateChannelCommissionCampaignBusiness.search(request, PageRequest.of(0, 10000, Sort.by(Sort.Order.asc("id"))));
-            List<Long> cid = ress.stream().map(AffiliateChannelCommissionCampaignDTO::getCommissionId).collect(Collectors.toList());
-            log.info("DIM COMM {}", cid.size());
-            cid.stream().forEach(aLong -> {
+                    rr.setCommissionId(aLong);
+                    CommissionDTO comm = commissionBusiness.findById(aLong);
+                    rr.setValue(Double.valueOf(comm.getValue()));
+                    log.info(rr.toString());
+                    transactionBusiness.create(rr);
 
-                rr.setCommissionId(aLong);
-                CommissionDTO comm = commissionBusiness.findById(aLong);
-                rr.setValue(Double.valueOf(comm.getValue()));
-                log.info(rr.toString());
-                transactionBusiness.create(rr);
+                });
+
+                trackingBusiness.setRead(trackingDTO.getId());
 
             });
-
-            trackingBusiness.setRead(trackingDTO.getId());
-
-        });
+        } catch (Exception e) {
+            log.error("Eccezione Scheduler --  {}", e.getMessage());
+        }
 
     }//trasformaTracking
 

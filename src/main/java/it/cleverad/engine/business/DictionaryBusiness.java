@@ -4,6 +4,7 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.Dictionary;
 import it.cleverad.engine.persistence.repository.DictionaryRepository;
 import it.cleverad.engine.web.dto.DictionaryDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -44,13 +45,8 @@ public class DictionaryBusiness {
 
     // GET BY ID
     public DictionaryDTO findById(Long id) {
-        try {
-            Dictionary media = repository.findById(id).orElseThrow(Exception::new);
+            Dictionary media = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return DictionaryDTO.from(media);
-        } catch (Exception e) {
-            log.error("Errore in findById", e);
-            return null;
-        }
     }
 
     // DELETE BY ID
@@ -61,7 +57,7 @@ public class DictionaryBusiness {
     // UPDATE
     public DictionaryDTO update(Long id, Filter filter) {
         try {
-            Dictionary media = repository.findById(id).orElseThrow(Exception::new);
+            Dictionary media = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             DictionaryDTO mediaDTOfrom = DictionaryDTO.from(media);
             mapper.map(filter, mediaDTOfrom);
 

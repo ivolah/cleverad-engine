@@ -5,6 +5,7 @@ import it.cleverad.engine.persistence.model.Budget;
 import it.cleverad.engine.persistence.repository.BudgetRepository;
 import it.cleverad.engine.web.dto.AffiliateBudgetCampaignDTO;
 import it.cleverad.engine.web.dto.BudgetDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -54,13 +55,8 @@ public class BudgetBusiness {
 
     // GET BY ID
     public BudgetDTO findById(Long id) {
-        try {
-            Budget budget = repository.findById(id).orElseThrow(Exception::new);
-            return BudgetDTO.from(budget);
-        } catch (Exception e) {
-            log.error("Errore in findById", e);
-            return null;
-        }
+        Budget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+        return BudgetDTO.from(budget);
     }
 
     // DELETE BY ID
@@ -79,7 +75,7 @@ public class BudgetBusiness {
     // UPDATE
     public BudgetDTO update(Long id, Filter filter) {
         try {
-            Budget budget = repository.findById(id).orElseThrow(Exception::new);
+            Budget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             BudgetDTO budgetDTO = BudgetDTO.from(budget);
 
             mapper.map(filter, budgetDTO);
@@ -102,8 +98,12 @@ public class BudgetBusiness {
 
         Page<BudgetDTO> listaB = new PageImpl<>(ll.stream().map(affiliateBudgetCampaignDTO -> {
             BudgetDTO budgetDTO = new BudgetDTO();
-            budgetDTO= this.findById(affiliateBudgetCampaignDTO.getBudgetId());
-            budgetDTO.setAffiliateName(affiliateBusiness.findById(affiliateBudgetCampaignDTO.getAffiliateId()).getName());
+            budgetDTO = this.findById(affiliateBudgetCampaignDTO.getBudgetId());
+            try {
+                budgetDTO.setAffiliateName(affiliateBusiness.findById(affiliateBudgetCampaignDTO.getAffiliateId()).getName());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             return budgetDTO;
         }).collect(Collectors.toList()));
 

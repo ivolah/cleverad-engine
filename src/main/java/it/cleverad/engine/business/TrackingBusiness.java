@@ -7,6 +7,7 @@ import it.cleverad.engine.web.dto.MediaCampaignDTO;
 import it.cleverad.engine.web.dto.MediaDTO;
 import it.cleverad.engine.web.dto.TargetDTO;
 import it.cleverad.engine.web.dto.TrackingDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -93,7 +94,7 @@ public class TrackingBusiness {
     // GET BY ID
     public TrackingDTO findById(Long id) {
         try {
-            Tracking media = repository.findById(id).orElseThrow(Exception::new);
+            Tracking media = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return TrackingDTO.from(media);
         } catch (Exception e) {
             log.error("Errore in findById", e);
@@ -109,7 +110,7 @@ public class TrackingBusiness {
     // UPDATE
     public TrackingDTO update(Long id, Filter filter) {
         try {
-            Tracking media = repository.findById(id).orElseThrow(Exception::new);
+            Tracking media = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             TrackingDTO mediaDTOfrom = TrackingDTO.from(media);
             mapper.map(filter, mediaDTOfrom);
 
