@@ -13,11 +13,11 @@ public class CookieDTO {
     private long id;
     private String name;
     private String value;
-    private String status;
+    private Boolean status;
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
 
-    public CookieDTO(long id, String name, String value, String status, LocalDateTime creationDate, LocalDateTime lastModificationDate) {
+    public CookieDTO(long id, String name, String value, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate) {
         this.id = id;
         this.name = name;
         this.value = value;

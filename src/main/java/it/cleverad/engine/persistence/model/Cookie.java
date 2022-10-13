@@ -22,7 +22,7 @@ public class Cookie {
 
     private String name;
     private String value;
-    private String status;
+    private Boolean status;
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
 

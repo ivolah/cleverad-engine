@@ -36,7 +36,7 @@ public class ScheduledActivities {
     private AffiliateChannelCommissionCampaignBusiness affiliateChannelCommissionCampaignBusiness;
 
     // controlla quotidianamente se la data scadenza delle campagne è stata superata
-    @Scheduled(fixedRateString = "60000")
+    @Scheduled(fixedRateString = "300000")
     public void trasformaTracking() {
         try {
             // trovo uttti i tracking con read == false

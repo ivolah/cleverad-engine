@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -64,6 +65,8 @@ public class BudgetBusiness {
     public void delete(Long id) {
          try {
             repository.deleteById(id);
+        }  catch (ConstraintViolationException ex) {
+            throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
         }

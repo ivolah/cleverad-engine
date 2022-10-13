@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
+import javax.validation.ConstraintViolationException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -108,6 +109,8 @@ public class CampaignBusiness {
                 campaign.getMediaCampaignList().stream().forEach(mediaCampaign -> mediaCampaignBusiness.delete(mediaCampaign.getId()));
 
             repository.deleteById(id);
+        } catch (ConstraintViolationException ex) {
+            throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
         }

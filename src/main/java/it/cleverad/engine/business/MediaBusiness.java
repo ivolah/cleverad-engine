@@ -13,6 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -101,6 +102,8 @@ public class MediaBusiness {
         try {
             if (media.getMediaCampaign() != null) mediaCampaignBusiness.delete(media.getMediaCampaign().getId());
             repository.deleteById(id);
+        }  catch (ConstraintViolationException ex) {
+            throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
         }

@@ -11,9 +11,9 @@ public class BasicCookieDTO {
     private long id;
     private String name;
     private String value;
-    private String status;
+    private Boolean status;
 
-    public BasicCookieDTO(long id, String name, String value, String status) {
+    public BasicCookieDTO(long id, String name, String value, Boolean status) {
         this.id = id;
         this.name = name;
         this.value = value;

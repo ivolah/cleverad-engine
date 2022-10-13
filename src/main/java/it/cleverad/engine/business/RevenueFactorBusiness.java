@@ -8,14 +8,13 @@ import it.cleverad.engine.persistence.repository.RevenueFactorRepository;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.RevenueFactorDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
-import it.cleverad.engine.web.exception.PostgresCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -70,14 +69,16 @@ public class RevenueFactorBusiness {
 
     // GET BY ID
     public RevenueFactorDTO findById(Long id) {
-            RevenueFactor entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
-            return RevenueFactorDTO.from(entity);
+        RevenueFactor entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+        return RevenueFactorDTO.from(entity);
     }
 
     // DELETE BY ID
     public void delete(Long id) {
         try {
             repository.deleteById(id);
+        }  catch (ConstraintViolationException ex) {
+            throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
         }
