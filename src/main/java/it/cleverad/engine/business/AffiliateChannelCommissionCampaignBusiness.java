@@ -75,7 +75,7 @@ public class AffiliateChannelCommissionCampaignBusiness {
 
     // DELETE BY ID
     public void delete(Long id) {
-         try {
+        try {
             repository.deleteById(id);
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -84,13 +84,8 @@ public class AffiliateChannelCommissionCampaignBusiness {
 
     // GET BY ID
     public AffiliateChannelCommissionCampaignDTO findById(Long id) {
-        try {
-            AffiliateChannelCommissionCampaign affiliateChannelCommissionCampaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
-            return AffiliateChannelCommissionCampaignDTO.from(affiliateChannelCommissionCampaign);
-        } catch (Exception e) {
-            log.error("Errore in findById", e);
-            return null;
-        }
+        AffiliateChannelCommissionCampaign affiliateChannelCommissionCampaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+        return AffiliateChannelCommissionCampaignDTO.from(affiliateChannelCommissionCampaign);
     }
 
     // GET BY ID CAMPAIGN

@@ -30,7 +30,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Component
@@ -103,10 +102,11 @@ public class CampaignBusiness {
 
     // DELETE BY ID
     public void delete(Long id) {
-        Optional<Campaign> campaign = repository.findById(id);
-        if (campaign.isPresent())
-            campaign.get().getMediaCampaignList().stream().forEach(mediaCampaign -> mediaCampaignBusiness.delete(mediaCampaign.getId()));
+        Campaign campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
         try {
+            if (campaign != null)
+                campaign.getMediaCampaignList().stream().forEach(mediaCampaign -> mediaCampaignBusiness.delete(mediaCampaign.getId()));
+
             repository.deleteById(id);
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);

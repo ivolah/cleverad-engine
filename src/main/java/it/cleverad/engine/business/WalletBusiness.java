@@ -49,13 +49,8 @@ public class WalletBusiness {
 
     // GET BY ID
     public WalletDTO findById(Long id) {
-        try {
             Wallet channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return WalletDTO.from(channel);
-        } catch (Exception e) {
-            log.error("Errore in findById", e);
-            return null;
-        }
     }
 
     // DELETE BY ID

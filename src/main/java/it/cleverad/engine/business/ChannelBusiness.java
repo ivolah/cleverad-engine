@@ -62,13 +62,8 @@ public class ChannelBusiness {
 
     // GET BY ID
     public ChannelDTO findById(Long id) {
-        try {
             Channel channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return ChannelDTO.from(channel);
-        } catch (Exception e) {
-            log.error("Errore in findById", e);
-            return null;
-        }
     }
 
     // DELETE BY ID
@@ -85,7 +80,6 @@ public class ChannelBusiness {
     public Page<ChannelDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Page<Channel> page = repository.findAll(getSpecification(request), pageable);
-
         return page.map(ChannelDTO::from);
     }
 

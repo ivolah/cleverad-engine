@@ -100,7 +100,6 @@ public class MediaBusiness {
         Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
         try {
             if (media.getMediaCampaign() != null) mediaCampaignBusiness.delete(media.getMediaCampaign().getId());
-
             repository.deleteById(id);
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);

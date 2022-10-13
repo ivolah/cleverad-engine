@@ -80,7 +80,6 @@ public class CampaignCategoryBusiness {
     public Page<CampaignCategoryDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Page<CampaignCategory> page = repository.findAll(getSpecification(request), pageable);
-
         return page.map(CampaignCategoryDTO::from);
     }
 

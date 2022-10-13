@@ -46,13 +46,8 @@ public class MediaTypeBusiness {
 
     // GET BY ID
     public MediaTypeDTO findById(Long id) {
-        try {
             MediaType media = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return MediaTypeDTO.from(media);
-        } catch (Exception e) {
-            log.error("Errore in findById", e);
-            return null;
-        }
     }
 
     // DELETE BY ID

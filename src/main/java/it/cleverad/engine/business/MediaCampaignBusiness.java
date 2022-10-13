@@ -67,7 +67,7 @@ public class MediaCampaignBusiness {
 
     // DELETE BY ID
     public void delete(Long id) {
-         try {
+        try {
             repository.deleteById(id);
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -76,13 +76,8 @@ public class MediaCampaignBusiness {
 
     // GET BY ID
     public MediaCampaignDTO findById(Long id) {
-        try {
-            MediaCampaign mediaCampaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
-            return MediaCampaignDTO.from(mediaCampaign);
-        } catch (Exception e) {
-            log.error("Errore in findById", e);
-            return null;
-        }
+        MediaCampaign mediaCampaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+        return MediaCampaignDTO.from(mediaCampaign);
     }
 
     // GET BY ID

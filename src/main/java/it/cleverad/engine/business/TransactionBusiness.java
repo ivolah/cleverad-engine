@@ -47,13 +47,8 @@ public class TransactionBusiness {
 
     // GET BY ID
     public TransactionDTO findById(Long id) {
-        try {
             Transaction channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return TransactionDTO.from(channel);
-        } catch (Exception e) {
-            log.error("Errore in findById", e);
-            return null;
-        }
     }
 
     // DELETE BY ID

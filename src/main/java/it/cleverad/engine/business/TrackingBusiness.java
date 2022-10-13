@@ -94,13 +94,8 @@ public class TrackingBusiness {
 
     // GET BY ID
     public TrackingDTO findById(Long id) {
-        try {
             Tracking media = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return TrackingDTO.from(media);
-        } catch (Exception e) {
-            log.error("Errore in findById", e);
-            return null;
-        }
     }
 
     // DELETE BY ID

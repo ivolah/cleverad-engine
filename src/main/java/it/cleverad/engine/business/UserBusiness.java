@@ -61,7 +61,6 @@ public class UserBusiness {
 
     // GET BY ID
     public UserDTO findById(Long id) {
-        try {
             User uuu = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             UserDTO dto = UserDTO.from(uuu);
             AffiliateDTO affiliate = affiliateBusiness.findById(dto.getAffiliateId());
@@ -74,10 +73,6 @@ public class UserBusiness {
             }
 
             return dto;
-        } catch (Exception e) {
-            log.error("Errore in findById", e);
-            return null;
-        }
     }
 
     // GET BY username

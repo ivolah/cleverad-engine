@@ -73,7 +73,6 @@ public class BudgetBusiness {
     public Page<BudgetDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Page<Budget> page = repository.findAll(getSpecification(request), pageable);
-
         return page.map(BudgetDTO::from);
     }
 

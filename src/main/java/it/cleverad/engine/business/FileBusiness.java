@@ -54,13 +54,8 @@ public class FileBusiness {
 
     // GET BY ID
     public FileDTO findById(Long id) {
-        try {
             File file = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
             return FileDTO.from(file);
-        } catch (Exception e) {
-            log.error("Errore in findById", e);
-            return null;
-        }
     }
 
     // DELETE BY ID
