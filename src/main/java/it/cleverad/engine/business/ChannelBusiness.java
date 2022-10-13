@@ -7,6 +7,7 @@ import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.dto.ChannelDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
+import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -74,10 +75,10 @@ public class ChannelBusiness {
     public void delete(Long id) {
         try {
             repository.deleteById(id);
-        } catch (DataIntegrityViolationException ee) {
-            log.warn("Impossibile cancellare commissione.");
-            throw new DataIntegrityViolationException("Impossibile cancellare Channel");
+        } catch (Exception ee) {
+            throw new PostgresDeleteCleveradException(ee);
         }
+
     }
 
     // SEARCH PAGINATED

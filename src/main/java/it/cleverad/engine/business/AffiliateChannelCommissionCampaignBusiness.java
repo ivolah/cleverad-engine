@@ -6,6 +6,7 @@ import it.cleverad.engine.persistence.repository.AffiliateChannelCommissionCampa
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresCleveradException;
+import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -74,7 +75,11 @@ public class AffiliateChannelCommissionCampaignBusiness {
 
     // DELETE BY ID
     public void delete(Long id) {
-        repository.deleteById(id);
+         try {
+            repository.deleteById(id);
+        } catch (Exception ee) {
+            throw new PostgresDeleteCleveradException(ee);
+        }
     }
 
     // GET BY ID

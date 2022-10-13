@@ -6,13 +6,13 @@ import it.cleverad.engine.persistence.repository.CampaignRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.CampaignDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
+import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -108,8 +108,8 @@ public class CampaignBusiness {
             campaign.get().getMediaCampaignList().stream().forEach(mediaCampaign -> mediaCampaignBusiness.delete(mediaCampaign.getId()));
         try {
             repository.deleteById(id);
-        } catch (DataIntegrityViolationException ee) {
-            log.warn("Impossibile cancellare campagna.");
+        } catch (Exception ee) {
+            throw new PostgresDeleteCleveradException(ee);
         }
     }
 

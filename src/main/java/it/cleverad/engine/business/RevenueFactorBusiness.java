@@ -9,6 +9,7 @@ import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.RevenueFactorDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresCleveradException;
+import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -82,9 +83,8 @@ public class RevenueFactorBusiness {
     public void delete(Long id) {
         try {
             repository.deleteById(id);
-        } catch (DataIntegrityViolationException ee) {
-            log.warn("Impossibile cancellare RevenueFactore.");
-            throw new PostgresCleveradException("Impossibile cancellare RevenueFactore ");
+        } catch (Exception ee) {
+            throw new PostgresDeleteCleveradException(ee);
         }
     }
 

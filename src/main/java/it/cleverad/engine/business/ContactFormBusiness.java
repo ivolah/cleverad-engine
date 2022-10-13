@@ -5,6 +5,7 @@ import it.cleverad.engine.persistence.model.ContactForm;
 import it.cleverad.engine.persistence.repository.ContactFormRepository;
 import it.cleverad.engine.web.dto.ContactFormDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
+import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -56,7 +57,11 @@ public class ContactFormBusiness {
 
     // DELETE BY ID
     public void delete(Long id) {
-        repository.deleteById(id);
+         try {
+            repository.deleteById(id);
+        } catch (Exception ee) {
+            throw new PostgresDeleteCleveradException(ee);
+        }
     }
 
     // SEARCH PAGINATED

@@ -5,14 +5,12 @@ import it.cleverad.engine.persistence.model.File;
 import it.cleverad.engine.persistence.repository.FileRepository;
 import it.cleverad.engine.web.dto.FileDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
-import it.cleverad.engine.web.exception.PostgresCleveradException;
+import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -69,9 +67,8 @@ public class FileBusiness {
     public void delete(Long id) {
         try {
             repository.deleteById(id);
-        } catch (DataIntegrityViolationException | EmptyResultDataAccessException ee) {
-            log.warn("Impossibile cancellare commissione.");
-            throw new PostgresCleveradException("Impossibile cancellare file ");
+        } catch (Exception ee) {
+            throw new PostgresDeleteCleveradException(ee);
         }
     }
 

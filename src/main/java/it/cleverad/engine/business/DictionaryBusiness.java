@@ -5,6 +5,7 @@ import it.cleverad.engine.persistence.model.Dictionary;
 import it.cleverad.engine.persistence.repository.DictionaryRepository;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
+import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -51,7 +52,11 @@ public class DictionaryBusiness {
 
     // DELETE BY ID
     public void delete(Long id) {
-        repository.deleteById(id);
+         try {
+            repository.deleteById(id);
+        } catch (Exception ee) {
+            throw new PostgresDeleteCleveradException(ee);
+        }
     }
 
     // UPDATE

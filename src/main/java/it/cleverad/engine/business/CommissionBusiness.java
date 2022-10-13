@@ -7,13 +7,12 @@ import it.cleverad.engine.persistence.repository.CommissionRepository;
 import it.cleverad.engine.web.dto.CommissionDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
-import it.cleverad.engine.web.exception.PostgresCleveradException;
+import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -64,17 +63,16 @@ public class CommissionBusiness {
 
     // GET BY ID
     public CommissionDTO findById(Long id) {
-            Commission commission = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
-            return CommissionDTO.from(commission);
+        Commission commission = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+        return CommissionDTO.from(commission);
     }
 
     // DELETE BY ID
     public void delete(Long id) {
         try {
             repository.deleteById(id);
-        } catch (DataIntegrityViolationException ee) {
-            log.warn("Impossibile cancellare commissione.");
-            throw new PostgresCleveradException("Impossibile cancellare commissione ");
+        } catch (Exception ee) {
+            throw new PostgresDeleteCleveradException(ee);
         }
     }
 

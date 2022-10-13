@@ -8,6 +8,7 @@ import it.cleverad.engine.web.dto.MediaDTO;
 import it.cleverad.engine.web.dto.TargetDTO;
 import it.cleverad.engine.web.dto.TrackingDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
+import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -104,7 +105,11 @@ public class TrackingBusiness {
 
     // DELETE BY ID
     public void delete(Long id) {
-        repository.deleteById(id);
+         try {
+            repository.deleteById(id);
+        } catch (Exception ee) {
+            throw new PostgresDeleteCleveradException(ee);
+        }
     }
 
     // UPDATE

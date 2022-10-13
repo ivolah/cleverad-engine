@@ -73,7 +73,6 @@ public class AffiliateBudgetCampaignBusiness {
 
     // DELETE BY ID
     public void delete(Long id) {
-
         try {
             repository.deleteById(id);
         } catch (Exception ee) {

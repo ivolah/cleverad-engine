@@ -7,6 +7,7 @@ import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.MediaDTO;
 import it.cleverad.engine.web.dto.MediaTypeDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
+import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -85,27 +86,25 @@ public class MediaBusiness {
 
     // GET BY ID
     public MediaDTO findById(Long id) {
-        try {
-            Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
-            MediaDTO dto = MediaDTO.from(media);
-            if (dto.getTypeId() != null) {
-                MediaTypeDTO mtDto = mediaTypeBusiness.findById(dto.getTypeId());
-                dto.setTypeName(mtDto.getName());
-            }
-            return dto;
-        } catch (Exception e) {
-            log.error("Errore in findById", e);
-            return null;
+        Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+        MediaDTO dto = MediaDTO.from(media);
+        if (dto.getTypeId() != null) {
+            MediaTypeDTO mtDto = mediaTypeBusiness.findById(dto.getTypeId());
+            dto.setTypeName(mtDto.getName());
         }
+        return dto;
     }
 
     // DELETE BY ID
     public void delete(Long id) {
-        Media media = repository.findById(id).orElse(null);
-        if (media.getMediaCampaign() != null) {
-            mediaCampaignBusiness.delete(media.getMediaCampaign().getId());
+        Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+        try {
+            if (media.getMediaCampaign() != null) mediaCampaignBusiness.delete(media.getMediaCampaign().getId());
+
+            repository.deleteById(id);
+        } catch (Exception ee) {
+            throw new PostgresDeleteCleveradException(ee);
         }
-        repository.deleteById(id);
     }
 
     // UPDATE
@@ -192,11 +191,9 @@ public class MediaBusiness {
     }
 
     public MediaDTO getByIdAndCampaignID(Long id, Long idCampaign) {
-        Pageable pageable = PageRequest.of(0,100, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
         Page<Media> page = repository.findMediaCampaigns(idCampaign, pageable);
-        return page.stream().filter(media ->
-            media.getId() == id
-        ).findFirst().map(media -> {
+        return page.stream().filter(media -> media.getId() == id).findFirst().map(media -> {
             MediaDTO dto = MediaDTO.from(media);
             if (dto.getTypeId() != null) {
                 MediaTypeDTO mtDto = mediaTypeBusiness.findById(dto.getTypeId());
@@ -208,7 +205,8 @@ public class MediaBusiness {
                 byte[] encodedRefferal = Base64.getEncoder().encode(refID.getBytes(StandardCharsets.UTF_8));
                 bannerCode = bannerCode.replace("{{refferalId}}", new String(encodedRefferal));
                 if (StringUtils.isNotBlank(dto.getUrl())) bannerCode = bannerCode.replace("{{url}}", dto.getUrl());
-                if (StringUtils.isNotBlank(dto.getTarget())) bannerCode = bannerCode.replace("{{target}}", dto.getTarget());
+                if (StringUtils.isNotBlank(dto.getTarget()))
+                    bannerCode = bannerCode.replace("{{target}}", dto.getTarget());
 
                 dto.setBannerCode(bannerCode);
             }
@@ -218,11 +216,9 @@ public class MediaBusiness {
     }
 
     public MediaDTO getByIdAndCampaignIDChannelID(Long id, Long idCampaign, Long idChannel) {
-        Pageable pageable = PageRequest.of(0,100, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
         Page<Media> page = repository.findMediaCampaigns(idCampaign, pageable);
-        return page.stream().filter(media ->
-                media.getId() == id
-        ).findFirst().map(media -> {
+        return page.stream().filter(media -> media.getId() == id).findFirst().map(media -> {
             MediaDTO dto = MediaDTO.from(media);
             if (dto.getTypeId() != null) {
                 MediaTypeDTO mtDto = mediaTypeBusiness.findById(dto.getTypeId());
@@ -234,7 +230,8 @@ public class MediaBusiness {
                 byte[] encodedRefferal = Base64.getEncoder().encode(refID.getBytes(StandardCharsets.UTF_8));
                 bannerCode = bannerCode.replace("{{refferalId}}", new String(encodedRefferal));
                 if (StringUtils.isNotBlank(dto.getUrl())) bannerCode = bannerCode.replace("{{url}}", dto.getUrl());
-                if (StringUtils.isNotBlank(dto.getTarget())) bannerCode = bannerCode.replace("{{target}}", dto.getTarget());
+                if (StringUtils.isNotBlank(dto.getTarget()))
+                    bannerCode = bannerCode.replace("{{target}}", dto.getTarget());
 
                 dto.setBannerCode(bannerCode);
             }

@@ -6,6 +6,7 @@ import it.cleverad.engine.persistence.repository.CategoryRepository;
 import it.cleverad.engine.web.dto.CategoryDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresCleveradException;
+import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -63,9 +64,8 @@ public class CategoryBusiness {
     public void delete(Long id) {
         try {
             repository.deleteById(id);
-        } catch (DataIntegrityViolationException ee) {
-            log.warn("Impossibile cancellare commissione.");
-            throw new PostgresCleveradException("Impossibile cancellare categoria ");
+        } catch (Exception ee) {
+            throw new PostgresDeleteCleveradException(ee);
         }
     }
 

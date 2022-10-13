@@ -6,13 +6,12 @@ import it.cleverad.engine.persistence.repository.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.WalletRepository;
 import it.cleverad.engine.web.dto.WalletDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
-import it.cleverad.engine.web.exception.PostgresCleveradException;
+import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -63,9 +62,8 @@ public class WalletBusiness {
     public void delete(Long id) {
         try {
             repository.deleteById(id);
-        } catch (DataIntegrityViolationException ee) {
-            log.warn("Impossibile cancellare commissione.");
-            throw new PostgresCleveradException("Impossibile cancellare cpl");
+        } catch (Exception ee) {
+            throw new PostgresDeleteCleveradException(ee);
         }
     }
 
