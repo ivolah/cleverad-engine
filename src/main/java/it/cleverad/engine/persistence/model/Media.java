@@ -21,18 +21,22 @@ public class Media {
     private Long id;
 
     private String name;
-    private Long typeId;
     private String url;
     private String target;
     private String bannerCode;
     private String note;
     private String idFile;
-    private String status;
+    private Boolean status;
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
 
     @OneToOne(mappedBy = "media")
     private MediaCampaign mediaCampaign;
+
+    @OneToOne(mappedBy = "media")
+    private MediaType mediaType;
+
+    private Long typeId;
 
     @Override
     public String toString() {

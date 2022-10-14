@@ -79,7 +79,7 @@ public class MediaCampaignBusiness {
 
     // GET BY ID
     public MediaCampaignDTO findById(Long id) {
-        MediaCampaign mediaCampaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+        MediaCampaign mediaCampaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("MediaCampaign",id));
         return MediaCampaignDTO.from(mediaCampaign);
     }
 

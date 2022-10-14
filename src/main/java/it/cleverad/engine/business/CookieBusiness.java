@@ -55,7 +55,7 @@ public class CookieBusiness {
 
     // GET BY ID
     public CookieDTO findById(Long id) {
-            Cookie channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            Cookie channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cookie",id));
             return CookieDTO.from(channel);
     }
 
@@ -80,7 +80,7 @@ public class CookieBusiness {
     // UPDATE
     public CookieDTO update(Long id, Filter filter) {
         try {
-            Cookie channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            Cookie channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cookie",id));
             CookieDTO campaignDTOfrom = CookieDTO.from(channel);
 
             mapper.map(filter, campaignDTOfrom);

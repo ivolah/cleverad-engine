@@ -4,6 +4,7 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.Commission;
 import it.cleverad.engine.persistence.repository.CampaignRepository;
 import it.cleverad.engine.persistence.repository.CommissionRepository;
+import it.cleverad.engine.persistence.repository.DictionaryRepository;
 import it.cleverad.engine.web.dto.CommissionDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -42,6 +43,8 @@ public class CommissionBusiness {
 
     @Autowired
     private DictionaryBusiness dictionaryBusiness;
+    @Autowired
+    private DictionaryRepository dictionaryRepository;
 
     @Autowired
     private CampaignRepository campaignRepository;
@@ -58,13 +61,14 @@ public class CommissionBusiness {
         Commission map = mapper.map(request, Commission.class);
         map.setCreationDate(LocalDateTime.now());
         map.setLastModificationDate(LocalDateTime.now());
-        map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow());
+        map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
+        map.setDictionary(dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.campaignId)));
         return CommissionDTO.from(repository.save(map));
     }
 
     // GET BY ID
     public CommissionDTO findById(Long id) {
-        Commission commission = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+        Commission commission = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Commission", id));
         return CommissionDTO.from(commission);
     }
 
@@ -72,7 +76,7 @@ public class CommissionBusiness {
     public void delete(Long id) {
         try {
             repository.deleteById(id);
-        }  catch (ConstraintViolationException ex) {
+        } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -90,7 +94,7 @@ public class CommissionBusiness {
     // UPDATE
     public CommissionDTO update(Long id, Filter filter) {
         try {
-            Commission ommission = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            Commission ommission = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Commission", id));
             CommissionDTO campaignDTOfrom = CommissionDTO.from(ommission);
 
             mapper.map(filter, campaignDTOfrom);
@@ -149,6 +153,9 @@ public class CommissionBusiness {
             if (request.getCampaignId() != null) {
                 predicates.add(cb.equal(root.get("campaign").get("id"), request.getCampaignId()));
             }
+            if (request.getDictionaryId() != null) {
+                predicates.add(cb.equal(root.get("dictionary").get("id"), request.getDictionaryId()));
+            }
 
             if (request.getCreationDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("creationDate"), LocalDateTime.ofInstant(request.getCreationDateFrom(), ZoneOffset.UTC)));
@@ -182,10 +189,11 @@ public class CommissionBusiness {
         private String value;
         private String description;
         private Boolean status;
-        private String idType;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dueDate;
+
         private Long campaignId;
+        private Long dictionaryId;
     }
 
     @Data
@@ -198,9 +206,10 @@ public class CommissionBusiness {
         private String value;
         private String description;
         private Boolean status;
-        private String idType;
         private LocalDate dueDate;
+
         private Long campaignId;
+        private Long dictionaryId;
 
         private Instant creationDateFrom;
         private Instant creationDateTo;

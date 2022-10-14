@@ -62,7 +62,7 @@ public class ChannelBusiness {
 
     // GET BY ID
     public ChannelDTO findById(Long id) {
-            Channel channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            Channel channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Channel",id));
             return ChannelDTO.from(channel);
     }
 
@@ -88,7 +88,7 @@ public class ChannelBusiness {
     // UPDATE
     public ChannelDTO update(Long id, Filter filter) {
         try {
-            Channel channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            Channel channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Channel",id));
             ChannelDTO campaignDTOfrom = ChannelDTO.from(channel);
 
             mapper.map(filter, campaignDTOfrom);

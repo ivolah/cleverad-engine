@@ -21,6 +21,7 @@ public class MediaType {
     private String description;
     private String status;
 
-
+    @OneToOne(optional = false)
+    private Media media;
 
 }

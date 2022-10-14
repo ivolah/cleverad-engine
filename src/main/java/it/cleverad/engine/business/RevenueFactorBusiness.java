@@ -69,7 +69,7 @@ public class RevenueFactorBusiness {
 
     // GET BY ID
     public RevenueFactorDTO findById(Long id) {
-        RevenueFactor entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+        RevenueFactor entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException("RevenueFactor", id));
         return RevenueFactorDTO.from(entity);
     }
 
@@ -77,7 +77,7 @@ public class RevenueFactorBusiness {
     public void delete(Long id) {
         try {
             repository.deleteById(id);
-        }  catch (ConstraintViolationException ex) {
+        } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -95,7 +95,7 @@ public class RevenueFactorBusiness {
     // UPDATE
     public RevenueFactorDTO update(Long id, Filter filter) {
         try {
-            RevenueFactor ommission = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            RevenueFactor ommission = repository.findById(id).orElseThrow(() -> new ElementCleveradException("RevenueFactor", id));
             RevenueFactorDTO campaignDTOfrom = RevenueFactorDTO.from(ommission);
 
             mapper.map(filter, campaignDTOfrom);

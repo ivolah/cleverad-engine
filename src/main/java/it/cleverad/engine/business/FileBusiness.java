@@ -55,7 +55,7 @@ public class FileBusiness {
 
     // GET BY ID
     public FileDTO findById(Long id) {
-            File file = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            File file = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File",id));
             return FileDTO.from(file);
     }
 
@@ -80,7 +80,7 @@ public class FileBusiness {
     // UPDATE
     public FileDTO update(Long id, FileBusiness.Filter filter) {
         try {
-            File fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            File fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File",id));
             FileDTO from = FileDTO.from(fil);
 
             mapper.map(filter, from);

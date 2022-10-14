@@ -54,7 +54,7 @@ public class AffiliateBusiness {
 
     // GET BY ID
     public AffiliateDTO findById(Long id) {
-            Affiliate affiliate = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            Affiliate affiliate = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Affiliate",id));
             return AffiliateDTO.from(affiliate);
     }
 
@@ -80,7 +80,7 @@ public class AffiliateBusiness {
     // UPDATE
     public AffiliateDTO update(Long id, Filter filter) {
         try {
-            Affiliate affiliate = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            Affiliate affiliate = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Affiliate",id));
             AffiliateDTO affiliateDTOfrom = AffiliateDTO.from(affiliate);
 
             mapper.map(filter, affiliateDTOfrom);

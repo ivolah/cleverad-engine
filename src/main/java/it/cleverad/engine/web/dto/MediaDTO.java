@@ -21,7 +21,7 @@ public class MediaDTO {
     private String note;
 
     private String idFile;
-    private String status;
+    private Boolean status;
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
 
@@ -31,7 +31,7 @@ public class MediaDTO {
     private Long typeId;
     private String typeName;
 
-    public MediaDTO(long id, String name, String url, String target, String bannerCode, String note, String idFile, String status, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long campaignId, String campaignName, Long typeId) {
+    public MediaDTO(long id, String name, String url, String target, String bannerCode, String note, String idFile, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long campaignId, String campaignName, Long typeId) {
         this.id = id;
         this.name = name;
         this.url = url;

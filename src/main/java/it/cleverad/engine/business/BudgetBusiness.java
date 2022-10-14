@@ -57,7 +57,7 @@ public class BudgetBusiness {
 
     // GET BY ID
     public BudgetDTO findById(Long id) {
-        Budget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+        Budget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Budget",id));
         return BudgetDTO.from(budget);
     }
 
@@ -82,7 +82,7 @@ public class BudgetBusiness {
     // UPDATE
     public BudgetDTO update(Long id, Filter filter) {
         try {
-            Budget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            Budget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Budget",id));
             BudgetDTO budgetDTO = BudgetDTO.from(budget);
 
             mapper.map(filter, budgetDTO);

@@ -16,11 +16,11 @@ public class CommissionDTO {
     private String value;
     private String description;
     private Boolean status;
-    private Long dictionaryId;
     private LocalDate dueDate;
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
 
+    private Long dictionaryId;
     private Long campaignId;
     private String typeName;
 

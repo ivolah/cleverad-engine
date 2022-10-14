@@ -87,7 +87,7 @@ public class AffiliateChannelCommissionCampaignBusiness {
 
     // GET BY ID
     public AffiliateChannelCommissionCampaignDTO findById(Long id) {
-        AffiliateChannelCommissionCampaign affiliateChannelCommissionCampaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+        AffiliateChannelCommissionCampaign affiliateChannelCommissionCampaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("AffiliateChannelCommissionCampaign",id));
         return AffiliateChannelCommissionCampaignDTO.from(affiliateChannelCommissionCampaign);
     }
 

@@ -53,7 +53,7 @@ public class CpcBusiness {
 
     // GET BY ID
     public CpcDTO findById(Long id) {
-            Cpc channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            Cpc channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cpc",id));
             return CpcDTO.from(channel);
     }
 
@@ -78,7 +78,7 @@ public class CpcBusiness {
     // UPDATE
     public CpcDTO update(Long id, Filter filter) {
         try {
-            Cpc channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            Cpc channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cpc",id));
             CpcDTO campaignDTOfrom = CpcDTO.from(channel);
 
             mapper.map(filter, campaignDTOfrom);

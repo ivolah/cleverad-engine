@@ -25,7 +25,7 @@ public class Dictionary {
     private boolean status;
 
     @OneToMany
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "dictionary_id")
     private Set<Commission> commission;
 
     @OneToMany

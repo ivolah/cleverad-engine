@@ -51,7 +51,7 @@ public class CampaignCategoryBusiness {
         map.setCreationDate(LocalDateTime.now());
         map.setLastModificationDate(LocalDateTime.now());
 
-        Category cat= new Category();
+        Category cat = new Category();
         cat.setId(request.getCategoryId());
         map.setCategory(cat);
 
@@ -64,15 +64,15 @@ public class CampaignCategoryBusiness {
 
     // GET BY ID
     public CampaignCategoryDTO findById(Long id) {
-            CampaignCategory channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
-            return  CampaignCategoryDTO.from(channel);
+        CampaignCategory channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignCategory", id));
+        return CampaignCategoryDTO.from(channel);
     }
 
     // DELETE BY ID
     public void delete(Long id) {
-         try {
+        try {
             repository.deleteById(id);
-        }  catch (ConstraintViolationException ex) {
+        } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -89,10 +89,10 @@ public class CampaignCategoryBusiness {
     // UPDATE
     public CampaignCategoryDTO update(Long id, Filter filter) {
         try {
-            CampaignCategory channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            CampaignCategory channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignCategory", id));
             CampaignCategoryDTO campaignDTOfrom = CampaignCategoryDTO.from(channel);
 
-            mapper.map(filter,campaignDTOfrom );
+            mapper.map(filter, campaignDTOfrom);
 
             CampaignCategory mappedEntity = mapper.map(channel, CampaignCategory.class);
             mappedEntity.setLastModificationDate(LocalDateTime.now());

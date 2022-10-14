@@ -52,7 +52,7 @@ public class ContactFormBusiness {
 
     // GET BY ID
     public ContactFormDTO findById(Long id) {
-            ContactForm form = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            ContactForm form = repository.findById(id).orElseThrow(() -> new ElementCleveradException("ContactForm",id));
             return ContactFormDTO.from(form);
     }
 
@@ -78,7 +78,7 @@ public class ContactFormBusiness {
     // UPDATE
     public ContactFormDTO update(Long id, Filter filter) {
         try {
-            ContactForm entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            ContactForm entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException("ContactForm",id));
             ContactFormDTO formDTO = ContactFormDTO.from(entity);
 
             mapper.map(filter, formDTO);

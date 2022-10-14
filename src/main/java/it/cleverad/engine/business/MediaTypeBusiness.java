@@ -47,15 +47,15 @@ public class MediaTypeBusiness {
 
     // GET BY ID
     public MediaTypeDTO findById(Long id) {
-            MediaType media = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
-            return MediaTypeDTO.from(media);
+        MediaType media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("MediaType", id));
+        return MediaTypeDTO.from(media);
     }
 
     // DELETE BY ID
     public void delete(Long id) {
-         try {
+        try {
             repository.deleteById(id);
-        }  catch (ConstraintViolationException ex) {
+        } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -65,7 +65,7 @@ public class MediaTypeBusiness {
     // UPDATE
     public MediaTypeDTO update(Long id, Filter filter) {
         try {
-            MediaType media = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            MediaType media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("MediaType", id));
             MediaTypeDTO mediaDTOfrom = MediaTypeDTO.from(media);
             mapper.map(filter, mediaDTOfrom);
 

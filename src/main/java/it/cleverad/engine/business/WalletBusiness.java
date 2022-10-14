@@ -50,7 +50,7 @@ public class WalletBusiness {
 
     // GET BY ID
     public WalletDTO findById(Long id) {
-            Wallet channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            Wallet channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Wallet",id));
             return WalletDTO.from(channel);
     }
 
@@ -84,7 +84,7 @@ public class WalletBusiness {
     // UPDATE
     public WalletDTO update(Long id, Filter filter) {
         try {
-            Wallet channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            Wallet channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Wallet",id));
             WalletDTO campaignDTOfrom = WalletDTO.from(channel);
 
             mapper.map(filter, campaignDTOfrom);

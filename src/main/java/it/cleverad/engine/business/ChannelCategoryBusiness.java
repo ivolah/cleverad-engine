@@ -66,7 +66,7 @@ public class ChannelCategoryBusiness {
 
     // GET BY ID
     public ChannelCategoryDTO findById(Long id) {
-        ChannelCategory channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+        ChannelCategory channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("ChannelCategory",id));
         return ChannelCategoryDTO.from(channel);
     }
 
@@ -92,7 +92,7 @@ public class ChannelCategoryBusiness {
     // UPDATE
     public ChannelCategoryDTO update(Long id, Filter filter) {
         try {
-            ChannelCategory channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            ChannelCategory channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("ChannelCategory",id));
             ChannelCategoryDTO campaignDTOfrom = ChannelCategoryDTO.from(channel);
 
             mapper.map(filter, campaignDTOfrom);

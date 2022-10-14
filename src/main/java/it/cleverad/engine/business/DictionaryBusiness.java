@@ -47,7 +47,7 @@ public class DictionaryBusiness {
 
     // GET BY ID
     public DictionaryDTO findById(Long id) {
-            Dictionary media = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            Dictionary media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Dictionary",id));
             return DictionaryDTO.from(media);
     }
 
@@ -65,7 +65,7 @@ public class DictionaryBusiness {
     // UPDATE
     public DictionaryDTO update(Long id, Filter filter) {
         try {
-            Dictionary media = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            Dictionary media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Dictionary",id));
             DictionaryDTO mediaDTOfrom = DictionaryDTO.from(media);
             mapper.map(filter, mediaDTOfrom);
 

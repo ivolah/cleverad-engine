@@ -48,7 +48,7 @@ public class TransactionBusiness {
 
     // GET BY ID
     public TransactionDTO findById(Long id) {
-            Transaction channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            Transaction channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction",id));
             return TransactionDTO.from(channel);
     }
 
@@ -73,7 +73,7 @@ public class TransactionBusiness {
     // UPDATE
     public TransactionDTO update(Long id, Filter filter) {
         try {
-            Transaction channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            Transaction channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction",id));
             TransactionDTO campaignDTOfrom = TransactionDTO.from(channel);
 
             mapper.map(filter, campaignDTOfrom);

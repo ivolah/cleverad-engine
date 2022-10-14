@@ -62,7 +62,7 @@ public class UserBusiness {
 
     // GET BY ID
     public UserDTO findById(Long id) {
-            User uuu = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            User uuu = repository.findById(id).orElseThrow(() -> new ElementCleveradException("User",id));
             UserDTO dto = UserDTO.from(uuu);
             AffiliateDTO affiliate = affiliateBusiness.findById(dto.getAffiliateId());
             dto.setAffiliateName(affiliate.getName());
@@ -87,7 +87,10 @@ public class UserBusiness {
             } else if (StringUtils.isNotBlank(username.trim())) {
                 Filter request = new Filter();
                 request.setUsername(username);
-                UserDTO dto = UserDTO.from(repository.findOne(getSpecification(request)).orElseThrow(Exception::new));
+
+                Page<User> page = repository.findAll(getSpecification(request), PageRequest.of(0, 1, Sort.by(Sort.Order.asc("id"))));
+                UserDTO dto = UserDTO.from(page.stream().findFirst().get());
+
                 AffiliateDTO affiliate = affiliateBusiness.findById(dto.getAffiliateId());
                 dto.setAffiliateName(affiliate.getName());
                 if (dto.getRoleId() == 3) {
@@ -155,19 +158,19 @@ public class UserBusiness {
     }
 
     public UserDTO resetPassword(Long id, String password) throws Exception {
-        User wser = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+        User wser = repository.findById(id).orElseThrow(() -> new ElementCleveradException("User",id));
         wser.setPassword(password);
         return UserDTO.from(repository.save(wser));
     }
 
     public UserDTO disableUser(Long id) throws Exception {
-        User wser = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+        User wser = repository.findById(id).orElseThrow(() -> new ElementCleveradException("User",id));
         wser.setStatus(false);
         return UserDTO.from(repository.save(wser));
     }
 
     public UserDTO enableUser(Long id) throws Exception {
-        User wser = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+        User wser = repository.findById(id).orElseThrow(() -> new ElementCleveradException("User",id));
         wser.setStatus(true);
         return UserDTO.from(repository.save(wser));
     }
@@ -199,7 +202,7 @@ public class UserBusiness {
                 predicates.add(cb.equal(root.get("status"), request.getStatus()));
             }
             if (request.getAffiliateId() != null) {
-                predicates.add(cb.equal(root.get("companyId"), request.getAffiliateId()));
+                predicates.add(cb.equal(root.get("affiliateId"), request.getAffiliateId()));
             }
             if (request.getRoleId() != null) {
                 predicates.add(cb.equal(root.get("roleId"), request.getRoleId()));

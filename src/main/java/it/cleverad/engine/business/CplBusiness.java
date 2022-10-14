@@ -53,7 +53,7 @@ public class CplBusiness {
 
     // GET BY ID
     public CplDTO findById(Long id) {
-            Cpl channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            Cpl channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cpl",id));
             return CplDTO.from(channel);
     }
 
@@ -78,7 +78,7 @@ public class CplBusiness {
     // UPDATE
     public CplDTO update(Long id, Filter filter) {
         try {
-            Cpl channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            Cpl channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cpl",id));
             CplDTO campaignDTOfrom = CplDTO.from(channel);
 
             mapper.map(filter, campaignDTOfrom);

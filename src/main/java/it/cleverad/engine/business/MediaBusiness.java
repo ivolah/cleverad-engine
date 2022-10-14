@@ -87,7 +87,7 @@ public class MediaBusiness {
 
     // GET BY ID
     public MediaDTO findById(Long id) {
-        Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+        Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Media",id));
         MediaDTO dto = MediaDTO.from(media);
         if (dto.getTypeId() != null) {
             MediaTypeDTO mtDto = mediaTypeBusiness.findById(dto.getTypeId());
@@ -98,7 +98,7 @@ public class MediaBusiness {
 
     // DELETE BY ID
     public void delete(Long id) {
-        Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+        Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Media",id));
         try {
             if (media.getMediaCampaign() != null) mediaCampaignBusiness.delete(media.getMediaCampaign().getId());
             repository.deleteById(id);
@@ -112,7 +112,7 @@ public class MediaBusiness {
     // UPDATE
     public MediaDTO update(Long id, Filter filter) {
         try {
-            Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Media",id));
             MediaDTO mediaDTOfrom = MediaDTO.from(media);
             mapper.map(filter, mediaDTOfrom);
 

@@ -53,36 +53,32 @@ public class TrackingBusiness {
 
     // GET BY ID
     public TargetDTO getTarget(BaseCreateRequest request) {
-        try {
-            String refferalID = request.getRefferalId();
-            byte[] decoder = Base64.getDecoder().decode(refferalID);
-            String str = new String(decoder);
-            TargetDTO targetDTO = new TargetDTO();
-            log.info("REFFERAL :: {}", str);
 
-            //  String[] tokens = str.split(Pattern.quote("||"));
-            String[] tokens = str.split("\\|\\|");
-            String mediaID = tokens[1];
-            MediaDTO mediaDTO = mediaBusiness.findById(Long.valueOf(mediaID));
-            targetDTO.setTarget(mediaDTO.getTarget());
+        String refferalID = request.getRefferalId();
+        byte[] decoder = Base64.getDecoder().decode(refferalID);
+        String str = new String(decoder);
+        TargetDTO targetDTO = new TargetDTO();
+        log.info("REFFERAL :: {}", str);
 
-            MediaCampaignDTO mcb = mediaCampaignBusiness.findByIdMedia(mediaDTO.getId());
-            if (mcb != null) {
-                Long cID = mcb.getCampaignId();
-                if (cID != null) {
-                    if (campaignBusiness.findById(cID).getCookies() != null && campaignBusiness.findById(cID).getCookies().size() > 0) {
-                        targetDTO.setCookieTime(campaignBusiness.findById(cID).getCookies().get(0).getValue());
-                    }
+        //  String[] tokens = str.split(Pattern.quote("||"));
+        String[] tokens = str.split("\\|\\|");
+        String mediaID = tokens[1];
+        MediaDTO mediaDTO = mediaBusiness.findById(Long.valueOf(mediaID));
+        targetDTO.setTarget(mediaDTO.getTarget());
+
+        MediaCampaignDTO mcb = mediaCampaignBusiness.findByIdMedia(mediaDTO.getId());
+        if (mcb != null) {
+            Long cID = mcb.getCampaignId();
+            if (cID != null) {
+                if (campaignBusiness.findById(cID).getCookies() != null && campaignBusiness.findById(cID).getCookies().size() > 0) {
+                    targetDTO.setCookieTime(campaignBusiness.findById(cID).getCookies().get(0).getValue());
                 }
-            } else {
-                targetDTO.setCookieTime("60");
             }
-
-            return targetDTO;
-        } catch (Exception e) {
-            log.error("Errore in getTarget", e.getMessage());
-            return new TargetDTO();
+        } else {
+            targetDTO.setCookieTime("60");
         }
+
+        return targetDTO;
     }
 
     // CREATE
@@ -95,15 +91,15 @@ public class TrackingBusiness {
 
     // GET BY ID
     public TrackingDTO findById(Long id) {
-            Tracking media = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
-            return TrackingDTO.from(media);
+        Tracking media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Tracking", id));
+        return TrackingDTO.from(media);
     }
 
     // DELETE BY ID
     public void delete(Long id) {
-         try {
+        try {
             repository.deleteById(id);
-        }  catch (ConstraintViolationException ex) {
+        } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -113,7 +109,7 @@ public class TrackingBusiness {
     // UPDATE
     public TrackingDTO update(Long id, Filter filter) {
         try {
-            Tracking media = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            Tracking media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Tracking", id));
             TrackingDTO mediaDTOfrom = TrackingDTO.from(media);
             mapper.map(filter, mediaDTOfrom);
 

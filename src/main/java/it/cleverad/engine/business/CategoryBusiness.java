@@ -55,7 +55,7 @@ public class CategoryBusiness {
 
     // GET BY ID
     public CategoryDTO findById(Long id) {
-            Category category = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            Category category = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Category",id));
             return CategoryDTO.from(category);
     }
 
@@ -80,7 +80,7 @@ public class CategoryBusiness {
     // UPDATE
     public CategoryDTO update(Long id, Filter filter) {
         try {
-            Category category = repository.findById(id).orElseThrow(() -> new ElementCleveradException(id));
+            Category category = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Category",id));
             CategoryDTO categoryDTO = CategoryDTO.from(category);
 
             mapper.map(filter, categoryDTO);
