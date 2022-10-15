@@ -2,6 +2,8 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.User;
+import it.cleverad.engine.persistence.repository.AffiliateRepository;
+import it.cleverad.engine.persistence.repository.DictionaryRepository;
 import it.cleverad.engine.persistence.repository.UserRepository;
 import it.cleverad.engine.web.dto.AffiliateDTO;
 import it.cleverad.engine.web.dto.UserDTO;
@@ -43,6 +45,11 @@ public class UserBusiness {
     private AffiliateBusiness affiliateBusiness;
 
     @Autowired
+    private AffiliateRepository affiliateRepository;
+    @Autowired
+    private DictionaryRepository dictionaryRepository;
+
+    @Autowired
     private Mapper mapper;
 
     @Autowired
@@ -57,29 +64,21 @@ public class UserBusiness {
         User map = mapper.map(request, User.class);
         map.setCreationDate(LocalDateTime.now());
         map.setPassword(bcryptEncoder.encode(request.getPassword()));
+        map.setAffiliate(affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId)));
+        map.setDictionary(dictionaryRepository.findById(request.roleId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.roleId)));
         return UserDTO.from(repository.save(map));
     }
 
     // GET BY ID
     public UserDTO findById(Long id) {
-            User uuu = repository.findById(id).orElseThrow(() -> new ElementCleveradException("User",id));
-            UserDTO dto = UserDTO.from(uuu);
-            AffiliateDTO affiliate = affiliateBusiness.findById(dto.getAffiliateId());
-            dto.setAffiliateName(affiliate.getName());
-
-            if (dto.getRoleId() == 3) {
-                dto.setRole("Admin");
-            } else {
-                dto.setRole("Guest");
-            }
-
-            return dto;
+        User uuu = repository.findById(id).orElseThrow(() -> new ElementCleveradException("User", id));
+        return UserDTO.from(uuu);
     }
 
     // GET BY username
     public UserDTO findByUsername(String username) {
         try {
-           // log.debug("USER ::" + username);
+            // log.debug("USER ::" + username);
             if (username.equals("anonymousUser")) {
                 UserDTO dto = new UserDTO();
                 dto.setRole("Admin");
@@ -96,10 +95,10 @@ public class UserBusiness {
                 if (dto.getRoleId() == 3) {
                     dto.setRole("Admin");
                 } else {
-                    dto.setRole("Guest");
+                    dto.setRole("User");
                 }
 
-              //  log.info("role {}" , dto.getRole());
+                //  log.info("role {}" , dto.getRole());
                 return dto;
             } else {
                 UserDTO dto = new UserDTO();
@@ -114,9 +113,9 @@ public class UserBusiness {
 
     // DELETE BY ID
     public void delete(Long id) {
-         try {
+        try {
             repository.deleteById(id);
-        }  catch (ConstraintViolationException ex) {
+        } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -125,52 +124,46 @@ public class UserBusiness {
 
     // SEARCH PAGINATED
     public Page<UserDTO> search(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-        Page<User> page = repository.findAll(getSpecification(request), pageable);
-
+        Page<User> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id"))));
         return page.map(user -> {
-            UserDTO dto = UserDTO.from(user);
-            if (user.getAffiliateId() != null) {
-                try {
-                    AffiliateDTO affiliate = affiliateBusiness.findById(user.getAffiliateId());
-                    dto.setAffiliateName(affiliate.getName());
-                } catch (Exception e) {
-                    log.warn("Errore in recupero dati affliliato : " + user.getAffiliateId());
-                }
-            }
-            if (dto.getRoleId() == 3) {
-                dto.setRole("Admin");
-            } else {
-                dto.setRole("Guest");
-            }
-            return dto;
+            return UserDTO.from(user);
         });
+    }
+
+    // SEARCH By AFFILIATE ID
+    public Page<UserDTO> searchByAffiliateID(Long affiliateId, Pageable pageable) {
+        Filter request = new Filter();
+        request.setAffiliateId(affiliateId);
+        return this.search(request, pageable);
     }
 
     // UPDATE
     public UserDTO update(Long id, Filter filter) {
         User wser = repository.findById(id).get();
+
         UserDTO userDTOfrom = UserDTO.from(wser);
+
         mapper.map(filter, userDTOfrom);
+
         User mappedEntity = mapper.map(wser, User.class);
         mapper.map(userDTOfrom, mappedEntity);
         return UserDTO.from(repository.save(mappedEntity));
     }
 
     public UserDTO resetPassword(Long id, String password) throws Exception {
-        User wser = repository.findById(id).orElseThrow(() -> new ElementCleveradException("User",id));
+        User wser = repository.findById(id).orElseThrow(() -> new ElementCleveradException("User", id));
         wser.setPassword(password);
         return UserDTO.from(repository.save(wser));
     }
 
     public UserDTO disableUser(Long id) throws Exception {
-        User wser = repository.findById(id).orElseThrow(() -> new ElementCleveradException("User",id));
+        User wser = repository.findById(id).orElseThrow(() -> new ElementCleveradException("User", id));
         wser.setStatus(false);
         return UserDTO.from(repository.save(wser));
     }
 
     public UserDTO enableUser(Long id) throws Exception {
-        User wser = repository.findById(id).orElseThrow(() -> new ElementCleveradException("User",id));
+        User wser = repository.findById(id).orElseThrow(() -> new ElementCleveradException("User", id));
         wser.setStatus(true);
         return UserDTO.from(repository.save(wser));
     }
@@ -202,10 +195,10 @@ public class UserBusiness {
                 predicates.add(cb.equal(root.get("status"), request.getStatus()));
             }
             if (request.getAffiliateId() != null) {
-                predicates.add(cb.equal(root.get("affiliateId"), request.getAffiliateId()));
+                predicates.add(cb.equal(root.get("affiliate").get("id"), request.getAffiliateId()));
             }
             if (request.getRoleId() != null) {
-                predicates.add(cb.equal(root.get("roleId"), request.getRoleId()));
+                predicates.add(cb.equal(root.get("dictionary").get("id"), request.getRoleId()));
             }
 
             if (request.getLastLoginFrom() != null) {
@@ -220,6 +213,7 @@ public class UserBusiness {
             return completePredicate;
         };
     }
+
 
     /**
      * ============================================================================================================

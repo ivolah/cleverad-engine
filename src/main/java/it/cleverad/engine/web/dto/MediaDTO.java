@@ -31,7 +31,9 @@ public class MediaDTO {
     private Long typeId;
     private String typeName;
 
-    public MediaDTO(long id, String name, String url, String target, String bannerCode, String note, String idFile, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long campaignId, String campaignName, Long typeId) {
+    private String imageHash;
+
+    public MediaDTO(long id, String name, String url, String target, String bannerCode, String note, String idFile, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long campaignId, String campaignName, Long typeId, String typeName) {
         this.id = id;
         this.name = name;
         this.url = url;
@@ -45,6 +47,7 @@ public class MediaDTO {
         this.campaignId = campaignId;
         this.campaignName = campaignName;
         this.typeId = typeId;
+        this.typeName = typeName;
     }
 
     public static MediaDTO from(Media media) {
@@ -55,7 +58,18 @@ public class MediaDTO {
             nameC = media.getMediaCampaign().getCampaign().getName();
         }
 
-        return new MediaDTO(media.getId(), media.getName(), media.getUrl(), media.getTarget(), media.getBannerCode(), media.getNote(), media.getIdFile(), media.getStatus(), media.getCreationDate(), media.getLastModificationDate(), idC, nameC, media.getTypeId());
+        return new MediaDTO(
+                media.getId(),
+                media.getName(),
+                media.getUrl(),
+                media.getTarget(),
+                media.getBannerCode(),
+                media.getNote(),
+                media.getIdFile(),
+                media.getStatus(),
+                media.getCreationDate(),
+                media.getLastModificationDate(),
+                idC, nameC, media.getMediaType().getId(), media.getMediaType().getName());
     }
 
 }

@@ -3,6 +3,7 @@ package it.cleverad.engine.business;
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.Media;
 import it.cleverad.engine.persistence.repository.MediaRepository;
+import it.cleverad.engine.persistence.repository.MediaTypeRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.MediaDTO;
 import it.cleverad.engine.web.dto.MediaTypeDTO;
@@ -51,6 +52,9 @@ public class MediaBusiness {
     private MediaTypeBusiness mediaTypeBusiness;
 
     @Autowired
+    private MediaTypeRepository mediaTypeRepository;
+
+    @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
 
     /**
@@ -72,6 +76,7 @@ public class MediaBusiness {
         Media map = mapper.map(request, Media.class);
         map.setCreationDate(LocalDateTime.now());
         map.setLastModificationDate(LocalDateTime.now());
+        map.setMediaType(mediaTypeRepository.findById(request.typeId).orElseThrow(() -> new ElementCleveradException("Media Type", request.typeId)));
         MediaDTO mediaDTO = MediaDTO.from(repository.save(map));
 
         // aggiungo riferimento campagna se c'è
@@ -87,7 +92,7 @@ public class MediaBusiness {
 
     // GET BY ID
     public MediaDTO findById(Long id) {
-        Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Media",id));
+        Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Media", id));
         MediaDTO dto = MediaDTO.from(media);
         if (dto.getTypeId() != null) {
             MediaTypeDTO mtDto = mediaTypeBusiness.findById(dto.getTypeId());
@@ -98,11 +103,11 @@ public class MediaBusiness {
 
     // DELETE BY ID
     public void delete(Long id) {
-        Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Media",id));
+        Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Media", id));
         try {
             if (media.getMediaCampaign() != null) mediaCampaignBusiness.delete(media.getMediaCampaign().getId());
             repository.deleteById(id);
-        }  catch (ConstraintViolationException ex) {
+        } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -112,7 +117,7 @@ public class MediaBusiness {
     // UPDATE
     public MediaDTO update(Long id, Filter filter) {
         try {
-            Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Media",id));
+            Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Media", id));
             MediaDTO mediaDTOfrom = MediaDTO.from(media);
             mapper.map(filter, mediaDTOfrom);
 
@@ -145,15 +150,9 @@ public class MediaBusiness {
 
     // SEARCH PAGINATED
     public Page<MediaDTO> search(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-        Page<Media> page = repository.findAll(getSpecification(request), pageable);
+        Page<Media> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id"))));
         return page.map(media -> {
-            MediaDTO dto = MediaDTO.from(media);
-            if (dto.getTypeId() != null) {
-                MediaTypeDTO mtDto = mediaTypeBusiness.findById(dto.getTypeId());
-                dto.setTypeName(mtDto.getName());
-            }
-            return dto;
+            return MediaDTO.from(media);
         });
     }
 
@@ -163,9 +162,6 @@ public class MediaBusiness {
         return page.map(media -> {
             MediaDTO dto = MediaDTO.from(media);
             if (dto.getTypeId() != null) {
-
-                MediaTypeDTO mtDto = mediaTypeBusiness.findById(dto.getTypeId());
-                dto.setTypeName(mtDto.getName());
 
                 String campID = String.valueOf(id);
                 String mediaID = String.valueOf(media.getId());
@@ -192,15 +188,20 @@ public class MediaBusiness {
         });
     }
 
+    public MediaDTO getImageHash(Long idMedia, Long idFile) {
+        String imhash = idMedia + "-" + idFile;
+        byte[] encodedImage = Base64.getEncoder().encode(imhash.getBytes(StandardCharsets.UTF_8));
+        MediaDTO mediaDTO = new MediaDTO();
+        mediaDTO.setImageHash(new String(encodedImage));
+        return mediaDTO;
+    }
+
     public MediaDTO getByIdAndCampaignID(Long id, Long idCampaign) {
         Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
         Page<Media> page = repository.findMediaCampaigns(idCampaign, pageable);
         return page.stream().filter(media -> media.getId() == id).findFirst().map(media -> {
             MediaDTO dto = MediaDTO.from(media);
             if (dto.getTypeId() != null) {
-                MediaTypeDTO mtDto = mediaTypeBusiness.findById(dto.getTypeId());
-                dto.setTypeName(mtDto.getName());
-
                 String bannerCode = dto.getBannerCode();
 
                 String refID = idCampaign + "||" + id + "||" + jwtUserDetailsService.getAffiliateID() + "||" + "0";
@@ -223,9 +224,6 @@ public class MediaBusiness {
         return page.stream().filter(media -> media.getId() == id).findFirst().map(media -> {
             MediaDTO dto = MediaDTO.from(media);
             if (dto.getTypeId() != null) {
-                MediaTypeDTO mtDto = mediaTypeBusiness.findById(dto.getTypeId());
-                dto.setTypeName(mtDto.getName());
-
                 String bannerCode = dto.getBannerCode();
 
                 String refID = idCampaign + "||" + id + "||" + jwtUserDetailsService.getAffiliateID() + "||" + idChannel;
@@ -266,7 +264,7 @@ public class MediaBusiness {
             }
 
             if (request.getTypeId() != null) {
-                predicates.add(cb.equal(root.get("typeId"), request.getTypeId()));
+                predicates.add(cb.equal(root.get("mediaType").get("id"), request.getTypeId()));
             }
 
             if (request.getTarget() != null) {
@@ -308,7 +306,7 @@ public class MediaBusiness {
     @AllArgsConstructor
     public static class BaseCreateRequest {
         private String name;
-        private String typeId;
+        private Long typeId;
         private String url;
         private String target;
         private String bannerCode;
@@ -325,7 +323,7 @@ public class MediaBusiness {
         private Long id;
 
         private String name;
-        private String typeId;
+        private Long typeId;
         private String url;
         private String target;
         private String bannerCode;

@@ -29,12 +29,17 @@ public class User {
     private String surname;
     private String email;
 
-    private Long affiliateId;
-    private Long roleId;
-
     private Boolean status;
 
     private LocalDateTime creationDate;
     private LocalDateTime lastLogin;
+
+    @ManyToOne
+    @JoinColumn(name = "affiliate_id")
+    private Affiliate affiliate;
+
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    private Dictionary dictionary;
 
 }

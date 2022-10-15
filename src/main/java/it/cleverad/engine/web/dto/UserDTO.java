@@ -24,7 +24,7 @@ public class UserDTO {
     private LocalDateTime creationDate;
     private LocalDateTime lastLogin;
 
-    public UserDTO(Long id, String username, String password, String name, String surname, String email, Long affiliateId, Long roleId, Boolean status, LocalDateTime creationDate, LocalDateTime lastLogin) {
+    public UserDTO(long id, String username, String password, String name, String surname, String email, Long affiliateId, String affiliateName, Long roleId, String role, Boolean status, LocalDateTime creationDate, LocalDateTime lastLogin) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -32,6 +32,7 @@ public class UserDTO {
         this.surname = surname;
         this.email = email;
         this.affiliateId = affiliateId;
+        this.affiliateName = affiliateName;
         this.roleId = roleId;
         this.role = role;
         this.status = status;
@@ -40,17 +41,7 @@ public class UserDTO {
     }
 
     public static UserDTO from(User user) {
-        return new UserDTO(user.getId(),
-                user.getUsername(),
-                user.getPassword(),
-                user.getName(),
-                user.getSurname(),
-                user.getEmail(),
-                user.getAffiliateId(),
-                user.getRoleId(),
-                user.getStatus(),
-                user.getCreationDate(),
-                user.getLastLogin());
+        return new UserDTO(user.getId(), user.getUsername(), user.getPassword(), user.getName(), user.getSurname(), user.getEmail(), user.getAffiliate().getId(), user.getAffiliate().getName(), user.getDictionary().getId(), user.getDictionary().getName(), user.getStatus(), user.getCreationDate(), user.getLastLogin());
     }
 
 }

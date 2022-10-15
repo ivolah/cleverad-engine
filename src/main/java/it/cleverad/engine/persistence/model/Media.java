@@ -33,13 +33,8 @@ public class Media {
     @OneToOne(mappedBy = "media")
     private MediaCampaign mediaCampaign;
 
-    @OneToOne(mappedBy = "media")
+    @ManyToOne
+    @JoinColumn(name = "type_id")
     private MediaType mediaType;
 
-    private Long typeId;
-
-    @Override
-    public String toString() {
-        return "Media{" + "id=" + id + ", name='" + name + '\'' + ", typeId='" + typeId + '\'' + ", url='" + url + '\'' + ", target='" + target + '\'' + ", bannerCode='" + bannerCode + '\'' + ", note='" + note + '\'' + ", idFile='" + idFile + '\'' + ", status='" + status + '\'' + ", creationDate=" + creationDate + ", lastModificationDate=" + lastModificationDate + ", mediaCampaign=" + mediaCampaign + '}';
-    }
 }

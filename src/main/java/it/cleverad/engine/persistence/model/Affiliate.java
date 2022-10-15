@@ -49,6 +49,9 @@ public class Affiliate {
     @OneToMany(mappedBy = "affiliate")
     private Set<Transaction> transactions;
 
+    @OneToMany(mappedBy = "affiliate")
+    private Set<User> users;
+
     public void addWallet(Wallet wallet) {
         wallet.setAffiliate(this);
         this.wallets.add(wallet);

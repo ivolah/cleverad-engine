@@ -41,10 +41,8 @@ public class UserController {
     @Operation(summary = "Lists the Users", description = "Lists the Users by Company, searched and paginated")
     @GetMapping("/{affiliateId}/affiliate")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<UserDTO> searchCompanyUsers(Long affiliateId, Pageable pageable) {
-        UserBusiness.Filter request = new UserBusiness.Filter();
-        request.setAffiliateId(affiliateId);
-        return business.search(request, pageable);
+    public Page<UserDTO> searchCompanyUsers(@PathVariable Long affiliateId, Pageable pageable) {
+        return business.searchByAffiliateID(affiliateId, pageable);
     }
 
     @Operation(summary = "Update the User", description = "Update the specific User")

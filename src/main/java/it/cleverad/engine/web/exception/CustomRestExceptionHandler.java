@@ -143,7 +143,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(final HttpMediaTypeNotSupportedException ex, final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
-        logger.info(ex.getClass().getName() + " " + ex);
+        logger.info(ex.getClass().getName() + " " + ex.getLocalizedMessage());
         final StringBuilder builder = new StringBuilder();
         builder.append(ex.getContentType());
         builder.append(" media type is not supported. Supported media types are ");
@@ -165,7 +165,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({ElementCleveradException.class})
     protected ResponseEntity<Object> handleElementCleveradException(final ElementCleveradException ex, final WebRequest request) {
-        logger.error(ex.getClass().getName() + " ", ex);
+        logger.error(ex.getClass().getName() + " "+ ex.getMessage(), ex);
         final ApiError apiError = new ApiError(HttpStatus.NOT_FOUND, ex.getLocalizedMessage(), ex.getMessage());
         return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
     }
@@ -180,8 +180,8 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({DataIntegrityViolationException.class})
     public ResponseEntity<Object> handleDataIntegrityViolationException(final DataIntegrityViolationException ex, final WebRequest request) {
-        logger.error(ex.getClass().getName() + " ", ex);
-        final ApiError apiError = new ApiError(HttpStatus.CONFLICT, "Conflict in the requested behaviour :" + ex.getLocalizedMessage(), ex.getMessage());
+        logger.error(ex.getClass().getName() + " :: "+ ex.getMostSpecificCause(), ex);
+        final ApiError apiError = new ApiError(HttpStatus.CONFLICT, "Conflict in the requested behaviour :" + ex.getMostSpecificCause(), ex.getMessage());
         return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
     }
 }

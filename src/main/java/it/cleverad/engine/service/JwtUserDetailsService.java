@@ -57,7 +57,7 @@ public class JwtUserDetailsService implements UserDetailsService {
             return "Admin";
         }
         else{
-            return "Guest";
+            return "User";
         }
     }
 
