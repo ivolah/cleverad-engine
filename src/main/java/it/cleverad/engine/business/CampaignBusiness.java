@@ -3,6 +3,7 @@ package it.cleverad.engine.business;
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.Campaign;
 import it.cleverad.engine.persistence.repository.CampaignRepository;
+import it.cleverad.engine.persistence.repository.CookieRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.CampaignDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -50,13 +51,10 @@ public class CampaignBusiness {
     private MediaCampaignBusiness mediaCampaignBusiness;
 
     @Autowired
-    private AffiliateChannelCommissionCampaignBusiness affiliateChannelCommissionCampaignBusiness;
-
-    @Autowired
     private CampaignCategoryBusiness campaignCategoryBusiness;
 
     @Autowired
-    private CampaignCookieBusiness campaignCookieBusiness;
+    private CookieRepository cookieRepository;
 
     /**
      * ============================================================================================================
@@ -64,21 +62,15 @@ public class CampaignBusiness {
 
     // CREATE
     public CampaignDTO create(BaseCreateRequest request) {
+
         Campaign map = mapper.map(request, Campaign.class);
-        map.setCreationDate(LocalDateTime.now());
-        map.setLastModificationDate(LocalDateTime.now());
+        map.setCookie(cookieRepository.findById(request.cookieId).orElseThrow(() -> new ElementCleveradException("Cookie", request.cookieId)));
         CampaignDTO dto = CampaignDTO.from(repository.save(map));
 
         //Category
         if (StringUtils.isNotBlank(request.getCategories())) {
             Arrays.stream(request.getCategories().split(",")).forEach(s -> campaignCategoryBusiness.create(new CampaignCategoryBusiness.BaseCreateRequest(dto.getId(), Long.valueOf(s))));
         }
-
-        //Cookie
-        if (StringUtils.isNotBlank(request.getCookies())) {
-            campaignCookieBusiness.create(new CampaignCookieBusiness.BaseCreateRequest(dto.getId(), Long.valueOf(request.getCookies())));
-        }
-
 
         return dto;
     }
@@ -89,11 +81,11 @@ public class CampaignBusiness {
         Campaign campaign = null;
 
         if (jwtUserDetailsService.getRole().equals("Admin")) {
-            campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign",id));
+            campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
         } else {
             Filter request = new Filter();
             request.setId(id);
-            campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign",id));
+            campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
         }
 
         if (campaign != null) return CampaignDTO.from(campaign);
@@ -103,11 +95,12 @@ public class CampaignBusiness {
 
     // DELETE BY ID
     public void delete(Long id) {
-        Campaign campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign",id));
+        Campaign campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
         try {
-            if (campaign != null)
+            if (campaign != null) {
                 campaign.getMediaCampaignList().stream().forEach(mediaCampaign -> mediaCampaignBusiness.delete(mediaCampaign.getId()));
-
+                campaign.getCampaignCategories().stream().forEach(campaignCategory -> campaignCategoryBusiness.delete(campaignCategory.getId()));
+            }
             repository.deleteById(id);
         } catch (ConstraintViolationException ex) {
             throw ex;
@@ -131,7 +124,7 @@ public class CampaignBusiness {
     // UPDATE
     public CampaignDTO update(Long id, Filter filter) {
         try {
-            Campaign campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign",id));
+            Campaign campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
             CampaignDTO campaignDTOfrom = CampaignDTO.from(campaign);
             mapper.map(filter, campaignDTOfrom);
             Campaign mappedEntity = mapper.map(campaign, Campaign.class);
@@ -224,7 +217,7 @@ public class CampaignBusiness {
         private String idFile;
         private String comissions;
         private String categories;
-        private String cookies;
+        private Long cookieId;
         private String valuta;
         private Long budget;
         @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSz")
@@ -245,6 +238,7 @@ public class CampaignBusiness {
         private String idFile;
         private String valuta;
         private Long budget;
+        private Long cookieId;
         private Instant creationDateFrom;
         private Instant creationDateTo;
         private Instant lastModificationDateFrom;

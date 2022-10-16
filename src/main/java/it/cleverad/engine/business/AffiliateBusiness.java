@@ -47,8 +47,6 @@ public class AffiliateBusiness {
     // CREATE
     public AffiliateDTO create(BaseCreateRequest request) {
         Affiliate map = mapper.map(request, Affiliate.class);
-        map.setCreationDate(LocalDate.now());
-        map.setLastModificationDate(LocalDate.now());
         return AffiliateDTO.from(repository.save(map));
     }
 
@@ -86,7 +84,7 @@ public class AffiliateBusiness {
             mapper.map(filter, affiliateDTOfrom);
 
             Affiliate mappedEntity = mapper.map(affiliate, Affiliate.class);
-            mappedEntity.setLastModificationDate(LocalDate.now());
+            mappedEntity.setLastModificationDate(LocalDateTime.now());
             mapper.map(affiliateDTOfrom, mappedEntity);
 
             return AffiliateDTO.from(repository.save(mappedEntity));

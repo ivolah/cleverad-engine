@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class ChannelDTO {
 
-    private long id;
+    private Long id;
     private String name;
     private String shortDescription;
     private String type;
@@ -21,10 +21,13 @@ public class ChannelDTO {
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
 
+    private Long dictionaryId;
+    private String dictionaryValue;
+
     private List<CategoryDTO> categoryDTOS;
     private String campaignID;
 
-    public ChannelDTO(long id, String name, String shortDescription, String type, Boolean status, String url, LocalDateTime creationDate, LocalDateTime lastModificationDate, List<CategoryDTO> categoryDTOS) {
+    public ChannelDTO(Long id, String name, String shortDescription, String type, Boolean status, String url, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long dictionaryId, String dictionaryValue, List<CategoryDTO> categoryDTOS) {
         this.id = id;
         this.name = name;
         this.shortDescription = shortDescription;
@@ -33,6 +36,8 @@ public class ChannelDTO {
         this.url = url;
         this.creationDate = creationDate;
         this.lastModificationDate = lastModificationDate;
+        this.dictionaryId = dictionaryId;
+        this.dictionaryValue = dictionaryValue;
         this.categoryDTOS = categoryDTOS;
     }
 
@@ -50,8 +55,7 @@ public class ChannelDTO {
             }).collect(Collectors.toList());
         }
 
-        return new ChannelDTO(channel.getId(), channel.getName(), channel.getShortDescription(), channel.getType(),
-                 channel.getStatus(), channel.getUrl(), channel.getCreationDate(), channel.getLastModificationDate(), categories);
+        return new ChannelDTO(channel.getId(), channel.getName(), channel.getShortDescription(), channel.getType(), channel.getStatus(), channel.getUrl(), channel.getCreationDate(), channel.getLastModificationDate(), channel.getDictionary() != null ? channel.getDictionary().getId() : null, channel.getDictionary() != null ? channel.getDictionary().getName() : null, categories);
     }
 
 }

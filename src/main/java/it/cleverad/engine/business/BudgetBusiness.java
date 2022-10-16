@@ -50,22 +50,20 @@ public class BudgetBusiness {
     // CREATE
     public BudgetDTO create(BaseCreateRequest request) {
         Budget map = mapper.map(request, Budget.class);
-        map.setCreationDate(LocalDateTime.now());
-        map.setLastModificationDate(LocalDateTime.now());
         return BudgetDTO.from(repository.save(map));
     }
 
     // GET BY ID
     public BudgetDTO findById(Long id) {
-        Budget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Budget",id));
+        Budget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Budget", id));
         return BudgetDTO.from(budget);
     }
 
     // DELETE BY ID
     public void delete(Long id) {
-         try {
+        try {
             repository.deleteById(id);
-        }  catch (ConstraintViolationException ex) {
+        } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -82,7 +80,7 @@ public class BudgetBusiness {
     // UPDATE
     public BudgetDTO update(Long id, Filter filter) {
         try {
-            Budget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Budget",id));
+            Budget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Budget", id));
             BudgetDTO budgetDTO = BudgetDTO.from(budget);
 
             mapper.map(filter, budgetDTO);
@@ -104,8 +102,7 @@ public class BudgetBusiness {
         Page<AffiliateBudgetCampaignDTO> ll = affiliateBudgetCampaignBusiness.search(reques, PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id"))));
 
         Page<BudgetDTO> listaB = new PageImpl<>(ll.stream().map(affiliateBudgetCampaignDTO -> {
-            BudgetDTO budgetDTO = new BudgetDTO();
-            budgetDTO = this.findById(affiliateBudgetCampaignDTO.getBudgetId());
+            BudgetDTO budgetDTO = this.findById(affiliateBudgetCampaignDTO.getBudgetId());
             try {
                 budgetDTO.setAffiliateName(affiliateBusiness.findById(affiliateBudgetCampaignDTO.getAffiliateId()).getName());
             } catch (Exception e) {

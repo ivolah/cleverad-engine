@@ -25,9 +25,10 @@ public class Budget {
     private Long budget;
     private Date dueDate;
 
-    private boolean status;
-    private LocalDateTime creationDate;
-    private LocalDateTime lastModificationDate;
+    @Column(nullable = false)
+    private Boolean status = true;
+    private LocalDateTime creationDate = LocalDateTime.now();
+    private LocalDateTime lastModificationDate = LocalDateTime.now();
 
     @OneToMany(mappedBy = "affiliate")
     private Set<AffiliateBudgetCampaign> affiliateBudgets;

@@ -18,11 +18,11 @@ public class BudgetDTO {
 
     private String affiliateName;
 
-    private boolean status;
+    private Boolean status;
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
 
-    public BudgetDTO(Long id, Long idAffiliate, Long budget, Date dueDate, boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate) {
+    public BudgetDTO(Long id, Long idAffiliate, Long budget, Date dueDate, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate) {
         this.id = id;
         this.idAffiliate = idAffiliate;
         this.budget = budget;
@@ -33,7 +33,7 @@ public class BudgetDTO {
     }
 
     public static BudgetDTO from(Budget budget) {
-        return new BudgetDTO(budget.getId(), budget.getIdAffiliate(), budget.getBudget(), budget.getDueDate(), budget.isStatus(), budget.getCreationDate(), budget.getLastModificationDate());
+        return new BudgetDTO(budget.getId(), budget.getIdAffiliate(), budget.getBudget(), budget.getDueDate(), budget.getStatus(), budget.getCreationDate(), budget.getLastModificationDate());
     }
 
 }

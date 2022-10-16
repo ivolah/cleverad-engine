@@ -16,13 +16,11 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -54,23 +52,20 @@ public class ChannelBusiness {
 
     // CREATE
     public ChannelDTO create(BaseCreateRequest request) {
-        Channel map = mapper.map(request, Channel.class);
-        map.setCreationDate(LocalDateTime.now());
-        map.setLastModificationDate(LocalDateTime.now());
-        return ChannelDTO.from(repository.save(map));
+        return ChannelDTO.from(repository.save(mapper.map(request, Channel.class)));
     }
 
     // GET BY ID
     public ChannelDTO findById(Long id) {
-            Channel channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Channel",id));
-            return ChannelDTO.from(channel);
+        Channel channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Channel", id));
+        return ChannelDTO.from(channel);
     }
 
     // DELETE BY ID
     public void delete(Long id) {
         try {
             repository.deleteById(id);
-        }  catch (ConstraintViolationException ex) {
+        } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -80,15 +75,14 @@ public class ChannelBusiness {
 
     // SEARCH PAGINATED
     public Page<ChannelDTO> search(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-        Page<Channel> page = repository.findAll(getSpecification(request), pageable);
+        Page<Channel> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id"))));
         return page.map(ChannelDTO::from);
     }
 
     // UPDATE
     public ChannelDTO update(Long id, Filter filter) {
         try {
-            Channel channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Channel",id));
+            Channel channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Channel", id));
             ChannelDTO campaignDTOfrom = ChannelDTO.from(channel);
 
             mapper.map(filter, campaignDTOfrom);
@@ -187,17 +181,15 @@ public class ChannelBusiness {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class BaseCreateRequest {
+
         private String name;
         private String shortDescription;
         private String type;
-        private String approvazione;
         private String url;
 
+        private String dictionaryId;
         private Boolean status;
-        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-        private LocalDate startDate;
-        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-        private LocalDate endDate;
+
     }
 
     @Data
@@ -212,7 +204,9 @@ public class ChannelBusiness {
         private String approvazione;
         private String url;
 
+        private String dictionaryId;
         private Boolean status;
+
         private Instant creationDateFrom;
         private Instant creationDateTo;
         private Instant lastModificationDateFrom;

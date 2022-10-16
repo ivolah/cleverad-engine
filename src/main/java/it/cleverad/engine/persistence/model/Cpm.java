@@ -26,9 +26,9 @@ public class Cpm {
     private Long mediaId;
 
     @CreatedDate
-    private LocalDateTime timeStamp;
+    private LocalDateTime timeStamp = LocalDateTime.now();
 
-    @Column(columnDefinition = "boolean default false")
-    private Boolean read;
+    @Column(nullable = false)
+    private Boolean read = false;
 
 }

@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
@@ -29,10 +30,11 @@ public class Affiliate {
     private String zipCode;
     private String primaryMail;
     private String secondaryMail;
-    private Boolean status;
 
-    private LocalDate creationDate;
-    private LocalDate lastModificationDate;
+    @Column(nullable = false)
+    private Boolean status = true;
+    private LocalDateTime creationDate = LocalDateTime.now();
+    private LocalDateTime lastModificationDate = LocalDateTime.now();
 
     @OneToMany(mappedBy = "affiliate")
     private Set<AffiliateChannelCommissionCampaign> affiliateCampaigns;

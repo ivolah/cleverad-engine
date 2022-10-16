@@ -28,7 +28,8 @@ import java.util.List;
 @Slf4j
 @Component
 @Transactional
-public class AffiliateCampaignBusiness {
+public class
+AffiliateCampaignBusiness {
 
     @Autowired
     private AffiliateChannelCommissionCampaignRepository repository;

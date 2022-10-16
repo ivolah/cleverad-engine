@@ -26,9 +26,11 @@ public class Media {
     private String bannerCode;
     private String note;
     private String idFile;
-    private Boolean status;
-    private LocalDateTime creationDate;
-    private LocalDateTime lastModificationDate;
+
+    @Column(nullable = false)
+    private Boolean status = true;
+    private LocalDateTime creationDate = LocalDateTime.now();
+    private LocalDateTime lastModificationDate = LocalDateTime.now();
 
     @OneToOne(mappedBy = "media")
     private MediaCampaign mediaCampaign;

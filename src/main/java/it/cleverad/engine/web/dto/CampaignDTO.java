@@ -26,15 +26,19 @@ public class CampaignDTO {
     private String valuta;
     private Long budget;
 
+    private Long cookieId;
+    private String cookieName;
+    private String cookieValue;
+
     private List<BasicMediaDTO> medias;
     private List<BasicAffiliateDTO> affiliates;
     private List<CommissionDTO> commissions;
     private List<BasicCategoryDTO> categories;
-    private List<BasicCookieDTO> cookies;
+    //    private List<BasicCookieDTO> cookies;
     private List<RevenueFactorDTO> revenues;
     private List<AffiliateChannelCommissionCampaignDTO> affiliateChannelCommissionCampaigns;
 
-    public CampaignDTO(long id, String name, String shortDescription, String longDescription, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, LocalDate startDate, LocalDate endDate, String idFile, String valuta, Long budget, List<BasicMediaDTO> medias, List<BasicAffiliateDTO> affiliates, List<CommissionDTO> commissions, List<BasicCategoryDTO> categories, List<BasicCookieDTO> cookies, List<RevenueFactorDTO> revenues, List<AffiliateChannelCommissionCampaignDTO> affiliateChannelCommissionCampaigns) {
+    public CampaignDTO(long id, String name, String shortDescription, String longDescription, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, LocalDate startDate, LocalDate endDate, String idFile, String valuta, Long budget, Long cookieId, String cookieName, String cookieValue, List<BasicMediaDTO> medias, List<BasicAffiliateDTO> affiliates, List<CommissionDTO> commissions, List<BasicCategoryDTO> categories, List<RevenueFactorDTO> revenues, List<AffiliateChannelCommissionCampaignDTO> affiliateChannelCommissionCampaigns) {
         this.id = id;
         this.name = name;
         this.shortDescription = shortDescription;
@@ -47,11 +51,13 @@ public class CampaignDTO {
         this.idFile = idFile;
         this.valuta = valuta;
         this.budget = budget;
+        this.cookieId = cookieId;
+        this.cookieName = cookieName;
+        this.cookieValue = cookieValue;
         this.medias = medias;
         this.affiliates = affiliates;
         this.commissions = commissions;
         this.categories = categories;
-        this.cookies = cookies;
         this.revenues = revenues;
         this.affiliateChannelCommissionCampaigns = affiliateChannelCommissionCampaigns;
     }
@@ -113,17 +119,17 @@ public class CampaignDTO {
             }).collect(Collectors.toList());
         }
 
-        List<BasicCookieDTO> cookie = null;
-        if (campaign.getCampaignCookies() != null) {
-            cookie = campaign.getCampaignCookies().stream().map(campaignCookie -> {
-                BasicCookieDTO dto = new BasicCookieDTO();
-                dto.setId(campaignCookie.getCookie().getId());
-                dto.setName(campaignCookie.getCookie().getName());
-                dto.setStatus(campaignCookie.getCookie().getStatus());
-                dto.setValue(campaignCookie.getCookie().getValue());
-                return dto;
-            }).collect(Collectors.toList());
-        }
+//        List<BasicCookieDTO> cookie = null;
+//        if (campaign.getCampaignCookies() != null) {
+//            cookie = campaign.getCampaignCookies().stream().map(campaignCookie -> {
+//                BasicCookieDTO dto = new BasicCookieDTO();
+//                dto.setId(campaignCookie.getCookie().getId());
+//                dto.setName(campaignCookie.getCookie().getName());
+//                dto.setStatus(campaignCookie.getCookie().getStatus());
+//                dto.setValue(campaignCookie.getCookie().getValue());
+//                return dto;
+//            }).collect(Collectors.toList());
+//        }
 
         List<RevenueFactorDTO> revenues = null;
         if (campaign.getRevenueFactors() != null) {
@@ -158,6 +164,6 @@ public class CampaignDTO {
             }).collect(Collectors.toList());
         }
 
-        return new CampaignDTO(campaign.getId(), campaign.getName(), campaign.getShortDescription(), campaign.getLongDescription(), campaign.getStatus(), campaign.getCreationDate(), campaign.getLastModificationDate(), campaign.getStartDate(), campaign.getEndDate(), campaign.getIdFile(), campaign.getValuta(), campaign.getBudget(), medias, affiliates, commissions, campaigns, cookie, revenues, accc);
+        return new CampaignDTO(campaign.getId(), campaign.getName(), campaign.getShortDescription(), campaign.getLongDescription(), campaign.getStatus(), campaign.getCreationDate(), campaign.getLastModificationDate(), campaign.getStartDate(), campaign.getEndDate(), campaign.getIdFile(), campaign.getValuta(), campaign.getBudget(), campaign.getCookie().getId(), campaign.getCookie().getName(), campaign.getCookie().getValue(), medias, affiliates, commissions, campaigns, revenues, accc);
     }
 }

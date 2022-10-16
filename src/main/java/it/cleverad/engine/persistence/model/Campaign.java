@@ -11,9 +11,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "t_campaign")
-@Inheritance(
-        strategy = InheritanceType.JOINED
-)
+@Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,15 +25,16 @@ public class Campaign {
     private String name;
     private String shortDescription;
     private String longDescription;
-    private Boolean status;
-    private LocalDateTime creationDate;
-    private LocalDateTime lastModificationDate;
     private LocalDate startDate;
     private LocalDate endDate;
     private String idFile;
     private String defaultCommissionId;
     private String valuta;
     private Long budget;
+    @Column(nullable = false)
+    private Boolean status = true;
+    private LocalDateTime creationDate = LocalDateTime.now();
+    private LocalDateTime lastModificationDate = LocalDateTime.now();
 
     @OneToMany(mappedBy = "campaign")
     private Set<MediaCampaign> mediaCampaignList;
@@ -64,7 +63,8 @@ public class Campaign {
     @OneToMany(mappedBy = "campaign")
     private Set<RevenueFactor> revenueFactors;
 
-
-
+    @ManyToOne
+    @JoinColumn(name = "cookie_id")
+    private Cookie cookie;
 
 }

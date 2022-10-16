@@ -29,15 +29,15 @@ public class Dictionary {
     private Set<Commission> commission;
 
     @OneToMany
-    @JoinColumn(name = "id")
-    private Set<RevenueFactor> revenueFactors;
+    @JoinColumn(name = "role_id")
+    private Set<User> users;
 
     @OneToMany
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "dictionary_id")
     private Set<Channel> channels;
 
     @OneToMany
-    @JoinColumn(name = "role_id")
-    private Set<User> users;
+    @JoinColumn(name = "id")
+    private Set<RevenueFactor> revenueFactors;
 
 }

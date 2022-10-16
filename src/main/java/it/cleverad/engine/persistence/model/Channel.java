@@ -24,12 +24,12 @@ public class Channel {
     private String name;
     private String shortDescription;
     private String type;
-    private String approvazione;
     private String url;
 
-    private Boolean status;
-    private LocalDateTime creationDate;
-    private LocalDateTime lastModificationDate;
+    @Column(nullable = false)
+    private Boolean status = true;
+    private LocalDateTime creationDate = LocalDateTime.now();
+    private LocalDateTime lastModificationDate = LocalDateTime.now();
 
     @OneToMany(mappedBy = "channel")
     private Set<ChannelCategory> channelCategories;

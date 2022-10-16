@@ -4,7 +4,7 @@ import it.cleverad.engine.persistence.model.Affiliate;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,12 +22,12 @@ public class AffiliateDTO {
     private String primaryMail;
     private String secondaryMail;
     private Boolean status;
-    private LocalDate creationDate;
-    private LocalDate lastModificationDate;
+    private LocalDateTime creationDate;
+    private LocalDateTime lastModificationDate;
 
     private List<BasicCampaignDTO> basicCampaignDTOS;
 
-    public AffiliateDTO(long id, String name, String vatNumber, String street, String streetNumber, String city, String zipCode, String primaryMail, String secondaryMail, Boolean status, LocalDate creationDate, LocalDate lastModificationDate, List<BasicCampaignDTO> basicCampaignDTOS) {
+    public AffiliateDTO(long id, String name, String vatNumber, String street, String streetNumber, String city, String zipCode, String primaryMail, String secondaryMail, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, List<BasicCampaignDTO> basicCampaignDTOS) {
         this.id = id;
         this.name = name;
         this.vatNumber = vatNumber;

@@ -69,11 +69,7 @@ public class TrackingBusiness {
         MediaCampaignDTO mcb = mediaCampaignBusiness.findByIdMedia(mediaDTO.getId());
         if (mcb != null) {
             Long cID = mcb.getCampaignId();
-            if (cID != null) {
-                if (campaignBusiness.findById(cID).getCookies() != null && campaignBusiness.findById(cID).getCookies().size() > 0) {
-                    targetDTO.setCookieTime(campaignBusiness.findById(cID).getCookies().get(0).getValue());
-                }
-            }
+            if (cID != null) targetDTO.setCookieTime(campaignBusiness.findById(cID).getCookieValue());
         } else {
             targetDTO.setCookieTime("60");
         }

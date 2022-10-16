@@ -25,7 +25,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,8 +51,6 @@ public class AffiliateBudgetCampaignBusiness {
         AffiliateBudgetCampaignDTO dto = null;
         try {
             AffiliateBudgetCampaign map = mapper.map(request, AffiliateBudgetCampaign.class);
-            map.setCreationDate(LocalDateTime.now());
-            map.setLastModificationDate(LocalDateTime.now());
 
             Affiliate affiliate = new Affiliate();
             affiliate.setId(request.getAffiliateId());

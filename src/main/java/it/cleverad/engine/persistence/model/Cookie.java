@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "t_cookie")
@@ -22,8 +23,14 @@ public class Cookie {
 
     private String name;
     private String value;
-    private Boolean status;
-    private LocalDateTime creationDate;
-    private LocalDateTime lastModificationDate;
+
+    @Column(nullable = false)
+    private Boolean status = true;
+    private LocalDateTime creationDate = LocalDateTime.now();
+    private LocalDateTime lastModificationDate = LocalDateTime.now();
+
+    @OneToMany
+    @JoinColumn(name = "id")
+    private Set<Campaign> campaigns;
 
 }
