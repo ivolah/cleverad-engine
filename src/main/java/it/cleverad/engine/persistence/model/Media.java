@@ -19,7 +19,6 @@ public class Media {
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
     private String url;
     private String target;
@@ -27,7 +26,6 @@ public class Media {
     private String note;
     private String idFile;
 
-    @Column(nullable = false)
     private Boolean status = true;
     private LocalDateTime creationDate = LocalDateTime.now();
     private LocalDateTime lastModificationDate = LocalDateTime.now();

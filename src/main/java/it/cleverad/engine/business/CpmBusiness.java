@@ -81,20 +81,15 @@ public class CpmBusiness {
 
     // UPDATE
     public CpmDTO update(Long id, Filter filter) {
-        try {
-            Cpm channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cpm", id));
-            CpmDTO campaignDTOfrom = CpmDTO.from(channel);
+        Cpm channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cpm", id));
+        CpmDTO campaignDTOfrom = CpmDTO.from(channel);
 
-            mapper.map(filter, campaignDTOfrom);
+        mapper.map(filter, campaignDTOfrom);
 
-            Cpm mappedEntity = mapper.map(channel, Cpm.class);
-            mapper.map(campaignDTOfrom, mappedEntity);
+        Cpm mappedEntity = mapper.map(channel, Cpm.class);
+        mapper.map(campaignDTOfrom, mappedEntity);
 
-            return CpmDTO.from(repository.save(mappedEntity));
-        } catch (Exception e) {
-            log.error("Errore in update", e);
-            return null;
-        }
+        return CpmDTO.from(repository.save(mappedEntity));
     }
 
 

@@ -20,8 +20,8 @@ public class CampaignRevenueFactor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDateTime creationDate;
-    private LocalDateTime lastModificationDate;
+    private LocalDateTime creationDate = LocalDateTime.now();
+    private LocalDateTime lastModificationDate = LocalDateTime.now();
 
     @ManyToOne
     @JoinColumn(name = "revenuefactor_id")

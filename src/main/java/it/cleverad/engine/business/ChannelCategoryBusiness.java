@@ -66,15 +66,15 @@ public class ChannelCategoryBusiness {
 
     // GET BY ID
     public ChannelCategoryDTO findById(Long id) {
-        ChannelCategory channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("ChannelCategory",id));
+        ChannelCategory channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("ChannelCategory", id));
         return ChannelCategoryDTO.from(channel);
     }
 
     // DELETE BY ID
     public void delete(Long id) {
-         try {
+        try {
             repository.deleteById(id);
-        }  catch (ConstraintViolationException ex) {
+        } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -91,21 +91,16 @@ public class ChannelCategoryBusiness {
 
     // UPDATE
     public ChannelCategoryDTO update(Long id, Filter filter) {
-        try {
-            ChannelCategory channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("ChannelCategory",id));
-            ChannelCategoryDTO campaignDTOfrom = ChannelCategoryDTO.from(channel);
+        ChannelCategory channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("ChannelCategory", id));
+        ChannelCategoryDTO campaignDTOfrom = ChannelCategoryDTO.from(channel);
 
-            mapper.map(filter, campaignDTOfrom);
+        mapper.map(filter, campaignDTOfrom);
 
-            ChannelCategory mappedEntity = mapper.map(channel, ChannelCategory.class);
-            mappedEntity.setLastModificationDate(LocalDateTime.now());
-            mapper.map(campaignDTOfrom, mappedEntity);
+        ChannelCategory mappedEntity = mapper.map(channel, ChannelCategory.class);
+        mappedEntity.setLastModificationDate(LocalDateTime.now());
+        mapper.map(campaignDTOfrom, mappedEntity);
 
-            return ChannelCategoryDTO.from(repository.save(mappedEntity));
-        } catch (Exception e) {
-            log.error("Errore in update", e);
-            return null;
-        }
+        return ChannelCategoryDTO.from(repository.save(mappedEntity));
     }
 
 

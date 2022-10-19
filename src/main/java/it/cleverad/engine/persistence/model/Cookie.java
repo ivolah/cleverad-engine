@@ -24,7 +24,6 @@ public class Cookie {
     private String name;
     private String value;
 
-    @Column(nullable = false)
     private Boolean status = true;
     private LocalDateTime creationDate = LocalDateTime.now();
     private LocalDateTime lastModificationDate = LocalDateTime.now();

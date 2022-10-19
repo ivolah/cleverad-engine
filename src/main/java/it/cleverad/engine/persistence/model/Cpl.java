@@ -24,6 +24,6 @@ public class Cpl {
     private String data;
 
     private LocalDateTime date;
-    private Boolean status;
+    private Boolean status = false;
 
 }

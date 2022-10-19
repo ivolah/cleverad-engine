@@ -52,15 +52,15 @@ public class ContactFormBusiness {
 
     // GET BY ID
     public ContactFormDTO findById(Long id) {
-            ContactForm form = repository.findById(id).orElseThrow(() -> new ElementCleveradException("ContactForm",id));
-            return ContactFormDTO.from(form);
+        ContactForm form = repository.findById(id).orElseThrow(() -> new ElementCleveradException("ContactForm", id));
+        return ContactFormDTO.from(form);
     }
 
     // DELETE BY ID
     public void delete(Long id) {
-         try {
+        try {
             repository.deleteById(id);
-        }  catch (ConstraintViolationException ex) {
+        } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -77,20 +77,15 @@ public class ContactFormBusiness {
 
     // UPDATE
     public ContactFormDTO update(Long id, Filter filter) {
-        try {
-            ContactForm entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException("ContactForm",id));
-            ContactFormDTO formDTO = ContactFormDTO.from(entity);
+        ContactForm entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException("ContactForm", id));
+        ContactFormDTO formDTO = ContactFormDTO.from(entity);
 
-            mapper.map(filter, formDTO);
+        mapper.map(filter, formDTO);
 
-            ContactForm mappedEntity = mapper.map(entity, ContactForm.class);
-            mapper.map(formDTO, mappedEntity);
+        ContactForm mappedEntity = mapper.map(entity, ContactForm.class);
+        mapper.map(formDTO, mappedEntity);
 
-            return ContactFormDTO.from(repository.save(mappedEntity));
-        } catch (Exception e) {
-            log.error("Errore in update", e);
-            return null;
-        }
+        return ContactFormDTO.from(repository.save(mappedEntity));
     }
 
     /**

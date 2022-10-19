@@ -55,15 +55,15 @@ public class FileBusiness {
 
     // GET BY ID
     public FileDTO findById(Long id) {
-            File file = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File",id));
-            return FileDTO.from(file);
+        File file = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File", id));
+        return FileDTO.from(file);
     }
 
     // DELETE BY ID
     public void delete(Long id) {
         try {
             repository.deleteById(id);
-        }  catch (ConstraintViolationException ex) {
+        } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -79,20 +79,15 @@ public class FileBusiness {
 
     // UPDATE
     public FileDTO update(Long id, FileBusiness.Filter filter) {
-        try {
-            File fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File",id));
-            FileDTO from = FileDTO.from(fil);
+        File fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File", id));
+        FileDTO from = FileDTO.from(fil);
 
-            mapper.map(filter, from);
+        mapper.map(filter, from);
 
-            File mappedEntity = mapper.map(fil, File.class);
-            mapper.map(from, mappedEntity);
+        File mappedEntity = mapper.map(fil, File.class);
+        mapper.map(from, mappedEntity);
 
-            return FileDTO.from(repository.save(mappedEntity));
-        } catch (Exception e) {
-            log.error("Errore in update", e);
-            return null;
-        }
+        return FileDTO.from(repository.save(mappedEntity));
     }
 
     /**

@@ -74,8 +74,6 @@ public class MediaBusiness {
         request.setBannerCode(bannerCode);
 
         Media map = mapper.map(request, Media.class);
-        map.setCreationDate(LocalDateTime.now());
-        map.setLastModificationDate(LocalDateTime.now());
         map.setMediaType(mediaTypeRepository.findById(request.typeId).orElseThrow(() -> new ElementCleveradException("Media Type", request.typeId)));
         MediaDTO mediaDTO = MediaDTO.from(repository.save(map));
 
@@ -116,36 +114,31 @@ public class MediaBusiness {
 
     // UPDATE
     public MediaDTO update(Long id, Filter filter) {
-        try {
-            Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Media", id));
-            MediaDTO mediaDTOfrom = MediaDTO.from(media);
-            mapper.map(filter, mediaDTOfrom);
+        Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Media", id));
+        MediaDTO mediaDTOfrom = MediaDTO.from(media);
+        mapper.map(filter, mediaDTOfrom);
 
-            Media mappedEntity = mapper.map(media, Media.class);
-            mapper.map(mediaDTOfrom, mappedEntity);
-            mappedEntity.setLastModificationDate(LocalDateTime.now());
+        Media mappedEntity = mapper.map(media, Media.class);
+        mapper.map(mediaDTOfrom, mappedEntity);
+        mappedEntity.setLastModificationDate(LocalDateTime.now());
 
-            String bannerCode = mappedEntity.getBannerCode();
-            String url = mappedEntity.getUrl();
-            if (StringUtils.isNotBlank(url)) bannerCode.replace("{{url}}", url);
+        String bannerCode = mappedEntity.getBannerCode();
+        String url = mappedEntity.getUrl();
+        if (StringUtils.isNotBlank(url)) bannerCode.replace("{{url}}", url);
 
-            String target = mappedEntity.getTarget();
-            if (StringUtils.isNotBlank(target)) bannerCode.replace("{{target}}", target);
-            mappedEntity.setBannerCode(bannerCode);
+        String target = mappedEntity.getTarget();
+        if (StringUtils.isNotBlank(target)) bannerCode.replace("{{target}}", target);
+        mappedEntity.setBannerCode(bannerCode);
 
-            // aggiungo riferimento campagna se c'è
-            if (filter.getCampaignId() != null) {
-                MediaCampaignBusiness.BaseCreateRequest rr = null;
-                rr.setMediaId(mappedEntity.getId());
-                rr.setCampaignId(Long.valueOf(filter.getCampaignId()));
-                mediaCampaignBusiness.create(rr);
-            }
-
-            return MediaDTO.from(repository.save(mappedEntity));
-        } catch (Exception e) {
-            log.error("Errore in update", e);
-            return null;
+        // aggiungo riferimento campagna se c'è
+        if (filter.getCampaignId() != null) {
+            MediaCampaignBusiness.BaseCreateRequest rr = null;
+            rr.setMediaId(mappedEntity.getId());
+            rr.setCampaignId(Long.valueOf(filter.getCampaignId()));
+            mediaCampaignBusiness.create(rr);
         }
+
+        return MediaDTO.from(repository.save(mappedEntity));
     }
 
     // SEARCH PAGINATED
@@ -312,7 +305,6 @@ public class MediaBusiness {
         private String bannerCode;
         private String note;
         private String idFile;
-        private String status;
         private String campaignId;
     }
 

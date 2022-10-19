@@ -88,21 +88,16 @@ public class CampaignCategoryBusiness {
 
     // UPDATE
     public CampaignCategoryDTO update(Long id, Filter filter) {
-        try {
-            CampaignCategory channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignCategory", id));
-            CampaignCategoryDTO campaignDTOfrom = CampaignCategoryDTO.from(channel);
+        CampaignCategory channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignCategory", id));
+        CampaignCategoryDTO campaignDTOfrom = CampaignCategoryDTO.from(channel);
 
-            mapper.map(filter, campaignDTOfrom);
+        mapper.map(filter, campaignDTOfrom);
 
-            CampaignCategory mappedEntity = mapper.map(channel, CampaignCategory.class);
-            mappedEntity.setLastModificationDate(LocalDateTime.now());
-            mapper.map(campaignDTOfrom, mappedEntity);
+        CampaignCategory mappedEntity = mapper.map(channel, CampaignCategory.class);
+        mappedEntity.setLastModificationDate(LocalDateTime.now());
+        mapper.map(campaignDTOfrom, mappedEntity);
 
-            return CampaignCategoryDTO.from(repository.save(mappedEntity));
-        } catch (Exception e) {
-            log.error("Errore in update", e);
-            return null;
-        }
+        return CampaignCategoryDTO.from(repository.save(mappedEntity));
     }
 
     /**

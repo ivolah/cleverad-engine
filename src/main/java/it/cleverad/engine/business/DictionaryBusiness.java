@@ -47,15 +47,15 @@ public class DictionaryBusiness {
 
     // GET BY ID
     public DictionaryDTO findById(Long id) {
-            Dictionary media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Dictionary",id));
-            return DictionaryDTO.from(media);
+        Dictionary media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Dictionary", id));
+        return DictionaryDTO.from(media);
     }
 
     // DELETE BY ID
     public void delete(Long id) {
-         try {
+        try {
             repository.deleteById(id);
-        }  catch (ConstraintViolationException ex) {
+        } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -64,18 +64,13 @@ public class DictionaryBusiness {
 
     // UPDATE
     public DictionaryDTO update(Long id, Filter filter) {
-        try {
-            Dictionary media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Dictionary",id));
-            DictionaryDTO mediaDTOfrom = DictionaryDTO.from(media);
-            mapper.map(filter, mediaDTOfrom);
+        Dictionary media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Dictionary", id));
+        DictionaryDTO mediaDTOfrom = DictionaryDTO.from(media);
+        mapper.map(filter, mediaDTOfrom);
 
-            Dictionary mappedEntity = mapper.map(media, Dictionary.class);
-            mapper.map(mediaDTOfrom, mappedEntity);
-            return DictionaryDTO.from(repository.save(mappedEntity));
-        } catch (Exception e) {
-            log.error("Errore in update", e);
-            return null;
-        }
+        Dictionary mappedEntity = mapper.map(media, Dictionary.class);
+        mapper.map(mediaDTOfrom, mappedEntity);
+        return DictionaryDTO.from(repository.save(mappedEntity));
     }
 
     // SEARCH PAGINATED

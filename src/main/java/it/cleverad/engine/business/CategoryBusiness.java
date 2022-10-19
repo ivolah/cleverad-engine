@@ -55,15 +55,15 @@ public class CategoryBusiness {
 
     // GET BY ID
     public CategoryDTO findById(Long id) {
-            Category category = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Category",id));
-            return CategoryDTO.from(category);
+        Category category = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Category", id));
+        return CategoryDTO.from(category);
     }
 
     // DELETE BY ID
     public void delete(Long id) {
         try {
             repository.deleteById(id);
-         } catch (ConstraintViolationException ex) {
+        } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -79,21 +79,16 @@ public class CategoryBusiness {
 
     // UPDATE
     public CategoryDTO update(Long id, Filter filter) {
-        try {
-            Category category = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Category",id));
-            CategoryDTO categoryDTO = CategoryDTO.from(category);
+        Category category = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Category", id));
+        CategoryDTO categoryDTO = CategoryDTO.from(category);
 
-            mapper.map(filter, categoryDTO);
+        mapper.map(filter, categoryDTO);
 
-            Category mappedEntity = mapper.map(category, Category.class);
-            mappedEntity.setLastModificationDate(LocalDateTime.now());
-            mapper.map(categoryDTO, mappedEntity);
+        Category mappedEntity = mapper.map(category, Category.class);
+        mappedEntity.setLastModificationDate(LocalDateTime.now());
+        mapper.map(categoryDTO, mappedEntity);
 
-            return CategoryDTO.from(repository.save(mappedEntity));
-        } catch (Exception e) {
-            log.error("Errore in update", e);
-            return null;
-        }
+        return CategoryDTO.from(repository.save(mappedEntity));
     }
 
 

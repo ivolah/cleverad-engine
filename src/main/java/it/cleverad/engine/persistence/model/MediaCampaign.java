@@ -19,8 +19,8 @@ public class MediaCampaign {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDateTime creationDate;
-    private LocalDateTime lastModificationDate;
+    private LocalDateTime creationDate = LocalDateTime.now();
+    private LocalDateTime lastModificationDate = LocalDateTime.now();
 
     @OneToOne
     @JoinColumn(name = "media_id")

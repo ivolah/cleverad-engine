@@ -17,13 +17,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -48,22 +46,20 @@ public class CookieBusiness {
     // CREATE
     public CookieDTO create(BaseCreateRequest request) {
         Cookie map = mapper.map(request, Cookie.class);
-        map.setCreationDate(LocalDateTime.now());
-        map.setLastModificationDate(LocalDateTime.now());
         return CookieDTO.from(repository.save(map));
     }
 
     // GET BY ID
     public CookieDTO findById(Long id) {
-            Cookie channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cookie",id));
-            return CookieDTO.from(channel);
+        Cookie channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cookie", id));
+        return CookieDTO.from(channel);
     }
 
     // DELETE BY ID
     public void delete(Long id) {
         try {
             repository.deleteById(id);
-        }  catch (ConstraintViolationException ex) {
+        } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -79,21 +75,16 @@ public class CookieBusiness {
 
     // UPDATE
     public CookieDTO update(Long id, Filter filter) {
-        try {
-            Cookie channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cookie",id));
-            CookieDTO campaignDTOfrom = CookieDTO.from(channel);
+        Cookie channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cookie", id));
+        CookieDTO campaignDTOfrom = CookieDTO.from(channel);
 
-            mapper.map(filter, campaignDTOfrom);
+        mapper.map(filter, campaignDTOfrom);
 
-            Cookie mappedEntity = mapper.map(channel, Cookie.class);
-            mappedEntity.setLastModificationDate(LocalDateTime.now());
-            mapper.map(campaignDTOfrom, mappedEntity);
+        Cookie mappedEntity = mapper.map(channel, Cookie.class);
+        mappedEntity.setLastModificationDate(LocalDateTime.now());
+        mapper.map(campaignDTOfrom, mappedEntity);
 
-            return CookieDTO.from(repository.save(mappedEntity));
-        } catch (Exception e) {
-            log.error("Errore in update", e);
-            return null;
-        }
+        return CookieDTO.from(repository.save(mappedEntity));
     }
 
 
@@ -147,12 +138,7 @@ public class CookieBusiness {
     @AllArgsConstructor
     public static class BaseCreateRequest {
         private String name;
-        private String status;
         private String value;
-        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-        private LocalDate startDate;
-        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-        private LocalDate endDate;
     }
 
     @Data
@@ -161,13 +147,12 @@ public class CookieBusiness {
     public static class Filter {
         private Long id;
         private String name;
-        private String status;
+        private Boolean status;
         private String value;
         private Instant creationDateFrom;
         private Instant creationDateTo;
         private Instant lastModificationDateFrom;
         private Instant lastModificationDateTo;
     }
-
 }
 

@@ -25,12 +25,12 @@ public class Commission {
     private String name;
     private String value;
     private String description;
-    private Boolean status;
     private LocalDate dueDate;
 
-    private LocalDateTime creationDate;
-    private LocalDateTime lastModificationDate;
-
+    @Column(nullable = false)
+    private Boolean status = true;
+    private LocalDateTime creationDate = LocalDateTime.now();
+    private LocalDateTime lastModificationDate = LocalDateTime.now();
     @ManyToOne
     @JoinColumn(name = "campaign_id")
     private Campaign campaign;

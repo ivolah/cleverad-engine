@@ -14,13 +14,12 @@ public class MediaDTO {
 
     private long id;
     private String name;
-
     private String url;
     private String target;
     private String bannerCode;
     private String note;
-
     private String idFile;
+
     private Boolean status;
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;

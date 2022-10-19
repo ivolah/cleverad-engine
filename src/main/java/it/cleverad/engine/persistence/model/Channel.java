@@ -26,7 +26,6 @@ public class Channel {
     private String type;
     private String url;
 
-    @Column(nullable = false)
     private Boolean status = true;
     private LocalDateTime creationDate = LocalDateTime.now();
     private LocalDateTime lastModificationDate = LocalDateTime.now();
@@ -40,5 +39,9 @@ public class Channel {
     @ManyToOne
     @JoinColumn(name = "dictionary_id")
     private Dictionary dictionary;
+
+    @ManyToOne
+    @JoinColumn(name = "affiliate_id")
+    private Affiliate affiliate;
 
 }

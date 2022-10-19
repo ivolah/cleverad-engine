@@ -48,15 +48,15 @@ public class TransactionBusiness {
 
     // GET BY ID
     public TransactionDTO findById(Long id) {
-            Transaction channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction",id));
-            return TransactionDTO.from(channel);
+        Transaction channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
+        return TransactionDTO.from(channel);
     }
 
     // DELETE BY ID
     public void delete(Long id) {
         try {
             repository.deleteById(id);
-        }  catch (ConstraintViolationException ex) {
+        } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -72,20 +72,15 @@ public class TransactionBusiness {
 
     // UPDATE
     public TransactionDTO update(Long id, Filter filter) {
-        try {
-            Transaction channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction",id));
-            TransactionDTO campaignDTOfrom = TransactionDTO.from(channel);
+        Transaction channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
+        TransactionDTO campaignDTOfrom = TransactionDTO.from(channel);
 
-            mapper.map(filter, campaignDTOfrom);
+        mapper.map(filter, campaignDTOfrom);
 
-            Transaction mappedEntity = mapper.map(channel, Transaction.class);
-            mapper.map(campaignDTOfrom, mappedEntity);
+        Transaction mappedEntity = mapper.map(channel, Transaction.class);
+        mapper.map(campaignDTOfrom, mappedEntity);
 
-            return TransactionDTO.from(repository.save(mappedEntity));
-        } catch (Exception e) {
-            log.error("Errore in update", e);
-            return null;
-        }
+        return TransactionDTO.from(repository.save(mappedEntity));
     }
 
 

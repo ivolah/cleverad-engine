@@ -1,6 +1,5 @@
 package it.cleverad.engine.persistence.model;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,21 +25,9 @@ public class Category {
     private String code;
     private String description;
 
-    private LocalDateTime creationDate;
-    private LocalDateTime lastModificationDate;
-
+    private LocalDateTime creationDate = LocalDateTime.now();
+    private LocalDateTime lastModificationDate = LocalDateTime.now();
 
     @OneToMany(mappedBy = "category")
     private Set<ChannelCategory> channelCategories;
-
-
-    @Override
-    public String toString() {
-        return "Category{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", code='" + code + '\'' +
-                ", description='" + description + '\'' +
-                '}';
-    }
 }

@@ -11,16 +11,13 @@ import java.time.LocalDateTime;
 public class CpcDTO {
 
     private long id;
-
     private String refferal;
-
     private LocalDateTime date;
     private Boolean status;
 
     public CpcDTO(long id, String refferal, LocalDateTime date, Boolean status) {
         this.id = id;
         this.refferal = refferal;
-
         this.date = date;
         this.status = status;
     }

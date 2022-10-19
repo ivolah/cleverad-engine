@@ -7,7 +7,6 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.Set;
 
 @Entity
 @Table(name = "t_budget")
@@ -21,7 +20,7 @@ public class Budget {
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long idAffiliate;
+
     private Long budget;
     private Date dueDate;
 
@@ -30,7 +29,14 @@ public class Budget {
     private LocalDateTime creationDate = LocalDateTime.now();
     private LocalDateTime lastModificationDate = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "affiliate")
-    private Set<AffiliateBudgetCampaign> affiliateBudgets;
+    @ManyToOne
+    @JoinColumn(name = "affiliate_id")
+    private Affiliate affiliate;
+
+    @ManyToOne
+    @JoinColumn(name = "campaign_id")
+    private Campaign campaign;
+
+
 
 }

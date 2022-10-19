@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -52,15 +51,15 @@ public class AffiliateBusiness {
 
     // GET BY ID
     public AffiliateDTO findById(Long id) {
-            Affiliate affiliate = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Affiliate",id));
-            return AffiliateDTO.from(affiliate);
+        Affiliate affiliate = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Affiliate", id));
+        return AffiliateDTO.from(affiliate);
     }
 
     // DELETE BY ID
     public void delete(Long id) {
-         try {
+        try {
             repository.deleteById(id);
-        }  catch (ConstraintViolationException ex) {
+        } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -77,21 +76,16 @@ public class AffiliateBusiness {
 
     // UPDATE
     public AffiliateDTO update(Long id, Filter filter) {
-        try {
-            Affiliate affiliate = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Affiliate",id));
-            AffiliateDTO affiliateDTOfrom = AffiliateDTO.from(affiliate);
+        Affiliate affiliate = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Affiliate", id));
+        AffiliateDTO affiliateDTOfrom = AffiliateDTO.from(affiliate);
 
-            mapper.map(filter, affiliateDTOfrom);
+        mapper.map(filter, affiliateDTOfrom);
 
-            Affiliate mappedEntity = mapper.map(affiliate, Affiliate.class);
-            mappedEntity.setLastModificationDate(LocalDateTime.now());
-            mapper.map(affiliateDTOfrom, mappedEntity);
+        Affiliate mappedEntity = mapper.map(affiliate, Affiliate.class);
+        mappedEntity.setLastModificationDate(LocalDateTime.now());
+        mapper.map(affiliateDTOfrom, mappedEntity);
 
-            return AffiliateDTO.from(repository.save(mappedEntity));
-        } catch (Exception e) {
-            log.error("Errore in update", e);
-            return null;
-        }
+        return AffiliateDTO.from(repository.save(mappedEntity));
     }
 
     /**

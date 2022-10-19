@@ -28,7 +28,7 @@ public class Wallet {
     private Double payed;
     private Double residual;
 
-    private Boolean status;
+    private Boolean status = true;
 
     @ManyToOne
     @JoinColumn(name = "affiliate_id")

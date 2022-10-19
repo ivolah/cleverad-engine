@@ -2,7 +2,10 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.Channel;
+import it.cleverad.engine.persistence.repository.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.ChannelRepository;
+import it.cleverad.engine.persistence.repository.DictionaryRepository;
+import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.dto.ChannelDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
@@ -42,9 +45,15 @@ public class ChannelBusiness {
     @Autowired
     private DictionaryBusiness dictionaryBusiness;
     @Autowired
+    private DictionaryRepository dictionaryRepository;
+    @Autowired
+    private AffiliateRepository affiliateRepository;
+    @Autowired
     private Mapper mapper;
     @Autowired
     private AffiliateChannelCommissionCampaignBusiness accc;
+    @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
 
     /**
      * ============================================================================================================
@@ -52,7 +61,12 @@ public class ChannelBusiness {
 
     // CREATE
     public ChannelDTO create(BaseCreateRequest request) {
-        return ChannelDTO.from(repository.save(mapper.map(request, Channel.class)));
+        request.setStatus(true);
+        Channel map = mapper.map(request, Channel.class);
+        map.setDictionary(dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
+        request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+        map.setAffiliate(affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId)));
+        return ChannelDTO.from(repository.save(map));
     }
 
     // GET BY ID
@@ -81,24 +95,21 @@ public class ChannelBusiness {
 
     // UPDATE
     public ChannelDTO update(Long id, Filter filter) {
-        try {
-            Channel channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Channel", id));
-            ChannelDTO campaignDTOfrom = ChannelDTO.from(channel);
+        Channel channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Channel", id));
+        ChannelDTO campaignDTOfrom = ChannelDTO.from(channel);
 
-            mapper.map(filter, campaignDTOfrom);
+        mapper.map(filter, campaignDTOfrom);
 
-            Channel mappedEntity = mapper.map(channel, Channel.class);
-            mappedEntity.setLastModificationDate(LocalDateTime.now());
-            mapper.map(campaignDTOfrom, mappedEntity);
+        Channel mappedEntity = mapper.map(channel, Channel.class);
+        mappedEntity.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.dictionaryId)));
 
-            return ChannelDTO.from(repository.save(mappedEntity));
-        } catch (Exception e) {
-            log.error("Errore in update", e);
-            return null;
-        }
+        mappedEntity.setLastModificationDate(LocalDateTime.now());
+        mapper.map(campaignDTOfrom, mappedEntity);
+
+        return ChannelDTO.from(repository.save(mappedEntity));
     }
 
-    public Page<ChannelDTO> getbyIdAffiliate(Long id, Pageable pageableRequest) {
+    public Page<ChannelDTO> getbyIdAffiliateChannelCommissionTemplate(Long id, Pageable pageableRequest) {
 
         AffiliateChannelCommissionCampaignBusiness.Filter rr = new AffiliateChannelCommissionCampaignBusiness.Filter();
         rr.setAffiliateId(id);
@@ -112,6 +123,25 @@ public class ChannelBusiness {
         return page.map(ChannelDTO::from);
     }
 
+    public Page<ChannelDTO> getbyIdAffiliateAll(Long id, Pageable pageableRequest) {
+        if (jwtUserDetailsService.getRole().equals("Admin")) {
+            Filter request = new Filter();
+            Page<Channel> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id"))));
+            return page.map(ChannelDTO::from);
+        } else {
+            AffiliateChannelCommissionCampaignBusiness.Filter rr = new AffiliateChannelCommissionCampaignBusiness.Filter();
+            rr.setAffiliateId(id);
+            Page<AffiliateChannelCommissionCampaignDTO> search = accc.search(rr, pageableRequest);
+
+            List<Channel> channelList = search.stream().map(affiliateChannelCommissionCampaignDTO -> {
+                return repository.findById(affiliateChannelCommissionCampaignDTO.getChannelId()).get();
+            }).collect(Collectors.toList());
+
+            Page<Channel> page = new PageImpl<>(channelList.stream().distinct().collect(Collectors.toList()));
+            return page.map(ChannelDTO::from);
+        }
+    }
+
     public Page<ChannelDTO> getbyIdUser(Long id, Pageable pageableRequest) {
         AffiliateChannelCommissionCampaignBusiness.Filter rr = new AffiliateChannelCommissionCampaignBusiness.Filter();
         rr.setAffiliateId(userBusiness.findById(id).getAffiliateId());
@@ -123,6 +153,30 @@ public class ChannelBusiness {
 
         Page<Channel> page = new PageImpl<>(channelList.stream().distinct().collect(Collectors.toList()));
         return page.map(ChannelDTO::from);
+    }
+
+    public Page<ChannelDTO> getbyIdUserAll(Long id, Pageable pageableRequest) {
+
+        if (jwtUserDetailsService.getRole().equals("Admin")) {
+
+            Filter request = new Filter();
+            Page<Channel> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id"))));
+            return page.map(ChannelDTO::from);
+
+        } else {
+
+            AffiliateChannelCommissionCampaignBusiness.Filter rr = new AffiliateChannelCommissionCampaignBusiness.Filter();
+            rr.setAffiliateId(userBusiness.findById(id).getAffiliateId());
+            Page<AffiliateChannelCommissionCampaignDTO> search = accc.search(rr, pageableRequest);
+
+            List<Channel> channelList = search.stream().map(dtos -> {
+                return repository.findById(dtos.getChannelId()).get();
+            }).collect(Collectors.toList());
+
+            Page<Channel> page = new PageImpl<>(channelList.stream().distinct().collect(Collectors.toList()));
+            return page.map(ChannelDTO::from);
+
+        }
     }
 
     //  GET TIPI
@@ -152,6 +206,9 @@ public class ChannelBusiness {
             }
             if (request.getStatus() != null) {
                 predicates.add(cb.equal(root.get("status"), request.getStatus()));
+            }
+            if (request.getAffiliateId() != null) {
+                predicates.add(cb.equal(root.get("affiliate").get("id"), request.getAffiliateId()));
             }
 
             if (request.getCreationDateFrom() != null) {
@@ -187,7 +244,8 @@ public class ChannelBusiness {
         private String type;
         private String url;
 
-        private String dictionaryId;
+        private Long affiliateId;
+        private Long dictionaryId;
         private Boolean status;
 
     }
@@ -204,7 +262,8 @@ public class ChannelBusiness {
         private String approvazione;
         private String url;
 
-        private String dictionaryId;
+        private Long affiliateId;
+        private Long dictionaryId;
         private Boolean status;
 
         private Instant creationDateFrom;

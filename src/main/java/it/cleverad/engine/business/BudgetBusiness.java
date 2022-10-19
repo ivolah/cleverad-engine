@@ -2,8 +2,9 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.Budget;
+import it.cleverad.engine.persistence.repository.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.BudgetRepository;
-import it.cleverad.engine.web.dto.AffiliateBudgetCampaignDTO;
+import it.cleverad.engine.persistence.repository.CampaignRepository;
 import it.cleverad.engine.web.dto.BudgetDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -13,7 +14,10 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
@@ -27,7 +31,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -35,9 +38,11 @@ import java.util.stream.Collectors;
 public class BudgetBusiness {
 
     @Autowired
-    AffiliateBudgetCampaignBusiness affiliateBudgetCampaignBusiness;
+    private AffiliateRepository affiliateRepository;
     @Autowired
-    AffiliateBusiness affiliateBusiness;
+    private CampaignRepository campaignRepository;
+    @Autowired
+    private AffiliateBusiness affiliateBusiness;
     @Autowired
     private BudgetRepository repository;
     @Autowired
@@ -50,6 +55,9 @@ public class BudgetBusiness {
     // CREATE
     public BudgetDTO create(BaseCreateRequest request) {
         Budget map = mapper.map(request, Budget.class);
+        map.setStatus(true);
+        map.setAffiliate(affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliat", request.affiliateId)));
+        map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
         return BudgetDTO.from(repository.save(map));
     }
 
@@ -79,39 +87,25 @@ public class BudgetBusiness {
 
     // UPDATE
     public BudgetDTO update(Long id, Filter filter) {
-        try {
-            Budget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Budget", id));
-            BudgetDTO budgetDTO = BudgetDTO.from(budget);
+        Budget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Budget", id));
+        BudgetDTO budgetDTO = BudgetDTO.from(budget);
+        mapper.map(filter, budgetDTO);
 
-            mapper.map(filter, budgetDTO);
+        Budget mappedEntity = mapper.map(budget, Budget.class);
+        mappedEntity.setLastModificationDate(LocalDateTime.now());
+        mappedEntity.setAffiliate(affiliateRepository.findById(filter.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliat", filter.affiliateId)));
+        mappedEntity.setCampaign(campaignRepository.findById(filter.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", filter.campaignId)));
+        mapper.map(budgetDTO, mappedEntity);
 
-            Budget mappedEntity = mapper.map(budget, Budget.class);
-            mappedEntity.setLastModificationDate(LocalDateTime.now());
-            mapper.map(budgetDTO, mappedEntity);
-
-            return BudgetDTO.from(repository.save(mappedEntity));
-        } catch (Exception e) {
-            log.error("Errore in update", e);
-            return null;
-        }
+        return BudgetDTO.from(repository.save(mappedEntity));
     }
 
     public Page<BudgetDTO> getByIdCampaign(Long id) {
-        AffiliateBudgetCampaignBusiness.Filter reques = new AffiliateBudgetCampaignBusiness.Filter();
-        reques.setCampaignId(id);
-        Page<AffiliateBudgetCampaignDTO> ll = affiliateBudgetCampaignBusiness.search(reques, PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id"))));
-
-        Page<BudgetDTO> listaB = new PageImpl<>(ll.stream().map(affiliateBudgetCampaignDTO -> {
-            BudgetDTO budgetDTO = this.findById(affiliateBudgetCampaignDTO.getBudgetId());
-            try {
-                budgetDTO.setAffiliateName(affiliateBusiness.findById(affiliateBudgetCampaignDTO.getAffiliateId()).getName());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return budgetDTO;
-        }).collect(Collectors.toList()));
-
-        return listaB;
+        Pageable pageable = PageRequest.of(0,1000, Sort.by(Sort.Order.asc("id")));
+        Filter request = new Filter();
+        request.setCampaignId(id);
+        Page<Budget> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(BudgetDTO::from);
     }
 
     /**
@@ -125,10 +119,12 @@ public class BudgetBusiness {
             if (request.getId() != null) {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
-            if (request.getIdAffiliate() != null) {
-                predicates.add(cb.equal(root.get("idAffiliate"), request.getIdAffiliate()));
+            if (request.getAffiliateId() != null) {
+                predicates.add(cb.equal(root.get("affiliate").get("id"), request.getAffiliateId()));
             }
-
+            if (request.getCampaignId() != null) {
+                predicates.add(cb.equal(root.get("campaign").get("id"), request.getCampaignId()));
+            }
             if (request.isStatus()) {
                 predicates.add(cb.equal(root.get("status"), request.isStatus()));
             }
@@ -161,16 +157,11 @@ public class BudgetBusiness {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class BaseCreateRequest {
-        private Long idAffiliate;
+        private Long affiliateId;
+        private Long campaignId;
         private Long budget;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private Date dueDate;
-
-        private boolean status;
-        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-        private LocalDateTime creationDate;
-        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-        private LocalDateTime lastModificationDate;
     }
 
     @Data
@@ -178,7 +169,8 @@ public class BudgetBusiness {
     @AllArgsConstructor
     public static class Filter {
         private Long id;
-        private Long idAffiliate;
+        private Long affiliateId;
+        private Long campaignId;
         private Long budget;
         private Date dueDate;
 

@@ -24,17 +24,16 @@ public class RevenueFactor {
     private Long revenue;
     private LocalDate dueDate;
 
-    private boolean status;
-
-    private LocalDateTime creationDate;
-    private LocalDateTime lastModificationDate;
+    private Boolean status = true;
+    private LocalDateTime creationDate = LocalDateTime.now();
+    private LocalDateTime lastModificationDate = LocalDateTime.now();
 
     @ManyToOne()
     @JoinColumn(name = "campaign_id")
     private Campaign campaign;
 
     @ManyToOne()
-    @JoinColumn(name = "type_id")
+    @JoinColumn(name = "dictionary_id")
     private Dictionary dictionary;
 
 }

@@ -61,9 +61,10 @@ public class RevenueFactorBusiness {
     public RevenueFactorDTO create(BaseCreateRequest request) {
         RevenueFactor map = mapper.map(request, RevenueFactor.class);
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow());
-        map.setDictionary(dictionaryRepository.findById(request.idType).orElseThrow());
+        map.setDictionary(dictionaryRepository.findById(request.dictionaryId).orElseThrow());
         map.setCreationDate(LocalDateTime.now());
         map.setLastModificationDate(LocalDateTime.now());
+        map.setStatus(true);
         return RevenueFactorDTO.from(repository.save(map));
     }
 
@@ -94,21 +95,17 @@ public class RevenueFactorBusiness {
 
     // UPDATE
     public RevenueFactorDTO update(Long id, Filter filter) {
-        try {
-            RevenueFactor ommission = repository.findById(id).orElseThrow(() -> new ElementCleveradException("RevenueFactor", id));
-            RevenueFactorDTO campaignDTOfrom = RevenueFactorDTO.from(ommission);
+        RevenueFactor ommission = repository.findById(id).orElseThrow(() -> new ElementCleveradException("RevenueFactor", id));
+        RevenueFactorDTO campaignDTOfrom = RevenueFactorDTO.from(ommission);
+        mapper.map(filter, campaignDTOfrom);
 
-            mapper.map(filter, campaignDTOfrom);
+        RevenueFactor mappedEntity = mapper.map(ommission, RevenueFactor.class);
+        mappedEntity.setCampaign(campaignRepository.findById(filter.campaignId).orElseThrow());
+        mappedEntity.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow());
+        mappedEntity.setLastModificationDate(LocalDateTime.now());
+        mapper.map(campaignDTOfrom, mappedEntity);
 
-            RevenueFactor mappedEntity = mapper.map(ommission, RevenueFactor.class);
-            mappedEntity.setLastModificationDate(LocalDateTime.now());
-            mapper.map(campaignDTOfrom, mappedEntity);
-
-            return RevenueFactorDTO.from(repository.save(mappedEntity));
-        } catch (Exception e) {
-            log.error("Errore in update", e);
-            return null;
-        }
+        return RevenueFactorDTO.from(repository.save(mappedEntity));
     }
 
     public Page<RevenueFactorDTO> getbyIdCampaign(Long id, Pageable pageableRequest) {
@@ -143,8 +140,8 @@ public class RevenueFactorBusiness {
             if (request.getCampaignId() != null) {
                 predicates.add(cb.equal(root.get("campaign").get("id"), request.getCampaignId()));
             }
-            if (request.getTypeId() != null) {
-                predicates.add(cb.equal(root.get("dictionary").get("id"), request.getTypeId()));
+            if (request.getDictionaryId() != null) {
+                predicates.add(cb.equal(root.get("dictionary").get("id"), request.getDictionaryId()));
             }
 
             if (request.getCreationDateFrom() != null) {
@@ -179,7 +176,7 @@ public class RevenueFactorBusiness {
         private LocalDate dueDate;
         private Boolean status;
         private Long campaignId;
-        private Long idType;
+        private Long dictionaryId;
     }
 
     @Data
@@ -193,7 +190,7 @@ public class RevenueFactorBusiness {
         private Boolean status;
 
         private Long campaignId;
-        private Long typeId;
+        private Long dictionaryId;
 
         private Instant creationDateFrom;
         private Instant creationDateTo;

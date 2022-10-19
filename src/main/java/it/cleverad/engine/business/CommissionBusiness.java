@@ -62,7 +62,7 @@ public class CommissionBusiness {
         map.setCreationDate(LocalDateTime.now());
         map.setLastModificationDate(LocalDateTime.now());
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
-        map.setDictionary(dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.campaignId)));
+        map.setDictionary(dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
         return CommissionDTO.from(repository.save(map));
     }
 
@@ -93,21 +93,18 @@ public class CommissionBusiness {
 
     // UPDATE
     public CommissionDTO update(Long id, Filter filter) {
-        try {
-            Commission ommission = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Commission", id));
-            CommissionDTO campaignDTOfrom = CommissionDTO.from(ommission);
+        Commission ommission = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Commission", id));
+        CommissionDTO campaignDTOfrom = CommissionDTO.from(ommission);
 
-            mapper.map(filter, campaignDTOfrom);
+        mapper.map(filter, campaignDTOfrom);
 
-            Commission mappedEntity = mapper.map(ommission, Commission.class);
-            mappedEntity.setLastModificationDate(LocalDateTime.now());
-            mapper.map(campaignDTOfrom, mappedEntity);
+        Commission mappedEntity = mapper.map(ommission, Commission.class);
+        mappedEntity.setLastModificationDate(LocalDateTime.now());
+        mappedEntity.setCampaign(campaignRepository.findById(filter.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", filter.campaignId)));
+        mappedEntity.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.dictionaryId)));
+        mapper.map(campaignDTOfrom, mappedEntity);
 
-            return CommissionDTO.from(repository.save(mappedEntity));
-        } catch (Exception e) {
-            log.error("Errore in update", e);
-            return null;
-        }
+        return CommissionDTO.from(repository.save(mappedEntity));
     }
 
     //  GET TIPI
@@ -185,6 +182,7 @@ public class CommissionBusiness {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class BaseCreateRequest {
+
         private String name;
         private String value;
         private String description;
@@ -194,6 +192,7 @@ public class CommissionBusiness {
 
         private Long campaignId;
         private Long dictionaryId;
+
     }
 
     @Data

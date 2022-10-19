@@ -22,7 +22,8 @@ public class Dictionary {
     private String name;
     private String description;
     private String type;
-    private boolean status;
+
+    private boolean status = true;
 
     @OneToMany
     @JoinColumn(name = "dictionary_id")
@@ -37,7 +38,7 @@ public class Dictionary {
     private Set<Channel> channels;
 
     @OneToMany
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "dictionary_id")
     private Set<RevenueFactor> revenueFactors;
 
 }

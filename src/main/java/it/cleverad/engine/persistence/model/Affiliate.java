@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -43,9 +42,6 @@ public class Affiliate {
     private Set<AffiliateChannelCommissionCampaign> commissionCampaigns;
 
     @OneToMany(mappedBy = "affiliate")
-    private Set<AffiliateBudgetCampaign> affiliateBudgets;
-
-    @OneToMany(mappedBy = "affiliate")
     private Set<Wallet> wallets;
 
     @OneToMany(mappedBy = "affiliate")
@@ -53,6 +49,12 @@ public class Affiliate {
 
     @OneToMany(mappedBy = "affiliate")
     private Set<User> users;
+
+    @OneToMany(mappedBy = "affiliate")
+    private Set<Channel> channels;
+
+    @OneToMany(mappedBy = "affiliate")
+    private Set<Budget> budgets;
 
     public void addWallet(Wallet wallet) {
         wallet.setAffiliate(this);

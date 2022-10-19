@@ -29,9 +29,10 @@ public class User {
     private String surname;
     private String email;
 
-    private Boolean status;
+    @Column(nullable = false)
+    private Boolean status = true;
+    private LocalDateTime creationDate = LocalDateTime.now();
 
-    private LocalDateTime creationDate;
     private LocalDateTime lastLogin;
 
     @ManyToOne

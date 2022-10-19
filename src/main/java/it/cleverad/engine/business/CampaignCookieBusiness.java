@@ -51,7 +51,7 @@ public class CampaignCookieBusiness {
         map.setCreationDate(LocalDateTime.now());
         map.setLastModificationDate(LocalDateTime.now());
 
-        Cookie cat= new Cookie();
+        Cookie cat = new Cookie();
         cat.setId(request.getCookieId());
         map.setCookie(cat);
 
@@ -64,15 +64,15 @@ public class CampaignCookieBusiness {
 
     // GET BY ID
     public CampaignCookieDTO findById(Long id) {
-            CampaignCookie channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignCookie",id));
-            return  CampaignCookieDTO.from(channel);
+        CampaignCookie channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignCookie", id));
+        return CampaignCookieDTO.from(channel);
     }
 
     // DELETE BY ID
     public void delete(Long id) {
-         try {
+        try {
             repository.deleteById(id);
-        }  catch (ConstraintViolationException ex) {
+        } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -88,21 +88,17 @@ public class CampaignCookieBusiness {
 
     // UPDATE
     public CampaignCookieDTO update(Long id, Filter filter) {
-        try {
-            CampaignCookie channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignCookie",id));
-            CampaignCookieDTO campaignDTOfrom = CampaignCookieDTO.from(channel);
 
-            mapper.map(filter,campaignDTOfrom );
+        CampaignCookie channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignCookie", id));
+        CampaignCookieDTO campaignDTOfrom = CampaignCookieDTO.from(channel);
 
-            CampaignCookie mappedEntity = mapper.map(channel, CampaignCookie.class);
-            mappedEntity.setLastModificationDate(LocalDateTime.now());
-            mapper.map(campaignDTOfrom, mappedEntity);
+        mapper.map(filter, campaignDTOfrom);
 
-            return CampaignCookieDTO.from(repository.save(mappedEntity));
-        } catch (Exception e) {
-            log.error("Errore in update", e);
-            return null;
-        }
+        CampaignCookie mappedEntity = mapper.map(channel, CampaignCookie.class);
+        mappedEntity.setLastModificationDate(LocalDateTime.now());
+        mapper.map(campaignDTOfrom, mappedEntity);
+
+        return CampaignCookieDTO.from(repository.save(mappedEntity));
     }
 
     /**

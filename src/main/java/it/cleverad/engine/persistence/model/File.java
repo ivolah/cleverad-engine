@@ -25,7 +25,7 @@ public class File {
     @Lob
     private byte[] data;
 
-    private LocalDateTime creationDate;
+    private LocalDateTime creationDate= LocalDateTime.now();
 
     public File(String name, String type, byte[] data) {
         this.name = name;

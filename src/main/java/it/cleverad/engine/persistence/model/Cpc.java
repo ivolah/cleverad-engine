@@ -22,7 +22,7 @@ public class Cpc {
 
     private String refferal;
 
-    private LocalDateTime date;
-    private Boolean status;
+    private LocalDateTime date = LocalDateTime.now();
+    private Boolean status = false;
 
 }

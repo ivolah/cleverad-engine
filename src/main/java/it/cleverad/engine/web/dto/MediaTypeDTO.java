@@ -13,9 +13,9 @@ public class MediaTypeDTO {
     private long id;
     private String name;
     private String description;
-    private String status;
+    private Boolean status;
 
-    public MediaTypeDTO(long id, String name, String description, String status) {
+    public MediaTypeDTO(long id, String name, String description, Boolean status) {
         this.id = id;
         this.name = name;
         this.description = description;

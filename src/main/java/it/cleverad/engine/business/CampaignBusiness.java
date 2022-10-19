@@ -53,6 +53,7 @@ public class CampaignBusiness {
     @Autowired
     private CampaignCategoryBusiness campaignCategoryBusiness;
 
+
     @Autowired
     private CookieRepository cookieRepository;
 
@@ -123,7 +124,6 @@ public class CampaignBusiness {
 
     // UPDATE
     public CampaignDTO update(Long id, Filter filter) {
-        try {
             Campaign campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
             CampaignDTO campaignDTOfrom = CampaignDTO.from(campaign);
             mapper.map(filter, campaignDTOfrom);
@@ -131,16 +131,25 @@ public class CampaignBusiness {
             mappedEntity.setLastModificationDate(LocalDateTime.now());
             mapper.map(campaignDTOfrom, mappedEntity);
             return CampaignDTO.from(repository.save(mappedEntity));
-        } catch (Exception e) {
-            log.error("Errore in update", e);
-            return null;
-        }
-    }
+            }
 
     // TROVA LE CAMPAGNE DELL AFFILIATE
     public Page<CampaignDTO> getCampaigns(Long affiliateId, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-        Page<Campaign> page = repository.findAffiliateCampaigns(affiliateId, pageable);
+        Filter request = new Filter();
+
+        Page<Campaign> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(CampaignDTO::from);
+    }
+
+    // TROVA LE CAMPAGNE DELL AFFILIATE filtrate per ID AFFIALIseTE DAL USER
+    public Page<CampaignDTO> getCampaignsGuest(Pageable pageableRequest) {
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+
+        Filter request = new Filter();
+
+
+        Page<Campaign> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CampaignDTO::from);
     }
 

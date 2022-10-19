@@ -55,13 +55,13 @@ public class Campaign {
     private Set<CampaignCookie> campaignCookies;
 
     @OneToMany(mappedBy = "campaign")
-    private Set<AffiliateBudgetCampaign> affiliateBudgets;
-
-    @OneToMany(mappedBy = "campaign")
     private Set<Transaction> transactions;
 
     @OneToMany(mappedBy = "campaign")
     private Set<RevenueFactor> revenueFactors;
+
+    @OneToMany(mappedBy = "campaign")
+    private Set<Budget> budgets;
 
     @ManyToOne
     @JoinColumn(name = "cookie_id")

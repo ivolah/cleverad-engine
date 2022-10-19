@@ -53,15 +53,15 @@ public class CplBusiness {
 
     // GET BY ID
     public CplDTO findById(Long id) {
-            Cpl channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cpl",id));
-            return CplDTO.from(channel);
+        Cpl channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cpl", id));
+        return CplDTO.from(channel);
     }
 
     // DELETE BY ID
     public void delete(Long id) {
         try {
             repository.deleteById(id);
-        }  catch (ConstraintViolationException ex) {
+        } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -77,20 +77,15 @@ public class CplBusiness {
 
     // UPDATE
     public CplDTO update(Long id, Filter filter) {
-        try {
-            Cpl channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cpl",id));
-            CplDTO campaignDTOfrom = CplDTO.from(channel);
+        Cpl channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cpl", id));
+        CplDTO campaignDTOfrom = CplDTO.from(channel);
 
-            mapper.map(filter, campaignDTOfrom);
+        mapper.map(filter, campaignDTOfrom);
 
-            Cpl mappedEntity = mapper.map(channel, Cpl.class);
-            mapper.map(campaignDTOfrom, mappedEntity);
+        Cpl mappedEntity = mapper.map(channel, Cpl.class);
+        mapper.map(campaignDTOfrom, mappedEntity);
 
-            return CplDTO.from(repository.save(mappedEntity));
-        } catch (Exception e) {
-            log.error("Errore in update", e);
-            return null;
-        }
+        return CplDTO.from(repository.save(mappedEntity));
     }
 
 

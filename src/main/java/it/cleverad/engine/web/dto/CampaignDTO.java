@@ -137,8 +137,8 @@ public class CampaignDTO {
                 RevenueFactorDTO dto = new RevenueFactorDTO();
                 dto.setId(factor.getId());
                 dto.setRevenue(factor.getRevenue());
-                dto.setStatus(factor.isStatus());
-                dto.setTypeName(factor.getDictionary().getName());
+                dto.setStatus(factor.getStatus());
+                dto.setDictionaryName(factor.getDictionary().getName());
                 dto.setDueDate(factor.getDueDate());
                 dto.setCreationDate(factor.getCreationDate());
                 dto.setLastModificationDate(factor.getLastModificationDate());

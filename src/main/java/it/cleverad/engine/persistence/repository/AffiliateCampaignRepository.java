@@ -1,0 +1,9 @@
+package it.cleverad.engine.persistence.repository;
+
+import it.cleverad.engine.persistence.model.AffiliateCampaign;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+public interface AffiliateCampaignRepository extends JpaRepository<AffiliateCampaign, Long>, JpaSpecificationExecutor<AffiliateCampaign> {
+
+}

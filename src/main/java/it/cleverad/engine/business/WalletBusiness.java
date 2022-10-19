@@ -50,8 +50,8 @@ public class WalletBusiness {
 
     // GET BY ID
     public WalletDTO findById(Long id) {
-            Wallet channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Wallet",id));
-            return WalletDTO.from(channel);
+        Wallet channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Wallet", id));
+        return WalletDTO.from(channel);
     }
 
     // DELETE BY ID
@@ -59,7 +59,7 @@ public class WalletBusiness {
         try {
             repository.deleteById(id);
         } catch (ConstraintViolationException ex) {
-        throw ex;
+            throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
         }
@@ -83,20 +83,15 @@ public class WalletBusiness {
 
     // UPDATE
     public WalletDTO update(Long id, Filter filter) {
-        try {
-            Wallet channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Wallet",id));
-            WalletDTO campaignDTOfrom = WalletDTO.from(channel);
+        Wallet channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Wallet", id));
+        WalletDTO campaignDTOfrom = WalletDTO.from(channel);
 
-            mapper.map(filter, campaignDTOfrom);
+        mapper.map(filter, campaignDTOfrom);
 
-            Wallet mappedEntity = mapper.map(channel, Wallet.class);
-            mapper.map(campaignDTOfrom, mappedEntity);
+        Wallet mappedEntity = mapper.map(channel, Wallet.class);
+        mapper.map(campaignDTOfrom, mappedEntity);
 
-            return WalletDTO.from(repository.save(mappedEntity));
-        } catch (Exception e) {
-            log.error("Errore in update", e);
-            return null;
-        }
+        return WalletDTO.from(repository.save(mappedEntity));
     }
 
     /**

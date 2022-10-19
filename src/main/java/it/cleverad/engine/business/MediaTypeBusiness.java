@@ -64,7 +64,6 @@ public class MediaTypeBusiness {
 
     // UPDATE
     public MediaTypeDTO update(Long id, Filter filter) {
-        try {
             MediaType media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("MediaType", id));
             MediaTypeDTO mediaDTOfrom = MediaTypeDTO.from(media);
             mapper.map(filter, mediaDTOfrom);
@@ -72,10 +71,6 @@ public class MediaTypeBusiness {
             MediaType mappedEntity = mapper.map(media, MediaType.class);
             mapper.map(mediaDTOfrom, mappedEntity);
             return MediaTypeDTO.from(repository.save(mappedEntity));
-        } catch (Exception e) {
-            log.error("Errore in update", e);
-            return null;
-        }
     }
 
     // SEARCH PAGINATED
@@ -124,7 +119,7 @@ public class MediaTypeBusiness {
     public static class BaseCreateRequest {
         private String name;
         private String description;
-        private String status;
+        private Boolean status;
     }
 
     @Data
@@ -134,7 +129,7 @@ public class MediaTypeBusiness {
         private Long id;
         private String name;
         private String description;
-        private String status;
+        private Boolean status;
     }
 
 }

@@ -104,18 +104,13 @@ public class TrackingBusiness {
 
     // UPDATE
     public TrackingDTO update(Long id, Filter filter) {
-        try {
-            Tracking media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Tracking", id));
-            TrackingDTO mediaDTOfrom = TrackingDTO.from(media);
-            mapper.map(filter, mediaDTOfrom);
+        Tracking media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Tracking", id));
+        TrackingDTO mediaDTOfrom = TrackingDTO.from(media);
+        mapper.map(filter, mediaDTOfrom);
 
-            Tracking mappedEntity = mapper.map(media, Tracking.class);
-            mapper.map(mediaDTOfrom, mappedEntity);
-            return TrackingDTO.from(repository.save(mappedEntity));
-        } catch (Exception e) {
-            log.error("Errore in update", e);
-            return null;
-        }
+        Tracking mappedEntity = mapper.map(media, Tracking.class);
+        mapper.map(mediaDTOfrom, mappedEntity);
+        return TrackingDTO.from(repository.save(mappedEntity));
     }
 
     public void setRead(long id) {

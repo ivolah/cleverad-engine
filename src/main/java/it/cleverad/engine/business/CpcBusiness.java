@@ -46,22 +46,21 @@ public class CpcBusiness {
     // CREATE
     public CpcDTO create(BaseCreateRequest request) {
         Cpc map = mapper.map(request, Cpc.class);
-        map.setDate(LocalDateTime.now());
-        map.setStatus(false);
+        log.info(request.refferal + " " + map.getRefferal());
         return CpcDTO.from(repository.save(map));
     }
 
     // GET BY ID
     public CpcDTO findById(Long id) {
-            Cpc channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cpc",id));
-            return CpcDTO.from(channel);
+        Cpc channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cpc", id));
+        return CpcDTO.from(channel);
     }
 
     // DELETE BY ID
     public void delete(Long id) {
         try {
             repository.deleteById(id);
-        }  catch (ConstraintViolationException ex) {
+        } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -77,20 +76,15 @@ public class CpcBusiness {
 
     // UPDATE
     public CpcDTO update(Long id, Filter filter) {
-        try {
-            Cpc channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cpc",id));
-            CpcDTO campaignDTOfrom = CpcDTO.from(channel);
+        Cpc channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cpc", id));
+        CpcDTO campaignDTOfrom = CpcDTO.from(channel);
 
-            mapper.map(filter, campaignDTOfrom);
+        mapper.map(filter, campaignDTOfrom);
 
-            Cpc mappedEntity = mapper.map(channel, Cpc.class);
-            mapper.map(campaignDTOfrom, mappedEntity);
+        Cpc mappedEntity = mapper.map(channel, Cpc.class);
+        mapper.map(campaignDTOfrom, mappedEntity);
 
-            return CpcDTO.from(repository.save(mappedEntity));
-        } catch (Exception e) {
-            log.error("Errore in update", e);
-            return null;
-        }
+        return CpcDTO.from(repository.save(mappedEntity));
     }
 
 
@@ -136,11 +130,8 @@ public class CpcBusiness {
     @AllArgsConstructor
     public static class Filter {
         private Long id;
-
         private String refferal;
-
         private Boolean status;
-
         private Instant dateFrom;
         private Instant dateTo;
     }
