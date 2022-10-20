@@ -3,7 +3,6 @@ package it.cleverad.engine.business;
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.Tracking;
 import it.cleverad.engine.persistence.repository.TrackingRepository;
-import it.cleverad.engine.web.dto.MediaCampaignDTO;
 import it.cleverad.engine.web.dto.MediaDTO;
 import it.cleverad.engine.web.dto.TargetDTO;
 import it.cleverad.engine.web.dto.TrackingDTO;
@@ -42,8 +41,7 @@ public class TrackingBusiness {
 
     @Autowired
     private MediaBusiness mediaBusiness;
-    @Autowired
-    private MediaCampaignBusiness mediaCampaignBusiness;
+
     @Autowired
     private CampaignBusiness campaignBusiness;
 
@@ -66,10 +64,9 @@ public class TrackingBusiness {
         MediaDTO mediaDTO = mediaBusiness.findById(Long.valueOf(mediaID));
         targetDTO.setTarget(mediaDTO.getTarget());
 
-        MediaCampaignDTO mcb = mediaCampaignBusiness.findByIdMedia(mediaDTO.getId());
-        if (mcb != null) {
-            Long cID = mcb.getCampaignId();
-            if (cID != null) targetDTO.setCookieTime(campaignBusiness.findById(cID).getCookieValue());
+        Long cID = mediaDTO.getCampaignId();
+        if (cID != null) {
+            targetDTO.setCookieTime(campaignBusiness.findById(cID).getCookieValue());
         } else {
             targetDTO.setCookieTime("60");
         }

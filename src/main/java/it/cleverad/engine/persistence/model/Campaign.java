@@ -7,6 +7,7 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -36,8 +37,6 @@ public class Campaign {
     private LocalDateTime creationDate = LocalDateTime.now();
     private LocalDateTime lastModificationDate = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "campaign")
-    private Set<MediaCampaign> mediaCampaignList;
 
     @OneToMany(mappedBy = "campaign")
     private Set<AffiliateChannelCommissionCampaign> affiliateChannelCommissionCampaigns;
@@ -66,5 +65,23 @@ public class Campaign {
     @ManyToOne
     @JoinColumn(name = "cookie_id")
     private Cookie cookie;
+
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "t_campaign_media", joinColumns = @JoinColumn(name = "campaign_id"), inverseJoinColumns = @JoinColumn(name = "media_id"))
+    private Set<Media> medias = new HashSet<>();
+
+    public void addMedia(Media media) {
+        this.medias.add(media);
+        media.getCampaigns().add(this);
+    }
+
+    public void removeMedia(long tagId) {
+        Media tag = this.medias.stream().filter(t -> t.getId() == tagId).findFirst().orElse(null);
+        if (tag != null) {
+            this.medias.remove(tag);
+            tag.getCampaigns().remove(this);
+        }
+    }
 
 }

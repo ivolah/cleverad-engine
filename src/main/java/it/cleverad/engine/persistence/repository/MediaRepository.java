@@ -12,7 +12,7 @@ public interface MediaRepository extends JpaRepository<Media, Long>, JpaSpecific
 
     @Query(nativeQuery = true,
             value = "SELECT * from t_media tm left join t_media_campaign tmc on tm.id = tmc.media_id where tmc.campaign_id = ?1 ")
-    Page<Media> findMediaCampaigns(Long campaignId, Pageable pageable);
+    Page<Media> findMediaCampaxigns(Long campaignId, Pageable pageable);
 
     @Query(nativeQuery = true,
             value = "SELECT tm.*, tmc from t_media tm left join t_media_campaign tmc on tm.id = tmc.media_id ")

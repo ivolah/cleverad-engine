@@ -4,6 +4,7 @@ import it.cleverad.engine.business.*;
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.dto.CommissionDTO;
 import it.cleverad.engine.web.dto.WalletDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,15 +112,13 @@ public class ScheduledActivities {
 
         try {
             // trovo uttti i tracking con read == false
-            cpcBusiness.getUnread().stream().filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal())).forEach(cpcDTO -> {
+            cpcBusiness.getUnread().stream().forEach(cpcDTO -> {
 
                 // prendo reffereal e lo leggo
                 String refferal = cpcDTO.getRefferal();
-                log.info("REFF CPC {}", refferal);
-
                 byte[] decoder = Base64.getDecoder().decode(refferal);
                 String str = new String(decoder);
-                log.trace("TTTT CPC {}", str);
+                log.info("CPC :: {} - {}", refferal, str);
 
                 String[] tokens = str.split("\\|\\|");
                 String mediaID = tokens[1];
@@ -161,7 +160,7 @@ public class ScheduledActivities {
             log.error("Eccezione Scheduler CPC --  {}", e.getMessage(), e);
         }
 
-    }//trasformaTrackingCPL
+    }//trasformaTrackingCPC
 
     @Scheduled(fixedRateString = "400000")
     public void trasformaTrackingCPM() {
@@ -172,11 +171,9 @@ public class ScheduledActivities {
 
                 // prendo reffereal e lo leggo
                 String refferal = cpmDTO.getRefferal();
-                log.info("REFF CPM {}", refferal);
-
                 byte[] decoder = Base64.getDecoder().decode(refferal);
                 String str = new String(decoder);
-                log.trace("TTTT CPM {}", str);
+                log.info("CPM :: {} - {}", refferal, str);
 
                 String[] tokens = str.split("\\|\\|");
                 String mediaID = tokens[1];
@@ -218,7 +215,7 @@ public class ScheduledActivities {
             log.error("Eccezione Scheduler CPM --  {}", e.getMessage(), e);
         }
 
-    }//trasformaTrackingCPL
+    }//trasformaTrackingCPM
 
     @Scheduled(fixedRateString = "50000")
     public void trasformaTrackingCPL() {
@@ -229,11 +226,10 @@ public class ScheduledActivities {
 
                 // prendo reffereal e lo leggo
                 String refferal = cplDTO.getRefferal();
-                log.info("REFF CCPL {}", refferal);
 
                 byte[] decoder = Base64.getDecoder().decode(refferal);
                 String str = new String(decoder);
-                log.trace("TTTT CCPL {}", str);
+                log.info("CPL :: {} - {}", refferal, str);
 
                 String[] tokens = str.split("\\|\\|");
                 String mediaID = tokens[1];
@@ -248,7 +244,7 @@ public class ScheduledActivities {
                 rr.setApproved(false);
 
                 // associo a wallet
-                WalletDTO walletDTO = walletBusiness.findByIdAffilaite(Long.valueOf(tokens[2])).stream().findFirst().get();
+                WalletDTO walletDTO = walletBusiness.findByIdAffilaite(Long.valueOf(tokens[2])).stream().findFirst().orElseThrow(() -> new ElementCleveradException("Wallet", Long.valueOf(tokens[2])));
                 rr.setWalletId(walletDTO.getId());
 
                 // g4esione commisione

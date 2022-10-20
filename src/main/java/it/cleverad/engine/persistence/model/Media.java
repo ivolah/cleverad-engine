@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "t_media")
@@ -30,11 +31,11 @@ public class Media {
     private LocalDateTime creationDate = LocalDateTime.now();
     private LocalDateTime lastModificationDate = LocalDateTime.now();
 
-    @OneToOne(mappedBy = "media")
-    private MediaCampaign mediaCampaign;
-
     @ManyToOne
     @JoinColumn(name = "type_id")
     private MediaType mediaType;
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "medias")
+    private Set<Campaign> campaigns;
 
 }

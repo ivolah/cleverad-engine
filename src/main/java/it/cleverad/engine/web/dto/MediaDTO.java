@@ -1,5 +1,6 @@
 package it.cleverad.engine.web.dto;
 
+import it.cleverad.engine.persistence.model.Campaign;
 import it.cleverad.engine.persistence.model.Media;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -50,25 +51,8 @@ public class MediaDTO {
     }
 
     public static MediaDTO from(Media media) {
-        Long idC = null;
-        String nameC = "NON ASSOCIATO A CAMPAGNA";
-        if (media.getMediaCampaign() != null) {
-            idC = media.getMediaCampaign().getCampaign().getId();
-            nameC = media.getMediaCampaign().getCampaign().getName();
-        }
-
-        return new MediaDTO(
-                media.getId(),
-                media.getName(),
-                media.getUrl(),
-                media.getTarget(),
-                media.getBannerCode(),
-                media.getNote(),
-                media.getIdFile(),
-                media.getStatus(),
-                media.getCreationDate(),
-                media.getLastModificationDate(),
-                idC, nameC, media.getMediaType().getId(), media.getMediaType().getName());
+        Campaign campaign = media.getCampaigns().stream().findFirst().orElse(null);
+        return new MediaDTO(media.getId(), media.getName(), media.getUrl(), media.getTarget(), media.getBannerCode(), media.getNote(), media.getIdFile(), media.getStatus(), media.getCreationDate(), media.getLastModificationDate(), campaign != null ? campaign.getId() : null, campaign != null ? campaign.getName() : "NON ASSOCIATO A CAMPAGNA", media.getMediaType().getId(), media.getMediaType().getName());
     }
 
 }

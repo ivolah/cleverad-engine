@@ -48,11 +48,7 @@ public class CampaignBusiness {
     private Mapper mapper;
 
     @Autowired
-    private MediaCampaignBusiness mediaCampaignBusiness;
-
-    @Autowired
     private CampaignCategoryBusiness campaignCategoryBusiness;
-
 
     @Autowired
     private CookieRepository cookieRepository;
@@ -99,7 +95,7 @@ public class CampaignBusiness {
         Campaign campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
         try {
             if (campaign != null) {
-                campaign.getMediaCampaignList().stream().forEach(mediaCampaign -> mediaCampaignBusiness.delete(mediaCampaign.getId()));
+             //   campaign.getMediaCampaignList().stream().forEach(mediaCampaign -> mediaCampaignBusiness.delete(mediaCampaign.getId()));
                 campaign.getCampaignCategories().stream().forEach(campaignCategory -> campaignCategoryBusiness.delete(campaignCategory.getId()));
             }
             repository.deleteById(id);

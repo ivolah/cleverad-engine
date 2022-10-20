@@ -65,16 +65,15 @@ public class CampaignDTO {
     public static CampaignDTO from(Campaign campaign) {
 
         List<BasicMediaDTO> medias = null;
-        if (campaign.getMediaCampaignList() != null) {
-            medias = campaign.getMediaCampaignList().stream().map(mediaCampaign -> {
+        if(campaign.getMedias() != null){
+            medias = campaign.getMedias().stream().map(media -> {
                 BasicMediaDTO mediaDTO = new BasicMediaDTO();
-                mediaDTO.setId(mediaCampaign.getMedia().getId());
-                mediaDTO.setName(mediaCampaign.getMedia().getName());
-                mediaDTO.setNote(mediaCampaign.getMedia().getNote());
-                mediaDTO.setTarget(mediaCampaign.getMedia().getTarget());
-                mediaDTO.setUrl(mediaCampaign.getMedia().getUrl());
-                mediaDTO.setTypeId(String.valueOf(mediaCampaign.getMedia().getMediaType().getId()));
-
+                mediaDTO.setId(media.getId());
+                mediaDTO.setName(media.getName());
+                mediaDTO.setNote(media.getNote());
+                mediaDTO.setTarget(media.getTarget());
+                mediaDTO.setUrl(media.getUrl());
+                mediaDTO.setTypeId(String.valueOf(media.getMediaType().getId()));
                 return mediaDTO;
             }).collect(Collectors.toList());
         }
