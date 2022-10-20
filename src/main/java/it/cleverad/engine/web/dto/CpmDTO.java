@@ -11,23 +11,32 @@ import java.time.LocalDateTime;
 public class CpmDTO {
 
     private long id;
+
     private Long campaignId;
     private Long imageId;
     private Long mediaId;
-    private LocalDateTime creationDate;
+
+    private String refferal;
+    private String ip;
+    private String agent;
+
+    private LocalDateTime date;
     private Boolean read;
 
-    public CpmDTO(long id, Long campaignId, Long imageId, Long mediaId, LocalDateTime creationDate, Boolean read) {
+    public CpmDTO(long id, Long campaignId, Long imageId, Long mediaId, String refferal, String ip, String agent, LocalDateTime date, Boolean read) {
         this.id = id;
         this.campaignId = campaignId;
         this.imageId = imageId;
         this.mediaId = mediaId;
-        this.creationDate = creationDate;
+        this.refferal = refferal;
+        this.ip = ip;
+        this.agent = agent;
+        this.date = date;
         this.read = read;
     }
 
     public static CpmDTO from(Cpm cpm) {
-        return new CpmDTO(cpm.getId(), cpm.getCampaignId(), cpm.getImageId(), cpm.getMediaId(), cpm.getTimeStamp(), cpm.getRead());
+        return new CpmDTO(cpm.getId(), cpm.getCampaignId(), cpm.getImageId(), cpm.getMediaId(), cpm.getRefferal(), cpm.getIp(), cpm.getAgent(), cpm.getDate(), cpm.getRead());
     }
 
 }

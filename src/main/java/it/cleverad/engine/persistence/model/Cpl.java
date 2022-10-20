@@ -21,9 +21,10 @@ public class Cpl {
     private Long id;
 
     private String refferal;
-    private String data;
+    private String ip;
+    private String agent;
 
-    private LocalDateTime date;
-    private Boolean status = false;
+    private LocalDateTime date = LocalDateTime.now();
+    private Boolean read = false;
 
 }

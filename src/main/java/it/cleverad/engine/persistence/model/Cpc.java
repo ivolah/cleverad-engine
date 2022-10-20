@@ -21,8 +21,10 @@ public class Cpc {
     private Long id;
 
     private String refferal;
+    private String ip;
+    private String agent;
 
     private LocalDateTime date = LocalDateTime.now();
-    private Boolean status = false;
+    private Boolean read = false;
 
 }

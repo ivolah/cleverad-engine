@@ -25,8 +25,12 @@ public class Cpm {
     private Long imageId;
     private Long mediaId;
 
+    private String refferal;
+    private String ip;
+    private String agent;
+
     @CreatedDate
-    private LocalDateTime timeStamp = LocalDateTime.now();
+    private LocalDateTime date = LocalDateTime.now();
 
     @Column(nullable = false)
     private Boolean read = false;

@@ -12,18 +12,22 @@ public class CpcDTO {
 
     private long id;
     private String refferal;
+    private String ip;
+    private String agent;
     private LocalDateTime date;
-    private Boolean status;
+    private Boolean read;
 
-    public CpcDTO(long id, String refferal, LocalDateTime date, Boolean status) {
+    public CpcDTO(long id, String refferal, String ip, String agent, LocalDateTime date, Boolean read) {
         this.id = id;
         this.refferal = refferal;
+        this.ip = ip;
+        this.agent = agent;
         this.date = date;
-        this.status = status;
+        this.read = read;
     }
 
     public static CpcDTO from(Cpc cpc) {
-        return new CpcDTO(cpc.getId(), cpc.getRefferal(), cpc.getDate(), cpc.getStatus());
+        return new CpcDTO(cpc.getId(), cpc.getRefferal(),cpc.getIp(), cpc.getAgent(), cpc.getDate(), cpc.getRead());
     }
 
 }

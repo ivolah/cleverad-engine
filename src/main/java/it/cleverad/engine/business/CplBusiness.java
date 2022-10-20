@@ -47,7 +47,7 @@ public class CplBusiness {
     public CplDTO create(BaseCreateRequest request) {
         Cpl map = mapper.map(request, Cpl.class);
         map.setDate(LocalDateTime.now());
-        map.setStatus(false);
+        map.setRead(false);
         return CplDTO.from(repository.save(map));
     }
 
@@ -88,6 +88,20 @@ public class CplBusiness {
         return CplDTO.from(repository.save(mappedEntity));
     }
 
+    public Page<CplDTO> getUnread() {
+        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id")));
+        Filter request = new Filter();
+        request.setRead(false);
+        Page<Cpl> page = repository.findAll(getSpecification(request), pageable);
+        log.info("UNREAD {}", page.getTotalElements());
+        return page.map(CplDTO::from);
+    }
+
+    public void setRead(long id) {
+        Cpl media = repository.findById(id).get();
+        media.setRead(true);
+        repository.save(media);
+    }
 
     /**
      * ============================================================================================================
@@ -100,8 +114,8 @@ public class CplBusiness {
             if (request.getId() != null) {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
-            if (request.getStatus() != null) {
-                predicates.add(cb.equal(root.get("status"), request.getStatus()));
+            if (request.getRead() != null) {
+                predicates.add(cb.equal(root.get("read"), request.getRead()));
             }
             if (request.getDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("date"), LocalDateTime.ofInstant(request.getDateFrom(), ZoneOffset.UTC)));
@@ -124,7 +138,8 @@ public class CplBusiness {
     @AllArgsConstructor
     public static class BaseCreateRequest {
         private String refferal;
-        private String data;
+        private String ip;
+        private String agent;
     }
 
     @Data
@@ -132,11 +147,10 @@ public class CplBusiness {
     @AllArgsConstructor
     public static class Filter {
         private Long id;
-
         private String refferal;
-        private String data;
-
-        private Boolean status;
+        private String ip;
+        private String agent;
+        private Boolean read;
         private Instant dateFrom;
         private Instant dateTo;
     }

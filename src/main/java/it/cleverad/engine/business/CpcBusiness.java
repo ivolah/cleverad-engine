@@ -46,7 +46,8 @@ public class CpcBusiness {
     // CREATE
     public CpcDTO create(BaseCreateRequest request) {
         Cpc map = mapper.map(request, Cpc.class);
-        log.info(request.refferal + " " + map.getRefferal());
+        map.setDate(LocalDateTime.now());
+        map.setRead(false);
         return CpcDTO.from(repository.save(map));
     }
 
@@ -88,6 +89,20 @@ public class CpcBusiness {
     }
 
 
+    public Page<CpcDTO> getUnread() {
+        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id")));
+        Filter request = new Filter();
+        request.setRead(false);
+        Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
+        log.info("UNREAD {}", page.getTotalElements());
+        return page.map(CpcDTO::from);
+    }
+
+    public void setRead(long id) {
+        Cpc media = repository.findById(id).get();
+        media.setRead(true);
+        repository.save(media);
+    }
     /**
      * ============================================================================================================
      **/
@@ -99,8 +114,8 @@ public class CpcBusiness {
             if (request.getId() != null) {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
-            if (request.getStatus() != null) {
-                predicates.add(cb.equal(root.get("status"), request.getStatus()));
+            if (request.getRead() != null) {
+                predicates.add(cb.equal(root.get("read"), request.getRead()));
             }
             if (request.getDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("date"), LocalDateTime.ofInstant(request.getDateFrom(), ZoneOffset.UTC)));
@@ -123,6 +138,8 @@ public class CpcBusiness {
     @AllArgsConstructor
     public static class BaseCreateRequest {
         private String refferal;
+        private String ip;
+        private String agent;
     }
 
     @Data
@@ -131,7 +148,9 @@ public class CpcBusiness {
     public static class Filter {
         private Long id;
         private String refferal;
-        private Boolean status;
+        private String ip;
+        private String agent;
+        private Boolean read;
         private Instant dateFrom;
         private Instant dateTo;
     }

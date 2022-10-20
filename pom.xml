@@ -19,12 +19,6 @@
     </properties>
     <dependencies>
 
-        <!--SPRING ACTUATOR-->
-        <!--        <dependency>-->
-        <!--            <groupId>org.springframework.boot</groupId>-->
-        <!--            <artifactId>spring-boot-starter-actuator</artifactId>-->
-        <!--        </dependency>-->
-
         <!--SPRING WEB -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

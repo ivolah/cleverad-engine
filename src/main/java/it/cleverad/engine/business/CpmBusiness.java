@@ -47,9 +47,11 @@ public class CpmBusiness {
     // CREATE
     public CpmDTO create(BaseCreateRequest request) {
         Cpm map = mapper.map(request, Cpm.class);
-        byte[] decoder = Base64.getDecoder().decode(request.getImageCode());
+        map.setRead(false);
+        map.setDate(LocalDateTime.now());
+        byte[] decoder = Base64.getDecoder().decode(request.getRefferal());
         String imageCode = new String(decoder);
-        String[] splits = imageCode.split("-");
+        String[] splits = imageCode.split("||");
         map.setImageId(Long.valueOf(splits[0]));
         map.setMediaId(Long.valueOf(splits[1]));
         return CpmDTO.from(repository.save(map));
@@ -92,6 +94,20 @@ public class CpmBusiness {
         return CpmDTO.from(repository.save(mappedEntity));
     }
 
+    public Page<CpmDTO> getUnread() {
+        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id")));
+        Filter request = new Filter();
+        request.setRead(false);
+        Page<Cpm> page = repository.findAll(getSpecification(request), pageable);
+        log.info("UNREAD {}", page.getTotalElements());
+        return page.map(CpmDTO::from);
+    }
+
+    public void setRead(long id) {
+        Cpm cpm = repository.findById(id).get();
+        cpm.setRead(true);
+        repository.save(cpm);
+    }
 
     /**
      * ============================================================================================================
@@ -127,7 +143,10 @@ public class CpmBusiness {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class BaseCreateRequest {
-        private String imageCode;
+        private String refferal;
+        private String ip;
+        private String agent;
+
     }
 
     @Data
@@ -139,6 +158,10 @@ public class CpmBusiness {
         private Long campaignId;
         private Long imageId;
         private Long mediaId;
+
+        private String refferal;
+        private String ip;
+        private String agent;
 
         private Boolean read;
         private Instant timeStampFrom;
