@@ -49,11 +49,13 @@ public class CpmBusiness {
         Cpm map = mapper.map(request, Cpm.class);
         map.setRead(false);
         map.setDate(LocalDateTime.now());
-        byte[] decoder = Base64.getDecoder().decode(request.getRefferal());
-        String imageCode = new String(decoder);
-        String[] splits = imageCode.split("||");
-        map.setImageId(Long.valueOf(splits[0]));
-        map.setMediaId(Long.valueOf(splits[1]));
+        if (request.getRefferal() != null) {
+            byte[] decoder = Base64.getDecoder().decode(request.getRefferal());
+            String imageCode = new String(decoder);
+            String[] splits = imageCode.split("||");
+            map.setImageId(Long.valueOf(splits[0]));
+            map.setMediaId(Long.valueOf(splits[1]));
+        }
         return CpmDTO.from(repository.save(map));
     }
 
@@ -99,7 +101,7 @@ public class CpmBusiness {
         Filter request = new Filter();
         request.setRead(false);
         Page<Cpm> page = repository.findAll(getSpecification(request), pageable);
-        log.info("UNREAD {}", page.getTotalElements());
+        log.trace("UNREAD {}", page.getTotalElements());
         return page.map(CpmDTO::from);
     }
 

@@ -66,7 +66,6 @@ public class MediaController {
         return business.getByCampaignId(id, pageable);
     }
 
-
     @GetMapping("/{id}/campaign/{idCampaign}")
     @ResponseStatus(HttpStatus.OK)
     public MediaDTO getByCampaignId(@PathVariable Long id, @PathVariable Long idCampaign) {

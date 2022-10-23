@@ -93,7 +93,7 @@ public class CplBusiness {
         Filter request = new Filter();
         request.setRead(false);
         Page<Cpl> page = repository.findAll(getSpecification(request), pageable);
-        log.info("UNREAD {}", page.getTotalElements());
+        log.trace("UNREAD {}", page.getTotalElements());
         return page.map(CplDTO::from);
     }
 
@@ -137,9 +137,10 @@ public class CplBusiness {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class BaseCreateRequest {
-        private String refferal;
+        private String cid;
         private String ip;
         private String agent;
+        private String data;
     }
 
     @Data
@@ -147,9 +148,10 @@ public class CplBusiness {
     @AllArgsConstructor
     public static class Filter {
         private Long id;
-        private String refferal;
+        private String cid;
         private String ip;
         private String agent;
+        private String data;
         private Boolean read;
         private Instant dateFrom;
         private Instant dateTo;

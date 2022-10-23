@@ -20,9 +20,10 @@ public class Cpl {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String refferal;
+    private String cid;
     private String ip;
     private String agent;
+    private String data;
 
     private LocalDateTime date = LocalDateTime.now();
     private Boolean read = false;

@@ -37,8 +37,6 @@ import java.util.stream.Collectors;
 public class ChannelBusiness {
 
     @Autowired
-    AffiliateBusiness affiliateBusiness;
-    @Autowired
     UserBusiness userBusiness;
     @Autowired
     private ChannelRepository repository;
@@ -89,7 +87,34 @@ public class ChannelBusiness {
 
     // SEARCH PAGINATED
     public Page<ChannelDTO> search(Filter request, Pageable pageableRequest) {
+        Page<AffiliateChannelCommissionCampaignDTO> searchACCC = null;
+        if (!jwtUserDetailsService.getRole().equals("Admin")) {
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+            request.setDictionaryId(13L);
+
+            AffiliateChannelCommissionCampaignBusiness.Filter rr = new AffiliateChannelCommissionCampaignBusiness.Filter();
+            rr.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+            searchACCC = accc.search(rr, pageableRequest);
+        }
+
         Page<Channel> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id"))));
+
+        if (searchACCC != null) {
+
+            List<Long> channelsACCC = searchACCC.stream().map(dtos -> {
+                return repository.findById(dtos.getChannelId()).get().getId();
+            }).collect(Collectors.toList());
+
+            List<Channel> channels = new ArrayList<>();
+            page.stream().forEach(channel -> {
+                Long id = channel.getId();
+                if (channelsACCC.contains(id)) {
+                    channels.add(channel);
+                }
+            });
+            page = new PageImpl<>(channels.stream().distinct().collect(Collectors.toList()));
+        }
+
         return page.map(ChannelDTO::from);
     }
 
@@ -119,6 +144,7 @@ public class ChannelBusiness {
             return repository.findById(affiliateChannelCommissionCampaignDTO.getChannelId()).get();
         }).collect(Collectors.toList());
 
+        //list to page
         Page<Channel> page = new PageImpl<>(channelList.stream().distinct().collect(Collectors.toList()));
         return page.map(ChannelDTO::from);
     }
@@ -158,13 +184,10 @@ public class ChannelBusiness {
     public Page<ChannelDTO> getbyIdUserAll(Long id, Pageable pageableRequest) {
 
         if (jwtUserDetailsService.getRole().equals("Admin")) {
-
             Filter request = new Filter();
             Page<Channel> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id"))));
             return page.map(ChannelDTO::from);
-
         } else {
-
             AffiliateChannelCommissionCampaignBusiness.Filter rr = new AffiliateChannelCommissionCampaignBusiness.Filter();
             rr.setAffiliateId(userBusiness.findById(id).getAffiliateId());
             Page<AffiliateChannelCommissionCampaignDTO> search = accc.search(rr, pageableRequest);
@@ -175,7 +198,6 @@ public class ChannelBusiness {
 
             Page<Channel> page = new PageImpl<>(channelList.stream().distinct().collect(Collectors.toList()));
             return page.map(ChannelDTO::from);
-
         }
     }
 

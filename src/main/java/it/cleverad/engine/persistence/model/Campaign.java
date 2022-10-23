@@ -41,8 +41,6 @@ public class Campaign {
     @OneToMany(mappedBy = "campaign")
     private Set<AffiliateChannelCommissionCampaign> affiliateChannelCommissionCampaigns;
 
-    @OneToMany(mappedBy = "campaign")
-    private Set<AffiliateCampaign> affiliateCampaigns;
 
     @OneToMany(mappedBy = "campaign")
     private Set<Commission> commissionCampaigns;
@@ -66,7 +64,25 @@ public class Campaign {
     @JoinColumn(name = "cookie_id")
     private Cookie cookie;
 
+    // >>>  CAMPAIGN + AFFILIATE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "t_campaign_affiliate", joinColumns = @JoinColumn(name = "campaign_id"), inverseJoinColumns = @JoinColumn(name = "affilaite_id"))
+    private Set<Affiliate> affiliates;
 
+    public void addAffiliate(Affiliate affiliate) {
+        this.affiliates.add(affiliate);
+        affiliate.getCampaigns().add(this);
+    }
+
+    public void removeAffiliate(long tagId) {
+        Affiliate affiliate = this.affiliates.stream().filter(t -> t.getId() == tagId).findFirst().orElse(null);
+        if (affiliate != null) {
+            this.affiliates.remove(affiliate);
+            affiliate.getCampaigns().remove(this);
+        }
+    }
+
+    // >>>  CAMPAIGN + MEDIA     >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "t_campaign_media", joinColumns = @JoinColumn(name = "campaign_id"), inverseJoinColumns = @JoinColumn(name = "media_id"))
     private Set<Media> medias = new HashSet<>();

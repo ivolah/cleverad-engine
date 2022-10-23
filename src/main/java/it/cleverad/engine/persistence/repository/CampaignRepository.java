@@ -11,7 +11,7 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long>, JpaSp
 
     @Query(nativeQuery = true,
             value = " select cam.* from t_campaign cam " +
-                    " join t_affiliate_campaign tac on cam.id = tac.campaign_id " +
+                    " join t_campaign_affiliate tac on cam.id = tac.campaign_id " +
                     " where tac.affiliate_id = ?1 ")
     Page<Campaign> findAffiliateCampaigns(Long affiliateId, Pageable pageable);
 

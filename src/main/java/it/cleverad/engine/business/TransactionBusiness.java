@@ -2,7 +2,7 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.Transaction;
-import it.cleverad.engine.persistence.repository.TransactionRepository;
+import it.cleverad.engine.persistence.repository.*;
 import it.cleverad.engine.web.dto.TransactionDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -36,6 +36,17 @@ public class TransactionBusiness {
     @Autowired
     private Mapper mapper;
 
+    @Autowired
+    private AffiliateRepository affiliateRepository;
+    @Autowired
+    private CampaignRepository campaignRepository;
+    @Autowired
+    private WalletRepository walletRepository;
+    @Autowired
+    private ChannelRepository channelRepository;
+    @Autowired
+    private CommissionRepository commissionRepository;
+
     /**
      * ============================================================================================================
      **/
@@ -43,6 +54,13 @@ public class TransactionBusiness {
     // CREATE
     public TransactionDTO create(BaseCreateRequest request) {
         Transaction map = mapper.map(request, Transaction.class);
+
+        map.setAffiliate(affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId)));
+        map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
+        map.setChannel(channelRepository.findById(request.channelId).orElseThrow(() -> new ElementCleveradException("Channel", request.channelId)));
+        map.setCommission(commissionRepository.findById(request.commissionId).orElseThrow(() -> new ElementCleveradException("Commission", request.commissionId)));
+        map.setWallet(walletRepository.findById(request.walletId).orElseThrow(() -> new ElementCleveradException("Wallet", request.walletId)));
+
         return TransactionDTO.from(repository.save(map));
     }
 
@@ -82,7 +100,6 @@ public class TransactionBusiness {
 
         return TransactionDTO.from(repository.save(mappedEntity));
     }
-
 
     /**
      * ============================================================================================================

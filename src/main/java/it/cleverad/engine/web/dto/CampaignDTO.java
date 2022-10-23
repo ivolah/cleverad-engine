@@ -79,15 +79,15 @@ public class CampaignDTO {
         }
 
         List<BasicAffiliateDTO> affiliates = null;
-        if (campaign.getAffiliateCampaigns() != null) {
-            affiliates = campaign.getAffiliateCampaigns().stream().map(affiliateCampaign -> {
-                BasicAffiliateDTO dto = new BasicAffiliateDTO();
-                dto.setId(affiliateCampaign.getAffiliate().getId());
-                dto.setName(affiliateCampaign.getAffiliate().getName());
-                dto.setPrimaryMail(affiliateCampaign.getAffiliate().getPrimaryMail());
-                return dto;
-            }).collect(Collectors.toList());
-        }
+//        if (campaign.getAffiliateCampaigns() != null) {
+//            affiliates = campaign.getAffiliateCampaigns().stream().map(affiliateCampaign -> {
+//                BasicAffiliateDTO dto = new BasicAffiliateDTO();
+//                dto.setId(affiliateCampaign.getAffiliate().getId());
+//                dto.setName(affiliateCampaign.getAffiliate().getName());
+//                dto.setPrimaryMail(affiliateCampaign.getAffiliate().getPrimaryMail());
+//                return dto;
+//            }).collect(Collectors.toList());
+//        }
 
         List<CommissionDTO> commissions = null;
         if (campaign.getCommissionCampaigns() != null) {

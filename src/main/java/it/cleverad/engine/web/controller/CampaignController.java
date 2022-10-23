@@ -61,8 +61,8 @@ public class CampaignController {
 
     @Operation(summary = "Get the Affiliate Campaigns", description = "Get the specific AffiliateCampaigns")
     @GetMapping("/{affiliateId}/affiliate")
-    public Page<CampaignDTO> getCampaigns(@PathVariable Long affiliateId, Pageable pageable) {
-        return business.getCampaigns(affiliateId, pageable);
+    public Page<CampaignDTO> getCampaigns(@PathVariable Long affiliateId) {
+        return business.getCampaigns(affiliateId);
     }
 
     /**

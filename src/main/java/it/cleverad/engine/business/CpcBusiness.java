@@ -94,7 +94,7 @@ public class CpcBusiness {
         Filter request = new Filter();
         request.setRead(false);
         Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
-        log.info("UNREAD {}", page.getTotalElements());
+        log.trace("UNREAD {}", page.getTotalElements());
         return page.map(CpcDTO::from);
     }
 

@@ -1,7 +1,9 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
+import it.cleverad.engine.persistence.model.Affiliate;
 import it.cleverad.engine.persistence.model.Campaign;
+import it.cleverad.engine.persistence.repository.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.CampaignRepository;
 import it.cleverad.engine.persistence.repository.CookieRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
@@ -14,10 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
@@ -32,6 +31,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -52,6 +53,9 @@ public class CampaignBusiness {
 
     @Autowired
     private CookieRepository cookieRepository;
+
+    @Autowired
+    private AffiliateRepository affiliateRepository;
 
     /**
      * ============================================================================================================
@@ -95,7 +99,7 @@ public class CampaignBusiness {
         Campaign campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
         try {
             if (campaign != null) {
-             //   campaign.getMediaCampaignList().stream().forEach(mediaCampaign -> mediaCampaignBusiness.delete(mediaCampaign.getId()));
+                //   campaign.getMediaCampaignList().stream().forEach(mediaCampaign -> mediaCampaignBusiness.delete(mediaCampaign.getId()));
                 campaign.getCampaignCategories().stream().forEach(campaignCategory -> campaignCategoryBusiness.delete(campaignCategory.getId()));
             }
             repository.deleteById(id);
@@ -112,42 +116,42 @@ public class CampaignBusiness {
         Page<Campaign> page;
         if (jwtUserDetailsService.getRole().equals("Admin")) {
             page = repository.findAll(getSpecification(request), pageable);
+            return page.map(CampaignDTO::from);
         } else {
-            page = repository.findAffiliateCampaigns(jwtUserDetailsService.getAffiliateID(), pageable);
+            Affiliate cc = affiliateRepository.findById(jwtUserDetailsService.getAffiliateID()).orElseThrow(() -> new ElementCleveradException("Affiliate", jwtUserDetailsService.getAffiliateID()));
+            Set<Campaign> list = cc.getCampaigns();
+            page = new PageImpl<>(list.stream().distinct().collect(Collectors.toList()));
+            return page.map(CampaignDTO::from);
         }
-        return page.map(CampaignDTO::from);
     }
 
     // UPDATE
     public CampaignDTO update(Long id, Filter filter) {
-            Campaign campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
-            CampaignDTO campaignDTOfrom = CampaignDTO.from(campaign);
-            mapper.map(filter, campaignDTOfrom);
-            Campaign mappedEntity = mapper.map(campaign, Campaign.class);
-            mappedEntity.setLastModificationDate(LocalDateTime.now());
-            mapper.map(campaignDTOfrom, mappedEntity);
-            return CampaignDTO.from(repository.save(mappedEntity));
-            }
+        Campaign campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
+        CampaignDTO campaignDTOfrom = CampaignDTO.from(campaign);
+        mapper.map(filter, campaignDTOfrom);
+        Campaign mappedEntity = mapper.map(campaign, Campaign.class);
+        mappedEntity.setLastModificationDate(LocalDateTime.now());
+        mapper.map(campaignDTOfrom, mappedEntity);
+        return CampaignDTO.from(repository.save(mappedEntity));
+    }
 
     // TROVA LE CAMPAGNE DELL AFFILIATE
-    public Page<CampaignDTO> getCampaigns(Long affiliateId, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-        Filter request = new Filter();
-
-        Page<Campaign> page = repository.findAll(getSpecification(request), pageable);
+    public Page<CampaignDTO> getCampaigns(Long affiliateId) {
+        Affiliate cc = affiliateRepository.findById(affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", affiliateId));
+        Set<Campaign> list = cc.getCampaigns();
+        Page<Campaign>  page = new PageImpl<>(list.stream().distinct().collect(Collectors.toList()));
         return page.map(CampaignDTO::from);
     }
 
     // TROVA LE CAMPAGNE DELL AFFILIATE filtrate per ID AFFIALIseTE DAL USER
     public Page<CampaignDTO> getCampaignsGuest(Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-
         Filter request = new Filter();
-
-
         Page<Campaign> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CampaignDTO::from);
     }
+
 
     /**
      * ============================================================================================================

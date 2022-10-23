@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -36,6 +37,6 @@ public class Media {
     private MediaType mediaType;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "medias")
-    private Set<Campaign> campaigns;
+    private Set<Campaign> campaigns = new HashSet<>();
 
 }

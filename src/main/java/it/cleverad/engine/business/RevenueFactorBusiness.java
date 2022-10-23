@@ -60,7 +60,7 @@ public class RevenueFactorBusiness {
     // CREATE
     public RevenueFactorDTO create(BaseCreateRequest request) {
         RevenueFactor map = mapper.map(request, RevenueFactor.class);
-        map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow());
+        map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
         map.setDictionary(dictionaryRepository.findById(request.dictionaryId).orElseThrow());
         map.setCreationDate(LocalDateTime.now());
         map.setLastModificationDate(LocalDateTime.now());

@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -56,9 +57,8 @@ public class Affiliate {
     @OneToMany(mappedBy = "affiliate")
     private Set<Budget> budgets;
 
-    public void addWallet(Wallet wallet) {
-        wallet.setAffiliate(this);
-        this.wallets.add(wallet);
-    }
+    // >>>  CAMPAIGN + AFFILIATE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "affiliates")
+    private Set<Campaign> campaigns = new HashSet<>();
 
 }
