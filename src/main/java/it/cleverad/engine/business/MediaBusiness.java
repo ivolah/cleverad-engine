@@ -209,13 +209,20 @@ public class MediaBusiness {
     }
 
     private String generaBannerCode(MediaDTO dto, Long mediaId, Long campaignId, Long channelID) {
-        String refID = campaignId + "||" + mediaId + "||" + jwtUserDetailsService.getAffiliateID() + "||" + channelID;
-        byte[] encodedRefferal = Base64.getEncoder().encode(refID.getBytes(StandardCharsets.UTF_8));
-
         String bannerCode = dto.getBannerCode();
-        bannerCode = bannerCode.replace("{{refferalId}}", new String(encodedRefferal));
+
         if (StringUtils.isNotBlank(dto.getUrl())) bannerCode = bannerCode.replace("{{url}}", dto.getUrl());
         if (StringUtils.isNotBlank(dto.getTarget())) bannerCode = bannerCode.replace("{{target}}", dto.getTarget());
+
+        if (!jwtUserDetailsService.getRole().equals("Admin")) {
+            String refID = campaignId + "||" + mediaId + "||" + jwtUserDetailsService.getAffiliateID() + "||" + channelID;
+            byte[] encodedRefferal = Base64.getEncoder().encode(refID.getBytes(StandardCharsets.UTF_8));
+            String reString = new String(encodedRefferal);
+            if (reString.endsWith("=")) {
+                reString = reString.substring(0, reString.length() - 1);
+            }
+            bannerCode = bannerCode.replace("{{refferalId}}", reString);
+        }
 
         return bannerCode;
     }
