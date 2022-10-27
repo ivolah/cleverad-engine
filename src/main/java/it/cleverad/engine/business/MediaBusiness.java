@@ -9,6 +9,7 @@ import it.cleverad.engine.persistence.repository.CampaignRepository;
 import it.cleverad.engine.persistence.repository.MediaRepository;
 import it.cleverad.engine.persistence.repository.MediaTypeRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
+import it.cleverad.engine.service.RefferalService;
 import it.cleverad.engine.web.dto.MediaDTO;
 import it.cleverad.engine.web.dto.MediaTypeDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -58,6 +59,9 @@ public class MediaBusiness {
     @Autowired
     private CampaignRepository campaignRepository;
 
+    @Autowired
+    private RefferalService refferalService;
+
     /**
      * ============================================================================================================
      **/
@@ -97,10 +101,6 @@ public class MediaBusiness {
             String affilaiteID = String.valueOf(jwtUserDetailsService.getAffiliateID());
 
             String channelID = "";
-
-            String refID = campID + "||" + mediaID + "||" + affilaiteID + "||" + channelID;
-            byte[] encodedRefferal = Base64.getEncoder().encode(refID.getBytes(StandardCharsets.UTF_8));
-
             String bannerCode = dto.getBannerCode();
             String url = dto.getUrl();
             if (StringUtils.isNotBlank(url)) bannerCode = bannerCode.replace("{{url}}", url);
@@ -108,7 +108,7 @@ public class MediaBusiness {
             String target = dto.getTarget();
             if (StringUtils.isNotBlank(target)) bannerCode = bannerCode.replace("{{target}}", target);
 
-            bannerCode = bannerCode.replace("{{refferalId}}", new String(encodedRefferal));
+            bannerCode = bannerCode.replace("{{refferalId}}", refferalService.creaEncoding(campID, mediaID, affilaiteID, channelID));
             dto.setBannerCode(bannerCode);
 
         }
@@ -186,14 +186,6 @@ public class MediaBusiness {
         });
     }
 
-    public MediaDTO getImageHash(Long idMedia, Long idFile) {
-        String imhash = idMedia + "-" + idFile;
-        byte[] encodedImage = Base64.getEncoder().encode(imhash.getBytes(StandardCharsets.UTF_8));
-        MediaDTO mediaDTO = new MediaDTO();
-        mediaDTO.setImageHash(new String(encodedImage));
-        return mediaDTO;
-    }
-
     public MediaDTO getByIdAndCampaignID(Long mediaId, Long campaignId) {
         Media media = repository.findById(mediaId).orElseThrow(() -> new ElementCleveradException("Media", mediaId));
         MediaDTO dto = MediaDTO.from(media);
@@ -218,9 +210,6 @@ public class MediaBusiness {
             String refID = campaignId + "||" + mediaId + "||" + jwtUserDetailsService.getAffiliateID() + "||" + channelID;
             byte[] encodedRefferal = Base64.getEncoder().encode(refID.getBytes(StandardCharsets.UTF_8));
             String reString = new String(encodedRefferal);
-            if (reString.endsWith("=")) {
-                reString = reString.substring(0, reString.length() - 1);
-            }
             bannerCode = bannerCode.replace("{{refferalId}}", reString);
         }
 
@@ -230,6 +219,7 @@ public class MediaBusiness {
     /**
      * ============================================================================================================
      **/
+
     private Specification<Media> getSpecification(Filter request) {
         return (root, query, cb) -> {
             Predicate completePredicate = null;

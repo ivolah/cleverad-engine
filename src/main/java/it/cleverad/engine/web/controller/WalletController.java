@@ -3,6 +3,7 @@ package it.cleverad.engine.web.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.cleverad.engine.business.WalletBusiness;
+import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.WalletDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,9 @@ public class WalletController {
 
     @Autowired
     private WalletBusiness business;
+
+    @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
 
     /**
      * ============================================================================================================
@@ -64,6 +68,13 @@ public class WalletController {
     @ResponseStatus(HttpStatus.OK)
     public Page<WalletDTO> findByIdAffilaite(@PathVariable Long id) {
         return business.findByIdAffilaite(id);
+    }
+
+    @Operation(summary = "Get the Wallet", description = "Get the specific Wallet")
+    @GetMapping("/affiliate")
+    @ResponseStatus(HttpStatus.OK)
+    public Page<WalletDTO> findByAffilaite() {
+        return business.findByIdAffilaite(jwtUserDetailsService.getAffiliateID());
     }
 
     /**

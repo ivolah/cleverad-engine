@@ -8,12 +8,12 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "t_transaction")
+@Table(name = "t_transaction_cpl")
 @Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
 @NoArgsConstructor
-public class Transaction {
+public class TransactionCPL {
 
     @Id
     @Column(name = "id", nullable = false)
@@ -25,27 +25,17 @@ public class Transaction {
     private Double value;
     private Boolean approved;
 
-    private LocalDateTime creationDate = LocalDateTime.now();
-    private LocalDateTime lastModificationDate = LocalDateTime.now();
+    private String cid;
 
-    @ManyToOne
-    @JoinColumn(name = "wallet_id")
-    private Wallet wallet;
-
-    @ManyToOne
-    @JoinColumn(name = "affiliate_id")
-    private Affiliate affiliate;
+    private String ip;
+    private String agent;
+    private String data;
 
     @ManyToOne
     @JoinColumn(name = "campaign_id")
     private Campaign campaign;
 
-    @ManyToOne
-    @JoinColumn(name = "commission_id")
-    private Commission commission;
-
-    @ManyToOne
-    @JoinColumn(name = "channel_id")
-    private Channel channel;
+    private LocalDateTime creationDate = LocalDateTime.now();
+    private LocalDateTime lastModificationDate = LocalDateTime.now();
 
 }

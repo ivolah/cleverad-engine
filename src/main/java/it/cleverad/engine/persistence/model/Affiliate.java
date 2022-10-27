@@ -46,9 +46,6 @@ public class Affiliate {
     private Set<Wallet> wallets;
 
     @OneToMany(mappedBy = "affiliate")
-    private Set<Transaction> transactions;
-
-    @OneToMany(mappedBy = "affiliate")
     private Set<User> users;
 
     @OneToMany(mappedBy = "affiliate")
@@ -56,6 +53,12 @@ public class Affiliate {
 
     @OneToMany(mappedBy = "affiliate")
     private Set<Budget> budgets;
+
+    @OneToMany(mappedBy = "affiliate")
+    private Set<TransactionCPC> transactionCPCS;
+
+    @OneToMany(mappedBy = "affiliate")
+    private Set<TransactionCPM> transactionCPMS;
 
     // >>>  CAMPAIGN + AFFILIATE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "affiliates")

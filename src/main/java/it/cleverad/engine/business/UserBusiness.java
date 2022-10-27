@@ -90,15 +90,13 @@ public class UserBusiness {
                 Page<User> page = repository.findAll(getSpecification(request), PageRequest.of(0, 1, Sort.by(Sort.Order.asc("id"))));
                 UserDTO dto = UserDTO.from(page.stream().findFirst().get());
 
-                AffiliateDTO affiliate = affiliateBusiness.findById(dto.getAffiliateId());
-                dto.setAffiliateName(affiliate.getName());
                 if (dto.getRoleId() == 3) {
                     dto.setRole("Admin");
                 } else {
                     dto.setRole("User");
+                    AffiliateDTO affiliate = affiliateBusiness.findById(dto.getAffiliateId());
+                    dto.setAffiliateName(affiliate.getName());
                 }
-
-                //  log.info("role {}" , dto.getRole());
                 return dto;
             } else {
                 UserDTO dto = new UserDTO();

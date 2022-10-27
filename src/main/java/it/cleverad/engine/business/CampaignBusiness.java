@@ -40,10 +40,10 @@ import java.util.stream.Collectors;
 public class CampaignBusiness {
 
     @Autowired
-    private CampaignRepository repository;
+    private JwtUserDetailsService jwtUserDetailsService;
 
     @Autowired
-    private JwtUserDetailsService jwtUserDetailsService;
+    private CampaignRepository repository;
 
     @Autowired
     private Mapper mapper;
@@ -86,6 +86,7 @@ public class CampaignBusiness {
         } else {
             Filter request = new Filter();
             request.setId(id);
+            // TODO logica per seach di quelli assegnati
             campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
         }
 

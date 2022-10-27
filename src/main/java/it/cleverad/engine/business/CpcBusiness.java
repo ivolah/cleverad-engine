@@ -88,11 +88,22 @@ public class CpcBusiness {
         return CpcDTO.from(repository.save(mappedEntity));
     }
 
-
     public Page<CpcDTO> getUnread() {
         Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setRead(false);
+        Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
+        log.trace("UNREAD {}", page.getTotalElements());
+        return page.map(CpcDTO::from);
+    }
+
+    public Page<CpcDTO> getUnreadLastHour() {
+        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id")));
+        Filter request = new Filter();
+        request.setRead(false);
+        LocalDateTime now = LocalDateTime.now();
+        request.setDateFrom(now.minusHours(1).toInstant(ZoneOffset.of("+02:00")));
+        request.setDateTo(now.toInstant(ZoneOffset.of("+02:00")));
         Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
         log.trace("UNREAD {}", page.getTotalElements());
         return page.map(CpcDTO::from);
@@ -103,6 +114,7 @@ public class CpcBusiness {
         media.setRead(true);
         repository.save(media);
     }
+
     /**
      * ============================================================================================================
      **/

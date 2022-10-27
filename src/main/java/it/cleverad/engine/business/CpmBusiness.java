@@ -1,8 +1,10 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
+import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.Cpm;
 import it.cleverad.engine.persistence.repository.CpmRepository;
+import it.cleverad.engine.service.RefferalService;
 import it.cleverad.engine.web.dto.CpmDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -26,7 +28,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 @Slf4j
@@ -40,6 +41,9 @@ public class CpmBusiness {
     @Autowired
     private Mapper mapper;
 
+    @Autowired
+    private RefferalService refferalService;
+
     /**
      * ============================================================================================================
      **/
@@ -50,11 +54,9 @@ public class CpmBusiness {
         map.setRead(false);
         map.setDate(LocalDateTime.now());
         if (request.getRefferal() != null) {
-            byte[] decoder = Base64.getDecoder().decode(request.getRefferal());
-            String imageCode = new String(decoder);
-            String[] splits = imageCode.split("||");
-            map.setImageId(Long.valueOf(splits[0]));
-            map.setMediaId(Long.valueOf(splits[1]));
+            Refferal refferal = refferalService.decodificaRefferal(request.getRefferal());
+            map.setImageId(refferal.getCampaignId());
+            map.setMediaId(refferal.getMediaId());
         }
         return CpmDTO.from(repository.save(map));
     }

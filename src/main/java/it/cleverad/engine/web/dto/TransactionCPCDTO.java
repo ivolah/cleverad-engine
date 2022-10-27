@@ -1,6 +1,6 @@
 package it.cleverad.engine.web.dto;
 
-import it.cleverad.engine.persistence.model.Transaction;
+import it.cleverad.engine.persistence.model.TransactionCPC;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
-public class TransactionDTO {
+public class TransactionCPCDTO {
 
     private Long id;
 
@@ -22,14 +22,16 @@ public class TransactionDTO {
     private String channelName;
 
     private LocalDateTime dateTime;
-    private String type;
     private Double value;
     private Boolean approved;
+
+    private String ip;
+    private String agent;
 
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
 
-    public TransactionDTO(Long id, Long affiliateId, String affiliateName, Long campaignId, String campaignName, Long commissionId, String commissionName, Long channelId, String channelName, LocalDateTime dateTime, String type, Double value, Boolean approved, LocalDateTime creationDate, LocalDateTime lastModificationDate) {
+    public TransactionCPCDTO(Long id, Long affiliateId, String affiliateName, Long campaignId, String campaignName, Long commissionId, String commissionName, Long channelId, String channelName, LocalDateTime dateTime, Double value, Boolean approved, String ip, String agent, LocalDateTime creationDate, LocalDateTime lastModificationDate) {
         this.id = id;
         this.affiliateId = affiliateId;
         this.affiliateName = affiliateName;
@@ -40,15 +42,16 @@ public class TransactionDTO {
         this.channelId = channelId;
         this.channelName = channelName;
         this.dateTime = dateTime;
-        this.type = type;
         this.value = value;
         this.approved = approved;
+        this.ip = ip;
+        this.agent = agent;
         this.creationDate = creationDate;
         this.lastModificationDate = lastModificationDate;
     }
 
-    public static TransactionDTO from(Transaction transaction) {
-        return new TransactionDTO(transaction.getId(),
+    public static TransactionCPCDTO from(TransactionCPC transaction) {
+        return new TransactionCPCDTO(transaction.getId(),
                 transaction.getAffiliate() != null ? transaction.getAffiliate().getId() : null,
                 transaction.getAffiliate() != null ? transaction.getAffiliate().getName() : null,
 
@@ -62,9 +65,10 @@ public class TransactionDTO {
                 transaction.getChannel() != null ? transaction.getChannel().getName() : null,
 
                 transaction.getDateTime(),
-                transaction.getType(),
                 transaction.getValue(),
                 transaction.getApproved(),
+                transaction.getIp(),
+                transaction.getAgent(),
                 transaction.getCreationDate(), transaction.getLastModificationDate());
     }
 

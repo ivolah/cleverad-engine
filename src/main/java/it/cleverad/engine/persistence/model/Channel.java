@@ -30,11 +30,7 @@ public class Channel {
     private LocalDateTime creationDate = LocalDateTime.now();
     private LocalDateTime lastModificationDate = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "channel")
-    private Set<ChannelCategory> channelCategories;
 
-    @OneToMany(mappedBy = "channel")
-    private Set<Transaction> transactions;
 
     @ManyToOne
     @JoinColumn(name = "dictionary_id")
@@ -50,4 +46,13 @@ public class Channel {
 //            joinColumns = @JoinColumn(name = "channel_id"),
 //            inverseJoinColumns = @JoinColumn(name = "category_id"))
 //    private Collection<Category> categories;
+
+    @OneToMany(mappedBy = "channel")
+    private Set<ChannelCategory> channelCategories;
+
+    @OneToMany(mappedBy = "channel")
+    private Set<TransactionCPC> transactionCPCS;
+
+    @OneToMany(mappedBy = "channel")
+    private Set<TransactionCPM> transactionCPMS;
 }

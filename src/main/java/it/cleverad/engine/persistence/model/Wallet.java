@@ -35,6 +35,9 @@ public class Wallet {
     private Affiliate affiliate;
 
     @OneToMany(mappedBy = "wallet")
-    private Set<Transaction> transactions;
+    private Set<TransactionCPC> transactionCPCS;
+
+    @OneToMany(mappedBy = "wallet")
+    private Set<TransactionCPM> transactionCPMS;
 
 }

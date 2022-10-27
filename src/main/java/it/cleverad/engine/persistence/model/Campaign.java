@@ -52,9 +52,6 @@ public class Campaign {
     private Set<CampaignCookie> campaignCookies;
 
     @OneToMany(mappedBy = "campaign")
-    private Set<Transaction> transactions;
-
-    @OneToMany(mappedBy = "campaign")
     private Set<RevenueFactor> revenueFactors;
 
     @OneToMany(mappedBy = "campaign")
@@ -63,6 +60,15 @@ public class Campaign {
     @ManyToOne
     @JoinColumn(name = "cookie_id")
     private Cookie cookie;
+
+    @OneToMany(mappedBy = "campaign")
+    private Set<TransactionCPC> transactionCPCS;
+
+    @OneToMany(mappedBy = "campaign")
+    private Set<TransactionCPM> transactionCPMS;
+
+    @OneToMany(mappedBy = "campaign")
+    private Set<TransactionCPL> transactionCPLS;
 
     // >>>  CAMPAIGN + AFFILIATE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})

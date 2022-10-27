@@ -1,8 +1,10 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
+import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.Tracking;
 import it.cleverad.engine.persistence.repository.TrackingRepository;
+import it.cleverad.engine.service.RefferalService;
 import it.cleverad.engine.web.dto.MediaDTO;
 import it.cleverad.engine.web.dto.TargetDTO;
 import it.cleverad.engine.web.dto.TrackingDTO;
@@ -25,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.criteria.Predicate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 @Slf4j
@@ -45,6 +46,9 @@ public class TrackingBusiness {
     @Autowired
     private CampaignBusiness campaignBusiness;
 
+    @Autowired
+    private RefferalService refferalService;
+
     /**
      * ============================================================================================================
      */
@@ -52,16 +56,11 @@ public class TrackingBusiness {
     // GET BY ID
     public TargetDTO getTarget(BaseCreateRequest request) {
 
-        String refferalID = request.getRefferalId();
-        byte[] decoder = Base64.getDecoder().decode(refferalID);
-        String str = new String(decoder);
+        Refferal refferal= refferalService.decodificaRefferal(request.getRefferalId());
         TargetDTO targetDTO = new TargetDTO();
-        log.info("REFFERAL :: {}", str);
+        log.info("REFFERAL :: {} - {}", request.getRefferalId(), refferal.toString());
 
-        //  String[] tokens = str.split(Pattern.quote("||"));
-        String[] tokens = str.split("\\|\\|");
-        String mediaID = tokens[1];
-        MediaDTO mediaDTO = mediaBusiness.findById(Long.valueOf(mediaID));
+        MediaDTO mediaDTO = mediaBusiness.findById(refferal.getMediaId());
         targetDTO.setTarget(mediaDTO.getTarget());
 
         Long cID = mediaDTO.getCampaignId();

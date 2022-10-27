@@ -59,6 +59,13 @@ public class AffiliateChannelCommissionCampaignController {
         return business.searchByCampaignId(id, pageable);
     }
 
+    @Operation(summary = "Lists the AffiliateChannelCommissionCampaigns", description = "Lists the AffiliateChannelCommissionCampaigns, searched and paginated")
+    @GetMapping("/{id}/campaign/affiliate")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<AffiliateChannelCommissionCampaignDTO> getByIdCampaignAffiliate(@PathVariable Long id, Pageable pageable) {
+        return business.searchByCampaignId(id, pageable);
+    }
+
     /**
      * ============================================================================================================
      **/
