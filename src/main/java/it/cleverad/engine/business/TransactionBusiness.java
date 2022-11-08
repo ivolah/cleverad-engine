@@ -382,6 +382,8 @@ public class TransactionBusiness {
         private String refferal;
         private String data;
         private Long clickNumber;
+        private String payoutId;
+        private String note;
     }
 
     @Data
@@ -400,6 +402,8 @@ public class TransactionBusiness {
         private LocalDateTime dateTime;
         private Double value;
         private Boolean approved;
+        private String payoutId;
+        private String note;
     }
 
 }

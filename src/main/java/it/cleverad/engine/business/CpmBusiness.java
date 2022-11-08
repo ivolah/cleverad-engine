@@ -113,6 +113,18 @@ public class CpmBusiness {
         repository.save(cpm);
     }
 
+    public Page<CpmDTO> getUnreadLastHour() {
+        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id")));
+        Filter request = new Filter();
+        request.setRead(false);
+        LocalDateTime now = LocalDateTime.now();
+        request.setDateFrom(now.minusHours(1).toInstant(ZoneOffset.of("+02:00")));
+        request.setDateTo(now.toInstant(ZoneOffset.of("+02:00")));
+        Page<Cpm> page = repository.findAll(getSpecification(request), pageable);
+        log.trace("UNREAD {}", page.getTotalElements());
+        return page.map(CpmDTO::from);
+    }
+
     /**
      * ============================================================================================================
      **/
@@ -127,11 +139,11 @@ public class CpmBusiness {
             if (request.getRead() != null) {
                 predicates.add(cb.equal(root.get("read"), request.getRead()));
             }
-            if (request.getTimeStampFrom() != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("timeStamp"), LocalDateTime.ofInstant(request.getTimeStampFrom(), ZoneOffset.UTC)));
+            if (request.getDateFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("date"), LocalDateTime.ofInstant(request.getDateFrom(), ZoneOffset.UTC)));
             }
-            if (request.getTimeStampTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("timeStamp"), LocalDateTime.ofInstant(request.getTimeStampTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
+            if (request.getDateTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("date"), LocalDateTime.ofInstant(request.getDateTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -168,8 +180,9 @@ public class CpmBusiness {
         private String agent;
 
         private Boolean read;
-        private Instant timeStampFrom;
-        private Instant timeStampTo;
+
+        private Instant dateFrom;
+        private Instant dateTo;
     }
 
 }

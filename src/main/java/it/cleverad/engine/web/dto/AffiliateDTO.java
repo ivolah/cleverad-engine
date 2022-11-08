@@ -21,13 +21,18 @@ public class AffiliateDTO {
     private String zipCode;
     private String primaryMail;
     private String secondaryMail;
+
+    private String iban;
+    private String swift;
+    private String paypal;
+
     private Boolean status;
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
 
     private List<BasicCampaignDTO> basicCampaignDTOS;
 
-    public AffiliateDTO(long id, String name, String vatNumber, String street, String streetNumber, String city, String zipCode, String primaryMail, String secondaryMail, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, List<BasicCampaignDTO> basicCampaignDTOS) {
+    public AffiliateDTO(long id, String name, String vatNumber, String street, String streetNumber, String city, String zipCode, String primaryMail, String secondaryMail, String iban, String swift, String paypal, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, List<BasicCampaignDTO> basicCampaignDTOS) {
         this.id = id;
         this.name = name;
         this.vatNumber = vatNumber;
@@ -37,6 +42,9 @@ public class AffiliateDTO {
         this.zipCode = zipCode;
         this.primaryMail = primaryMail;
         this.secondaryMail = secondaryMail;
+        this.iban = iban;
+        this.swift = swift;
+        this.paypal = paypal;
         this.status = status;
         this.creationDate = creationDate;
         this.lastModificationDate = lastModificationDate;
@@ -44,7 +52,6 @@ public class AffiliateDTO {
     }
 
     public static AffiliateDTO from(Affiliate affiliate) {
-
 
         List<BasicCampaignDTO> collect = null;
         if (affiliate.getAffiliateCampaigns() != null) {
@@ -59,7 +66,8 @@ public class AffiliateDTO {
             }).collect(Collectors.toList());
         }
 
-        return new AffiliateDTO(affiliate.getId(), affiliate.getName(), affiliate.getVatNumber(), affiliate.getStreet(), affiliate.getStreetNumber(), affiliate.getCity(), affiliate.getZipCode(), affiliate.getPrimaryMail(), affiliate.getSecondaryMail(), affiliate.getStatus(), affiliate.getCreationDate(), affiliate.getLastModificationDate(), collect);
+        return new AffiliateDTO(affiliate.getId(), affiliate.getName(), affiliate.getVatNumber(), affiliate.getStreet(), affiliate.getStreetNumber(), affiliate.getCity(), affiliate.getZipCode(), affiliate.getPrimaryMail(), affiliate.getSecondaryMail(), affiliate.getIban(), affiliate.getSwift(), affiliate.getPaypal(),
+                affiliate.getStatus(), affiliate.getCreationDate(), affiliate.getLastModificationDate(), collect);
     }
 
 }

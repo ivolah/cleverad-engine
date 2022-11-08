@@ -2,7 +2,6 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.Wallet;
-import it.cleverad.engine.persistence.repository.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.WalletRepository;
 import it.cleverad.engine.web.dto.WalletDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -32,8 +31,6 @@ public class WalletBusiness {
 
     @Autowired
     private WalletRepository repository;
-    @Autowired
-    private AffiliateRepository affiliateRepository;
 
     @Autowired
     private Mapper mapper;
@@ -92,6 +89,30 @@ public class WalletBusiness {
         mapper.map(campaignDTOfrom, mappedEntity);
 
         return WalletDTO.from(repository.save(mappedEntity));
+    }
+
+    public WalletDTO incement(Long id, Double value) {
+        Wallet wallet = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Wallet", id));
+
+        Double totale = wallet.getTotal();
+        totale = totale + value;
+        wallet.setTotal(totale);
+
+        return WalletDTO.from(repository.save(wallet));
+    }
+
+    public WalletDTO decrement(Long id, Double value) {
+        Wallet wallet = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Wallet", id));
+
+        Double residual = wallet.getResidual();
+        residual = residual - value;
+        wallet.setTotal(residual);
+
+        Double payed = wallet.getPayed();
+        payed = payed + value;
+        wallet.setPayed(payed);
+
+        return WalletDTO.from(repository.save(wallet));
     }
 
     /**

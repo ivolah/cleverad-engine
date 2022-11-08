@@ -29,10 +29,13 @@ public class TransactionCPLDTO {
     private String agent;
     private String data;
 
+    private String payoutId;
+    private String note;
+
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
 
-    public TransactionCPLDTO(Long id, Long affiliateId, String affiliateName, Long campaignId, String campaignName, Long commissionId, String commissionName, Long channelId, String channelName, LocalDateTime dateTime, Double value, Boolean approved, String ip, String agent, String data, LocalDateTime creationDate, LocalDateTime lastModificationDate) {
+    public TransactionCPLDTO(Long id, Long affiliateId, String affiliateName, Long campaignId, String campaignName, Long commissionId, String commissionName, Long channelId, String channelName, LocalDateTime dateTime, Double value, Boolean approved, String ip, String agent, String data, String payoutId, String note, LocalDateTime creationDate, LocalDateTime lastModificationDate) {
         this.id = id;
         this.affiliateId = affiliateId;
         this.affiliateName = affiliateName;
@@ -48,6 +51,8 @@ public class TransactionCPLDTO {
         this.ip = ip;
         this.agent = agent;
         this.data = data;
+        this.payoutId = payoutId;
+        this.note = note;
         this.creationDate = creationDate;
         this.lastModificationDate = lastModificationDate;
     }
@@ -66,6 +71,7 @@ public class TransactionCPLDTO {
                 null,
                 null,
                 null,
+                null,null,
                 null,
                 null,
                 transaction.getCreationDate(), transaction.getLastModificationDate());

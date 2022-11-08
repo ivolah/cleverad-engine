@@ -38,8 +38,6 @@ public class Channel {
     @JoinColumn(name = "affiliate_id")
     private Affiliate affiliate;
 
-
-
 //    @ManyToMany
 //    @JoinTable(
 //            name = "t_channel_category",

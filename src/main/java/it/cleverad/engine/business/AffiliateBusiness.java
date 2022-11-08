@@ -165,6 +165,9 @@ public class AffiliateBusiness {
         private String primaryMail;
         private String secondaryMail;
         private Boolean status;
+        private String iban;
+        private String swift;
+        private String paypal;
     }
 
     @Data
@@ -181,6 +184,9 @@ public class AffiliateBusiness {
         private String zipCode;
         private String primaryMail;
         private String secondaryMail;
+        private String iban;
+        private String swift;
+        private String paypal;
         private Boolean status;
         private Instant creationDateFrom;
         private Instant creationDateTo;

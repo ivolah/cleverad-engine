@@ -1,9 +1,6 @@
 package it.cleverad.engine.scheduled;
 
-import it.cleverad.engine.business.CpcBusiness;
-import it.cleverad.engine.business.CplBusiness;
-import it.cleverad.engine.business.CpmBusiness;
-import it.cleverad.engine.business.TransactionBusiness;
+import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.AffiliateChannelCommissionCampaign;
 import it.cleverad.engine.persistence.repository.AffiliateChannelCommissionCampaignRepository;
@@ -12,7 +9,6 @@ import it.cleverad.engine.service.RefferalService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -35,6 +31,9 @@ public class ScheduledActivities {
     @Autowired
     private WalletRepository walletRepository;
     @Autowired
+    private WalletBusiness walletBusiness;
+
+    @Autowired
     private AffiliateChannelCommissionCampaignRepository affiliateChannelCommissionCampaignRepository;
 
     @Autowired
@@ -42,11 +41,10 @@ public class ScheduledActivities {
 
     //TODO  controlla quotidianamente se la data scadenza delle campagne è stata superata
 
-    @Scheduled(cron = "0 0/1 * * * ?")
+    @Scheduled(cron = "0 0/3 * * * ?")
     public void trasformaTrackingCPC() {
         try {
             TransactionBusiness.BaseCreateRequest rr = new TransactionBusiness.BaseCreateRequest();
-
             Map<String, Integer> mappa = new HashMap<>();
 
             // trovo tutti i tracking con read == false
@@ -62,11 +60,7 @@ public class ScheduledActivities {
 
             if (!mappa.isEmpty()) {
                 mappa.forEach((s, aLong) -> {
-                    log.info("Gestisco ID {}", aLong);
-
-                    CpcBusiness.Filter ff = new CpcBusiness.Filter();
-                    ff.setRefferal(s);
-                    cpcBusiness.search(ff, PageRequest.of(0, 10000));
+                    log.info("Gestisco trasformaTrackingCPC ID {}", aLong);
 
                     // prendo reffereal e lo leggo
                     Refferal refferal = refferalService.decodificaRefferal(s);
@@ -75,7 +69,8 @@ public class ScheduledActivities {
                     // gesione commisione
                     AffiliateChannelCommissionCampaign accc = affiliateChannelCommissionCampaignRepository.findByAffiliateIdAndChannelIdAndCampaignId(refferal.getAffiliateId(), refferal.getChannelId(), refferal.getCampaignId());
                     rr.setCommissionId(accc.getCommission().getId());
-                    rr.setValue(Double.valueOf(accc.getCommission().getValue()) * aLong);
+                    Double totale = Double.valueOf(accc.getCommission().getValue()) * aLong;
+                    rr.setValue(totale);
                     rr.setClickNumber(Long.valueOf(aLong));
 
                     // setta transazione
@@ -86,7 +81,10 @@ public class ScheduledActivities {
                     rr.setApproved(true);
 
                     // associo a wallet
-                    rr.setWalletId(walletRepository.findByAffiliateId(refferal.getAffiliateId()).getId());
+                    Long walletID = walletRepository.findByAffiliateId(refferal.getAffiliateId()).getId();
+                    rr.setWalletId(walletID);
+                    // incemento valore
+                    walletBusiness.incement(walletID, totale);
 
                     // creo la transazione
                     transactionBusiness.createCpc(rr);
@@ -99,39 +97,57 @@ public class ScheduledActivities {
 
     }//trasformaTrackingCPC
 
-    @Scheduled(cron = "0 0/2 * * * ?")
+    @Scheduled(cron = "0 0/6 * * * ?")
     public void trasformaTrackingCPM() {
         try {
-            // trovo uttti i tracking con read == false
-            cpmBusiness.getUnread().stream().filter(cpmDTO -> cpmDTO.getRefferal() != null).forEach(cpmDTO -> {
-                TransactionBusiness.BaseCreateRequest rr = new TransactionBusiness.BaseCreateRequest();
+            TransactionBusiness.BaseCreateRequest rr = new TransactionBusiness.BaseCreateRequest();
+            Map<String, Integer> mappa = new HashMap<>();
 
-                // prendo reffereal e lo leggo
-                Refferal refferal = refferalService.decodificaRefferal(cpmDTO.getRefferal());
-                log.info("CPM :: {} - {}", cpmDTO.getRefferal(), refferal);
-
-                // gesione commisione
-                AffiliateChannelCommissionCampaign accc = affiliateChannelCommissionCampaignRepository.findByAffiliateIdAndChannelIdAndCampaignId(refferal.getAffiliateId(), refferal.getChannelId(), refferal.getCampaignId());
-                rr.setCommissionId(accc.getCommission().getId());
-                rr.setValue(Double.valueOf(accc.getCommission().getValue()));
-
-                // setta transazione
-                rr.setAffiliateId(refferal.getAffiliateId());
-                rr.setCampaignId(refferal.getCampaignId());
-                rr.setChannelId(refferal.getChannelId());
-                rr.setDateTime(cpmDTO.getDate());
-                rr.setApproved(false);
-
-                // associo a wallet
-                rr.setWalletId(walletRepository.findByAffiliateId(refferal.getAffiliateId()).getId());
-
-                // creo la transazione
-                transactionBusiness.createCpm(rr);
-                log.info(">>>>>>> TRASNSAZIONE >>>>> {}", rr);
+            // trovo tutti i tracking con read == false
+            cpmBusiness.getUnreadLastHour().stream().filter(cpmDTO -> cpmDTO.getRefferal() != null).forEach(cpmDTO -> {
+                // gestisco calcolatore
+                Integer num = mappa.get(cpmDTO.getRefferal());
+                if (num == null) num = 0;
+                mappa.put(cpmDTO.getRefferal(), num + 1);
 
                 // setto a gestito
-                cpmBusiness.setRead(cpmDTO.getId());
+                cpcBusiness.setRead(cpmDTO.getId());
             });
+
+            if (!mappa.isEmpty()) {
+                mappa.forEach((s, aLong) -> {
+                    log.info("Gestisco trasformaTrackingCPM ID {}", aLong);
+
+                    // prendo reffereal e lo leggo
+                    Refferal refferal = refferalService.decodificaRefferal(s);
+                    log.info("CPM :: {} - {}", s, refferal);
+
+                    // gesione commisione
+                    AffiliateChannelCommissionCampaign accc = affiliateChannelCommissionCampaignRepository.findByAffiliateIdAndChannelIdAndCampaignId(refferal.getAffiliateId(), refferal.getChannelId(), refferal.getCampaignId());
+                    rr.setCommissionId(accc.getCommission().getId());
+                    Double totale = Double.valueOf(accc.getCommission().getValue()) * aLong;
+                    rr.setValue(totale);
+                    rr.setClickNumber(Long.valueOf(aLong));
+
+                    // setta transazione
+                    rr.setAffiliateId(refferal.getAffiliateId());
+                    rr.setCampaignId(refferal.getCampaignId());
+                    rr.setChannelId(refferal.getChannelId());
+                    rr.setDateTime(LocalDateTime.now());
+                    rr.setApproved(false);
+
+                    // associo a wallet
+                    Long walletID = walletRepository.findByAffiliateId(refferal.getAffiliateId()).getId();
+                    rr.setWalletId(walletID);
+                    // incemento valore
+                    walletBusiness.incement(walletID, totale);
+
+                    // creo la transazione
+                    transactionBusiness.createCpm(rr);
+                    log.info(">>>>>>> TRASNSAZIONE >>>>> {}", rr);
+                });
+            }
+
         } catch (Exception e) {
             log.error("Eccezione Scheduler CPM --  {}", e.getMessage(), e);
         }
@@ -145,7 +161,7 @@ public class ScheduledActivities {
 
                 // prendo reffereal e lo leggo
                 Refferal refferal = refferalService.decodificaRefferal(cplDTO.getRefferal());
-                log.info("CPL :: {} - {}", reff.getMediaId(), reff.getCampaignId());
+                log.info("CPL :: {} - {}", cplDTO, refferal);
 
                 // setta transazione
                 TransactionBusiness.BaseCreateRequest rr = new TransactionBusiness.BaseCreateRequest();
@@ -154,6 +170,18 @@ public class ScheduledActivities {
                 rr.setChannelId(refferal.getChannelId());
                 rr.setDateTime(cplDTO.getDate());
                 rr.setApproved(true);
+
+                // gesione commisione
+                AffiliateChannelCommissionCampaign accc = affiliateChannelCommissionCampaignRepository.findByAffiliateIdAndChannelIdAndCampaignId(refferal.getAffiliateId(), refferal.getChannelId(), refferal.getCampaignId());
+                rr.setCommissionId(accc.getCommission().getId());
+                Double totale = Double.valueOf(accc.getCommission().getValue());
+                rr.setValue(totale);
+
+                // associo a wallet
+                Long walletID = walletRepository.findByAffiliateId(refferal.getAffiliateId()).getId();
+                rr.setWalletId(walletID);
+                // incemento valore
+                walletBusiness.incement(walletID, totale);
 
                 // creo la transazione
                 transactionBusiness.createCpl(rr);
