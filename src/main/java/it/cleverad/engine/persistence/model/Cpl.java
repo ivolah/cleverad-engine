@@ -20,7 +20,7 @@ public class Cpl {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String cid;
+    private String refferal;
     private String ip;
     private String agent;
     private String data;

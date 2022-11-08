@@ -12,7 +12,7 @@ public class CplDTO {
 
     private long id;
 
-    private String cid;
+    private String refferal;
     private String ip;
     private String agent;
     private String data;
@@ -20,9 +20,9 @@ public class CplDTO {
     private LocalDateTime date;
     private Boolean read;
 
-    public CplDTO(long id, String cid, String ip, String agent, String data, LocalDateTime date, Boolean read) {
+    public CplDTO(long id, String refferal, String ip, String agent, String data, LocalDateTime date, Boolean read) {
         this.id = id;
-        this.cid = cid;
+        this.refferal = refferal;
         this.ip = ip;
         this.agent = agent;
         this.data = data;
@@ -31,7 +31,7 @@ public class CplDTO {
     }
 
     public static CplDTO from(Cpl cpl) {
-        return new CplDTO(cpl.getId(), cpl.getCid(), cpl.getIp(),cpl.getAgent(), cpl.getData(), cpl.getDate(), cpl.getRead());
+        return new CplDTO(cpl.getId(), cpl.getRefferal(), cpl.getIp(),cpl.getAgent(), cpl.getData(), cpl.getDate(), cpl.getRead());
     }
 
 }

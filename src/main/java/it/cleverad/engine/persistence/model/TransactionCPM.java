@@ -25,6 +25,11 @@ public class TransactionCPM {
     private Double value;
     private Boolean approved;
 
+    private Long imageId;
+    private Long mediaId;
+    private String ip;
+    private String agent;
+
     private LocalDateTime creationDate = LocalDateTime.now();
     private LocalDateTime lastModificationDate = LocalDateTime.now();
 
@@ -48,10 +53,6 @@ public class TransactionCPM {
     @JoinColumn(name = "channel_id")
     private Channel channel;
 
-    private Long imageId;
-    private Long mediaId;
 
-    private String ip;
-    private String agent;
 
 }

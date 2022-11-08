@@ -24,7 +24,7 @@ public class TransactionCPL {
     private Double value;
     private Boolean approved;
 
-    private String cid;
+    private String refferal;
 
     private String ip;
     private String agent;

@@ -31,6 +31,10 @@ public class Affiliate {
     private String primaryMail;
     private String secondaryMail;
 
+    private String iban;
+    private String swift;
+    private String paypal;
+
     @Column(nullable = false)
     private Boolean status = true;
     private LocalDateTime creationDate = LocalDateTime.now();

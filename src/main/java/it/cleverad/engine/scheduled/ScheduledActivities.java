@@ -76,6 +76,7 @@ public class ScheduledActivities {
                     AffiliateChannelCommissionCampaign accc = affiliateChannelCommissionCampaignRepository.findByAffiliateIdAndChannelIdAndCampaignId(refferal.getAffiliateId(), refferal.getChannelId(), refferal.getCampaignId());
                     rr.setCommissionId(accc.getCommission().getId());
                     rr.setValue(Double.valueOf(accc.getCommission().getValue()) * aLong);
+                    rr.setClickNumber(Long.valueOf(aLong));
 
                     // setta transazione
                     rr.setAffiliateId(refferal.getAffiliateId());
@@ -140,15 +141,17 @@ public class ScheduledActivities {
     public void trasformaTrackingCPL() {
         try {
             // trovo uttti i tracking con read == false
-            cplBusiness.getUnread().stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getCid())).forEach(cplDTO -> {
+            cplBusiness.getUnread().stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
 
                 // prendo reffereal e lo leggo
-                Refferal reff = refferalService.decodificaRefferal(cplDTO.getCid());
+                Refferal refferal = refferalService.decodificaRefferal(cplDTO.getRefferal());
                 log.info("CPL :: {} - {}", reff.getMediaId(), reff.getCampaignId());
 
                 // setta transazione
                 TransactionBusiness.BaseCreateRequest rr = new TransactionBusiness.BaseCreateRequest();
-                rr.setCampaignId(Long.valueOf(reff.getCampaignId()));
+                rr.setAffiliateId(refferal.getAffiliateId());
+                rr.setCampaignId(refferal.getCampaignId());
+                rr.setChannelId(refferal.getChannelId());
                 rr.setDateTime(cplDTO.getDate());
                 rr.setApproved(true);
 
