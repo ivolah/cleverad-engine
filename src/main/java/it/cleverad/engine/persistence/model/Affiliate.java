@@ -60,6 +60,9 @@ public class Affiliate {
     @OneToMany(mappedBy = "affiliate")
     private Set<TransactionCPM> transactionCPMS;
 
+    @OneToMany(mappedBy = "affiliate")
+    private Set<TransactionCPL> transactionCPLS;
+
     // >>>  CAMPAIGN + AFFILIATE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "affiliates")
     private Set<Campaign> campaigns = new HashSet<>();

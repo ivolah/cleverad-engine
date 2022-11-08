@@ -15,6 +15,7 @@ public class FileDTO {
     private String type;
     private byte[] data;
     private LocalDateTime creationDate;
+    private String nomeCodificato;
 
     public FileDTO(Long id, String name, String type, byte[] data, LocalDateTime creationDate) {
         this.id = id;

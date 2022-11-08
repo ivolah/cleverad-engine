@@ -27,12 +27,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -95,22 +97,7 @@ public class MediaBusiness {
         if (dto.getTypeId() != null) {
             MediaTypeDTO mtDto = mediaTypeBusiness.findById(dto.getTypeId());
             dto.setTypeName(mtDto.getName());
-
-            String campID = String.valueOf(id);
-            String mediaID = String.valueOf(media.getId());
-            String affilaiteID = String.valueOf(jwtUserDetailsService.getAffiliateID());
-
-            String channelID = "";
-            String bannerCode = dto.getBannerCode();
-            String url = dto.getUrl();
-            if (StringUtils.isNotBlank(url)) bannerCode = bannerCode.replace("{{url}}", url);
-
-            String target = dto.getTarget();
-            if (StringUtils.isNotBlank(target)) bannerCode = bannerCode.replace("{{target}}", target);
-
-            bannerCode = bannerCode.replace("{{refferalId}}", refferalService.creaEncoding(campID, mediaID, affilaiteID, channelID));
-            dto.setBannerCode(bannerCode);
-
+            dto.setBannerCode(generaBannerCode(dto, media.getId(), id, 0L));
         }
         return dto;
     }
@@ -175,12 +162,18 @@ public class MediaBusiness {
         }
     }
 
+    public Media getByFileId(Long fileId) {
+        Media page = repository.findByIdFile(Long.toString(fileId));
+        return page;
+    }
+
     public Page<MediaDTO> getByCampaignId(Long campaignId, Pageable pageableRequest) {
         Campaign cc = campaignRepository.findById(campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", campaignId));
         Set<Media> list = cc.getMedias();
         Page<Media> page = new PageImpl<>(list.stream().distinct().collect(Collectors.toList()));
         return page.map(media -> {
             MediaDTO dto = MediaDTO.from(media);
+
             dto.setBannerCode(generaBannerCode(dto, media.getId(), campaignId, 0L));
             return dto;
         });
@@ -206,11 +199,14 @@ public class MediaBusiness {
         if (StringUtils.isNotBlank(dto.getUrl())) bannerCode = bannerCode.replace("{{url}}", dto.getUrl());
         if (StringUtils.isNotBlank(dto.getTarget())) bannerCode = bannerCode.replace("{{target}}", dto.getTarget());
 
+        String url = dto.getUrl();
+        if (StringUtils.isNotBlank(url)) bannerCode = bannerCode.replace("{{url}}", url);
+
+        String target = dto.getTarget();
+        if (StringUtils.isNotBlank(target)) bannerCode = bannerCode.replace("{{target}}", target);
+
         if (!jwtUserDetailsService.getRole().equals("Admin")) {
-            String refID = campaignId + "||" + mediaId + "||" + jwtUserDetailsService.getAffiliateID() + "||" + channelID;
-            byte[] encodedRefferal = Base64.getEncoder().encode(refID.getBytes(StandardCharsets.UTF_8));
-            String reString = new String(encodedRefferal);
-            bannerCode = bannerCode.replace("{{refferalId}}", reString);
+            bannerCode = bannerCode.replace("{{refferalId}}", refferalService.creaEncoding(Long.toString(campaignId), Long.toString(mediaId), String.valueOf(jwtUserDetailsService.getAffiliateID()), Long.toString(channelID)));
         }
 
         return bannerCode;

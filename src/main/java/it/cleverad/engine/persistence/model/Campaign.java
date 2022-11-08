@@ -31,12 +31,12 @@ public class Campaign {
     private String idFile;
     private String defaultCommissionId;
     private String valuta;
+    private String trackingCode;
     private Long budget;
     @Column(nullable = false)
     private Boolean status = true;
     private LocalDateTime creationDate = LocalDateTime.now();
     private LocalDateTime lastModificationDate = LocalDateTime.now();
-
 
     @OneToMany(mappedBy = "campaign")
     private Set<AffiliateChannelCommissionCampaign> affiliateChannelCommissionCampaigns;
@@ -67,6 +67,12 @@ public class Campaign {
     @OneToMany(mappedBy = "campaign")
     private Set<TransactionCPM> transactionCPMS;
 
+    // >>>  COMPANY  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private Company company;
+
+    // >>>  TransactionCPL  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     @OneToMany(mappedBy = "campaign")
     private Set<TransactionCPL> transactionCPLS;
 

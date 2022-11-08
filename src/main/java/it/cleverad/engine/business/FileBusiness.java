@@ -2,7 +2,9 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.File;
+import it.cleverad.engine.persistence.model.Media;
 import it.cleverad.engine.persistence.repository.FileRepository;
+import it.cleverad.engine.service.RefferalService;
 import it.cleverad.engine.web.dto.FileDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -30,6 +32,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -41,6 +44,12 @@ public class FileBusiness {
 
     @Autowired
     private Mapper mapper;
+
+    @Autowired
+    private RefferalService refferalService;
+
+    @Autowired
+    private MediaBusiness mediaBusiness;
 
     /**
      * ============================================================================================================
@@ -88,6 +97,32 @@ public class FileBusiness {
         mapper.map(from, mappedEntity);
 
         return FileDTO.from(repository.save(mappedEntity));
+    }
+
+    public List<FileDTO> listaFileCodificati() {
+        Filter request = new Filter();
+        Page<File> page = repository.findAll(getSpecification(request), PageRequest.of(0, 10, Sort.by(Sort.Order.desc("creationDate"))));
+
+        List<FileDTO> fileDTOList = page.stream().map(ele -> {
+            // trovo media id collegato e campaign id a cui e colelgato il media
+            log.info("ele.getId() " + ele.getId());
+            // trovo mediaId
+            Media mm = mediaBusiness.getByFileId(ele.getId());
+            if (mm != null) {
+                Long mediaId = mm.getId();
+                log.info("mediaId " + mediaId);
+                // trovo campaignID
+                Long campaignId = mediaBusiness.findById(mediaId).getCampaignId();
+                log.info("campaignId " + campaignId);
+                String stringa = refferalService.encode(String.valueOf(campaignId)) + "-" + refferalService.encode(String.valueOf(mediaId));
+                FileDTO dto = FileDTO.from(ele);
+                dto.setNomeCodificato(stringa);
+                return dto;
+            }
+            return null;
+        }).collect(Collectors.toList());
+
+        return fileDTOList;
     }
 
     /**

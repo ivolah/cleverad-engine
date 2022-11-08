@@ -42,7 +42,7 @@ public class ScheduledActivities {
 
     //TODO  controlla quotidianamente se la data scadenza delle campagne è stata superata
 
-    @Scheduled(cron = "0 0 * * * ?")
+    @Scheduled(cron = "0 0/1 * * * ?")
     public void trasformaTrackingCPC() {
         try {
             TransactionBusiness.BaseCreateRequest rr = new TransactionBusiness.BaseCreateRequest();
@@ -98,7 +98,7 @@ public class ScheduledActivities {
 
     }//trasformaTrackingCPC
 
-    @Scheduled(fixedRateString = "30000")
+    @Scheduled(cron = "0 0/2 * * * ?")
     public void trasformaTrackingCPM() {
         try {
             // trovo uttti i tracking con read == false
@@ -136,21 +136,21 @@ public class ScheduledActivities {
         }
     }//trasformaTrackingCPM
 
-    @Scheduled(fixedRateString = "60000")
+    @Scheduled(cron = "0 0/3 * * * ?")
     public void trasformaTrackingCPL() {
         try {
             // trovo uttti i tracking con read == false
             cplBusiness.getUnread().stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getCid())).forEach(cplDTO -> {
 
                 // prendo reffereal e lo leggo
-                String campaignId = refferalService.decodifica(cplDTO.getCid());
-                log.info("CPL :: {} - {}", campaignId, campaignId);
+                Refferal reff = refferalService.decodificaRefferal(cplDTO.getCid());
+                log.info("CPL :: {} - {}", reff.getMediaId(), reff.getCampaignId());
 
                 // setta transazione
                 TransactionBusiness.BaseCreateRequest rr = new TransactionBusiness.BaseCreateRequest();
-                rr.setCampaignId(Long.valueOf(campaignId));
+                rr.setCampaignId(Long.valueOf(reff.getCampaignId()));
                 rr.setDateTime(cplDTO.getDate());
-                rr.setApproved(false);
+                rr.setApproved(true);
 
                 // creo la transazione
                 transactionBusiness.createCpl(rr);

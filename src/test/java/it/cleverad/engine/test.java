@@ -1,11 +1,18 @@
 package it.cleverad.engine;
 
+import it.cleverad.engine.config.model.Refferal;
 import org.junit.jupiter.api.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Base64;
 import java.util.zip.DataFormatException;
 
 public class test {
+
+    public String decodifica(String refferalString) {
+        byte[] decoder = Base64.getDecoder().decode(refferalString);
+        return new String(decoder);
+    }
     @Test
     public void test() throws DataFormatException, UnsupportedEncodingException {
 
@@ -14,6 +21,16 @@ public class test {
 
         String aa = " {{url}}/{{target}}/{{refferalId}}";
 
+
+        message = "30-5-1-0";
+
+        String[] tokens = message.split("-");
+        System.out.println("NOM TOKEN  REFF  "+ tokens.length);
+        Refferal refferal = new Refferal();
+        if (tokens[0] != null) {
+            System.out.println(tokens[0]);
+            refferal.setCampaignId(Long.valueOf(decodifica(tokens[0])));
+        }
 
 //
 //        System.out.println("Original Message length : " + message.length());

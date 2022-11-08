@@ -78,7 +78,7 @@ public class AffiliateChannelCommissionCampaignBusiness {
     public void delete(Long id) {
         try {
             repository.deleteById(id);
-        }  catch (ConstraintViolationException ex) {
+        } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -87,7 +87,7 @@ public class AffiliateChannelCommissionCampaignBusiness {
 
     // GET BY ID
     public AffiliateChannelCommissionCampaignDTO findById(Long id) {
-        AffiliateChannelCommissionCampaign affiliateChannelCommissionCampaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("AffiliateChannelCommissionCampaign",id));
+        AffiliateChannelCommissionCampaign affiliateChannelCommissionCampaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("AffiliateChannelCommissionCampaign", id));
         return AffiliateChannelCommissionCampaignDTO.from(affiliateChannelCommissionCampaign);
     }
 
@@ -98,6 +98,22 @@ public class AffiliateChannelCommissionCampaignBusiness {
         filter.setCampaignId(campaignId);
         log.info(">>> " + campaignId);
         Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
+        return page.map(AffiliateChannelCommissionCampaignDTO::from);
+    }
+
+    // SEARCH searchScheduledActivities
+    public AffiliateChannelCommissionCampaign searchScheduledActivities(Filter request) {
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.asc("id")));
+        Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(request), pageable);
+
+        if (page.getTotalPages() > 0) {
+            return page.getContent().get(0);
+        } else return null;
+    }
+
+    public Page<AffiliateChannelCommissionCampaignDTO> search(Filter request, Pageable pageableR) {
+        Pageable pageable = PageRequest.of(pageableR.getPageNumber(), pageableR.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(request), pageable);
         return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
 
@@ -129,12 +145,6 @@ public class AffiliateChannelCommissionCampaignBusiness {
 
             return completePredicate;
         };
-    }
-
-    public Page<AffiliateChannelCommissionCampaignDTO> search(Filter request, Pageable pageableR) {
-        Pageable pageable = PageRequest.of(pageableR.getPageNumber(), pageableR.getPageSize(), Sort.by(Sort.Order.asc("id")));
-        Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
 
     /**

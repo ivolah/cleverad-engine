@@ -20,5 +20,9 @@ public interface MediaRepository extends JpaRepository<Media, Long>, JpaSpecific
 
     // List<Media> findMediasByCampaingsId(Long campaignId);
     Page<Media> findByIdIn(Collection<Long> states, Pageable pageable);
+
+    Media findByIdFile(String Id);
+
+
 }
 

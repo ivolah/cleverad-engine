@@ -4,6 +4,7 @@ import it.cleverad.engine.persistence.model.AffiliateChannelCommissionCampaign;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -19,11 +20,13 @@ public class AffiliateChannelCommissionCampaignDTO {
     private Long commissionId;
     private String commissionName;
     private String commissionValue;
+    private String commissionType;
+    private LocalDate commissionDueDate;
 
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
 
-    public AffiliateChannelCommissionCampaignDTO(long id, Long campaignId, Long affiliateId, String affilateName, Long channelId, String channelName, Long commissionId, String commissionName, String commissionValue, LocalDateTime creationDate, LocalDateTime lastModificationDate) {
+    public AffiliateChannelCommissionCampaignDTO(long id, Long campaignId, Long affiliateId, String affilateName, Long channelId, String channelName, Long commissionId, String commissionName, String commissionValue, String commissionType, LocalDate commissionDate, LocalDateTime creationDate, LocalDateTime lastModificationDate) {
         this.id = id;
         this.campaignId = campaignId;
         this.affiliateId = affiliateId;
@@ -33,12 +36,17 @@ public class AffiliateChannelCommissionCampaignDTO {
         this.commissionId = commissionId;
         this.commissionName = commissionName;
         this.commissionValue = commissionValue;
+        this.commissionType = commissionType;
+        this.commissionDueDate = commissionDate;
         this.creationDate = creationDate;
         this.lastModificationDate = lastModificationDate;
     }
 
     public static AffiliateChannelCommissionCampaignDTO from(AffiliateChannelCommissionCampaign accc) {
-        return new AffiliateChannelCommissionCampaignDTO(accc.getId(), accc.getCampaign().getId(), accc.getAffiliate().getId(), accc.getAffiliate().getName(), accc.getChannel().getId(), accc.getChannel().getName(), accc.getCommission().getId(), accc.getCommission().getName(), accc.getCommission().getValue(), accc.getCreationDate(), accc.getLastModificationDate());
+        return new AffiliateChannelCommissionCampaignDTO(accc.getId(), accc.getCampaign().getId(), accc.getAffiliate().getId(), accc.getAffiliate().getName(), accc.getChannel().getId(), accc.getChannel().getName(), accc.getCommission().getId(), accc.getCommission().getName(), accc.getCommission().getValue(),
+                accc.getCommission().getDictionary().getName(),
+                accc.getCommission().getDueDate(),
+                accc.getCreationDate(), accc.getLastModificationDate());
     }
 
 }

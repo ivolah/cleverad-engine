@@ -25,6 +25,7 @@ public class CampaignDTO {
     private String idFile;
     private String valuta;
     private Long budget;
+    private String trackingCode;
 
     private Long cookieId;
     private String cookieName;
@@ -38,7 +39,7 @@ public class CampaignDTO {
     private List<RevenueFactorDTO> revenues;
     private List<AffiliateChannelCommissionCampaignDTO> affiliateChannelCommissionCampaigns;
 
-    public CampaignDTO(long id, String name, String shortDescription, String longDescription, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, LocalDate startDate, LocalDate endDate, String idFile, String valuta, Long budget, Long cookieId, String cookieName, String cookieValue, List<BasicMediaDTO> medias, List<BasicAffiliateDTO> affiliates, List<CommissionDTO> commissions, List<BasicCategoryDTO> categories, List<RevenueFactorDTO> revenues, List<AffiliateChannelCommissionCampaignDTO> affiliateChannelCommissionCampaigns) {
+    public CampaignDTO(long id, String name, String shortDescription, String longDescription, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, LocalDate startDate, LocalDate endDate, String idFile, String valuta, Long budget, String trackingCode, Long cookieId, String cookieName, String cookieValue, List<BasicMediaDTO> medias, List<BasicAffiliateDTO> affiliates, List<CommissionDTO> commissions, List<BasicCategoryDTO> categories, List<RevenueFactorDTO> revenues, List<AffiliateChannelCommissionCampaignDTO> affiliateChannelCommissionCampaigns) {
         this.id = id;
         this.name = name;
         this.shortDescription = shortDescription;
@@ -51,6 +52,7 @@ public class CampaignDTO {
         this.idFile = idFile;
         this.valuta = valuta;
         this.budget = budget;
+        this.trackingCode = trackingCode;
         this.cookieId = cookieId;
         this.cookieName = cookieName;
         this.cookieValue = cookieValue;
@@ -65,7 +67,7 @@ public class CampaignDTO {
     public static CampaignDTO from(Campaign campaign) {
 
         List<BasicMediaDTO> medias = null;
-        if(campaign.getMedias() != null){
+        if (campaign.getMedias() != null) {
             medias = campaign.getMedias().stream().map(media -> {
                 BasicMediaDTO mediaDTO = new BasicMediaDTO();
                 mediaDTO.setId(media.getId());
@@ -163,6 +165,6 @@ public class CampaignDTO {
             }).collect(Collectors.toList());
         }
 
-        return new CampaignDTO(campaign.getId(), campaign.getName(), campaign.getShortDescription(), campaign.getLongDescription(), campaign.getStatus(), campaign.getCreationDate(), campaign.getLastModificationDate(), campaign.getStartDate(), campaign.getEndDate(), campaign.getIdFile(), campaign.getValuta(), campaign.getBudget(), campaign.getCookie().getId(), campaign.getCookie().getName(), campaign.getCookie().getValue(), medias, affiliates, commissions, campaigns, revenues, accc);
+        return new CampaignDTO(campaign.getId(), campaign.getName(), campaign.getShortDescription(), campaign.getLongDescription(), campaign.getStatus(), campaign.getCreationDate(), campaign.getLastModificationDate(), campaign.getStartDate(), campaign.getEndDate(), campaign.getIdFile(), campaign.getValuta(), campaign.getBudget(), campaign.getTrackingCode(), campaign.getCookie().getId(), campaign.getCookie().getName(), campaign.getCookie().getValue(), medias, affiliates, commissions, campaigns, revenues, accc);
     }
 }

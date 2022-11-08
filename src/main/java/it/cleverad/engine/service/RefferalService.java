@@ -2,6 +2,7 @@ package it.cleverad.engine.service;
 
 import it.cleverad.engine.config.model.Refferal;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -16,15 +17,19 @@ public class RefferalService {
         log.trace("NOM TOKEN  REFF  {}", tokens.length);
         Refferal refferal = new Refferal();
         if (tokens[0] != null) {
+            log.info(tokens[0]);
             refferal.setCampaignId(Long.valueOf(decodifica(tokens[0])));
         }
         if (tokens[1] != null) {
+            log.info(tokens[1]);
             refferal.setMediaId(Long.valueOf(decodifica(tokens[1])));
         }
         if (tokens[2] != null) {
+            log.info(tokens[2]);
             refferal.setAffiliateId(Long.valueOf(decodifica(tokens[2])));
         }
         if (tokens[3] != null) {
+            log.info(tokens[3]);
             refferal.setChannelId(Long.valueOf(decodifica(tokens[3])));
         }
         return refferal;
@@ -42,10 +47,10 @@ public class RefferalService {
         affilaiteID = encode(affilaiteID);
         channelID = encode(channelID);
 
-        return campaignId + "-" + mediaID + "-" + affilaiteID + "-" + channelID;
+        return StringUtils.stripEnd(campaignId, "=") + "-" + StringUtils.stripEnd(mediaID, "=") + "-" + StringUtils.stripEnd(affilaiteID, "=") + "-" + StringUtils.stripEnd(channelID, "=");
     }
 
-    private String encode(String str) {
+    public String encode(String str) {
         byte[] encodedRefferal = Base64.getEncoder().encode(str.getBytes(StandardCharsets.UTF_8));
         String reString = new String(encodedRefferal);
         if (reString.endsWith("=")) {

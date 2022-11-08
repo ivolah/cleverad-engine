@@ -30,8 +30,6 @@ public class Channel {
     private LocalDateTime creationDate = LocalDateTime.now();
     private LocalDateTime lastModificationDate = LocalDateTime.now();
 
-
-
     @ManyToOne
     @JoinColumn(name = "dictionary_id")
     private Dictionary dictionary;
@@ -39,6 +37,8 @@ public class Channel {
     @ManyToOne
     @JoinColumn(name = "affiliate_id")
     private Affiliate affiliate;
+
+
 
 //    @ManyToMany
 //    @JoinTable(
@@ -55,4 +55,7 @@ public class Channel {
 
     @OneToMany(mappedBy = "channel")
     private Set<TransactionCPM> transactionCPMS;
+
+    @OneToMany(mappedBy = "channel")
+    private Set<TransactionCPL> transactionCPLS;
 }

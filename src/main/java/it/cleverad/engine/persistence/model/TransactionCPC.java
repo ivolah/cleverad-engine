@@ -26,6 +26,7 @@ public class TransactionCPC {
 
     private String ip;
     private String agent;
+    private Long clickNumber;
 
     private LocalDateTime creationDate = LocalDateTime.now();
     private LocalDateTime lastModificationDate = LocalDateTime.now();

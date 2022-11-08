@@ -27,7 +27,10 @@ public class ChannelDTO {
     private List<CategoryDTO> categoryDTOS;
     private String campaignID;
 
-    public ChannelDTO(Long id, String name, String shortDescription, String type, Boolean status, String url, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long dictionaryId, String dictionaryValue, List<CategoryDTO> categoryDTOS) {
+    private String affiliateName;
+    private Long affiliateId;
+
+    public ChannelDTO(Long id, String name, String shortDescription, String type, Boolean status, String url, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long dictionaryId, String dictionaryValue, List<CategoryDTO> categoryDTOS, String affiliateName, Long affiliateId) {
         this.id = id;
         this.name = name;
         this.shortDescription = shortDescription;
@@ -39,6 +42,8 @@ public class ChannelDTO {
         this.dictionaryId = dictionaryId;
         this.dictionaryValue = dictionaryValue;
         this.categoryDTOS = categoryDTOS;
+        this.affiliateName = affiliateName;
+        this.affiliateId = affiliateId;
     }
 
     public static ChannelDTO from(Channel channel) {
@@ -55,7 +60,8 @@ public class ChannelDTO {
             }).collect(Collectors.toList());
         }
 
-        return new ChannelDTO(channel.getId(), channel.getName(), channel.getShortDescription(), channel.getType(), channel.getStatus(), channel.getUrl(), channel.getCreationDate(), channel.getLastModificationDate(), channel.getDictionary() != null ? channel.getDictionary().getId() : null, channel.getDictionary() != null ? channel.getDictionary().getName() : null, categories);
+
+        return new ChannelDTO(channel.getId(), channel.getName(), channel.getShortDescription(), channel.getType(), channel.getStatus(), channel.getUrl(), channel.getCreationDate(), channel.getLastModificationDate(), channel.getDictionary() != null ? channel.getDictionary().getId() : null, channel.getDictionary() != null ? channel.getDictionary().getName() : null, categories, channel.getAffiliate() != null ? channel.getAffiliate().getName() : null, channel.getAffiliate() != null ? channel.getAffiliate().getId() : null);
     }
 
 }

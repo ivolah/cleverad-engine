@@ -5,17 +5,16 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
-@Table(name = "t_commision")
+@Table(name = "t_company")
 @Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
 @NoArgsConstructor
-public class Commission {
+public class Company {
 
     @Id
     @Column(name = "id", nullable = false)
@@ -23,29 +22,22 @@ public class Commission {
     private Long id;
 
     private String name;
-    private String value;
-    private String description;
-    private LocalDate dueDate;
+    private String vatNumber;
+    private String street;
+    private String streetNumber;
+    private String city;
+    private String zipCode;
+    private String primaryMail;
+    private String secondaryMail;
 
-    @Column(nullable = false)
     private Boolean status = true;
     private LocalDateTime creationDate = LocalDateTime.now();
     private LocalDateTime lastModificationDate = LocalDateTime.now();
-    @ManyToOne
-    @JoinColumn(name = "campaign_id")
-    private Campaign campaign;
 
-    @ManyToOne
-    @JoinColumn(name = "dictionary_id")
-    private Dictionary dictionary;
-
-    @OneToMany(mappedBy = "commission")
-    private Set<TransactionCPC> transactionCPCS;
-
-    @OneToMany(mappedBy = "commission")
-    private Set<TransactionCPM> transactionCPMS;
-
-    @OneToMany(mappedBy = "commission")
+    @OneToMany(mappedBy = "company")
     private Set<TransactionCPL> transactionCPLS;
+
+    @OneToMany(mappedBy = "company")
+    private Set<Campaign> campaigns;
 
 }

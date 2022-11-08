@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @CrossOrigin
 @Tag(name = "Files", description = "Endpoints for all the Files Operations")
 @RestController
@@ -35,7 +37,6 @@ public class FileController {
             throw new PostgresCleveradException("Errore uplaod: " + file.getOriginalFilename() + "!");
         }
     }
-
 
     @Operation(summary = "Lists the Files", description = "Lists the Files, searched and paginated")
     @GetMapping
@@ -64,6 +65,13 @@ public class FileController {
     public void delete(@PathVariable Long id) {
         this.business.delete(id);
     }
+
+    @GetMapping("/encoded")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public List<FileDTO> listaFileCodificati() {
+        return business.listaFileCodificati();
+    }
+
 
     /**
      * ============================================================================================================
