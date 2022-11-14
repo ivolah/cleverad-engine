@@ -14,22 +14,17 @@ public class RefferalService {
 
     public Refferal decodificaRefferal(String refferalString) {
         String[] tokens = refferalString.split("-");
-        log.trace("NOM TOKEN  REFF  {}", tokens.length);
         Refferal refferal = new Refferal();
         if (tokens[0] != null) {
-            log.info(tokens[0]);
             refferal.setCampaignId(Long.valueOf(decodifica(tokens[0])));
         }
         if (tokens[1] != null) {
-            log.info(tokens[1]);
             refferal.setMediaId(Long.valueOf(decodifica(tokens[1])));
         }
         if (tokens[2] != null) {
-            log.info(tokens[2]);
             refferal.setAffiliateId(Long.valueOf(decodifica(tokens[2])));
         }
         if (tokens[3] != null) {
-            log.info(tokens[3]);
             refferal.setChannelId(Long.valueOf(decodifica(tokens[3])));
         }
         return refferal;
@@ -53,6 +48,9 @@ public class RefferalService {
     public String encode(String str) {
         byte[] encodedRefferal = Base64.getEncoder().encode(str.getBytes(StandardCharsets.UTF_8));
         String reString = new String(encodedRefferal);
+        if (reString.endsWith("=")) {
+            reString = reString.substring(0, reString.length() - 1);
+        }
         if (reString.endsWith("=")) {
             reString = reString.substring(0, reString.length() - 1);
         }

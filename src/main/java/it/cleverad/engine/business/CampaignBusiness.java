@@ -5,8 +5,10 @@ import it.cleverad.engine.persistence.model.Affiliate;
 import it.cleverad.engine.persistence.model.Campaign;
 import it.cleverad.engine.persistence.repository.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.CampaignRepository;
+import it.cleverad.engine.persistence.repository.CompanyRepository;
 import it.cleverad.engine.persistence.repository.CookieRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
+import it.cleverad.engine.service.RefferalService;
 import it.cleverad.engine.web.dto.CampaignDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -55,7 +57,13 @@ public class CampaignBusiness {
     private CookieRepository cookieRepository;
 
     @Autowired
+    private CompanyRepository companyRepository;
+
+    @Autowired
     private AffiliateRepository affiliateRepository;
+
+    @Autowired
+    private RefferalService refferalService;
 
     /**
      * ============================================================================================================
@@ -64,12 +72,22 @@ public class CampaignBusiness {
     // CREATE
     public CampaignDTO create(BaseCreateRequest request) {
         Campaign map = mapper.map(request, Campaign.class);
-        map.setCookie(cookieRepository.findById(request.cookieId).orElseThrow(() -> new ElementCleveradException("Cookie", request.cookieId)));
+        map.setCookie(cookieRepository.findById(request.getCookieId()).orElseThrow(() -> new ElementCleveradException("Cookie", request.cookieId)));
+        map.setCompany(companyRepository.findById(request.getCompanyId()).orElseThrow(() -> new ElementCleveradException("Company", request.getCompanyId())));
+
         CampaignDTO dto = CampaignDTO.from(repository.save(map));
+        CampaignDTO finalDto = dto;
         //Category
         if (StringUtils.isNotBlank(request.getCategories())) {
-            Arrays.stream(request.getCategories().split(",")).forEach(s -> campaignCategoryBusiness.create(new CampaignCategoryBusiness.BaseCreateRequest(dto.getId(), Long.valueOf(s))));
+            Arrays.stream(request.getCategories().split(",")).forEach(s -> campaignCategoryBusiness.create(new CampaignCategoryBusiness.BaseCreateRequest(finalDto.getId(), Long.valueOf(s))));
         }
+        String encodedID =refferalService.encode(String.valueOf(dto.getId()))    ;
+
+
+        Campaign campaign = repository.findById(dto.getId()).orElseThrow(() -> new ElementCleveradException("Campaign", finalDto.getId()));
+        campaign.setEncodedId(encodedID);
+        dto = CampaignDTO.from(repository.save(map));
+
         return dto;
     }
 
@@ -135,6 +153,7 @@ public class CampaignBusiness {
 
         // SET COOKIE
         mappedEntity.setCookie(cookieRepository.findById(filter.cookieId).orElseThrow(() -> new ElementCleveradException("Cookie", filter.cookieId)));
+        mappedEntity.setCompany(companyRepository.findById(filter.getCompanyId()).orElseThrow(() -> new ElementCleveradException("Company", filter.getCompanyId())));
 
         // SET Category
         // cancello precedenti
@@ -167,7 +186,6 @@ public class CampaignBusiness {
     public Page<CampaignDTO> searchByMediaId(Long mediaId) {
         Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id")));
         Page<Campaign> page;
-
 
 
         return null;
@@ -248,6 +266,7 @@ public class CampaignBusiness {
         private String comissions;
         private String categories;
         private Long cookieId;
+        private Long companyId;
         private String valuta;
         private Long budget;
         private String trackingCode;
@@ -281,6 +300,7 @@ public class CampaignBusiness {
         private Instant startDateTo;
         private Instant endDateFrom;
         private Instant endDateTo;
+        private Long companyId;
     }
 
 }

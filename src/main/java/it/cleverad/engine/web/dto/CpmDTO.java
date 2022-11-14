@@ -12,7 +12,7 @@ public class CpmDTO {
 
     private long id;
 
-    private Long campaignId;
+
     private Long imageId;
     private Long mediaId;
 
@@ -23,9 +23,8 @@ public class CpmDTO {
     private LocalDateTime date;
     private Boolean read;
 
-    public CpmDTO(long id, Long campaignId, Long imageId, Long mediaId, String refferal, String ip, String agent, LocalDateTime date, Boolean read) {
+    public CpmDTO(long id, Long imageId, Long mediaId, String refferal, String ip, String agent, LocalDateTime date, Boolean read) {
         this.id = id;
-        this.campaignId = campaignId;
         this.imageId = imageId;
         this.mediaId = mediaId;
         this.refferal = refferal;
@@ -36,7 +35,7 @@ public class CpmDTO {
     }
 
     public static CpmDTO from(Cpm cpm) {
-        return new CpmDTO(cpm.getId(), cpm.getCampaignId(), cpm.getImageId(), cpm.getMediaId(), cpm.getRefferal(), cpm.getIp(), cpm.getAgent(), cpm.getDate(), cpm.getRead());
+        return new CpmDTO(cpm.getId(), cpm.getImageId(), cpm.getMediaId(), cpm.getRefferal(), cpm.getIp(), cpm.getAgent(), cpm.getDate(), cpm.getRead());
     }
 
 }

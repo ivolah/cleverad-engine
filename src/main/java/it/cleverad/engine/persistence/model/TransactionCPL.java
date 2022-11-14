@@ -29,7 +29,7 @@ public class TransactionCPL {
     private String ip;
     private String agent;
     private String data;
-    private String payoutId;
+    private String payoutReference;
     private String note;
 
     private LocalDateTime creationDate = LocalDateTime.now();
@@ -54,6 +54,10 @@ public class TransactionCPL {
     @ManyToOne
     @JoinColumn(name = "channel_id")
     private Channel channel;
+
+    @ManyToOne
+    @JoinColumn(name = "media_id")
+    private Media media;
 
     @ManyToOne
     @JoinColumn(name = "payout_id")

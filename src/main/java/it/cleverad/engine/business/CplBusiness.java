@@ -137,7 +137,7 @@ public class CplBusiness {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class BaseCreateRequest {
-        private String cid;
+        private String refferal;
         private String ip;
         private String agent;
         private String data;
@@ -158,4 +158,3 @@ public class CplBusiness {
     }
 
 }
-

@@ -26,10 +26,14 @@ public class CampaignDTO {
     private String valuta;
     private Long budget;
     private String trackingCode;
+    private String encodedId;
 
     private Long cookieId;
     private String cookieName;
     private String cookieValue;
+
+    private Long companyId;
+    private String companyName;
 
     private List<BasicMediaDTO> medias;
     private List<BasicAffiliateDTO> affiliates;
@@ -39,7 +43,7 @@ public class CampaignDTO {
     private List<RevenueFactorDTO> revenues;
     private List<AffiliateChannelCommissionCampaignDTO> affiliateChannelCommissionCampaigns;
 
-    public CampaignDTO(long id, String name, String shortDescription, String longDescription, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, LocalDate startDate, LocalDate endDate, String idFile, String valuta, Long budget, String trackingCode, Long cookieId, String cookieName, String cookieValue, List<BasicMediaDTO> medias, List<BasicAffiliateDTO> affiliates, List<CommissionDTO> commissions, List<BasicCategoryDTO> categories, List<RevenueFactorDTO> revenues, List<AffiliateChannelCommissionCampaignDTO> affiliateChannelCommissionCampaigns) {
+    public CampaignDTO(long id, String name, String shortDescription, String longDescription, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, LocalDate startDate, LocalDate endDate, String idFile, String valuta, Long budget, String trackingCode, String encodedId, Long cookieId, String cookieName, String cookieValue, Long companyId, String companyName, List<BasicMediaDTO> medias, List<BasicAffiliateDTO> affiliates, List<CommissionDTO> commissions, List<BasicCategoryDTO> categories, List<RevenueFactorDTO> revenues, List<AffiliateChannelCommissionCampaignDTO> affiliateChannelCommissionCampaigns) {
         this.id = id;
         this.name = name;
         this.shortDescription = shortDescription;
@@ -53,9 +57,12 @@ public class CampaignDTO {
         this.valuta = valuta;
         this.budget = budget;
         this.trackingCode = trackingCode;
+        this.encodedId = encodedId;
         this.cookieId = cookieId;
         this.cookieName = cookieName;
         this.cookieValue = cookieValue;
+        this.companyId = companyId;
+        this.companyName = companyName;
         this.medias = medias;
         this.affiliates = affiliates;
         this.commissions = commissions;
@@ -165,6 +172,12 @@ public class CampaignDTO {
             }).collect(Collectors.toList());
         }
 
-        return new CampaignDTO(campaign.getId(), campaign.getName(), campaign.getShortDescription(), campaign.getLongDescription(), campaign.getStatus(), campaign.getCreationDate(), campaign.getLastModificationDate(), campaign.getStartDate(), campaign.getEndDate(), campaign.getIdFile(), campaign.getValuta(), campaign.getBudget(), campaign.getTrackingCode(), campaign.getCookie().getId(), campaign.getCookie().getName(), campaign.getCookie().getValue(), medias, affiliates, commissions, campaigns, revenues, accc);
+        return new CampaignDTO(campaign.getId(), campaign.getName(), campaign.getShortDescription(),
+                campaign.getLongDescription(), campaign.getStatus(), campaign.getCreationDate(), campaign.getLastModificationDate(),
+                campaign.getStartDate(), campaign.getEndDate(), campaign.getIdFile(), campaign.getValuta(), campaign.getBudget(),
+                campaign.getTrackingCode(), campaign.getEncodedId(), campaign.getCookie().getId(), campaign.getCookie().getName(), campaign.getCookie().getValue(),
+                campaign.getCompany().getId(), campaign.getCompany().getName(),
+                medias, affiliates, commissions, campaigns, revenues, accc);
     }
+
 }

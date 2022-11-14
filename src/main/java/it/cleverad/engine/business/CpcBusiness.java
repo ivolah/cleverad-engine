@@ -110,9 +110,9 @@ public class CpcBusiness {
     }
 
     public void setRead(long id) {
-        Cpc media = repository.findById(id).get();
-        media.setRead(true);
-        repository.save(media);
+        Cpc cpc = repository.findById(id).get();
+        cpc.setRead(true);
+        repository.save(cpc);
     }
 
     /**
@@ -168,4 +168,3 @@ public class CpcBusiness {
     }
 
 }
-

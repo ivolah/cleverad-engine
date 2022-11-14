@@ -32,6 +32,7 @@ public class Campaign {
     private String defaultCommissionId;
     private String valuta;
     private String trackingCode;
+    private String encodedId;
     private Long budget;
     @Column(nullable = false)
     private Boolean status = true;
@@ -40,7 +41,6 @@ public class Campaign {
 
     @OneToMany(mappedBy = "campaign")
     private Set<AffiliateChannelCommissionCampaign> affiliateChannelCommissionCampaigns;
-
 
     @OneToMany(mappedBy = "campaign")
     private Set<Commission> commissionCampaigns;

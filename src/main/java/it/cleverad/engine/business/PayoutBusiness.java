@@ -17,11 +17,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +45,8 @@ public class PayoutBusiness {
     // CREATE
     public PayoutDTO create(BaseCreateRequest request) {
         Payout map = mapper.map(request, Payout.class);
+        map.setCreationDate(LocalDateTime.now());
+        map.setLastModificationDate(LocalDateTime.now());
         return PayoutDTO.from(repository.save(map));
     }
 
@@ -128,6 +132,7 @@ public class PayoutBusiness {
         private Double totale;
         private String valuta;
         private String note;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate data;
         private String stato;
         private Long affiliateId;
@@ -143,6 +148,7 @@ public class PayoutBusiness {
         private Double totale;
         private String valuta;
         private String note;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate data;
     }
 

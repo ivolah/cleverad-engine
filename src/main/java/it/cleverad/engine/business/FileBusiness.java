@@ -103,26 +103,23 @@ public class FileBusiness {
         Filter request = new Filter();
         Page<File> page = repository.findAll(getSpecification(request), PageRequest.of(0, 10, Sort.by(Sort.Order.desc("creationDate"))));
 
-        List<FileDTO> fileDTOList = page.stream().map(ele -> {
+        List<FileDTO> fileDTOList = page.stream().distinct().map(ele -> {
             // trovo media id collegato e campaign id a cui e colelgato il media
-            log.info("ele.getId() " + ele.getId());
-            // trovo mediaId
             Media mm = mediaBusiness.getByFileId(ele.getId());
             if (mm != null) {
                 Long mediaId = mm.getId();
-                log.info("mediaId " + mediaId);
                 // trovo campaignID
                 Long campaignId = mediaBusiness.findById(mediaId).getCampaignId();
-                log.info("campaignId " + campaignId);
                 String stringa = refferalService.encode(String.valueOf(campaignId)) + "-" + refferalService.encode(String.valueOf(mediaId));
                 FileDTO dto = FileDTO.from(ele);
                 dto.setNomeCodificato(stringa);
                 return dto;
+            }else{
+                return null;
             }
-            return null;
         }).collect(Collectors.toList());
 
-        return fileDTOList;
+        return fileDTOList.stream().distinct().collect(Collectors.toList());
     }
 
     /**

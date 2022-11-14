@@ -54,8 +54,8 @@ public class AffiliateDTO {
     public static AffiliateDTO from(Affiliate affiliate) {
 
         List<BasicCampaignDTO> collect = null;
-        if (affiliate.getAffiliateCampaigns() != null) {
-            collect = affiliate.getAffiliateCampaigns().stream().map(affiliateCampaign -> {
+        if (affiliate.getAffiliateChannelCommissionCampaigns() != null) {
+            collect = affiliate.getAffiliateChannelCommissionCampaigns().stream().map(affiliateCampaign -> {
                 BasicCampaignDTO campaignDTO = new BasicCampaignDTO();
                 campaignDTO.setId(affiliateCampaign.getCampaign().getId());
                 campaignDTO.setName(affiliateCampaign.getCampaign().getName());

@@ -39,4 +39,13 @@ public class Media {
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "medias")
     private Set<Campaign> campaigns = new HashSet<>();
 
+    @OneToMany(mappedBy = "media")
+    private Set<TransactionCPM> transactionCPMS;
+
+    @OneToMany(mappedBy = "media")
+    private Set<TransactionCPC> transactionCPCS;
+
+    @OneToMany(mappedBy = "media")
+    private Set<TransactionCPL> transactionCPLS;
+
 }

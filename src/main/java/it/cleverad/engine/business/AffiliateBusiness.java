@@ -37,6 +37,9 @@ public class AffiliateBusiness {
     private AffiliateRepository repository;
 
     @Autowired
+    private WalletBusiness walletBusiness;
+
+    @Autowired
     private Mapper mapper;
 
     /**
@@ -46,7 +49,17 @@ public class AffiliateBusiness {
     // CREATE
     public AffiliateDTO create(BaseCreateRequest request) {
         Affiliate map = mapper.map(request, Affiliate.class);
-        return AffiliateDTO.from(repository.save(map));
+        AffiliateDTO dto = AffiliateDTO.from(repository.save(map));
+        // creo wallet associato
+        WalletBusiness.BaseCreateRequest wal = new WalletBusiness.BaseCreateRequest();
+        wal.setAffiliateId(dto.getId());
+        wal.setNome("Wallet " + dto.getName());
+        wal.setPayed(0.0);
+        wal.setResidual(0.0);
+        wal.setTotal(0.0);
+        wal.setStatus(true);
+        walletBusiness.create(wal);
+        return dto;
     }
 
     // GET BY ID

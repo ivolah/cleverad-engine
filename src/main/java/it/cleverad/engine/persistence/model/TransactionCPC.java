@@ -27,7 +27,7 @@ public class TransactionCPC {
     private String ip;
     private String agent;
     private Long clickNumber;
-    private String payoutId;
+    private String payoutReference;
     private String note;
 
     private LocalDateTime creationDate = LocalDateTime.now();
@@ -52,6 +52,10 @@ public class TransactionCPC {
     @ManyToOne
     @JoinColumn(name = "channel_id")
     private Channel channel;
+
+    @ManyToOne
+    @JoinColumn(name = "media_id")
+    private Media media;
 
     @ManyToOne
     @JoinColumn(name = "payout_id")

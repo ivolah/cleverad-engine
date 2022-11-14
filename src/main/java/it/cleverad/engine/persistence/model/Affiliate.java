@@ -41,10 +41,10 @@ public class Affiliate {
     private LocalDateTime lastModificationDate = LocalDateTime.now();
 
     @OneToMany(mappedBy = "affiliate")
-    private Set<AffiliateChannelCommissionCampaign> affiliateCampaigns;
+    private Set<AffiliateChannelCommissionCampaign> affiliateChannelCommissionCampaigns;
 
-    @OneToMany(mappedBy = "affiliate")
-    private Set<AffiliateChannelCommissionCampaign> commissionCampaigns;
+//    @OneToMany(mappedBy = "affiliate")
+//    private Set<AffiliateChannelCommissionCampaign> commissionCampaigns;
 
     @OneToMany(mappedBy = "affiliate")
     private Set<Wallet> wallets;

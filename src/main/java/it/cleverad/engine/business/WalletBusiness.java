@@ -98,6 +98,10 @@ public class WalletBusiness {
         totale = totale + value;
         wallet.setTotal(totale);
 
+        Double residual = wallet.getResidual();
+        residual = residual + value;
+        wallet.setResidual(residual);
+
         return WalletDTO.from(repository.save(wallet));
     }
 
@@ -178,4 +182,3 @@ public class WalletBusiness {
     }
 
 }
-

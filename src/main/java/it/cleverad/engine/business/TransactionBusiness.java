@@ -58,6 +58,8 @@ public class TransactionBusiness {
     private ChannelRepository channelRepository;
     @Autowired
     private CommissionRepository commissionRepository;
+    @Autowired
+    private MediaRepository mediaRepository;
 
     /**
      * ============================================================================================================
@@ -96,6 +98,7 @@ public class TransactionBusiness {
         map.setChannel(channelRepository.findById(request.channelId).orElseThrow(() -> new ElementCleveradException("Channel", request.channelId)));
         map.setCommission(commissionRepository.findById(request.commissionId).orElseThrow(() -> new ElementCleveradException("Commission", request.commissionId)));
         map.setWallet(walletRepository.findById(request.walletId).orElseThrow(() -> new ElementCleveradException("Wallet", request.walletId)));
+        map.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
 
         return TransactionCPMDTO.from(cpmRepository.save(map));
     }
@@ -183,11 +186,9 @@ public class TransactionBusiness {
     //SEARCH BY AFFILIATE ID
     public Page<TransactionCPCDTO> searchByAffiliateCpc(Filter request, Long id, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-
         if (jwtUserDetailsService.getRole().equals("Admin")) {
-            request.setAffiliateId(id);
         } else {
-            request.setApproved(true);
+            //  request.setApproved(true);
             request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         }
         Page<TransactionCPC> page = cpcRepository.findAll(getSpecificationCPC(request), pageable);
@@ -196,11 +197,9 @@ public class TransactionBusiness {
 
     public Page<TransactionCPLDTO> searchByAffiliateCpl(Filter request, Long id, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-        request.setApproved(true);
         if (jwtUserDetailsService.getRole().equals("Admin")) {
-            request.setAffiliateId(id);
         } else {
-            request.setApproved(true);
+            //      request.setApproved(true);
             request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         }
         Page<TransactionCPL> page = cplRepository.findAll(getSpecificationCPL(request), pageable);
@@ -209,11 +208,9 @@ public class TransactionBusiness {
 
     public Page<TransactionCPMDTO> searchByAffiliateCpm(Filter request, Long id, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-        request.setApproved(true);
         if (jwtUserDetailsService.getRole().equals("Admin")) {
-            request.setAffiliateId(id);
         } else {
-            request.setApproved(true);
+            //    request.setApproved(true);
             request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         }
         Page<TransactionCPM> page = cpmRepository.findAll(getSpecificationCPM(request), pageable);
@@ -372,6 +369,7 @@ public class TransactionBusiness {
         private Long commissionId;
         private Long channelId;
         private Long walletId;
+        private Long mediaId;
 
         private LocalDateTime dateTime;
         private Double value;
@@ -407,4 +405,3 @@ public class TransactionBusiness {
     }
 
 }
-
