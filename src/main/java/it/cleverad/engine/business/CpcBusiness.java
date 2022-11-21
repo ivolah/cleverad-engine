@@ -70,7 +70,7 @@ public class CpcBusiness {
 
     // SEARCH PAGINATED
     public Page<CpcDTO> search(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CpcDTO::from);
     }
@@ -89,7 +89,7 @@ public class CpcBusiness {
     }
 
     public Page<CpcDTO> getUnread() {
-        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setRead(false);
         Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
@@ -98,7 +98,7 @@ public class CpcBusiness {
     }
 
     public Page<CpcDTO> getUnreadLastHour() {
-        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setRead(false);
         LocalDateTime now = LocalDateTime.now();

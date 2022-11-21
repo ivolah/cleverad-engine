@@ -36,8 +36,12 @@ public class TransactionCPL {
     private LocalDateTime lastModificationDate = LocalDateTime.now();
 
     @ManyToOne
-    @JoinColumn(name = "company_id")
-    private Company company;
+    @JoinColumn(name = "wallet_id")
+    private Wallet wallet;
+    
+    @ManyToOne
+    @JoinColumn(name = "advertiser_id")
+    private Advertiser advertiser;
 
     @ManyToOne
     @JoinColumn(name = "campaign_id")

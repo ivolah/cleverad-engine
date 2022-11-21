@@ -27,10 +27,17 @@ public class Affiliate {
     private String street;
     private String streetNumber;
     private String city;
+    private String province;
     private String zipCode;
     private String primaryMail;
     private String secondaryMail;
+    private String country;
+    private String phonePrefix;
+    private String phoneNumber;
 
+    private String note;
+
+    private String bank;
     private String iban;
     private String swift;
     private String paypal;
@@ -53,6 +60,9 @@ public class Affiliate {
     private Set<User> users;
 
     @OneToMany(mappedBy = "affiliate")
+    private Set<Representative> representatives;
+
+    @OneToMany(mappedBy = "affiliate")
     private Set<Channel> channels;
 
     @OneToMany(mappedBy = "affiliate")
@@ -67,8 +77,11 @@ public class Affiliate {
     @OneToMany(mappedBy = "affiliate")
     private Set<TransactionCPL> transactionCPLS;
 
+    @OneToMany(mappedBy = "affiliate")
+    private Set<Payout> payouts;
+
     // >>>  CAMPAIGN + AFFILIATE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "affiliates")
     private Set<Campaign> campaigns = new HashSet<>();
 
-}
+} 

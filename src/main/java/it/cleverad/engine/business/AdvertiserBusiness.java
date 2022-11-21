@@ -1,9 +1,9 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.Company;
-import it.cleverad.engine.persistence.repository.CompanyRepository;
-import it.cleverad.engine.web.dto.CompanyDTO;
+import it.cleverad.engine.persistence.model.Advertiser;
+import it.cleverad.engine.persistence.repository.AdvertiserRepository;
+import it.cleverad.engine.web.dto.AdvertiserDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -31,10 +31,10 @@ import java.util.List;
 @Slf4j
 @Component
 @Transactional
-public class CompanyBusiness {
+public class AdvertiserBusiness {
 
     @Autowired
-    private CompanyRepository repository;
+    private AdvertiserRepository repository;
 
     @Autowired
     private Mapper mapper;
@@ -44,15 +44,15 @@ public class CompanyBusiness {
      **/
 
     // CREATE
-    public CompanyDTO create(BaseCreateRequest request) {
-        Company map = mapper.map(request, Company.class);
-        return CompanyDTO.from(repository.save(map));
+    public AdvertiserDTO create(BaseCreateRequest request) {
+        Advertiser map = mapper.map(request, Advertiser.class);
+        return AdvertiserDTO.from(repository.save(map));
     }
 
     // GET BY ID
-    public CompanyDTO findById(Long id) {
-        Company Company = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Company", id));
-        return CompanyDTO.from(Company);
+    public AdvertiserDTO findById(Long id) {
+        Advertiser Advertiser = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Advertiser", id));
+        return AdvertiserDTO.from(Advertiser);
     }
 
     // DELETE BY ID
@@ -67,31 +67,31 @@ public class CompanyBusiness {
     }
 
     // SEARCH PAGINATED
-    public Page<CompanyDTO> search(Filter request, Pageable pageableRequest) {
+    public Page<AdvertiserDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-        Page<Company> page = repository.findAll(getSpecification(request), pageable);
+        Page<Advertiser> page = repository.findAll(getSpecification(request), pageable);
 
-        return page.map(CompanyDTO::from);
+        return page.map(AdvertiserDTO::from);
     }
 
     // UPDATE
-    public CompanyDTO update(Long id, Filter filter) {
-        Company Company = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Company", id));
-        CompanyDTO CompanyDTOfrom = CompanyDTO.from(Company);
+    public AdvertiserDTO update(Long id, Filter filter) {
+        Advertiser Advertiser = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Advertiser", id));
+        AdvertiserDTO AdvertiserDTOfrom = AdvertiserDTO.from(Advertiser);
 
-        mapper.map(filter, CompanyDTOfrom);
+        mapper.map(filter, AdvertiserDTOfrom);
 
-        Company mappedEntity = mapper.map(Company, Company.class);
+        Advertiser mappedEntity = mapper.map(Advertiser, Advertiser.class);
         mappedEntity.setLastModificationDate(LocalDateTime.now());
-        mapper.map(CompanyDTOfrom, mappedEntity);
+        mapper.map(AdvertiserDTOfrom, mappedEntity);
 
-        return CompanyDTO.from(repository.save(mappedEntity));
+        return AdvertiserDTO.from(repository.save(mappedEntity));
     }
 
     /**
      * ============================================================================================================
      **/
-    private Specification<Company> getSpecification(Filter request) {
+    private Specification<Advertiser> getSpecification(Filter request) {
         return (root, query, cb) -> {
             Predicate completePredicate = null;
             List<Predicate> predicates = new ArrayList<>();

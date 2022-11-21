@@ -171,7 +171,7 @@ public class RevenueFactorBusiness {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class BaseCreateRequest {
-        private Long revenue;
+        private Double revenue;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dueDate;
         private Boolean status;
@@ -184,7 +184,7 @@ public class RevenueFactorBusiness {
     @AllArgsConstructor
     public static class Filter {
         private Long id;
-        private Long revenue;
+        private Double revenue;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dueDate;
         private Boolean status;
@@ -199,4 +199,3 @@ public class RevenueFactorBusiness {
     }
 
 }
-

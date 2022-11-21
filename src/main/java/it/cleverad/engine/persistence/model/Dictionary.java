@@ -34,6 +34,10 @@ public class Dictionary {
     private Set<User> users;
 
     @OneToMany
+    @JoinColumn(name = "role_id")
+    private Set<Representative> representatives;
+
+    @OneToMany
     @JoinColumn(name = "dictionary_id")
     private Set<Channel> channels;
 

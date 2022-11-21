@@ -41,7 +41,7 @@ public class UserController {
     @Operation(summary = "Lists the Users", description = "Lists the Users by Company, searched and paginated")
     @GetMapping("/{affiliateId}/affiliate")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<UserDTO> searchCompanyUsers(@PathVariable Long affiliateId, Pageable pageable) {
+    public Page<UserDTO> searchAffilaiteUsers(@PathVariable Long affiliateId, Pageable pageable) {
         return business.searchByAffiliateID(affiliateId, pageable);
     }
 

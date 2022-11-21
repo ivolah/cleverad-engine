@@ -6,7 +6,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Data
@@ -43,7 +45,9 @@ public class CampaignDTO {
     private List<RevenueFactorDTO> revenues;
     private List<AffiliateChannelCommissionCampaignDTO> affiliateChannelCommissionCampaigns;
 
-    public CampaignDTO(long id, String name, String shortDescription, String longDescription, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, LocalDate startDate, LocalDate endDate, String idFile, String valuta, Long budget, String trackingCode, String encodedId, Long cookieId, String cookieName, String cookieValue, Long companyId, String companyName, List<BasicMediaDTO> medias, List<BasicAffiliateDTO> affiliates, List<CommissionDTO> commissions, List<BasicCategoryDTO> categories, List<RevenueFactorDTO> revenues, List<AffiliateChannelCommissionCampaignDTO> affiliateChannelCommissionCampaigns) {
+    private String categoryList;
+
+    public CampaignDTO(long id, String name, String shortDescription, String longDescription, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, LocalDate startDate, LocalDate endDate, String idFile, String valuta, Long budget, String trackingCode, String encodedId, Long cookieId, String cookieName, String cookieValue, Long companyId, String companyName, List<BasicMediaDTO> medias, List<BasicAffiliateDTO> affiliates, List<CommissionDTO> commissions, List<BasicCategoryDTO> categories, List<RevenueFactorDTO> revenues, List<AffiliateChannelCommissionCampaignDTO> affiliateChannelCommissionCampaigns, String catergoryList) {
         this.id = id;
         this.name = name;
         this.shortDescription = shortDescription;
@@ -69,6 +73,7 @@ public class CampaignDTO {
         this.categories = categories;
         this.revenues = revenues;
         this.affiliateChannelCommissionCampaigns = affiliateChannelCommissionCampaigns;
+        this.categoryList = catergoryList;
     }
 
     public static CampaignDTO from(Campaign campaign) {
@@ -115,9 +120,10 @@ public class CampaignDTO {
             }).collect(Collectors.toList());
         }
 
-        List<BasicCategoryDTO> campaigns = null;
+
+        List<BasicCategoryDTO> categoryDTOS = new ArrayList<>();
         if (campaign.getCampaignCategories() != null) {
-            campaigns = campaign.getCampaignCategories().stream().map(campaignCategory -> {
+            categoryDTOS = campaign.getCampaignCategories().stream().map(campaignCategory -> {
                 BasicCategoryDTO dto = new BasicCategoryDTO();
                 dto.setId(campaignCategory.getCategory().getId());
                 dto.setName(campaignCategory.getCategory().getName());
@@ -127,6 +133,15 @@ public class CampaignDTO {
             }).collect(Collectors.toList());
         }
 
+        String catergoryList = "";
+        if (categoryDTOS.size() >0)
+            for (BasicCategoryDTO basicCategoryDTO : Objects.requireNonNull(categoryDTOS)) {
+            if (catergoryList.equals("")) {
+                catergoryList = "" + basicCategoryDTO.getId();
+            } else {
+                catergoryList = catergoryList + "," + basicCategoryDTO.getId();
+            }
+        }
 //        List<BasicCookieDTO> cookie = null;
 //        if (campaign.getCampaignCookies() != null) {
 //            cookie = campaign.getCampaignCookies().stream().map(campaignCookie -> {
@@ -176,8 +191,8 @@ public class CampaignDTO {
                 campaign.getLongDescription(), campaign.getStatus(), campaign.getCreationDate(), campaign.getLastModificationDate(),
                 campaign.getStartDate(), campaign.getEndDate(), campaign.getIdFile(), campaign.getValuta(), campaign.getBudget(),
                 campaign.getTrackingCode(), campaign.getEncodedId(), campaign.getCookie().getId(), campaign.getCookie().getName(), campaign.getCookie().getValue(),
-                campaign.getCompany().getId(), campaign.getCompany().getName(),
-                medias, affiliates, commissions, campaigns, revenues, accc);
+                campaign.getAdvertiser().getId(), campaign.getAdvertiser().getName(),
+                medias, affiliates, commissions, categoryDTOS, revenues, accc, catergoryList);
     }
 
 }

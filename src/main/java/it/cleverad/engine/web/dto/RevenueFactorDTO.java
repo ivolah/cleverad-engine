@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class RevenueFactorDTO {
 
     private Long id;
-    private Long revenue;
+    private Double revenue;
     private LocalDate dueDate;
     private Long campaignId;
     private String  campaignName;
@@ -22,7 +22,7 @@ public class RevenueFactorDTO {
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
 
-    public RevenueFactorDTO(Long id, Long revenue, LocalDate dueDate, Long campaignId, String campaignName, Long dictionaryId, String divtionaryName, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate) {
+    public RevenueFactorDTO(Long id, Double revenue, LocalDate dueDate, Long campaignId, String campaignName, Long dictionaryId, String divtionaryName, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate) {
         this.id = id;
         this.revenue = revenue;
         this.dueDate = dueDate;

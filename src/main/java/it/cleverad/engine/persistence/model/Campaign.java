@@ -67,10 +67,10 @@ public class Campaign {
     @OneToMany(mappedBy = "campaign")
     private Set<TransactionCPM> transactionCPMS;
 
-    // >>>  COMPANY  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    // >>>  ADVERTISER  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     @ManyToOne
-    @JoinColumn(name = "company_id")
-    private Company company;
+    @JoinColumn(name = "advertiser_id")
+    private Advertiser advertiser;
 
     // >>>  TransactionCPL  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     @OneToMany(mappedBy = "campaign")

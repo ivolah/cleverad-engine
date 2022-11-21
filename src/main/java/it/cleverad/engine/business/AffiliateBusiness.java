@@ -4,7 +4,9 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.Affiliate;
 import it.cleverad.engine.persistence.repository.AffiliateRepository;
 import it.cleverad.engine.web.dto.AffiliateDTO;
+import it.cleverad.engine.web.dto.WalletDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
+import it.cleverad.engine.web.exception.PostgresCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -71,7 +73,15 @@ public class AffiliateBusiness {
     // DELETE BY ID
     public void delete(Long id) {
         try {
-            repository.deleteById(id);
+            Page<WalletDTO> dd = walletBusiness.findByIdAffilaite(id);
+            WalletDTO dto = dd.stream().findFirst().get();
+            if (dto.getTotal() > 0) {
+                // invio messaggio specifico su lfatto che c'è un wallet con contenuto
+                throw new PostgresCleveradException("Impossibile cancellare affiliato " + dto.getNome() + " perchè associato ad un wallet.");
+            } else {
+                walletBusiness.delete(dto.getId());
+                repository.deleteById(id);
+            }
         } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
@@ -96,6 +106,7 @@ public class AffiliateBusiness {
 
         Affiliate mappedEntity = mapper.map(affiliate, Affiliate.class);
         mappedEntity.setLastModificationDate(LocalDateTime.now());
+
         mapper.map(affiliateDTOfrom, mappedEntity);
 
         return AffiliateDTO.from(repository.save(mappedEntity));
@@ -178,9 +189,15 @@ public class AffiliateBusiness {
         private String primaryMail;
         private String secondaryMail;
         private Boolean status;
+        private String country;
+        private String phonePrefix;
+        private String phoneNumber;
+        private String note;
+        private String bank;
         private String iban;
         private String swift;
         private String paypal;
+        private String province;
     }
 
     @Data
@@ -197,14 +214,20 @@ public class AffiliateBusiness {
         private String zipCode;
         private String primaryMail;
         private String secondaryMail;
+        private Boolean status;
+        private String phonePrefix;
+        private String phoneNumber;
+        private String note;
+        private String bank;
         private String iban;
         private String swift;
         private String paypal;
-        private Boolean status;
         private Instant creationDateFrom;
         private Instant creationDateTo;
         private Instant lastModificationDateFrom;
         private Instant lastModificationDateTo;
+        private String province;
+        private String country;
     }
 
 }

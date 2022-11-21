@@ -18,10 +18,17 @@ public class AffiliateDTO {
     private String street;
     private String streetNumber;
     private String city;
+    private String province;
     private String zipCode;
     private String primaryMail;
     private String secondaryMail;
+    private String country ;
+    private String phonePrefix;
+    private String phoneNumber;
 
+    private String note;
+
+    private String bank;
     private String iban;
     private String swift;
     private String paypal;
@@ -32,16 +39,22 @@ public class AffiliateDTO {
 
     private List<BasicCampaignDTO> basicCampaignDTOS;
 
-    public AffiliateDTO(long id, String name, String vatNumber, String street, String streetNumber, String city, String zipCode, String primaryMail, String secondaryMail, String iban, String swift, String paypal, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, List<BasicCampaignDTO> basicCampaignDTOS) {
+    public AffiliateDTO(long id, String name, String vatNumber, String street, String streetNumber, String city, String province, String zipCode, String primaryMail, String secondaryMail, String country, String phonePrefix, String phoneNumber, String note, String bank, String iban, String swift, String paypal, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, List<BasicCampaignDTO> basicCampaignDTOS) {
         this.id = id;
         this.name = name;
         this.vatNumber = vatNumber;
         this.street = street;
         this.streetNumber = streetNumber;
         this.city = city;
+        this.province = province;
         this.zipCode = zipCode;
         this.primaryMail = primaryMail;
         this.secondaryMail = secondaryMail;
+        this.country = country;
+        this.phonePrefix = phonePrefix;
+        this.phoneNumber = phoneNumber;
+        this.note = note;
+        this.bank = bank;
         this.iban = iban;
         this.swift = swift;
         this.paypal = paypal;
@@ -66,7 +79,10 @@ public class AffiliateDTO {
             }).collect(Collectors.toList());
         }
 
-        return new AffiliateDTO(affiliate.getId(), affiliate.getName(), affiliate.getVatNumber(), affiliate.getStreet(), affiliate.getStreetNumber(), affiliate.getCity(), affiliate.getZipCode(), affiliate.getPrimaryMail(), affiliate.getSecondaryMail(), affiliate.getIban(), affiliate.getSwift(), affiliate.getPaypal(),
+        return new AffiliateDTO(affiliate.getId(), affiliate.getName(), affiliate.getVatNumber(), affiliate.getStreet(), affiliate.getStreetNumber(),
+                affiliate.getCity(), affiliate.getProvince(), affiliate.getZipCode(), affiliate.getPrimaryMail(), affiliate.getSecondaryMail(),
+                                                                                                          affiliate.getCountry(),affiliate.getPhonePrefix(),affiliate.getPhoneNumber(),
+           affiliate.getNote(), affiliate.getBank(),     affiliate.getIban(), affiliate.getSwift(), affiliate.getPaypal(),
                 affiliate.getStatus(), affiliate.getCreationDate(), affiliate.getLastModificationDate(), collect);
     }
 

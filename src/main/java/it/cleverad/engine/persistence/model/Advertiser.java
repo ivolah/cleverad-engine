@@ -9,12 +9,12 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
-@Table(name = "t_company")
+@Table(name = "t_advertiser")
 @Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
 @NoArgsConstructor
-public class Company {
+public class Advertiser {
 
     @Id
     @Column(name = "id", nullable = false)
@@ -34,10 +34,13 @@ public class Company {
     private LocalDateTime creationDate = LocalDateTime.now();
     private LocalDateTime lastModificationDate = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "company")
+    @OneToMany(mappedBy = "advertiser")
     private Set<TransactionCPL> transactionCPLS;
 
-    @OneToMany(mappedBy = "company")
+    @OneToMany(mappedBy = "advertiser")
     private Set<Campaign> campaigns;
+
+    @OneToMany(mappedBy = "advertiser")
+    private Set<Representative> representatives;
 
 }

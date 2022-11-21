@@ -40,4 +40,7 @@ public class Wallet {
     @OneToMany(mappedBy = "wallet")
     private Set<TransactionCPM> transactionCPMS;
 
+    @OneToMany(mappedBy = "wallet")
+    private Set<TransactionCPL> transactionCPLS;
+
 }

@@ -1,6 +1,6 @@
 package it.cleverad.engine.web.dto;
 
-import it.cleverad.engine.persistence.model.Company;
+import it.cleverad.engine.persistence.model.Advertiser;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
-public class CompanyDTO {
+public class AdvertiserDTO {
 
     private long id;
     private String name;
@@ -27,7 +27,7 @@ public class CompanyDTO {
 
     private List<BasicCampaignDTO> basicCampaignDTOS;
 
-    public CompanyDTO(long id, String name, String vatNumber, String street, String streetNumber, String city, String zipCode, String primaryMail, String secondaryMail, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, List<BasicCampaignDTO> basicCampaignDTOS) {
+    public AdvertiserDTO(long id, String name, String vatNumber, String street, String streetNumber, String city, String zipCode, String primaryMail, String secondaryMail, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, List<BasicCampaignDTO> basicCampaignDTOS) {
         this.id = id;
         this.name = name;
         this.vatNumber = vatNumber;
@@ -43,11 +43,11 @@ public class CompanyDTO {
         this.basicCampaignDTOS = basicCampaignDTOS;
     }
 
-    public static CompanyDTO from(Company company) {
+    public static AdvertiserDTO from(Advertiser advertiser) {
 
         List<BasicCampaignDTO> collect = null;
-        if (company.getCampaigns() != null) {
-            collect = company.getCampaigns().stream().map(campaign -> {
+        if (advertiser.getCampaigns() != null) {
+            collect = advertiser.getCampaigns().stream().map(campaign -> {
                 BasicCampaignDTO campaignDTO = new BasicCampaignDTO();
                 campaignDTO.setId(campaign.getId());
                 campaignDTO.setName(campaign.getName());
@@ -58,7 +58,7 @@ public class CompanyDTO {
             }).collect(Collectors.toList());
         }
 
-        return new CompanyDTO(company.getId(), company.getName(), company.getVatNumber(), company.getStreet(), company.getStreetNumber(), company.getCity(), company.getZipCode(), company.getPrimaryMail(), company.getSecondaryMail(), company.getStatus(), company.getCreationDate(), company.getLastModificationDate(), collect);
+        return new AdvertiserDTO(advertiser.getId(), advertiser.getName(), advertiser.getVatNumber(), advertiser.getStreet(), advertiser.getStreetNumber(), advertiser.getCity(), advertiser.getZipCode(), advertiser.getPrimaryMail(), advertiser.getSecondaryMail(), advertiser.getStatus(), advertiser.getCreationDate(), advertiser.getLastModificationDate(), collect);
     }
 
 }

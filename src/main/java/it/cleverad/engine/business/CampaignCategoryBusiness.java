@@ -127,10 +127,10 @@ public class CampaignCategoryBusiness {
             }
 
             if (request.getCategoryId() != null) {
-                predicates.add(cb.equal(root.get("categoryId"), request.getCategoryId()));
+                predicates.add(cb.equal(root.get("category").get("id"), request.getCategoryId()));
             }
             if (request.getCampaignId() != null) {
-                predicates.add(cb.equal(root.get("campaignId"), request.getCampaignId()));
+                predicates.add(cb.equal(root.get("campaign").get("id"), request.getCampaignId()));
             }
 
             if (request.getCreationDateFrom() != null) {

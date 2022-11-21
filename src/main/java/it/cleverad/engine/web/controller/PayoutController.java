@@ -28,6 +28,13 @@ public class PayoutController {
      * ============================================================================================================
      **/
 
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "/cpc")
+    @ResponseStatus
+    Page<PayoutDTO> createcpc(@ModelAttribute PayoutBusiness.BaseCreateRequest request) {
+        return business.createCpc(request.getTransazioni());
+    }
+
     @Operation(summary = "Create Payout", description = "Creates a new Payout")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
@@ -66,15 +73,19 @@ public class PayoutController {
     @Operation(summary = "Get the Payout", description = "Get the specific Payout")
     @GetMapping("/{id}/affiliate")
     @ResponseStatus(HttpStatus.OK)
-    public Page<PayoutDTO> findByIdAffilaite(@PathVariable Long id) {
-        return business.findByIdAffilaite(id);
+    public Page<PayoutDTO> findByIdAffilaite(@PathVariable Long id, Pageable pageable) {
+        return business.findByIdAffilaite(id, pageable);
     }
 
     @Operation(summary = "Get the Payout", description = "Get the specific Payout")
     @GetMapping("/affiliate")
     @ResponseStatus(HttpStatus.OK)
-    public Page<PayoutDTO> findByAffilaite() {
-        return business.findByIdAffilaite(jwtUserDetailsService.getAffiliateID());
+    public Page<PayoutDTO> findByAffilaite(Pageable pageable) {
+        if (jwtUserDetailsService.getRole().equals("Admin")) {
+            return business.findByIdAffilaite(null, pageable);
+        } else {
+            return business.findByIdAffilaite(jwtUserDetailsService.getAffiliateID(), pageable);
+        }
     }
 
     /**

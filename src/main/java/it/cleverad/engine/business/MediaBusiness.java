@@ -106,7 +106,11 @@ public class MediaBusiness {
     public void delete(Long id) {
         Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Media", id));
         try {
-            //    if (media.getMediaCampaign() != null) mediaCampaignBusiness.delete(media.getMediaCampaign().getId());
+            if (media.getCampaigns() != null) {
+                media.getCampaigns().forEach(campaign -> {
+                    campaign.removeMedia(id);
+                });
+            }
             repository.deleteById(id);
         } catch (ConstraintViolationException ex) {
             throw ex;

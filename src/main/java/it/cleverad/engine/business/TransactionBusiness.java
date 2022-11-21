@@ -74,6 +74,7 @@ public class TransactionBusiness {
         map.setChannel(channelRepository.findById(request.channelId).orElseThrow(() -> new ElementCleveradException("Channel", request.channelId)));
         map.setCommission(commissionRepository.findById(request.commissionId).orElseThrow(() -> new ElementCleveradException("Commission", request.commissionId)));
         map.setWallet(walletRepository.findById(request.walletId).orElseThrow(() -> new ElementCleveradException("Wallet", request.walletId)));
+        map.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
 
         return TransactionCPCDTO.from(cpcRepository.save(map));
     }
@@ -85,7 +86,8 @@ public class TransactionBusiness {
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
         map.setChannel(channelRepository.findById(request.channelId).orElseThrow(() -> new ElementCleveradException("Channel", request.channelId)));
         map.setCommission(commissionRepository.findById(request.commissionId).orElseThrow(() -> new ElementCleveradException("Commission", request.commissionId)));
-//        map.setWallet(walletRepository.findById(request.walletId).orElseThrow(() -> new ElementCleveradException("Wallet", request.walletId)));
+        map.setWallet(walletRepository.findById(request.walletId).orElseThrow(() -> new ElementCleveradException("Wallet", request.walletId)));
+        map.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
 
         return TransactionCPLDTO.from(cplRepository.save(map));
     }
@@ -166,26 +168,26 @@ public class TransactionBusiness {
     // SEARCH PAGINATED
 
     public Page<TransactionCPCDTO> searchCpc(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Page<TransactionCPC> page = cpcRepository.findAll(getSpecificationCPC(request), pageable);
         return page.map(TransactionCPCDTO::from);
     }
 
     public Page<TransactionCPLDTO> searchCpl(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Page<TransactionCPL> page = cplRepository.findAll(getSpecificationCPL(request), pageable);
         return page.map(TransactionCPLDTO::from);
     }
 
     public Page<TransactionCPMDTO> searchCpm(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Page<TransactionCPM> page = cpmRepository.findAll(getSpecificationCPM(request), pageable);
         return page.map(TransactionCPMDTO::from);
     }
 
     //SEARCH BY AFFILIATE ID
     public Page<TransactionCPCDTO> searchByAffiliateCpc(Filter request, Long id, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         if (jwtUserDetailsService.getRole().equals("Admin")) {
         } else {
             //  request.setApproved(true);
@@ -196,7 +198,7 @@ public class TransactionBusiness {
     }
 
     public Page<TransactionCPLDTO> searchByAffiliateCpl(Filter request, Long id, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         if (jwtUserDetailsService.getRole().equals("Admin")) {
         } else {
             //      request.setApproved(true);
@@ -207,7 +209,7 @@ public class TransactionBusiness {
     }
 
     public Page<TransactionCPMDTO> searchByAffiliateCpm(Filter request, Long id, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         if (jwtUserDetailsService.getRole().equals("Admin")) {
         } else {
             //    request.setApproved(true);
@@ -233,7 +235,6 @@ public class TransactionBusiness {
     /**
      * ============================================================================================================
      **/
-
 
     private Specification<TransactionCPC> getSpecificationCPC(Filter request) {
         return (root, query, cb) -> {

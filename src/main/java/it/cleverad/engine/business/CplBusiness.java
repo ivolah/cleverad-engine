@@ -70,7 +70,7 @@ public class CplBusiness {
 
     // SEARCH PAGINATED
     public Page<CplDTO> search(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Page<Cpl> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CplDTO::from);
     }
@@ -89,7 +89,7 @@ public class CplBusiness {
     }
 
     public Page<CplDTO> getUnread() {
-        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setRead(false);
         Page<Cpl> page = repository.findAll(getSpecification(request), pageable);

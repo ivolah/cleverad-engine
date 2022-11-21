@@ -66,10 +66,10 @@ public class ChannelController {
         return business.getbyIdUser(id, pageable);
     }
 
-    @GetMapping("/{id}/affiliate/all")
+    @GetMapping("/affiliate")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<ChannelDTO> getbyIdUserAll(@PathVariable Long id, Pageable pageable) {
-        return business.getbyIdAffiliateAll(id, pageable);
+    public Page<ChannelDTO> getbyIdUserAll(Pageable pageable) {
+        return business.getbyIdAffiliateAll( pageable);
     }
 
     @GetMapping("/{id}/affiliate")

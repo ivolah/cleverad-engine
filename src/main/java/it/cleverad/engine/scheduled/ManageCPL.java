@@ -52,6 +52,7 @@ public class ManageCPL {
                 rr.setAffiliateId(refferal.getAffiliateId());
                 rr.setCampaignId(refferal.getCampaignId());
                 rr.setChannelId(refferal.getChannelId());
+                rr.setMediaId(refferal.getMediaId());
                 rr.setDateTime(cplDTO.getDate());
                 rr.setApproved(true);
 

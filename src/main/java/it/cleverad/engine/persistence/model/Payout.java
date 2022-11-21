@@ -21,16 +21,20 @@ public class Payout {
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long affiliateId;
+
 
     private Double totale;
     private String valuta;
     private String note;
-    private String stato;
+    private Boolean stato;
     private LocalDate data;
 
     private LocalDateTime creationDate = LocalDateTime.now();
     private LocalDateTime lastModificationDate = LocalDateTime.now();
+
+    @ManyToOne
+    @JoinColumn(name = "affiliate_id")
+    private Affiliate affiliate;
 
     @OneToMany(mappedBy = "payout")
     private Set<TransactionCPL> transactionCPLS;
