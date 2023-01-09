@@ -22,12 +22,13 @@ public class Payout {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     private Double totale;
     private String valuta;
     private String note;
     private Boolean stato;
     private LocalDate data;
+
+    private Long fileId;
 
     private LocalDateTime creationDate = LocalDateTime.now();
     private LocalDateTime lastModificationDate = LocalDateTime.now();
@@ -35,6 +36,10 @@ public class Payout {
     @ManyToOne
     @JoinColumn(name = "affiliate_id")
     private Affiliate affiliate;
+
+    @ManyToOne()
+    @JoinColumn(name = "dictionary_id")
+    private Dictionary dictionary;
 
     @OneToMany(mappedBy = "payout")
     private Set<TransactionCPL> transactionCPLS;

@@ -1,6 +1,5 @@
 package it.cleverad.engine.web.controller;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import it.cleverad.engine.business.CampaignCookieBusiness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -8,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @CrossOrigin
-@Tag(name = "CampaignCookies", description = "Endpoints for all the CampaignCookies Operations")
 @RestController
 @RequestMapping(value = "/campaigncookie")
 public class CampaignCookieController {

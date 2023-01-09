@@ -1,7 +1,5 @@
 package it.cleverad.engine.web.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import it.cleverad.engine.business.DictionaryBusiness;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin
-@Tag(name = "Dictionary", description = "Endpoints for all the Campaigs Operations")
 @RestController
 @RequestMapping(value = "/dictionary")
 public class DictionaryController {
@@ -24,50 +21,42 @@ public class DictionaryController {
      * ============================================================================================================
      **/
 
-    @Operation(summary = "Create Dictionary", description = "Creates a new Dictionary")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public DictionaryDTO create(@ModelAttribute DictionaryBusiness.BaseCreateRequest request) {
         return  business.create(request);
     }
 
-    @Operation(summary = "Lists the Dictionary", description = "Lists the Dictionary, searched and paginated")
     @GetMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<DictionaryDTO> search(DictionaryBusiness.Filter request, Pageable pageable) {
         return business.search(request, pageable);
     }
 
-    @Operation(summary = "Update the Dictionary", description = "Update the specific Dictionary")
     @PatchMapping(path = "/{id}" )
     @ResponseStatus(HttpStatus.ACCEPTED)
     public DictionaryDTO update(@PathVariable Long id, @RequestBody DictionaryBusiness.Filter request) {
         return business.update(id, request);
     }
 
-    @Operation(summary = "Get the Dictionary", description = "Get the specific Dictionary")
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public DictionaryDTO getByUuid(@PathVariable Long id) {
         return business.findById(id);
     }
 
-    @Operation(summary = "Delete Dictionary", description = "Delete the specific Dictionary")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void delete(@PathVariable Long id) {
         this.business.delete(id);
     }
 
-
-    @Operation(summary = "Lists the Dictionary", description = "Lists the Dictionary, searched and paginated")
     @GetMapping("/role")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<DictionaryDTO> role(DictionaryBusiness.Filter request, Pageable pageable) {
         return business.getTypeRole(request, pageable);
     }
 
-    @Operation(summary = "Lists the Dictionary", description = "Lists the Dictionary, searched and paginated")
     @GetMapping("/status")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<DictionaryDTO> status(DictionaryBusiness.Filter request, Pageable pageable) {

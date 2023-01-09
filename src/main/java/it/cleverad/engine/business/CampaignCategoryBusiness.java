@@ -62,6 +62,23 @@ public class CampaignCategoryBusiness {
         return CampaignCategoryDTO.from(repository.save(map));
     }
 
+    public CampaignCategory createEntity(BaseCreateRequest request) {
+        CampaignCategory map = mapper.map(request, CampaignCategory.class);
+        map.setCreationDate(LocalDateTime.now());
+        map.setLastModificationDate(LocalDateTime.now());
+
+        Category cat = new Category();
+        cat.setId(request.getCategoryId());
+        map.setCategory(cat);
+
+        Campaign campaign = new Campaign();
+        campaign.setId(request.getCampaignId());
+        map.setCampaign(campaign);
+
+        return repository.save(map);
+    }
+
+
     // GET BY ID
     public CampaignCategoryDTO findById(Long id) {
         CampaignCategory channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignCategory", id));

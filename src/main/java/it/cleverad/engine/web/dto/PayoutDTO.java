@@ -25,12 +25,17 @@ public class PayoutDTO {
     private LocalDate data;
     private Boolean stato;
 
+    private Long fileId;
+
+    private Long dictionaryId;
+    private String dictionaryName;
+
     private LocalDateTime creationDate = LocalDateTime.now();
     private LocalDateTime lastModificationDate = LocalDateTime.now();
 
     private List<TransactionCPCDTO> transactionCPCS;
 
-    public PayoutDTO(Long id, Long affiliateId, String affiliateName, Double totale, String valuta, String note, LocalDate data, Boolean stato, LocalDateTime creationDate, LocalDateTime lastModificationDate, List<TransactionCPCDTO> transactionCPCS) {
+    public PayoutDTO(Long id, Long affiliateId, String affiliateName, Double totale, String valuta, String note, LocalDate data, Boolean stato, Long fileId, Long dictionaryId, String dictionaryName, LocalDateTime creationDate, LocalDateTime lastModificationDate, List<TransactionCPCDTO> transactionCPCS) {
         this.id = id;
         this.affiliateId = affiliateId;
         this.affiliateName = affiliateName;
@@ -39,6 +44,9 @@ public class PayoutDTO {
         this.note = note;
         this.data = data;
         this.stato = stato;
+        this.fileId = fileId;
+        this.dictionaryId = dictionaryId;
+        this.dictionaryName = dictionaryName;
         this.creationDate = creationDate;
         this.lastModificationDate = lastModificationDate;
         this.transactionCPCS = transactionCPCS;
@@ -74,7 +82,10 @@ public class PayoutDTO {
                 payout.getId(),
                 payout.getAffiliate() != null ? payout.getAffiliate().getId() : null,
                 payout.getAffiliate() != null ? payout.getAffiliate().getName() : null,
-                payout.getTotale(), payout.getValuta(), payout.getNote(), payout.getData(), payout.getStato(), payout.getCreationDate(), payout.getLastModificationDate(),
+                payout.getTotale(), payout.getValuta(), payout.getNote(), payout.getData(), payout.getStato(), payout.getFileId(),
+                payout.getDictionary() != null ? payout.getDictionary().getId() : null,
+                payout.getDictionary() != null ? payout.getDictionary().getName() : null,
+                payout.getCreationDate(), payout.getLastModificationDate(),
                 transactionCPCS
         );
     }

@@ -31,12 +31,13 @@ public class TransactionCPCDTO {
     private String agent;
     private Long clickNumber;
     private String payoutReference;
+    private Long payoutId;
     private String note;
 
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
 
-    public TransactionCPCDTO(Long id, Long affiliateId, String affiliateName, Long campaignId, String campaignName, Long commissionId, String commissionName, Long channelId, String channelName, Long mediaId, String mediaName, LocalDateTime dateTime, Double value, Boolean approved, String ip, String agent, Long clickNumber, String payoutReference, String note, LocalDateTime creationDate, LocalDateTime lastModificationDate) {
+    public TransactionCPCDTO(Long id, Long affiliateId, String affiliateName, Long campaignId, String campaignName, Long commissionId, String commissionName, Long channelId, String channelName, Long mediaId, String mediaName, LocalDateTime dateTime, Double value, Boolean approved, String ip, String agent, Long clickNumber, String payoutReference, Long payoutId, String note, LocalDateTime creationDate, LocalDateTime lastModificationDate) {
         this.id = id;
         this.affiliateId = affiliateId;
         this.affiliateName = affiliateName;
@@ -55,6 +56,7 @@ public class TransactionCPCDTO {
         this.agent = agent;
         this.clickNumber = clickNumber;
         this.payoutReference = payoutReference;
+        this.payoutId = payoutId;
         this.note = note;
         this.creationDate = creationDate;
         this.lastModificationDate = lastModificationDate;
@@ -81,7 +83,12 @@ public class TransactionCPCDTO {
                 transaction.getValue(),
                 transaction.getApproved(),
                 transaction.getIp(),
-                transaction.getAgent(), transaction.getClickNumber(), transaction.getPayoutReference(), transaction.getNote(),
+                transaction.getAgent(), transaction.getClickNumber(),
+
+                transaction.getPayoutReference(),
+                transaction.getPayout() != null ? transaction.getPayout().getId() : null,
+                
+                transaction.getNote(),
                 transaction.getCreationDate(), transaction.getLastModificationDate());
     }
 

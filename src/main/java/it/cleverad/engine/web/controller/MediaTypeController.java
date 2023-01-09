@@ -1,7 +1,5 @@
 package it.cleverad.engine.web.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import it.cleverad.engine.business.MediaTypeBusiness;
 import it.cleverad.engine.web.dto.MediaTypeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin
-@Tag(name = "MediaTypes", description = "Endpoints for all the Campaigs Operations")
 @RestController
 @RequestMapping(value = "/mediatype")
 public class MediaTypeController {
@@ -24,35 +21,30 @@ public class MediaTypeController {
      * ============================================================================================================
      **/
 
-    @Operation(summary = "Create MediaType", description = "Creates a new MediaType")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public MediaTypeDTO create(@ModelAttribute MediaTypeBusiness.BaseCreateRequest request) {
         return  business.create(request);
     }
 
-    @Operation(summary = "Lists the MediaTypes", description = "Lists the MediaTypes, searched and paginated")
     @GetMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<MediaTypeDTO> search(MediaTypeBusiness.Filter request, Pageable pageable) {
         return business.search(request, pageable);
     }
 
-    @Operation(summary = "Update the MediaType", description = "Update the specific MediaType")
     @PatchMapping(path = "/{id}" )
     @ResponseStatus(HttpStatus.ACCEPTED)
     public MediaTypeDTO update(@PathVariable Long id, @RequestBody MediaTypeBusiness.Filter request) {
         return business.update(id, request);
     }
 
-    @Operation(summary = "Get the MediaType", description = "Get the specific MediaType")
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public MediaTypeDTO getByUuid(@PathVariable Long id) {
         return business.findById(id);
     }
 
-    @Operation(summary = "Delete MediaType", description = "Delete the specific MediaType")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void delete(@PathVariable Long id) {

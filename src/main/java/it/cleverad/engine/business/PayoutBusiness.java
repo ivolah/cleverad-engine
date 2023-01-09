@@ -1,13 +1,10 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.Affiliate;
-import it.cleverad.engine.persistence.model.Payout;
-import it.cleverad.engine.persistence.model.TransactionCPC;
-import it.cleverad.engine.persistence.repository.AffiliateRepository;
-import it.cleverad.engine.persistence.repository.PayoutRepository;
-import it.cleverad.engine.persistence.repository.TransactionCPCRepository;
-import it.cleverad.engine.persistence.repository.TransactionCPLRepository;
+import it.cleverad.engine.persistence.model.Dictionary;
+import it.cleverad.engine.persistence.model.*;
+import it.cleverad.engine.persistence.repository.*;
+import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.PayoutDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -36,16 +33,16 @@ public class PayoutBusiness {
 
     @Autowired
     private PayoutRepository repository;
-
     @Autowired
     private AffiliateRepository affiliateRepository;
-
     @Autowired
     private TransactionCPLRepository cplRepository;
-
     @Autowired
     private TransactionCPCRepository cpcRepository;
-
+    @Autowired
+    private DictionaryBusiness dictionaryBusiness;
+    @Autowired
+    private DictionaryRepository dictionaryRepository;
     @Autowired
     private Mapper mapper;
 
@@ -73,6 +70,8 @@ public class PayoutBusiness {
             map.setCreationDate(LocalDateTime.now());
             map.setLastModificationDate(LocalDateTime.now());
             map.setTotale(0.0);
+            Dictionary dictionary = dictionaryRepository.findById(18L).orElseThrow(() -> new ElementCleveradException("Dictionary", 18L));
+            map.setDictionary(dictionary);
             map = repository.save(map);
             affiliatoPayout.put(idAffiliate, map.getId());
         });
@@ -125,6 +124,24 @@ public class PayoutBusiness {
     // DELETE BY ID
     public void delete(Long id) {
         try {
+
+
+            Payout payout = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Payout", id));
+            payout.getTransactionCPCS().forEach(transactionCPC -> {
+                // rimuovo relazione
+                TransactionCPC cpc = cpcRepository.findById(transactionCPC.getId()).orElseThrow(() -> new ElementCleveradException("Transaction CPC", transactionCPC.getId()));
+                cpc.setPayout(null);
+                cpc.setPayoutReference(null);
+                cpcRepository.save(cpc);
+            });
+            payout.getTransactionCPLS().forEach(transactionCPL -> {
+                // rimuovo relazione
+                TransactionCPL cpl = cplRepository.findById(transactionCPL.getId()).orElseThrow(() -> new ElementCleveradException("Transaction CPL", transactionCPL.getId()));
+                cpl.setPayout(null);
+                cpl.setPayoutReference(null);
+                cplRepository.save(cpl);
+            });
+
             repository.deleteById(id);
         } catch (ConstraintViolationException ex) {
             throw ex;
@@ -153,18 +170,71 @@ public class PayoutBusiness {
     public PayoutDTO update(Long id, Filter filter) {
         Payout payout = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Payout", id));
         PayoutDTO campaignDTOfrom = PayoutDTO.from(payout);
-
         mapper.map(filter, campaignDTOfrom);
 
         Payout mappedEntity = mapper.map(payout, Payout.class);
+        mappedEntity.setAffiliate(affiliateRepository.findById(filter.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", filter.affiliateId)));
+        mappedEntity.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.dictionaryId)));
+
         mapper.map(campaignDTOfrom, mappedEntity);
+        return PayoutDTO.from(repository.save(mappedEntity));
+    }
+
+    public PayoutDTO updateStatus(Long id, Long dictionaryId) {
+        Payout payout = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Payout", id));
+
+        Payout mappedEntity = mapper.map(payout, Payout.class);
+        mappedEntity.setAffiliate(affiliateRepository.findById(payout.getAffiliate().getId()).orElseThrow(() -> new ElementCleveradException("Affiliate", payout.getAffiliate().getId())));
+        mappedEntity.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", dictionaryId)));
 
         return PayoutDTO.from(repository.save(mappedEntity));
+    }
+
+    public PayoutDTO removeCpc(Long payoutId, Long transactionId) {
+
+        TransactionCPC cpc = cpcRepository.findById(transactionId).orElseThrow(() -> new ElementCleveradException("Transaction CPC", transactionId));
+        Double value = cpc.getValue();
+        cpc.setPayout(null);
+        cpc.setPayoutReference(null);
+        cpcRepository.save(cpc);
+
+        Payout payout = repository.findById(payoutId).orElseThrow(() -> new ElementCleveradException("Payout", payoutId));
+        Set<TransactionCPC> transactionCPCS = payout.getTransactionCPCS();
+        transactionCPCS.remove(cpc);
+        payout.setTransactionCPCS(transactionCPCS);
+        Double totale = payout.getTotale();
+        payout.setTotale(totale - value);
+        repository.save(payout);
+
+        return PayoutDTO.from(payout);
+    }
+
+    public PayoutDTO removeCpl(Long payoutId, Long transactionId) {
+        TransactionCPL cpl = cplRepository.findById(transactionId).orElseThrow(() -> new ElementCleveradException("Transaction CPL", transactionId));
+        Double value = cpl.getValue();
+        cpl.setPayout(null);
+        cpl.setPayoutReference(null);
+        cplRepository.save(cpl);
+
+        Payout payout = repository.findById(payoutId).orElseThrow(() -> new ElementCleveradException("Payout", payoutId));
+        Set<TransactionCPL> transactionCPCl = payout.getTransactionCPLS();
+        transactionCPCl.remove(cpl);
+        payout.setTransactionCPLS(transactionCPCl);
+        Double totale = payout.getTotale();
+        payout.setTotale(totale - value);
+        repository.save(payout);
+        return PayoutDTO.from(payout);
+    }
+
+    //  GET TIPI
+    public Page<DictionaryDTO> getTypes() {
+        return dictionaryBusiness.getTypePayout();
     }
 
     /**
      * ============================================================================================================
      **/
+
     private Specification<Payout> getSpecification(Filter request) {
         return (root, query, cb) -> {
             Predicate completePredicate = null;
@@ -179,12 +249,14 @@ public class PayoutBusiness {
             if (request.getAffiliateId() != null) {
                 predicates.add(cb.equal(root.get("affiliate").get("id"), request.getAffiliateId()));
             }
+            if (request.getDictionaryId() != null) {
+                predicates.add(cb.equal(root.get("dictionary").get("id"), request.getDictionaryId()));
+            }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
     }
-
 
     /**
      * ============================================================================================================
@@ -216,6 +288,8 @@ public class PayoutBusiness {
         private String note;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate data;
+        private Long fileId;
+        private Long dictionaryId;
     }
 
 }

@@ -58,7 +58,7 @@ public class TrackingBusiness {
 
         Refferal refferal= refferalService.decodificaRefferal(request.getRefferalId());
         TargetDTO targetDTO = new TargetDTO();
-        log.info("REFFERAL :: {} - {}", request.getRefferalId(), refferal.toString());
+        log.trace("REFFERAL :: {} - {}", request.getRefferalId(), refferal.toString());
 
         MediaDTO mediaDTO = mediaBusiness.findById(refferal.getMediaId());
         targetDTO.setTarget(mediaDTO.getTarget());
@@ -117,7 +117,6 @@ public class TrackingBusiness {
 
     }
 
-
     // SEARCH PAGINATED
     public Page<TrackingDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
@@ -133,7 +132,6 @@ public class TrackingBusiness {
         log.info("UNREAD {}", page.getTotalElements());
         return page.map(TrackingDTO::from);
     }
-
 
     /**
      * ============================================================================================================

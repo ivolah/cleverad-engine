@@ -48,6 +48,12 @@
             <scope>test</scope>
         </dependency>
 
+        <!--SPRING WEBSOCKET -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+
         <!-- PERSISTENCE -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -95,11 +101,11 @@
         </dependency>
 
         <!--SWAGGER-->
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.6.8</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.springdoc</groupId>-->
+<!--            <artifactId>springdoc-openapi-ui</artifactId>-->
+<!--            <version>1.6.1</version>-->
+<!--        </dependency>-->
 
         <!-- SPRING SECURITY-->
         <dependency>
@@ -114,12 +120,11 @@
             <version>0.9.1</version>
         </dependency>
 
-
+        <!-- VALIDATION EXCEPTION -->
         <dependency>
-            <groupId>com.jayway.restassured</groupId>
-            <artifactId>rest-assured</artifactId>
-            <version>2.9.0</version>
-            <scope>test</scope>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <version>2.0.1.Final</version>
         </dependency>
 
     </dependencies>

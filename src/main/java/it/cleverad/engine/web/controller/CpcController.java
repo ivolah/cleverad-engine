@@ -1,7 +1,5 @@
 package it.cleverad.engine.web.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import it.cleverad.engine.business.CpcBusiness;
 import it.cleverad.engine.web.dto.CpcDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin
-@Tag(name = "Cpcs", description = "Endpoints for all the Cpcs Operations")
 @RestController
 @RequestMapping(value = "/cpc")
 public class CpcController {
@@ -24,35 +21,30 @@ public class CpcController {
      * ============================================================================================================
      **/
 
-    @Operation(summary = "Create Cpc", description = "Creates a new Cpc")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public CpcDTO create(@ModelAttribute CpcBusiness.BaseCreateRequest request) {
         return business.create(request);
     }
 
-    @Operation(summary = "Lists the Cpcs", description = "Lists the Cpcs, searched and paginated")
     @GetMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<CpcDTO> search(CpcBusiness.Filter request, Pageable pageable) {
         return business.search(request, pageable);
     }
 
-    @Operation(summary = "Update the Cpc", description = "Update the specific Cpc")
     @PatchMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public CpcDTO update(@PathVariable Long id, @RequestBody CpcBusiness.Filter request) {
         return business.update(id, request);
     }
 
-    @Operation(summary = "Get the Cpc", description = "Get the specific Cpc")
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public CpcDTO getByUuid(@PathVariable Long id) {
         return business.findById(id);
     }
 
-    @Operation(summary = "Delete Cpc", description = "Delete the specific Cpc")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void delete(@PathVariable Long id) {

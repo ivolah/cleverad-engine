@@ -308,13 +308,12 @@ public class MediaBusiness {
         private String target;
         private String bannerCode;
         private String note;
+        private Long campaignId;
 
         private String idFile;
         private String status;
         private LocalDateTime creationDate;
         private LocalDateTime lastModificationDate;
-
-        private Long campaignId;
 
         private Instant creationDateFrom;
         private Instant creationDateTo;

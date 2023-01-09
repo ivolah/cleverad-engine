@@ -59,7 +59,7 @@ public class Affiliate {
     @OneToMany(mappedBy = "affiliate")
     private Set<User> users;
 
-    @OneToMany(mappedBy = "affiliate")
+    @OneToMany(mappedBy = "affiliate", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Representative> representatives;
 
     @OneToMany(mappedBy = "affiliate")

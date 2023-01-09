@@ -39,6 +39,8 @@ public class Campaign {
     private LocalDateTime creationDate = LocalDateTime.now();
     private LocalDateTime lastModificationDate = LocalDateTime.now();
 
+    // ONE TO MANY
+
     @OneToMany(mappedBy = "campaign")
     private Set<AffiliateChannelCommissionCampaign> affiliateChannelCommissionCampaigns;
 
@@ -57,15 +59,25 @@ public class Campaign {
     @OneToMany(mappedBy = "campaign")
     private Set<Budget> budgets;
 
-    @ManyToOne
-    @JoinColumn(name = "cookie_id")
-    private Cookie cookie;
-
     @OneToMany(mappedBy = "campaign")
     private Set<TransactionCPC> transactionCPCS;
 
     @OneToMany(mappedBy = "campaign")
     private Set<TransactionCPM> transactionCPMS;
+
+    // MANY TO ONE
+
+    @ManyToOne
+    @JoinColumn(name = "cookie_id")
+    private Cookie cookie;
+
+    @ManyToOne
+    @JoinColumn(name = "planner_id")
+    private Planner planner;
+
+    @ManyToOne
+    @JoinColumn(name = "dealer_id")
+    private Dealer dealer;
 
     // >>>  ADVERTISER  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     @ManyToOne
@@ -80,6 +92,10 @@ public class Campaign {
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "t_campaign_affiliate", joinColumns = @JoinColumn(name = "campaign_id"), inverseJoinColumns = @JoinColumn(name = "affilaite_id"))
     private Set<Affiliate> affiliates;
+    // >>>  CAMPAIGN + MEDIA     >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "t_campaign_media", joinColumns = @JoinColumn(name = "campaign_id"), inverseJoinColumns = @JoinColumn(name = "media_id"))
+    private Set<Media> medias = new HashSet<>();
 
     public void addAffiliate(Affiliate affiliate) {
         this.affiliates.add(affiliate);
@@ -93,11 +109,6 @@ public class Campaign {
             affiliate.getCampaigns().remove(this);
         }
     }
-
-    // >>>  CAMPAIGN + MEDIA     >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(name = "t_campaign_media", joinColumns = @JoinColumn(name = "campaign_id"), inverseJoinColumns = @JoinColumn(name = "media_id"))
-    private Set<Media> medias = new HashSet<>();
 
     public void addMedia(Media media) {
         this.medias.add(media);

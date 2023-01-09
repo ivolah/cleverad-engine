@@ -1,7 +1,8 @@
 package it.cleverad.engine.web.controller;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
+import it.cleverad.engine.business.TransactionAllBusiness;
 import it.cleverad.engine.business.TransactionBusiness;
+import it.cleverad.engine.web.dto.TransactionAllDTO;
 import it.cleverad.engine.web.dto.TransactionCPCDTO;
 import it.cleverad.engine.web.dto.TransactionCPLDTO;
 import it.cleverad.engine.web.dto.TransactionCPMDTO;
@@ -13,13 +14,15 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin
-@Tag(name = "Transaction", description = "Endpoints for all the Transactions Operations")
 @RestController
 @RequestMapping(value = "/transaction")
 public class TransactionController {
 
     @Autowired
     private TransactionBusiness business;
+
+    @Autowired
+    private TransactionAllBusiness allBusiness;
 
     /**
      * ============================================================================================================
@@ -171,5 +174,13 @@ public class TransactionController {
     /**
      * ============================================================================================================
      **/
+
+    @GetMapping("/all")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<TransactionAllDTO> searchAll(TransactionAllBusiness.Filter request, Pageable pageable) {
+        return allBusiness.search(request,  pageable);
+    }
+
+
 
 }
