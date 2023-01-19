@@ -28,12 +28,17 @@ public class TransactionAll {
     private String payoutReference;
     private Double value;
     private Long affiliateId;
+    private String affiliateName;
     private Long campaignId;
+    private String campaignName;
     private Long channelId;
+    private String channelName;
     private Long commissionId;
+    private String commissionName;
     private Long payoutId;
     private Long walletId;
     private Long mediaId;
+    private String mediaName;
     private Long clickNumber;
     private String refferal;
     private Long companyId;

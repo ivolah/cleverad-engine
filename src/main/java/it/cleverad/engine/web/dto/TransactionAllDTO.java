@@ -1,6 +1,7 @@
 package it.cleverad.engine.web.dto;
 
 import it.cleverad.engine.persistence.model.TransactionAll;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -8,6 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class TransactionAllDTO {
 
     private Long id;
@@ -20,43 +22,23 @@ public class TransactionAllDTO {
     private String payoutReference;
     private Double value;
     private Long affiliateId;
+    private String affiliateName;
     private Long campaignId;
+    private String campaignName;
     private Long channelId;
+    private String channelName;
     private Long commissionId;
+    private String commissionName;
     private Long payoutId;
     private Long walletId;
     private Long mediaId;
+    private String mediaName;
     private Long clickNumber;
     private String refferal;
     private Long companyId;
     private Long advertiserId;
     private String data;
     private String tipo;
-
-    public TransactionAllDTO(Long id, String agent, Boolean approved, LocalDateTime creationDate, LocalDateTime dateTime, String ip, String note, String payoutReference, Double value, Long affiliateId, Long campaignId, Long channelId, Long commissionId, Long payoutId, Long walletId, Long mediaId, Long clickNumber, String refferal, Long companyId, Long advertiserId, String data, String tipo) {
-        this.id = id;
-        this.agent = agent;
-        this.approved = approved;
-        this.creationDate = creationDate;
-        this.dateTime = dateTime;
-        this.ip = ip;
-        this.note = note;
-        this.payoutReference = payoutReference;
-        this.value = value;
-        this.affiliateId = affiliateId;
-        this.campaignId = campaignId;
-        this.channelId = channelId;
-        this.commissionId = commissionId;
-        this.payoutId = payoutId;
-        this.walletId = walletId;
-        this.mediaId = mediaId;
-        this.clickNumber = clickNumber;
-        this.refferal = refferal;
-        this.companyId = companyId;
-        this.advertiserId = advertiserId;
-        this.data = data;
-        this.tipo = tipo;
-    }
 
     public static TransactionAllDTO from(TransactionAll transaction) {
         return new TransactionAllDTO(
@@ -70,12 +52,17 @@ public class TransactionAllDTO {
                 transaction.getPayoutReference(),
                 transaction.getValue(),
                 transaction.getAffiliateId(),
+                transaction.getAffiliateName(),
                 transaction.getCampaignId(),
+                transaction.getCampaignName(),
                 transaction.getChannelId(),
+                transaction.getChannelName(),
                 transaction.getCommissionId(),
+                transaction.getCommissionName(),
                 transaction.getPayoutId(),
                 transaction.getWalletId(),
                 transaction.getMediaId(),
+                transaction.getMediaName(),
                 transaction.getClickNumber(),
                 transaction.getRefferal(),
                 transaction.getCompanyId(),

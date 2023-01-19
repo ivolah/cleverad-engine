@@ -6,7 +6,6 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -41,6 +40,17 @@ public class Affiliate {
     private String iban;
     private String swift;
     private String paypal;
+
+
+    private String nomeSitoSocial;
+    private String urlSitoSocial;
+
+    private String firstName;
+    private String lastName;
+
+    @ManyToOne
+    @JoinColumn(name = "dictionary_id")
+    private Dictionary dictionary;
 
     @Column(nullable = false)
     private Boolean status = true;
@@ -80,8 +90,15 @@ public class Affiliate {
     @OneToMany(mappedBy = "affiliate")
     private Set<Payout> payouts;
 
+    @OneToMany(mappedBy = "affiliate")
+    private Set<FileAffiliate> fileAffiliates;
+
     // >>>  CAMPAIGN + AFFILIATE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "affiliates")
-    private Set<Campaign> campaigns = new HashSet<>();
+
+    @OneToMany(mappedBy = "affiliate")
+    private Set<CampaignAffiliate> campaignAffiliates;
+
+//    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "affiliates")
+//    private Set<Campaign> campaigns = new HashSet<>();
 
 } 

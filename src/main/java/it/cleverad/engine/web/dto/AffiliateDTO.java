@@ -22,7 +22,7 @@ public class AffiliateDTO {
     private String zipCode;
     private String primaryMail;
     private String secondaryMail;
-    private String country ;
+    private String country;
     private String phonePrefix;
     private String phoneNumber;
 
@@ -38,8 +38,9 @@ public class AffiliateDTO {
     private LocalDateTime lastModificationDate;
 
     private List<BasicCampaignDTO> basicCampaignDTOS;
+    private List<FileAffiliateDTO> fileAffiliates;
 
-    public AffiliateDTO(long id, String name, String vatNumber, String street, String streetNumber, String city, String province, String zipCode, String primaryMail, String secondaryMail, String country, String phonePrefix, String phoneNumber, String note, String bank, String iban, String swift, String paypal, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, List<BasicCampaignDTO> basicCampaignDTOS) {
+    public AffiliateDTO(long id, String name, String vatNumber, String street, String streetNumber, String city, String province, String zipCode, String primaryMail, String secondaryMail, String country, String phonePrefix, String phoneNumber, String note, String bank, String iban, String swift, String paypal, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, List<BasicCampaignDTO> basicCampaignDTOS, List<FileAffiliateDTO> fileAffiliates) {
         this.id = id;
         this.name = name;
         this.vatNumber = vatNumber;
@@ -62,13 +63,14 @@ public class AffiliateDTO {
         this.creationDate = creationDate;
         this.lastModificationDate = lastModificationDate;
         this.basicCampaignDTOS = basicCampaignDTOS;
+        this.fileAffiliates = fileAffiliates;
     }
 
     public static AffiliateDTO from(Affiliate affiliate) {
 
-        List<BasicCampaignDTO> collect = null;
+        List<BasicCampaignDTO> listaCam = null;
         if (affiliate.getAffiliateChannelCommissionCampaigns() != null) {
-            collect = affiliate.getAffiliateChannelCommissionCampaigns().stream().map(affiliateCampaign -> {
+            listaCam = affiliate.getAffiliateChannelCommissionCampaigns().stream().map(affiliateCampaign -> {
                 BasicCampaignDTO campaignDTO = new BasicCampaignDTO();
                 campaignDTO.setId(affiliateCampaign.getCampaign().getId());
                 campaignDTO.setName(affiliateCampaign.getCampaign().getName());
@@ -79,11 +81,28 @@ public class AffiliateDTO {
             }).collect(Collectors.toList());
         }
 
+        List<FileAffiliateDTO> listaFile = null;
+        if (affiliate.getFileAffiliates() != null) {
+            listaFile = affiliate.getFileAffiliates().stream().map(fileAffiliate -> {
+                FileAffiliateDTO fileAffiliateDTO = new FileAffiliateDTO();
+                fileAffiliateDTO.setAffiliateId(fileAffiliate.getAffiliate().getId());
+                fileAffiliateDTO.setAffiliateName(fileAffiliate.getAffiliate().getName());
+                fileAffiliateDTO.setDictionaryId(fileAffiliate.getDictionary().getId());
+                fileAffiliateDTO.setDictionaryValue(fileAffiliate.getDictionary().getName());
+                fileAffiliateDTO.setCreationDate(fileAffiliate.getCreationDate());
+                fileAffiliateDTO.setNote(fileAffiliate.getNote());
+                fileAffiliateDTO.setId(fileAffiliate.getId());
+                fileAffiliateDTO.setName(fileAffiliate.getName());
+                fileAffiliateDTO.setType(fileAffiliate.getType());
+                return fileAffiliateDTO;
+            }).collect(Collectors.toList());
+        }
+
         return new AffiliateDTO(affiliate.getId(), affiliate.getName(), affiliate.getVatNumber(), affiliate.getStreet(), affiliate.getStreetNumber(),
                 affiliate.getCity(), affiliate.getProvince(), affiliate.getZipCode(), affiliate.getPrimaryMail(), affiliate.getSecondaryMail(),
-                                                                                                          affiliate.getCountry(),affiliate.getPhonePrefix(),affiliate.getPhoneNumber(),
-           affiliate.getNote(), affiliate.getBank(),     affiliate.getIban(), affiliate.getSwift(), affiliate.getPaypal(),
-                affiliate.getStatus(), affiliate.getCreationDate(), affiliate.getLastModificationDate(), collect);
+                affiliate.getCountry(), affiliate.getPhonePrefix(), affiliate.getPhoneNumber(),
+                affiliate.getNote(), affiliate.getBank(), affiliate.getIban(), affiliate.getSwift(), affiliate.getPaypal(),
+                affiliate.getStatus(), affiliate.getCreationDate(), affiliate.getLastModificationDate(), listaCam, listaFile);
     }
 
 }

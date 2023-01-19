@@ -121,6 +121,12 @@ public class PayoutController {
         return business.updateStatus(id, 23L);
     }
 
+    @PatchMapping(path = "/{id}/status/{statusId}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public PayoutDTO updateStatusPayout(@PathVariable Long id, @PathVariable Long statusId) {
+        return business.updateStatus(id, statusId);
+    }
+
     /**
      * ============================================================================================================
      **/

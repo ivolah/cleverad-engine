@@ -29,10 +29,10 @@ import java.util.List;
 @Component
 @Transactional
 public class AffiliateChannelCommissionCampaignBusiness {
-    
+
     @Autowired
     private AffiliateChannelCommissionCampaignRepository repository;
-    
+
     @Autowired
     private AffiliateRepository affiliateRepository;
     @Autowired
@@ -41,94 +41,104 @@ public class AffiliateChannelCommissionCampaignBusiness {
     private ChannelRepository channelRepository;
     @Autowired
     private CommissionRepository commissionRepository;
-    
+
+    @Autowired
+    private CampaignAffiliateBusiness campaignAffiliateBusiness;
+
     @Autowired
     private Mapper mapper;
-    
+
     /**
      * ============================================================================================================
      **/
-    
+
     // CREATE
     public AffiliateChannelCommissionCampaignDTO create(BaseCreateRequest request) {
         AffiliateChannelCommissionCampaignDTO dto = null;
-        
+
         AffiliateChannelCommissionCampaign map = mapper.map(request, AffiliateChannelCommissionCampaign.class);
         map.setCreationDate(LocalDateTime.now());
         map.setLastModificationDate(LocalDateTime.now());
-        
+
         Affiliate affiliate = affiliateRepository.findById(request.getAffiliateId()).orElseThrow(() -> new ElementCleveradException("Affilirte", request.getAffiliateId()));
-            map.setAffiliate(affiliate);
-        
+        map.setAffiliate(affiliate);
+
         Channel channel = channelRepository.findById(request.getChannelId()).orElseThrow(() -> new ElementCleveradException("Channel", request.getChannelId()));
         map.setChannel(channel);
-        
-        Commission commission =  commissionRepository.findById(request.getCommissionId()).orElseThrow(() -> new ElementCleveradException("Commission", request.getCommissionId()));
+
+        Commission commission = commissionRepository.findById(request.getCommissionId()).orElseThrow(() -> new ElementCleveradException("Commission", request.getCommissionId()));
         map.setCommission(commission);
-        
-        Campaign campaign =  campaignRepository.findById(request.getCampaignId()).orElseThrow(() -> new ElementCleveradException("Campaign", request.getCampaignId()));
+
+        Campaign campaign = campaignRepository.findById(request.getCampaignId()).orElseThrow(() -> new ElementCleveradException("Campaign", request.getCampaignId()));
         map.setCampaign(campaign);
-       
-        campaign.addAffiliate(affiliate);
-        
+
+        campaignAffiliateBusiness.create(new CampaignAffiliateBusiness.BaseCreateRequest(campaign.getId(), affiliate.getId(), null));
+        //addAffiliate(affiliate);
+
         map = repository.save(map);
-        
+
         dto = AffiliateChannelCommissionCampaignDTO.from(map);
-        
+
         return dto;
     }
-    
+
     // DELETE BY ID
     public void delete(Long id) {
         try {
-            repository.deleteById(id);
+            AffiliateChannelCommissionCampaign affiliateChannelCommissionCampaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("AffiliateChannelCommissionCampaign", id));
+
+            repository.deleteById(affiliateChannelCommissionCampaign.getId());
+
+            //campaignAffiliateBusiness.deleteByCampaignIdAndAffiliateId(affiliateChannelCommissionCampaign.getCampaign().getId(), affiliateChannelCommissionCampaign.getAffiliate().getId());
+
         } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
         }
     }
-    
+
     // GET BY ID
     public AffiliateChannelCommissionCampaignDTO findById(Long id) {
         AffiliateChannelCommissionCampaign affiliateChannelCommissionCampaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("AffiliateChannelCommissionCampaign", id));
         return AffiliateChannelCommissionCampaignDTO.from(affiliateChannelCommissionCampaign);
     }
-    
+
     // GET BY ID CAMPAIGN
     public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignId(Long campaignId, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-        Filter   filter   = new Filter();
+        Filter filter = new Filter();
         filter.setCampaignId(campaignId);
         log.info(">>> " + campaignId);
         Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
         return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
-    
+
     // SEARCH searchScheduledActivities
     public AffiliateChannelCommissionCampaign searchScheduledActivities(Filter request) {
-        Pageable                                 pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.asc("id")));
-        Page<AffiliateChannelCommissionCampaign> page     = repository.findAll(getSpecification(request), pageable);
-        
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.asc("id")));
+        Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(request), pageable);
+
         if (page.getTotalPages() > 0) {
             return page.getContent().get(0);
-        } else return null;
+        } else
+            return null;
     }
-    
+
     public Page<AffiliateChannelCommissionCampaignDTO> search(Filter request, Pageable pageableR) {
-        Pageable                                 pageable = PageRequest.of(pageableR.getPageNumber(), pageableR.getPageSize(), Sort.by(Sort.Order.asc("id")));
-        Page<AffiliateChannelCommissionCampaign> page     = repository.findAll(getSpecification(request), pageable);
+        Pageable pageable = PageRequest.of(pageableR.getPageNumber(), pageableR.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(request), pageable);
         return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
-    
+
     /**
      * ============================================================================================================
      **/
     private Specification<AffiliateChannelCommissionCampaign> getSpecification(AffiliateChannelCommissionCampaignBusiness.Filter request) {
         return (root, query, cb) -> {
-            Predicate       completePredicate = null;
-            List<Predicate> predicates        = new ArrayList<>();
-            
+            Predicate completePredicate = null;
+            List<Predicate> predicates = new ArrayList<>();
+
             if (request.getId() != null) {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
@@ -144,17 +154,17 @@ public class AffiliateChannelCommissionCampaignBusiness {
             if (request.getCommissionId() != null) {
                 predicates.add(cb.equal(root.get("commission").get("id"), request.getCommissionId()));
             }
-            
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
-            
+
             return completePredicate;
         };
     }
-    
+
     /**
      * ============================================================================================================
      **/
-    
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
@@ -164,7 +174,7 @@ public class AffiliateChannelCommissionCampaignBusiness {
         private Long channelId;
         private Long commissionId;
     }
-    
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
@@ -175,5 +185,5 @@ public class AffiliateChannelCommissionCampaignBusiness {
         private Long channelId;
         private Long commissionId;
     }
-    
+
 }

@@ -45,4 +45,12 @@ public class Dictionary {
     @JoinColumn(name = "dictionary_id")
     private Set<RevenueFactor> revenueFactors;
 
+    @OneToMany
+    @JoinColumn(name = "dictionary_id")
+    private Set<FileAffiliate> fileAffiliates;
+
+    @OneToMany
+    @JoinColumn(name = "dictionary_id")
+    private Set<Affiliate> affiliates;
+
 }

@@ -71,16 +71,16 @@ public class CampaignDTO {
             }).collect(Collectors.toList());
         }
 
-        List<BasicAffiliateDTO> affiliates = null;
-        //        if (campaign.getAffiliateCampaigns() != null) {
-        //            affiliates = campaign.getAffiliateCampaigns().stream().map(affiliateCampaign -> {
-        //                BasicAffiliateDTO dto = new BasicAffiliateDTO();
-        //                dto.setId(affiliateCampaign.getAffiliate().getId());
-        //                dto.setName(affiliateCampaign.getAffiliate().getName());
-        //                dto.setPrimaryMail(affiliateCampaign.getAffiliate().getPrimaryMail());
-        //                return dto;
-        //            }).collect(Collectors.toList());
-        //        }
+        List<BasicAffiliateDTO> affiliateDTOList = null;
+        if (campaign.getCampaignAffiliates() != null) {
+            affiliateDTOList = campaign.getCampaignAffiliates().stream().map(affiliateCampaign -> {
+                BasicAffiliateDTO dto = new BasicAffiliateDTO();
+                dto.setId(affiliateCampaign.getAffiliate() != null ? affiliateCampaign.getAffiliate().getId() : null);
+                dto.setName(affiliateCampaign.getAffiliate() != null ? affiliateCampaign.getAffiliate().getName() : null);
+                dto.setFollowThrough(affiliateCampaign.getFollowThrough());
+                return dto;
+            }).collect(Collectors.toList());
+        }
 
         List<CommissionDTO> commissions = null;
         if (campaign.getCommissionCampaigns() != null) {
@@ -169,9 +169,13 @@ public class CampaignDTO {
                 campaign.getTrackingCode(), campaign.getEncodedId(),
                 campaign.getCookie().getId(), campaign.getCookie().getName(), campaign.getCookie().getValue(),
                 campaign.getAdvertiser().getId(), campaign.getAdvertiser().getName(),
-                campaign.getDealer().getId(), campaign.getDealer().getName(),
-                campaign.getPlanner().getId(), campaign.getPlanner().getName(),
-                medias, affiliates, commissions, categoryDTOS, revenues, accc, categoryList);
+                campaign.getDealer() != null ? campaign.getDealer().getId() : null,
+                campaign.getDealer() != null ? campaign.getDealer().getName() : null,
+
+                campaign.getPlanner() != null ? campaign.getPlanner().getId() : null,
+                campaign.getPlanner() != null ? campaign.getPlanner().getName() : null,
+
+                medias, affiliateDTOList, commissions, categoryDTOS, revenues, accc, categoryList);
     }
 
 }

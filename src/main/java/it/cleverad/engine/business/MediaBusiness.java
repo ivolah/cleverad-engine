@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
 @Slf4j
 @Component
 @Transactional
@@ -73,10 +74,12 @@ public class MediaBusiness {
 
         String bannerCode = request.getBannerCode();
         String url = request.getUrl();
-        if (StringUtils.isNotBlank(url)) bannerCode.replace("{{url}}", url);
+        if (StringUtils.isNotBlank(url))
+            bannerCode.replace("{{url}}", url);
 
         String target = request.getTarget();
-        if (StringUtils.isNotBlank(target)) bannerCode.replace("{{target}}", target);
+        if (StringUtils.isNotBlank(target))
+            bannerCode.replace("{{target}}", target);
 
         request.setBannerCode(bannerCode);
 
@@ -131,10 +134,12 @@ public class MediaBusiness {
 
         String bannerCode = mappedEntity.getBannerCode();
         String url = mappedEntity.getUrl();
-        if (StringUtils.isNotBlank(url)) bannerCode.replace("{{url}}", url);
+        if (StringUtils.isNotBlank(url))
+            bannerCode.replace("{{url}}", url);
 
         String target = mappedEntity.getTarget();
-        if (StringUtils.isNotBlank(target)) bannerCode.replace("{{target}}", target);
+        if (StringUtils.isNotBlank(target))
+            bannerCode.replace("{{target}}", target);
         mappedEntity.setBannerCode(bannerCode);
         Media saved = repository.save(mappedEntity);
 
@@ -152,7 +157,14 @@ public class MediaBusiness {
             return page.map(media -> MediaDTO.from(media));
         } else {
             Affiliate cc = affiliateRepository.findById(jwtUserDetailsService.getAffiliateID()).orElseThrow(() -> new ElementCleveradException("Affiliate", jwtUserDetailsService.getAffiliateID()));
-            Set<Campaign> campaigns = cc.getCampaigns();
+
+            List<Campaign> campaigns = new ArrayList<>();
+            if (cc.getCampaignAffiliates() != null) {
+                campaigns = cc.getCampaignAffiliates().stream().map(campaignAffiliate -> {
+                    Campaign ccc = campaignAffiliate.getCampaign();
+                    return ccc;
+                }).collect(Collectors.toList());
+            }
 
             Set<Long> ids = new HashSet<>();
             campaigns.stream().spliterator().forEachRemaining(campaign -> {
@@ -164,6 +176,7 @@ public class MediaBusiness {
             Page<Media> page = repository.findByIdIn(ids, pageableRequest);
             return page.map(MediaDTO::from);
         }
+
     }
 
     public Media getByFileId(Long fileId) {
@@ -200,14 +213,18 @@ public class MediaBusiness {
     private String generaBannerCode(MediaDTO dto, Long mediaId, Long campaignId, Long channelID) {
         String bannerCode = dto.getBannerCode();
 
-        if (StringUtils.isNotBlank(dto.getUrl())) bannerCode = bannerCode.replace("{{url}}", dto.getUrl());
-        if (StringUtils.isNotBlank(dto.getTarget())) bannerCode = bannerCode.replace("{{target}}", dto.getTarget());
+        if (StringUtils.isNotBlank(dto.getUrl()))
+            bannerCode = bannerCode.replace("{{url}}", dto.getUrl());
+        if (StringUtils.isNotBlank(dto.getTarget()))
+            bannerCode = bannerCode.replace("{{target}}", dto.getTarget());
 
         String url = dto.getUrl();
-        if (StringUtils.isNotBlank(url)) bannerCode = bannerCode.replace("{{url}}", url);
+        if (StringUtils.isNotBlank(url))
+            bannerCode = bannerCode.replace("{{url}}", url);
 
         String target = dto.getTarget();
-        if (StringUtils.isNotBlank(target)) bannerCode = bannerCode.replace("{{target}}", target);
+        if (StringUtils.isNotBlank(target))
+            bannerCode = bannerCode.replace("{{target}}", target);
 
         if (!jwtUserDetailsService.getRole().equals("Admin")) {
             bannerCode = bannerCode.replace("{{refferalId}}", refferalService.creaEncoding(Long.toString(campaignId), Long.toString(mediaId), String.valueOf(jwtUserDetailsService.getAffiliateID()), Long.toString(channelID)));
@@ -278,9 +295,11 @@ public class MediaBusiness {
         };
     }
 
+
     /**
      * ============================================================================================================
      **/
+
 
     @Data
     @NoArgsConstructor

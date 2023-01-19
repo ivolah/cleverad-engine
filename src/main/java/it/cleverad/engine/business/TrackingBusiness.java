@@ -42,9 +42,10 @@ public class TrackingBusiness {
 
     @Autowired
     private MediaBusiness mediaBusiness;
-
     @Autowired
     private CampaignBusiness campaignBusiness;
+    @Autowired
+    private CampaignAffiliateBusiness campaignAffiliateBusiness;
 
     @Autowired
     private RefferalService refferalService;
@@ -56,7 +57,7 @@ public class TrackingBusiness {
     // GET BY ID
     public TargetDTO getTarget(BaseCreateRequest request) {
 
-        Refferal refferal= refferalService.decodificaRefferal(request.getRefferalId());
+        Refferal refferal = refferalService.decodificaRefferal(request.getRefferalId());
         TargetDTO targetDTO = new TargetDTO();
         log.trace("REFFERAL :: {} - {}", request.getRefferalId(), refferal.toString());
 
@@ -69,6 +70,10 @@ public class TrackingBusiness {
         } else {
             targetDTO.setCookieTime("60");
         }
+        
+        campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(refferal.getAffiliateId(), refferal.getCampaignId()).stream().findFirst().ifPresent(campaignAffiliateDTO ->
+                targetDTO.setFollowThorugh(campaignAffiliateDTO.getFollowThrough())
+        );
 
         return targetDTO;
     }
