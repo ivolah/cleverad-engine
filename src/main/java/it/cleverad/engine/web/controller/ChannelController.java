@@ -61,7 +61,7 @@ public class ChannelController {
     @GetMapping("/affiliate")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<ChannelDTO> getbyIdUserAll(Pageable pageable) {
-        return business.getbyIdAffiliateAll( pageable);
+        return business.getbyIdAffiliateAll(pageable);
     }
 
     @GetMapping("/{id}/affiliate")
@@ -83,6 +83,15 @@ public class ChannelController {
     public Page<DictionaryDTO> getTypes() {
         return business.getTypes();
     }
+
+    @GetMapping("/approve")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<ChannelDTO> daApprovare(Pageable pageable) {
+        ChannelBusiness.Filter request = new ChannelBusiness.Filter();
+        request.setStatus(false);
+        return business.search(request, pageable);
+    }
+
 
     /**
      * ============================================================================================================

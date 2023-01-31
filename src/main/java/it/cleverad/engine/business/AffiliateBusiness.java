@@ -3,7 +3,10 @@ package it.cleverad.engine.business;
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.Affiliate;
 import it.cleverad.engine.persistence.repository.AffiliateRepository;
+import it.cleverad.engine.persistence.repository.DictionaryRepository;
+import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.web.dto.AffiliateDTO;
+import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.WalletDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresCleveradException;
@@ -40,6 +43,13 @@ public class AffiliateBusiness {
 
     @Autowired
     private WalletBusiness walletBusiness;
+    @Autowired
+    private DictionaryRepository dictionaryRepository;
+    @Autowired
+    private DictionaryBusiness dictionaryBusiness;
+
+    @Autowired
+    private MailService mailService;
 
     @Autowired
     private Mapper mapper;
@@ -51,7 +61,11 @@ public class AffiliateBusiness {
     // CREATE
     public AffiliateDTO create(BaseCreateRequest request) {
         Affiliate map = mapper.map(request, Affiliate.class);
+        map.setDictionaryChannelType(dictionaryRepository.findById(request.getCategorytypeId()).orElseThrow(() -> new ElementCleveradException("Dictionary Channel Type", request.getCategorytypeId())));
+        map.setDictionaryCompanyType(dictionaryRepository.findById(request.getCompanytypeId()).orElseThrow(() -> new ElementCleveradException("Dictionary Company Type", request.getCompanytypeId())));
+       
         AffiliateDTO dto = AffiliateDTO.from(repository.save(map));
+
         // creo wallet associato
         WalletBusiness.BaseCreateRequest wal = new WalletBusiness.BaseCreateRequest();
         wal.setAffiliateId(dto.getId());
@@ -61,6 +75,13 @@ public class AffiliateBusiness {
         wal.setTotal(0.0);
         wal.setStatus(true);
         walletBusiness.create(wal);
+
+        // invio mail
+        MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
+        mailRequest.setTemplateId(2L);
+        mailRequest.setAffiliateId(dto.getId());
+        mailService.inviaMailRegistrazione(mailRequest);
+        
         return dto;
     }
 
@@ -108,9 +129,30 @@ public class AffiliateBusiness {
         mappedEntity.setLastModificationDate(LocalDateTime.now());
 
         mapper.map(affiliateDTOfrom, mappedEntity);
+        mappedEntity.setDictionaryChannelType(dictionaryRepository.findById(filter.getCategorytypeId()).orElseThrow(() -> new ElementCleveradException("Dictionary Category Type", filter.getCategorytypeId())));
+        mappedEntity.setDictionaryCompanyType(dictionaryRepository.findById(filter.getCompanytypeId()).orElseThrow(() -> new ElementCleveradException("Dictionary Company Type", filter.getCompanytypeId())));
 
         return AffiliateDTO.from(repository.save(mappedEntity));
     }
+
+    //  GET TIPI
+    public Page<DictionaryDTO> getTypeCompany() {
+        return dictionaryBusiness.getTypeCompany();
+    }
+
+
+    public Page<DictionaryDTO> getChannelTypeAffiliate() {
+        return dictionaryBusiness.getChannelTypeAffiliate();
+    }
+
+    public List<String> listEmails(Long affiliateId) {
+        List<String> lista = new ArrayList<>();
+        Affiliate affiliate = repository.findById(affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", affiliateId));
+        lista.add(affiliate.getPrimaryMail());
+        lista.add(affiliate.getSecondaryMail());
+        return lista;
+    }
+
 
     /**
      * ============================================================================================================
@@ -180,6 +222,7 @@ public class AffiliateBusiness {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class BaseCreateRequest {
+
         private String name;
         private String vatNumber;
         private String street;
@@ -198,6 +241,14 @@ public class AffiliateBusiness {
         private String swift;
         private String paypal;
         private String province;
+
+        private String firstName;
+        private String lastName;
+        private String nomeSitoSocial;
+        private String urlSitoSocial;
+        private Long companytypeId;
+        private Long  categorytypeId;
+        private String contenutoSito;
     }
 
     @Data
@@ -228,6 +279,14 @@ public class AffiliateBusiness {
         private Instant lastModificationDateTo;
         private String province;
         private String country;
+
+        private String firstName;
+        private String lastName;
+        private String nomeSitoSocial;
+        private String urlSitoSocial;
+        private Long companytypeId;
+        private Long categorytypeId;
+        private String contenutoSito;
     }
 
 }

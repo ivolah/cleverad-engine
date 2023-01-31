@@ -5,15 +5,14 @@ import it.cleverad.engine.web.dto.AffiliateDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin
 @RestController
-@RequestMapping(value = "/affiliate")
-public class AffiliateController {
+@RequestMapping(value = "/register")
+public class RegisterController {
 
     @Autowired
     private AffiliateBusiness business;
@@ -25,31 +24,8 @@ public class AffiliateController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public AffiliateDTO create(@ModelAttribute AffiliateBusiness.BaseCreateRequest request) {
+        request.setStatus(false);
         return business.create(request);
-    }
-
-    @GetMapping
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<AffiliateDTO> search(AffiliateBusiness.Filter request, Pageable pageable) {
-        return business.search(request, pageable);
-    }
-
-    @PatchMapping(path = "/{id}")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public AffiliateDTO update(@PathVariable Long id, @RequestBody AffiliateBusiness.Filter request) {
-        return business.update(id, request);
-    }
-
-    @GetMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public AffiliateDTO getByUuid(@PathVariable Long id) {
-        return business.findById(id);
-    }
-
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public void delete(@PathVariable Long id) {
-        this.business.delete(id);
     }
 
     @GetMapping("/types/company")
@@ -58,18 +34,10 @@ public class AffiliateController {
         return business.getTypeCompany();
     }
 
-    @GetMapping("/types/channel")
+    @GetMapping("/types/category")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<DictionaryDTO> getChannelTypeAffiliate() {
         return business.getChannelTypeAffiliate();
-    }
-
-    @GetMapping("/approve")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<AffiliateDTO> daApprovare(Pageable pageable) {
-        AffiliateBusiness.Filter request = new AffiliateBusiness.Filter();
-        request.setStatus(false);
-        return business.search(request, pageable);
     }
 
     /**

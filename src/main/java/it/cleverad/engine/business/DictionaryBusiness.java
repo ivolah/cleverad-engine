@@ -126,6 +126,24 @@ public class DictionaryBusiness {
         return page.map(DictionaryDTO::from);
     }
 
+    public Page<DictionaryDTO> getTypeCompany() {
+        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Filter request = new Filter();
+        request.setType("COMPANYTYPE");
+        Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(DictionaryDTO::from);
+    }
+
+    public Page<DictionaryDTO> getChannelTypeAffiliate() {
+        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Filter request = new Filter();
+        request.setType("CHANNELTYPE");
+        Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(DictionaryDTO::from);
+    }
+
+
+
 
     /**
      * ============================================================================================================

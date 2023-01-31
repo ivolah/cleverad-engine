@@ -41,16 +41,23 @@ public class Affiliate {
     private String swift;
     private String paypal;
 
+    private String firstName;
+    private String lastName;
+
 
     private String nomeSitoSocial;
     private String urlSitoSocial;
 
-    private String firstName;
-    private String lastName;
+    @ManyToOne
+    @JoinColumn(name = "companytype_id")
+    private Dictionary dictionaryCompanyType;
 
     @ManyToOne
-    @JoinColumn(name = "dictionary_id")
-    private Dictionary dictionary;
+    @JoinColumn(name = "channeltype_id")
+    private Dictionary dictionaryChannelType;
+
+    private String contenutoSito;
+    
 
     @Column(nullable = false)
     private Boolean status = true;

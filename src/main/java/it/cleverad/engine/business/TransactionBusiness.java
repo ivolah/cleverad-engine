@@ -1,9 +1,7 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.TransactionCPC;
-import it.cleverad.engine.persistence.model.TransactionCPL;
-import it.cleverad.engine.persistence.model.TransactionCPM;
+import it.cleverad.engine.persistence.model.*;
 import it.cleverad.engine.persistence.repository.*;
 import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.TransactionCPCDTO;
@@ -68,12 +66,18 @@ public class TransactionBusiness {
     // CREATE
     public TransactionCPCDTO createCpc(BaseCreateRequest request) {
         TransactionCPC map = mapper.map(request, TransactionCPC.class);
-
-        map.setAffiliate(affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId)));
+        Affiliate aa = affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId));
+        map.setAffiliate(aa);
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
         map.setChannel(channelRepository.findById(request.channelId).orElseThrow(() -> new ElementCleveradException("Channel", request.channelId)));
         map.setCommission(commissionRepository.findById(request.commissionId).orElseThrow(() -> new ElementCleveradException("Commission", request.commissionId)));
-        map.setWallet(walletRepository.findById(request.walletId).orElseThrow(() -> new ElementCleveradException("Wallet", request.walletId)));
+        Wallet ww;
+        if (request.walletId != null) {
+            ww = walletRepository.findById(request.walletId).orElseThrow(() -> new ElementCleveradException("Wallet", request.walletId));
+        } else {
+            ww = aa.getWallets().stream().findFirst().get();
+        }
+        map.setWallet(ww);
         map.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
 
         return TransactionCPCDTO.from(cpcRepository.save(map));
@@ -81,13 +85,21 @@ public class TransactionBusiness {
 
     public TransactionCPLDTO createCpl(BaseCreateRequest request) {
         TransactionCPL map = mapper.map(request, TransactionCPL.class);
-
+        Affiliate aa = affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId));
+        map.setAffiliate(aa);
         map.setAffiliate(affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId)));
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
         map.setChannel(channelRepository.findById(request.channelId).orElseThrow(() -> new ElementCleveradException("Channel", request.channelId)));
         map.setCommission(commissionRepository.findById(request.commissionId).orElseThrow(() -> new ElementCleveradException("Commission", request.commissionId)));
-        map.setWallet(walletRepository.findById(request.walletId).orElseThrow(() -> new ElementCleveradException("Wallet", request.walletId)));
-        map.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
+        Wallet ww;
+        if (request.walletId != null) {
+            ww = walletRepository.findById(request.walletId).orElseThrow(() -> new ElementCleveradException("Wallet", request.walletId));
+        } else {
+            ww = aa.getWallets().stream().findFirst().get();
+        }
+        map.setWallet(ww);
+
+        //map.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
 
         return TransactionCPLDTO.from(cplRepository.save(map));
     }
@@ -95,11 +107,18 @@ public class TransactionBusiness {
     public TransactionCPMDTO createCpm(BaseCreateRequest request) {
         TransactionCPM map = mapper.map(request, TransactionCPM.class);
 
-        map.setAffiliate(affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId)));
+        Affiliate aa = affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId));
+        map.setAffiliate(aa);
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
         map.setChannel(channelRepository.findById(request.channelId).orElseThrow(() -> new ElementCleveradException("Channel", request.channelId)));
         map.setCommission(commissionRepository.findById(request.commissionId).orElseThrow(() -> new ElementCleveradException("Commission", request.commissionId)));
-        map.setWallet(walletRepository.findById(request.walletId).orElseThrow(() -> new ElementCleveradException("Wallet", request.walletId)));
+        Wallet ww;
+        if (request.walletId != null) {
+            ww = walletRepository.findById(request.walletId).orElseThrow(() -> new ElementCleveradException("Wallet", request.walletId));
+        } else {
+            ww = aa.getWallets().stream().findFirst().get();
+        }
+        map.setWallet(ww);
         map.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
 
         return TransactionCPMDTO.from(cpmRepository.save(map));
@@ -220,17 +239,17 @@ public class TransactionBusiness {
     }
 
     // UPDATE
-//    public TransactionDTO update(Long id, Filter filter) {
-//        Transaction channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
-//        TransactionDTO campaignDTOfrom = TransactionDTO.from(channel);
-//
-//        mapper.map(filter, campaignDTOfrom);
-//
-//        Transaction mappedEntity = mapper.map(channel, Transaction.class);
-//        mapper.map(campaignDTOfrom, mappedEntity);
-//
-//        return TransactionDTO.from(repository.save(mappedEntity));
-//    }
+    //    public TransactionDTO update(Long id, Filter filter) {
+    //        Transaction channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
+    //        TransactionDTO campaignDTOfrom = TransactionDTO.from(channel);
+    //
+    //        mapper.map(filter, campaignDTOfrom);
+    //
+    //        Transaction mappedEntity = mapper.map(channel, Transaction.class);
+    //        mapper.map(campaignDTOfrom, mappedEntity);
+    //
+    //        return TransactionDTO.from(repository.save(mappedEntity));
+    //    }
 
 
     /**
@@ -373,7 +392,7 @@ public class TransactionBusiness {
         private Long walletId;
         private Long mediaId;
 
-        private LocalDateTime dateTime;
+        //private LocalDateTime dateTime;
         private Double value;
         private Boolean approved;
 

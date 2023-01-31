@@ -82,7 +82,6 @@ public class PlannerBusiness {
         return page.map(PlannerDTO::from);
     }
 
-
     // UPDATE
     public PlannerDTO update(Long id, Filter filter) {
         Planner channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Planner", id));

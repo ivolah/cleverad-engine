@@ -15,7 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,7 +68,7 @@ public class ManageCPC {
                 rr.setAffiliateId(refferal.getAffiliateId());
                 rr.setCampaignId(refferal.getCampaignId());
                 rr.setChannelId(refferal.getChannelId());
-                rr.setDateTime(LocalDateTime.now());
+           //     rr.setDateTime(LocalDateTime.now());
                 rr.setMediaId(refferal.getMediaId());
                 rr.setApproved(true);
 

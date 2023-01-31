@@ -39,7 +39,7 @@ public class FileAffiliateController {
         return business.search(request, pageable);
     }
 
-    @GetMapping    (path = "/{id}/affiliate")
+    @GetMapping(path = "/affiliate/{affiliateId}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<FileAffiliateDTO> search(@PathVariable Long affiliateId, Pageable pageable) {
         FileAffiliateBusiness.Filter request = new FileAffiliateBusiness.Filter();
