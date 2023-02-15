@@ -40,7 +40,7 @@ public class ManageCPC {
 
     //TODO controlla quotidianamente se la data scadenza delle campagne è stata superata
 
-    @Scheduled(cron = "0 0/2 * * * ?")
+    @Scheduled(cron = "0 0/30 * * * ?")
     public void trasformaTrackingCPC() {
         try {
 

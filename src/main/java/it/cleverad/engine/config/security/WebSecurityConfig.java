@@ -54,8 +54,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 // SESSIONE STATELESS
                         sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 // NON AUTENTICO LA CHIAMATE DI AUTENTICAZIONE
-                .authorizeRequests().antMatchers("/authenticate", "/contactform", "/tracking", "/target",
-                                                 "/cpc", "/cpl", "/cpm", "/file/encoded", "/register").permitAll().
+                .authorizeRequests().antMatchers(
+                        "/authenticate",
+                        "/target",
+                        "/file/encoded",
+                        "/register").permitAll().
+
                 // TUTTE LE ALTRE RICHIESTO SONO AUTENTICATE
                         anyRequest().authenticated().and().
                 // session won't be used to store user's state.

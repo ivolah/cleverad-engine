@@ -57,6 +57,9 @@ public class Affiliate {
     private Dictionary dictionaryChannelType;
 
     private String contenutoSito;
+
+    private String type;
+    private Boolean cb;
     
 
     @Column(nullable = false)

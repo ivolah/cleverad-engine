@@ -37,7 +37,7 @@ public class ManageCPL {
 
     //TODO  controlla quotidianamente se la data scadenza delle campagne è stata superata
 
-    @Scheduled(cron = "0 0/3 * * * ?")
+    @Scheduled(cron = "0 0/30 * * * ?")
     public void trasformaTrackingCPL() {
         try {
             // trovo uttti i tracking con read == false
