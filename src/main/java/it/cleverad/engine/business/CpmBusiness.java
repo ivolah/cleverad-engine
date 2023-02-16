@@ -2,8 +2,8 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.config.model.Refferal;
-import it.cleverad.engine.persistence.model.Cpm;
-import it.cleverad.engine.persistence.repository.CpmRepository;
+import it.cleverad.engine.persistence.model.tracking.Cpm;
+import it.cleverad.engine.persistence.repository.tracking.CpmRepository;
 import it.cleverad.engine.service.RefferalService;
 import it.cleverad.engine.web.dto.CpmDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;

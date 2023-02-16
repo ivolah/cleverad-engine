@@ -1,4 +1,4 @@
-package it.cleverad.engine.persistence.model;
+package it.cleverad.engine.persistence.model.tracking;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,23 +8,21 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "t_cpc")
-@Inheritance(strategy = InheritanceType.JOINED)
+@Table(name = "t_tracking")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Cpc {
+public class Tracking {
 
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String refferal;
+    private String refferalId;
     private String ip;
     private String agent;
-
-    private LocalDateTime date = LocalDateTime.now();
-    private Boolean read = false;
+    private LocalDateTime creationDate;
+    private Boolean read;
 
 }

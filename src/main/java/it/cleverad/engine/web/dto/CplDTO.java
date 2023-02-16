@@ -1,6 +1,6 @@
 package it.cleverad.engine.web.dto;
 
-import it.cleverad.engine.persistence.model.Cpl;
+import it.cleverad.engine.persistence.model.tracking.Cpl;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

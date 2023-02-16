@@ -44,6 +44,7 @@ public class CampaignDTO {
 
     private Long plannerId;
     private String plannerName;
+    private String plannerMail;
 
     private List<BasicMediaDTO> medias;
     private List<BasicAffiliateDTO> affiliates;
@@ -75,7 +76,8 @@ public class CampaignDTO {
         if (campaign.getCampaignAffiliates() != null) {
             affiliateDTOList = campaign.getCampaignAffiliates().stream().map(affiliateCampaign -> {
                 BasicAffiliateDTO dto = new BasicAffiliateDTO();
-                dto.setId(affiliateCampaign.getAffiliate() != null ? affiliateCampaign.getAffiliate().getId() : null);
+
+                dto.setId(affiliateCampaign.getAffiliate() != null ? affiliateCampaign.getAffiliate().getId() : 0);
                 dto.setName(affiliateCampaign.getAffiliate() != null ? affiliateCampaign.getAffiliate().getName() : null);
                 dto.setFollowThrough(affiliateCampaign.getFollowThrough());
                 return dto;
@@ -174,6 +176,7 @@ public class CampaignDTO {
 
                 campaign.getPlanner() != null ? campaign.getPlanner().getId() : null,
                 campaign.getPlanner() != null ? campaign.getPlanner().getName() : null,
+                campaign.getPlanner() != null ? campaign.getPlanner().getEmail() : null,
 
                 medias, affiliateDTOList, commissions, categoryDTOS, revenues, accc, categoryList);
     }

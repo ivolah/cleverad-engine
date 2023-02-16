@@ -1,4 +1,4 @@
-package it.cleverad.engine.persistence.model;
+package it.cleverad.engine.persistence.model.tracking;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

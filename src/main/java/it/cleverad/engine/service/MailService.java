@@ -54,7 +54,7 @@ public class MailService {
 
         SimpleMailMessage message = new SimpleMailMessage();
 
-        message.setFrom("test@cleverad.it");
+        message.setFrom("info@cleverad.it");
         message.setTo(request.email);
         message.setSubject(request.oggetto);
         message.setText(request.testo);
@@ -84,6 +84,7 @@ public class MailService {
     @SneakyThrows
     public MailDTO inviaMailRegistrazione(BaseCreateRequest request) {
         AffiliateDTO affiliate = affiliateBusiness.findById(request.getAffiliateId());
+
         MailTemplateDTO mailTemplate = mailTempalteBusiness.findById(request.getTemplateId());
         String templateStr = mailTemplate.getContent();
 
@@ -95,7 +96,7 @@ public class MailService {
 
         MimeMessage mimeMessage = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
-        helper.setFrom("test@cleverad.it");
+        helper.setFrom("info@cleverad.it");
         helper.setTo(affiliate.getPrimaryMail());
         helper.setSubject(mailTemplate.getSubject());
         String emailContent = stringWriter.toString();
@@ -109,6 +110,7 @@ public class MailService {
     public MailDTO conferma(BaseCreateRequest request, String canale) {
 
         AffiliateDTO affiliate = affiliateBusiness.findById(request.getAffiliateId());
+
         MailTemplateDTO mailTemplate = null;
         if (canale.equals("CANALE")) {
             mailTemplate = mailTempalteBusiness.findById(4L);
@@ -147,11 +149,13 @@ public class MailService {
         StringWriter stringWriter = new StringWriter();
         Map<String, Object> model = new HashMap<>();
         model.put("affiliate", affiliate);
+        model.put("campaign", campaign);
+        model.put("plannerName", campaign.getPlannerName());
         t.process(model, stringWriter);
 
         MimeMessage mimeMessage = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
-        helper.setFrom("info@cleverad.it");
+        helper.setFrom(campaign.getPlannerMail());
         helper.setTo(affiliate.getPrimaryMail());
         helper.setSubject(mailTemplate.getSubject() + campaign.getName());
         String emailContent = stringWriter.toString();

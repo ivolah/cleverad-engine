@@ -1,8 +1,8 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.Cpl;
-import it.cleverad.engine.persistence.repository.CplRepository;
+import it.cleverad.engine.persistence.model.tracking.Cpl;
+import it.cleverad.engine.persistence.repository.tracking.CplRepository;
 import it.cleverad.engine.web.dto.CplDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;

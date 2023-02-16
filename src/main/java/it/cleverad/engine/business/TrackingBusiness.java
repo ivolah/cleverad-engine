@@ -2,8 +2,8 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.config.model.Refferal;
-import it.cleverad.engine.persistence.model.Tracking;
-import it.cleverad.engine.persistence.repository.TrackingRepository;
+import it.cleverad.engine.persistence.model.tracking.Tracking;
+import it.cleverad.engine.persistence.repository.tracking.TrackingRepository;
 import it.cleverad.engine.service.RefferalService;
 import it.cleverad.engine.web.dto.MediaDTO;
 import it.cleverad.engine.web.dto.TargetDTO;
