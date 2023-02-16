@@ -2,9 +2,9 @@
 //
 //import it.cleverad.engine.business.*;
 //import it.cleverad.engine.config.model.Refferal;
-//import it.cleverad.engine.persistence.model.AffiliateChannelCommissionCampaign;
-//import it.cleverad.engine.persistence.repository.AffiliateChannelCommissionCampaignRepository;
-//import it.cleverad.engine.persistence.repository.WalletRepository;
+//import it.cleverad.engine.persistence.model.service.AffiliateChannelCommissionCampaign;
+//import it.cleverad.engine.persistence.repository.service.AffiliateChannelCommissionCampaignRepository;
+//import it.cleverad.engine.persistence.repository.service.WalletRepository;
 //import it.cleverad.engine.service.RefferalService;
 //import it.cleverad.engine.web.dto.CpcDTO;
 //import lombok.extern.slf4j.Slf4j;

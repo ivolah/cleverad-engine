@@ -1,6 +1,6 @@
 package it.cleverad.engine.web.dto;
 
-import it.cleverad.engine.persistence.model.Wallet;
+import it.cleverad.engine.persistence.model.service.Wallet;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

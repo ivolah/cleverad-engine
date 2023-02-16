@@ -1,11 +1,11 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.Representative;
-import it.cleverad.engine.persistence.repository.AdvertiserRepository;
-import it.cleverad.engine.persistence.repository.AffiliateRepository;
-import it.cleverad.engine.persistence.repository.DictionaryRepository;
-import it.cleverad.engine.persistence.repository.RepresentativeRepository;
+import it.cleverad.engine.persistence.model.service.Representative;
+import it.cleverad.engine.persistence.repository.service.AdvertiserRepository;
+import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
+import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
+import it.cleverad.engine.persistence.repository.service.RepresentativeRepository;
 import it.cleverad.engine.web.dto.RepresentativeDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;

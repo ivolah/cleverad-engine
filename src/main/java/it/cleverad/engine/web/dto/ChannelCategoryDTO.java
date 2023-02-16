@@ -1,6 +1,6 @@
 package it.cleverad.engine.web.dto;
 
-import it.cleverad.engine.persistence.model.ChannelCategory;
+import it.cleverad.engine.persistence.model.service.ChannelCategory;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

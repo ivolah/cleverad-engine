@@ -1,8 +1,8 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.Editor;
-import it.cleverad.engine.persistence.repository.EditorRepository;
+import it.cleverad.engine.persistence.model.service.Editor;
+import it.cleverad.engine.persistence.repository.service.EditorRepository;
 import it.cleverad.engine.web.dto.EditorDTO;
 import it.cleverad.engine.web.dto.WalletDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;

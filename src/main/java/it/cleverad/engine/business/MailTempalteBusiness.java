@@ -1,8 +1,8 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.MailTemplate;
-import it.cleverad.engine.persistence.repository.MailTemplateRepository;
+import it.cleverad.engine.persistence.model.service.MailTemplate;
+import it.cleverad.engine.persistence.repository.service.MailTemplateRepository;
 import it.cleverad.engine.web.dto.MailTemplateDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;

@@ -1,10 +1,10 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.Campaign;
-import it.cleverad.engine.persistence.model.CampaignCookie;
-import it.cleverad.engine.persistence.model.Cookie;
-import it.cleverad.engine.persistence.repository.CampaignCookieRepository;
+import it.cleverad.engine.persistence.model.service.Campaign;
+import it.cleverad.engine.persistence.model.service.CampaignCookie;
+import it.cleverad.engine.persistence.model.service.Cookie;
+import it.cleverad.engine.persistence.repository.service.CampaignCookieRepository;
 import it.cleverad.engine.web.dto.CampaignCookieDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;

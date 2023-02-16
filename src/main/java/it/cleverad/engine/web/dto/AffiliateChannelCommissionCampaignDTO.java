@@ -1,6 +1,6 @@
 package it.cleverad.engine.web.dto;
 
-import it.cleverad.engine.persistence.model.AffiliateChannelCommissionCampaign;
+import it.cleverad.engine.persistence.model.service.AffiliateChannelCommissionCampaign;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

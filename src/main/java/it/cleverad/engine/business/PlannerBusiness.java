@@ -1,9 +1,9 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.Planner;
-import it.cleverad.engine.persistence.repository.CampaignRepository;
-import it.cleverad.engine.persistence.repository.PlannerRepository;
+import it.cleverad.engine.persistence.model.service.Planner;
+import it.cleverad.engine.persistence.repository.service.CampaignRepository;
+import it.cleverad.engine.persistence.repository.service.PlannerRepository;
 import it.cleverad.engine.web.dto.PlannerDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;

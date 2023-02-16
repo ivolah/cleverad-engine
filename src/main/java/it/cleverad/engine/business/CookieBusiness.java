@@ -1,8 +1,8 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.Cookie;
-import it.cleverad.engine.persistence.repository.CookieRepository;
+import it.cleverad.engine.persistence.model.service.Cookie;
+import it.cleverad.engine.persistence.repository.service.CookieRepository;
 import it.cleverad.engine.web.dto.CookieDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -155,4 +155,3 @@ public class CookieBusiness {
         private Instant lastModificationDateTo;
     }
 }
-

@@ -1,9 +1,9 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.Dictionary;
-import it.cleverad.engine.persistence.model.*;
-import it.cleverad.engine.persistence.repository.*;
+import it.cleverad.engine.persistence.model.service.Dictionary;
+import it.cleverad.engine.persistence.model.service.*;
+import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.PayoutDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;

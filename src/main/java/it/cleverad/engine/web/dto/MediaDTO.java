@@ -1,7 +1,7 @@
 package it.cleverad.engine.web.dto;
 
-import it.cleverad.engine.persistence.model.Campaign;
-import it.cleverad.engine.persistence.model.Media;
+import it.cleverad.engine.persistence.model.service.Campaign;
+import it.cleverad.engine.persistence.model.service.Media;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

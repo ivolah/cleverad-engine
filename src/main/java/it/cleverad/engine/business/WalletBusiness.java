@@ -1,8 +1,8 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.Wallet;
-import it.cleverad.engine.persistence.repository.WalletRepository;
+import it.cleverad.engine.persistence.model.service.Wallet;
+import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.web.dto.WalletDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;

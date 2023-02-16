@@ -1,6 +1,6 @@
 package it.cleverad.engine.web.dto;
 
-import it.cleverad.engine.persistence.model.CampaignCategory;
+import it.cleverad.engine.persistence.model.service.CampaignCategory;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

@@ -1,6 +1,6 @@
 package it.cleverad.engine.web.dto;
 
-import it.cleverad.engine.persistence.model.Advertiser;
+import it.cleverad.engine.persistence.model.service.Advertiser;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

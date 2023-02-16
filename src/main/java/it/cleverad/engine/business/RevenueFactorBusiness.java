@@ -1,10 +1,10 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.RevenueFactor;
-import it.cleverad.engine.persistence.repository.CampaignRepository;
-import it.cleverad.engine.persistence.repository.DictionaryRepository;
-import it.cleverad.engine.persistence.repository.RevenueFactorRepository;
+import it.cleverad.engine.persistence.model.service.RevenueFactor;
+import it.cleverad.engine.persistence.repository.service.CampaignRepository;
+import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
+import it.cleverad.engine.persistence.repository.service.RevenueFactorRepository;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.RevenueFactorDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;

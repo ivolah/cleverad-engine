@@ -1,8 +1,8 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.MediaType;
-import it.cleverad.engine.persistence.repository.MediaTypeRepository;
+import it.cleverad.engine.persistence.model.service.MediaType;
+import it.cleverad.engine.persistence.repository.service.MediaTypeRepository;
 import it.cleverad.engine.web.dto.MediaTypeDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;

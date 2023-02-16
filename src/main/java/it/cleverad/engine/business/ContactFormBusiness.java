@@ -1,8 +1,8 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.ContactForm;
-import it.cleverad.engine.persistence.repository.ContactFormRepository;
+import it.cleverad.engine.persistence.model.service.ContactForm;
+import it.cleverad.engine.persistence.repository.service.ContactFormRepository;
 import it.cleverad.engine.web.dto.ContactFormDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;

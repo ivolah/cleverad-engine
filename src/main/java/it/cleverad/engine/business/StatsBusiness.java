@@ -1,7 +1,7 @@
 package it.cleverad.engine.business;
 
-import it.cleverad.engine.persistence.model.*;
-import it.cleverad.engine.persistence.repository.*;
+import it.cleverad.engine.persistence.model.service.*;
+import it.cleverad.engine.persistence.repository.service.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

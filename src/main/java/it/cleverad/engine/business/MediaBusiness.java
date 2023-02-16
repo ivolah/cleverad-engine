@@ -1,13 +1,13 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.Affiliate;
-import it.cleverad.engine.persistence.model.Campaign;
-import it.cleverad.engine.persistence.model.Media;
-import it.cleverad.engine.persistence.repository.AffiliateRepository;
-import it.cleverad.engine.persistence.repository.CampaignRepository;
-import it.cleverad.engine.persistence.repository.MediaRepository;
-import it.cleverad.engine.persistence.repository.MediaTypeRepository;
+import it.cleverad.engine.persistence.model.service.Affiliate;
+import it.cleverad.engine.persistence.model.service.Campaign;
+import it.cleverad.engine.persistence.model.service.Media;
+import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
+import it.cleverad.engine.persistence.repository.service.CampaignRepository;
+import it.cleverad.engine.persistence.repository.service.MediaRepository;
+import it.cleverad.engine.persistence.repository.service.MediaTypeRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.service.RefferalService;
 import it.cleverad.engine.web.dto.MediaDTO;

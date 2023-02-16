@@ -1,6 +1,6 @@
 package it.cleverad.engine.web.dto;
 
-import it.cleverad.engine.persistence.model.TransactionCPM;
+import it.cleverad.engine.persistence.model.service.TransactionCPM;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

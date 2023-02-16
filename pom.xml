@@ -110,13 +110,6 @@
             <version>20200518</version>
         </dependency>
 
-        <!--SWAGGER-->
-        <!--        <dependency>-->
-        <!--            <groupId>org.springdoc</groupId>-->
-        <!--            <artifactId>springdoc-openapi-ui</artifactId>-->
-        <!--            <version>1.6.1</version>-->
-        <!--        </dependency>-->
-
         <!-- SPRING SECURITY-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -136,6 +129,7 @@
             <artifactId>validation-api</artifactId>
             <version>2.0.1.Final</version>
         </dependency>
+
 
     </dependencies>
 
@@ -164,4 +158,5 @@
             <id>ivoll</id>
         </developer>
     </developers>
+
 </project>

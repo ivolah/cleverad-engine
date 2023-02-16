@@ -1,8 +1,8 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.*;
-import it.cleverad.engine.persistence.repository.*;
+import it.cleverad.engine.persistence.model.service.*;
+import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.TransactionCPCDTO;
 import it.cleverad.engine.web.dto.TransactionCPLDTO;

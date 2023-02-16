@@ -1,6 +1,6 @@
 package it.cleverad.engine.web.dto;
 
-import it.cleverad.engine.persistence.model.ContactForm;
+import it.cleverad.engine.persistence.model.service.ContactForm;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

@@ -1,9 +1,9 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.File;
-import it.cleverad.engine.persistence.model.Media;
-import it.cleverad.engine.persistence.repository.FileRepository;
+import it.cleverad.engine.persistence.model.service.File;
+import it.cleverad.engine.persistence.model.service.Media;
+import it.cleverad.engine.persistence.repository.service.FileRepository;
 import it.cleverad.engine.service.RefferalService;
 import it.cleverad.engine.web.dto.FileDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;

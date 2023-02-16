@@ -1,12 +1,12 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.Affiliate;
-import it.cleverad.engine.persistence.model.Dictionary;
-import it.cleverad.engine.persistence.model.FileAffiliate;
-import it.cleverad.engine.persistence.repository.AffiliateRepository;
-import it.cleverad.engine.persistence.repository.DictionaryRepository;
-import it.cleverad.engine.persistence.repository.FileAffiliateRepository;
+import it.cleverad.engine.persistence.model.service.Affiliate;
+import it.cleverad.engine.persistence.model.service.Dictionary;
+import it.cleverad.engine.persistence.model.service.FileAffiliate;
+import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
+import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
+import it.cleverad.engine.persistence.repository.service.FileAffiliateRepository;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.FileAffiliateDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;

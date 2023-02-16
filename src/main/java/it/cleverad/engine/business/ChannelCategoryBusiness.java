@@ -1,10 +1,10 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.Category;
-import it.cleverad.engine.persistence.model.Channel;
-import it.cleverad.engine.persistence.model.ChannelCategory;
-import it.cleverad.engine.persistence.repository.ChannelCategoryRepository;
+import it.cleverad.engine.persistence.model.service.Category;
+import it.cleverad.engine.persistence.model.service.Channel;
+import it.cleverad.engine.persistence.model.service.ChannelCategory;
+import it.cleverad.engine.persistence.repository.service.ChannelCategoryRepository;
 import it.cleverad.engine.web.dto.ChannelCategoryDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -176,4 +176,3 @@ public class ChannelCategoryBusiness {
     }
 
 }
-

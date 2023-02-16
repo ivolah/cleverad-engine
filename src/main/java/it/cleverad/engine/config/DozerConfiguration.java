@@ -6,7 +6,7 @@ import com.github.dozermapper.core.loader.api.BeanMappingBuilder;
 import it.cleverad.engine.business.AffiliateChannelCommissionCampaignBusiness;
 import it.cleverad.engine.business.TransactionBusiness;
 import it.cleverad.engine.business.WalletBusiness;
-import it.cleverad.engine.persistence.model.*;
+import it.cleverad.engine.persistence.model.service.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

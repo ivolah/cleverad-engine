@@ -1,6 +1,6 @@
 package it.cleverad.engine.web.dto;
 
-import it.cleverad.engine.persistence.model.Editor;
+import it.cleverad.engine.persistence.model.service.Editor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

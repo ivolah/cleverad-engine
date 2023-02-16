@@ -1,10 +1,10 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.Commission;
-import it.cleverad.engine.persistence.repository.CampaignRepository;
-import it.cleverad.engine.persistence.repository.CommissionRepository;
-import it.cleverad.engine.persistence.repository.DictionaryRepository;
+import it.cleverad.engine.persistence.model.service.Commission;
+import it.cleverad.engine.persistence.repository.service.CampaignRepository;
+import it.cleverad.engine.persistence.repository.service.CommissionRepository;
+import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
 import it.cleverad.engine.web.dto.CommissionDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -217,4 +217,3 @@ public class CommissionBusiness {
     }
 
 }
-
