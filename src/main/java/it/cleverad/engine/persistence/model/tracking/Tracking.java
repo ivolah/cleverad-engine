@@ -19,9 +19,11 @@ public class Tracking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "refferal_id")
     private String refferalId;
     private String ip;
     private String agent;
+    @Column(name = "creation_date")
     private LocalDateTime creationDate;
     private Boolean read;
 

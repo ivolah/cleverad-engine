@@ -20,8 +20,10 @@ public class AffiliateChannelCommissionCampaign {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDateTime creationDate;
-    private LocalDateTime lastModificationDate;
+    @Column(name = "creation_date")
+    private LocalDateTime creationDate = LocalDateTime.now();
+    @Column(name = "last_modification_date")
+    private LocalDateTime lastModificationDate = LocalDateTime.now();
 
     @ManyToOne
     @JoinColumn(name = "affiliate_id")

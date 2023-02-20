@@ -21,8 +21,11 @@ public class Cpm {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "campaign_id")
     private Long campaignId;
+    @Column(name = "image_id")
     private Long imageId;
+    @Column(name = "media_id")
     private Long mediaId;
 
     private String refferal;

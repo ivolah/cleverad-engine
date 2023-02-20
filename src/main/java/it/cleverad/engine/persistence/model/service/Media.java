@@ -24,12 +24,16 @@ public class Media {
     private String name;
     private String url;
     private String target;
+    @Column(name = "banner_code")
     private String bannerCode;
     private String note;
+    @Column(name = "id_file")
     private String idFile;
 
     private Boolean status = true;
+    @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
+    @Column(name = "last_modification_date")
     private LocalDateTime lastModificationDate = LocalDateTime.now();
 
     @ManyToOne

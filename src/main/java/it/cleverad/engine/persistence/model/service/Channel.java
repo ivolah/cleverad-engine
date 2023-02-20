@@ -22,12 +22,15 @@ public class Channel {
     private Long id;
 
     private String name;
+    @Column(name = "short_description")
     private String shortDescription;
     private String type;
     private String url;
 
     private Boolean status = true;
+    @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
+    @Column(name = "last_modification_date")
     private LocalDateTime lastModificationDate = LocalDateTime.now();
 
     @ManyToOne

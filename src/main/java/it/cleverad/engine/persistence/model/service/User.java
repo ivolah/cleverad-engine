@@ -31,8 +31,9 @@ public class User {
 
     @Column(nullable = false)
     private Boolean status = true;
+    @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
-
+    @Column(name = "last_login")
     private LocalDateTime lastLogin;
 
     @ManyToOne

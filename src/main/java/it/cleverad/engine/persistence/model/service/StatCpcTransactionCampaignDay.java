@@ -14,7 +14,7 @@ import javax.persistence.Table;
 @Getter
 @Setter
 @NoArgsConstructor
-public class StatCpcTransactionCampaignWeek {
+public class StatCpcTransactionCampaignDay {
 
     @Id
     private Long id;
@@ -30,5 +30,6 @@ public class StatCpcTransactionCampaignWeek {
     private Long fileId;
     private Double year;
     private Double week;
+    private Double day;
 
 }

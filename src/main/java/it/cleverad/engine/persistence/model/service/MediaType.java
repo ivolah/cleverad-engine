@@ -24,6 +24,6 @@ public class MediaType {
 
     @OneToMany
     @JoinColumn(name = "type_id")
-    private Set<Media>  medias;
+    private Set<Media> medias;
 
 }

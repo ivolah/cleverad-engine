@@ -41,7 +41,7 @@ public class UserDTO {
     }
 
     public static UserDTO from(User user) {
-        return new UserDTO(user.getId(), user.getUsername(), user.getPassword(), user.getName(), user.getSurname(), user.getEmail(), user.getAffiliate() != null ? user.getAffiliate().getId() : null, user.getAffiliate() != null ? user.getAffiliate().getName() : null, user.getDictionary().getId(), user.getDictionary().getName(), user.getStatus(), user.getCreationDate(), user.getLastLogin());
+        return new UserDTO(user.getId(), user.getUsername(), user.getPassword(), user.getName(), user.getSurname(), user.getEmail(), user.getAffiliate() != null ? user.getAffiliate().getId() : null, user.getAffiliate() != null ? user.getAffiliate().getName() : null, user.getDictionary().getId(), user.getDictionary().getName(), user.getStatus(), user.getCreationDate() != null ? user.getCreationDate() : null, user.getLastLogin());
     }
 
 }

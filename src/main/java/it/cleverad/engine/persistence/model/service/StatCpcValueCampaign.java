@@ -17,11 +17,14 @@ public class StatCpcValueCampaign {
     @Id
     private Long id;
 
-    private Double  value;
+    private Double value;
+    @Column(name = "campaign_id")
     private Long campaignId;
     private String campaign;
+    @Column(name = "media_id")
     private Long mediaId;
     private String media;
+    @Column(name = "file_id")
     private Long fileId;
 
 }

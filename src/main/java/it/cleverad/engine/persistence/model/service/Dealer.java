@@ -26,13 +26,16 @@ public class Dealer {
     private String name;
     private String surname;
     private String email;
+    @Column(name = "phone_prefix")
     private String phonePrefix;
     private String phone;
+    @Column(name = "mobile_prefix")
     private String mobilePrefix;
     private String mobile;
 
     @Column(nullable = false)
     private Boolean status = true;
+    @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
 
     @OneToMany

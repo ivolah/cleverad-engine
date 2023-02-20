@@ -20,7 +20,9 @@ public class CampaignCookie {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
+    @Column(name = "last_modification_date")
     private LocalDateTime lastModificationDate = LocalDateTime.now();
 
     @ManyToOne

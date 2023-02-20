@@ -24,7 +24,8 @@ public class FileAffiliate {
     private String name;
     private String type;
     private String note;
-    private LocalDateTime creationDate= LocalDateTime.now();
+    @Column(name = "creation_date")
+    private LocalDateTime creationDate = LocalDateTime.now();
 
     @Lob
     private byte[] data;
@@ -44,6 +45,5 @@ public class FileAffiliate {
         this.affiliate = affiliate;
         this.dictionary = dictionary;
     }
-
 
 }

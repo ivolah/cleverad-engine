@@ -32,13 +32,15 @@ public class TransactionCPL {
     private String payoutReference;
     private String note;
 
+    @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
+    @Column(name = "last_modification_date")
     private LocalDateTime lastModificationDate = LocalDateTime.now();
 
     @ManyToOne
     @JoinColumn(name = "wallet_id")
     private Wallet wallet;
-    
+
     @ManyToOne
     @JoinColumn(name = "advertiser_id")
     private Advertiser advertiser;

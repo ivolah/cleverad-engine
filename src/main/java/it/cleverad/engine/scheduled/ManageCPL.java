@@ -37,7 +37,7 @@ public class ManageCPL {
 
     //TODO  controlla quotidianamente se la data scadenza delle campagne è stata superata
 
-    @Scheduled(cron = "0 0/30 * * * ?")
+    @Scheduled(cron = "0 0/4 * * * ?")
     public void trasformaTrackingCPL() {
         try {
             // trovo uttti i tracking con read == false
@@ -53,18 +53,23 @@ public class ManageCPL {
                 rr.setCampaignId(refferal.getCampaignId());
                 rr.setChannelId(refferal.getChannelId());
                 rr.setMediaId(refferal.getMediaId());
-             //   rr.setDateTime(cplDTO.getDate());
+                //   rr.setDateTime(cplDTO.getDate());
                 rr.setApproved(true);
-
                 rr.setAgent(cplDTO.getAgent());
                 rr.setIp(cplDTO.getIp());
                 rr.setData(cplDTO.getData());
-
                 rr.setMediaId(refferal.getMediaId());
 
                 // associo a wallet
-                Long walletID = walletRepository.findByAffiliateId(refferal.getAffiliateId()).getId();
-                rr.setWalletId(walletID);
+                Long affiliateID = refferal.getAffiliateId();
+                log.info("AFFILIATE >>>> {}", affiliateID);
+                Long walletID;
+                if (affiliateID != null) {
+                    walletID = walletRepository.findByAffiliateId(affiliateID).getId();
+                    rr.setWalletId(walletID);
+                } else {
+                    walletID = null;
+                }
 
                 // gesione commisione
                 List<AffiliateChannelCommissionCampaign> accc = affiliateChannelCommissionCampaignRepository.findByAffiliateIdAndChannelIdAndCampaignId(refferal.getAffiliateId(), refferal.getChannelId(), refferal.getCampaignId());

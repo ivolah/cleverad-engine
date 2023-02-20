@@ -40,7 +40,7 @@ public class ManageCPC {
 
     //TODO controlla quotidianamente se la data scadenza delle campagne è stata superata
 
-    @Scheduled(cron = "0 0/30 * * * ?")
+    @Scheduled(cron = "22 0/4 * * * ?")
     public void trasformaTrackingCPC() {
         try {
 
@@ -68,15 +68,20 @@ public class ManageCPC {
                 rr.setAffiliateId(refferal.getAffiliateId());
                 rr.setCampaignId(refferal.getCampaignId());
                 rr.setChannelId(refferal.getChannelId());
-           //     rr.setDateTime(LocalDateTime.now());
+                //     rr.setDateTime(LocalDateTime.now());
                 rr.setMediaId(refferal.getMediaId());
                 rr.setApproved(true);
-
                 rr.setMediaId(refferal.getMediaId());
 
                 // associo a wallet
-                Long walletID = walletRepository.findByAffiliateId(refferal.getAffiliateId()).getId();
-                rr.setWalletId(walletID);
+                Long affiliateID = refferal.getAffiliateId();
+                Long walletID;
+                if (affiliateID != null) {
+                    walletID = walletRepository.findByAffiliateId(affiliateID).getId();
+                    rr.setWalletId(walletID);
+                } else {
+                    walletID = null;
+                }
 
                 // gesione commisione
                 List<AffiliateChannelCommissionCampaign> accc = affiliateChannelCommissionCampaignRepository.findByAffiliateIdAndChannelIdAndCampaignId(refferal.getAffiliateId(), refferal.getChannelId(), refferal.getCampaignId());

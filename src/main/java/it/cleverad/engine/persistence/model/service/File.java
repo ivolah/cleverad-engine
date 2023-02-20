@@ -25,7 +25,8 @@ public class File {
     @Lob
     private byte[] data;
 
-    private LocalDateTime creationDate= LocalDateTime.now();
+    @Column(name = "creation_date")
+    private LocalDateTime creationDate = LocalDateTime.now();
 
     public File(String name, String type, byte[] data) {
         this.name = name;
@@ -33,4 +34,5 @@ public class File {
         this.data = data;
         this.creationDate = LocalDateTime.now();
     }
+
 }

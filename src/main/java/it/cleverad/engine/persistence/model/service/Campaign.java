@@ -24,19 +24,29 @@ public class Campaign {
     private Long id;
 
     private String name;
+    @Column(name = "short_description")
     private String shortDescription;
+    @Column(name = "long_description")
     private String longDescription;
+    @Column(name = "start_date")
     private LocalDate startDate;
+    @Column(name = "end_date")
     private LocalDate endDate;
+    @Column(name = "id_file")
     private String idFile;
+    @Column(name = "default_commission_id")
     private String defaultCommissionId;
     private String valuta;
+    @Column(name = "tracking_code")
     private String trackingCode;
+    @Column(name = "encoded_id")
     private String encodedId;
     private Long budget;
     @Column(nullable = false)
     private Boolean status = true;
+    @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
+    @Column(name = "last_modification_date")
     private LocalDateTime lastModificationDate = LocalDateTime.now();
 
     // ONE TO MANY

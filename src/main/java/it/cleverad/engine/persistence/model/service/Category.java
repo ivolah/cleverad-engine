@@ -25,7 +25,9 @@ public class Category {
     private String code;
     private String description;
 
+    @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
+    @Column(name = "last_modification_date")
     private LocalDateTime lastModificationDate = LocalDateTime.now();
 
     @OneToMany(mappedBy = "category")

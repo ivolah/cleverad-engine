@@ -4,6 +4,7 @@ import it.cleverad.engine.persistence.model.service.Payout;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.Column;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,7 +31,9 @@ public class PayoutDTO {
     private Long dictionaryId;
     private String dictionaryName;
 
+    @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
+    @Column(name = "last_modification_date")
     private LocalDateTime lastModificationDate = LocalDateTime.now();
 
     private List<TransactionCPCDTO> transactionCPCS;
@@ -78,16 +81,7 @@ public class PayoutDTO {
             }).collect(Collectors.toList());
         }
 
-        return new PayoutDTO(
-                payout.getId(),
-                payout.getAffiliate() != null ? payout.getAffiliate().getId() : null,
-                payout.getAffiliate() != null ? payout.getAffiliate().getName() : null,
-                payout.getTotale(), payout.getValuta(), payout.getNote(), payout.getData(), payout.getStato(), payout.getFileId(),
-                payout.getDictionary() != null ? payout.getDictionary().getId() : null,
-                payout.getDictionary() != null ? payout.getDictionary().getName() : null,
-                payout.getCreationDate(), payout.getLastModificationDate(),
-                transactionCPCS
-        );
+        return new PayoutDTO(payout.getId(), payout.getAffiliate() != null ? payout.getAffiliate().getId() : null, payout.getAffiliate() != null ? payout.getAffiliate().getName() : null, payout.getTotale(), payout.getValuta(), payout.getNote(), payout.getData(), payout.getStato(), payout.getFileId(), payout.getDictionary() != null ? payout.getDictionary().getId() : null, payout.getDictionary() != null ? payout.getDictionary().getName() : null, payout.getCreationDate(), payout.getLastModificationDate(), transactionCPCS);
     }
 
 }

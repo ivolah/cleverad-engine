@@ -22,10 +22,13 @@ public class RevenueFactor {
     private Long id;
 
     private Double revenue;
+    @Column(name = "due_date")
     private LocalDate dueDate;
 
     private Boolean status = true;
+    @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
+    @Column(name = "last_modification_date")
     private LocalDateTime lastModificationDate = LocalDateTime.now();
 
     @ManyToOne()

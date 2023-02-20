@@ -22,16 +22,24 @@ public class Advertiser {
     private Long id;
 
     private String name;
+    @Column(name = "vat_number")
     private String vatNumber;
     private String street;
+    @Column(name = "street_number")
     private String streetNumber;
     private String city;
+    @Column(name = "zip_code")
     private String zipCode;
+    @Column(name = "primary_mail")
     private String primaryMail;
+    @Column(name = "secondary_mail")
     private String secondaryMail;
 
     private Boolean status = true;
+
+    @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
+    @Column(name = "last_modification_date")
     private LocalDateTime lastModificationDate = LocalDateTime.now();
 
     @OneToMany(mappedBy = "advertiser")

@@ -18,11 +18,14 @@ public class StatCpcClickCampaign {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    private Long  click;
+    private Long click;
+    @Column(name = "campaign_id")
     private Long campaignId;
     private String campaign;
+    @Column(name = "media_id")
     private Long mediaId;
     private String media;
+    @Column(name = "file_id")
     private Long fileId;
 
 }
