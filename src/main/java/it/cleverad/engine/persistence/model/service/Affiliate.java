@@ -71,9 +71,7 @@ public class Affiliate {
     @Column(name = "contenuto_sito")
     private String contenutoSito;
 
-    private String type;
     private Boolean cb;
-
 
     @Column(nullable = false)
     private Boolean status = true;

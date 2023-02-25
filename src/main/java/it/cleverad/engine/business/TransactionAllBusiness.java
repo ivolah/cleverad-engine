@@ -71,13 +71,26 @@ public class TransactionAllBusiness {
     }
 
     // SEARCH PAGINATED
-     public Page<TransactionAllDTO> search(Filter request, Pageable pageableRequest) {
+    public Page<TransactionAllDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Page<TransactionAll> page = repository.findAll(getSpecification(request), pageable);
         return page.map(TransactionAllDTO::from);
     }
 
-      // UPDATE
+    public Page<TransactionAllDTO> searchPrefiltrato(Filter request, Pageable pageableRequest) {
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+        if (jwtUserDetailsService.getRole().equals("Admin")) {
+            Page<TransactionAll> page = repository.findAll(getSpecification(request), pageable);
+            return page.map(TransactionAllDTO::from);
+        } else {
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+            Page<TransactionAll> page = repository.findAll(getSpecification(request), pageable);
+            return page.map(TransactionAllDTO::from);
+        }
+    }
+
+
+    // UPDATE
     //    public TransactionDTO update(Long id, Filter filter) {
     //        Transaction channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
     //        TransactionDTO campaignDTOfrom = TransactionDTO.from(channel);

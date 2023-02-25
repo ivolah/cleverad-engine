@@ -181,6 +181,10 @@ public class TransactionController {
         return allBusiness.search(request,  pageable);
     }
 
-
+    @GetMapping("/all/affiliate")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<TransactionAllDTO> searchAllPrefiltrato(TransactionAllBusiness.Filter request, Pageable pageable) {
+        return allBusiness.searchPrefiltrato(request,  pageable);
+    }
 
 }
