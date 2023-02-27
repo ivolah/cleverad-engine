@@ -4,22 +4,21 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
-@Table(name = "v_cpc_transaction_campaign_media")
+@Table(name = "v_cpc_click_campaign_media")
+@Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
 @NoArgsConstructor
-public class StatCpcTransactionCampaign {
+public class StatCpcClickCampaignMedia {
 
     @Id
+    @Column(name = "id", nullable = false)
     private Long id;
 
-    private Long totale;
+    private Long click;
     @Column(name = "campaign_id")
     private Long campaignId;
     private String campaign;

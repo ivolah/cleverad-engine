@@ -62,6 +62,7 @@ public class ChannelBusiness {
         request.setStatus(true);
         Channel map = mapper.map(request, Channel.class);
         map.setDictionary(dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
+       map.setDictionaryType(dictionaryRepository.findById(request.typeId).orElseThrow(() -> new ElementCleveradException("Type", request.typeId)));
         if (request.affiliateId != null) {
             map.setAffiliate(affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId)));
         } else {
@@ -125,7 +126,7 @@ public class ChannelBusiness {
     public ChannelDTO update(Long id, Filter filter) {
         Channel channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Channel", id));
         ChannelDTO campaignDTOfrom = ChannelDTO.from(channel);
-
+        filter.setStatus(true);
         mapper.map(filter, campaignDTOfrom);
 
         Channel mappedEntity = mapper.map(channel, Channel.class);
@@ -181,6 +182,18 @@ public class ChannelBusiness {
         return dictionaryBusiness.getTypeChannel();
     }
 
+    public ChannelDTO disable(Long id) {
+        Channel channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Channel", id));
+        channel.setStatus(false);
+        return ChannelDTO.from(repository.save(channel));
+    }
+
+    public ChannelDTO enable(Long id) {
+        Channel channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Channel", id));
+        channel.setStatus(true);
+        return ChannelDTO.from(repository.save(channel));
+    }
+
     /**
      * ============================================================================================================
      **/
@@ -198,8 +211,8 @@ public class ChannelBusiness {
             if (request.getShortDescription() != null) {
                 predicates.add(cb.equal(root.get("shortDescription"), request.getShortDescription()));
             }
-            if (request.getType() != null) {
-                predicates.add(cb.equal(root.get("type"), request.getType()));
+            if (request.getTypeId() != null) {
+                predicates.add(cb.equal(root.get("dictionary").get("id"), request.getTypeId()));
             }
             if (request.getStatus() != null) {
                 predicates.add(cb.equal(root.get("status"), request.getStatus()));
@@ -227,6 +240,7 @@ public class ChannelBusiness {
         };
     }
 
+
     /**
      * ============================================================================================================
      **/
@@ -238,11 +252,12 @@ public class ChannelBusiness {
 
         private String name;
         private String shortDescription;
-        private String type;
+
         private String url;
 
         private Long affiliateId;
         private Long dictionaryId;
+        private Long typeId;
         private Boolean status;
 
     }
@@ -255,12 +270,12 @@ public class ChannelBusiness {
 
         private String name;
         private String shortDescription;
-        private String type;
         private String approvazione;
         private String url;
 
         private Long affiliateId;
         private Long dictionaryId;
+        private Long typeId;
         private Boolean status;
 
         private Instant creationDateFrom;

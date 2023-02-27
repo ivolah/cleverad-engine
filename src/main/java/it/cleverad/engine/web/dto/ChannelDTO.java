@@ -1,6 +1,7 @@
 package it.cleverad.engine.web.dto;
 
 import it.cleverad.engine.persistence.model.service.Channel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,12 +11,13 @@ import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class ChannelDTO {
 
     private Long id;
     private String name;
     private String shortDescription;
-    private String type;
+
     private Boolean status;
     private String url;
     private LocalDateTime creationDate;
@@ -24,23 +26,27 @@ public class ChannelDTO {
     private Long dictionaryId;
     private String dictionaryValue;
 
+    private Long typeId;
+    private String typeValue;
+
     private List<CategoryDTO> categoryDTOS;
     private String campaignID;
 
     private String affiliateName;
     private Long affiliateId;
 
-    public ChannelDTO(Long id, String name, String shortDescription, String type, Boolean status, String url, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long dictionaryId, String dictionaryValue, List<CategoryDTO> categoryDTOS, String affiliateName, Long affiliateId) {
+    public ChannelDTO(Long id, String name, String shortDescription, Boolean status, String url, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long dictionaryId, String dictionaryValue, Long typeId, String typeValue, List<CategoryDTO> categoryDTOS, String affiliateName, Long affiliateId) {
         this.id = id;
         this.name = name;
         this.shortDescription = shortDescription;
-        this.type = type;
         this.status = status;
         this.url = url;
         this.creationDate = creationDate;
         this.lastModificationDate = lastModificationDate;
         this.dictionaryId = dictionaryId;
         this.dictionaryValue = dictionaryValue;
+        this.typeId = typeId;
+        this.typeValue = typeValue;
         this.categoryDTOS = categoryDTOS;
         this.affiliateName = affiliateName;
         this.affiliateId = affiliateId;
@@ -61,7 +67,17 @@ public class ChannelDTO {
         }
 
 
-        return new ChannelDTO(channel.getId(), channel.getName(), channel.getShortDescription(), channel.getType(), channel.getStatus(), channel.getUrl(), channel.getCreationDate(), channel.getLastModificationDate(), channel.getDictionary() != null ? channel.getDictionary().getId() : null, channel.getDictionary() != null ? channel.getDictionary().getName() : null, categories, channel.getAffiliate() != null ? channel.getAffiliate().getName() : null, channel.getAffiliate() != null ? channel.getAffiliate().getId() : null);
+        return new ChannelDTO(channel.getId(), channel.getName(), channel.getShortDescription(), channel.getStatus(),
+                channel.getUrl(), channel.getCreationDate(), channel.getLastModificationDate(),
+                channel.getDictionary() != null ? channel.getDictionary().getId() : null,
+                channel.getDictionary() != null ? channel.getDictionary().getName() : null,
+
+                channel.getDictionaryType() != null ? channel.getDictionaryType().getId() : null,
+                channel.getDictionaryType() != null ? channel.getDictionaryType().getName() : null,
+                categories,
+                channel.getAffiliate() != null ? channel.getAffiliate().getName() : null,
+                channel.getAffiliate() != null ? channel.getAffiliate().getId() : null
+                );
     }
 
 }

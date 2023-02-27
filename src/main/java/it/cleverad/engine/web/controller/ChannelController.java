@@ -92,6 +92,17 @@ public class ChannelController {
         return business.search(request, pageable);
     }
 
+    @PatchMapping(path = "/{id}/disable")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ChannelDTO disable(@PathVariable Long id) {
+        return business.disable(id);
+    }
+
+    @PatchMapping(path = "/{id}/enable")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ChannelDTO enable(@PathVariable Long id) {
+        return business.enable(id);
+    }
 
     /**
      * ============================================================================================================

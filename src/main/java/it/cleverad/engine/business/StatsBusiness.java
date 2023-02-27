@@ -27,15 +27,13 @@ public class StatsBusiness {
     @Autowired
     private StatCpcClickCampaignRepository statCpcClickCampaignRepository;
     @Autowired
-    private StatCpcClickCampaignWeekRepository statCpcClickCampaignWeekRepository;
+    private StatCpcClickCampaignMediaDayRepository statCpcClickCampaignMediaDayRepository  ;
     @Autowired
     private StatCpcValueCampaignRepository statCpcValueCampaignRepository;
     @Autowired
     private StatCpcValueCampaignWeekRepository statCpcValueCampaignWeekRepository;
     @Autowired
-    private StatCpcTransactionCampaignRepository statCpcTransactionCampaignRepository;
-    @Autowired
-    private StatCpcTransactionCampaignWeekRepository statCpcTransactionCampaignWeekRepository;
+    private StatCpcTransactionCampaignMediaRepository statCpcTransactionCampaignRepository;
     @Autowired
     private StatCplValueCampaignRepository statCplValueCampaignRepository;
     @Autowired
@@ -45,13 +43,13 @@ public class StatsBusiness {
      * ============================================================================================================
      **/
 
-    public Page<StatCpcClickCampaign> searchStatCpcClickCampaign(Filter request, Pageable pageableRequest) {
+    public Page<StatCpcClickCampaignMedia> searchStatCpcClickCampaign(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-        Page<StatCpcClickCampaign> page = statCpcClickCampaignRepository.findAll(getSpecificationStatCpcClickCampaign(request), pageable);
+        Page<StatCpcClickCampaignMedia> page = statCpcClickCampaignRepository.findAll(getSpecificationStatCpcClickCampaign(request), pageable);
         return page;
     }
 
-    private Specification<StatCpcClickCampaign> getSpecificationStatCpcClickCampaign(Filter request) {
+    private Specification<StatCpcClickCampaignMedia> getSpecificationStatCpcClickCampaign(Filter request) {
         return (root, query, cb) -> {
             Predicate completePredicate = null;
             List<Predicate> predicates = new ArrayList<>();
@@ -65,13 +63,13 @@ public class StatsBusiness {
         };
     }
 
-    public Page<StatCpcClickCampaignWeek> searchStatCpcClickCampaignWeek(Filter request, Pageable pageableRequest) {
+    public Page<StatCpcClickCampaignMediaDay> searchStatCpcClickCampaignMediaDay(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-        Page<StatCpcClickCampaignWeek> page = statCpcClickCampaignWeekRepository.findAll(getSpecificationStatCpcClickCampaignWeek(request), pageable);
+        Page<StatCpcClickCampaignMediaDay> page = statCpcClickCampaignMediaDayRepository.findAll(getSpecificationStatCpcClickCampaignWeek(request), pageable);
         return page;
     }
 
-    private Specification<StatCpcClickCampaignWeek> getSpecificationStatCpcClickCampaignWeek(Filter request) {
+    private Specification<StatCpcClickCampaignMediaDay> getSpecificationStatCpcClickCampaignWeek(Filter request) {
         return (root, query, cb) -> {
             Predicate completePredicate = null;
             List<Predicate> predicates = new ArrayList<>();
@@ -133,13 +131,13 @@ public class StatsBusiness {
      * ============================================================================================================
      **/
 
-    public Page<StatCpcTransactionCampaign> searchStatCpcTransactionCampaign(Filter request, Pageable pageableRequest) {
+    public Page<StatCpcTransactionCampaignMedia> searchStatCpcTransactionCampaign(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-        Page<StatCpcTransactionCampaign> page = statCpcTransactionCampaignRepository.findAll(getSpecificationStatCpcTransactionCampaign(request), pageable);
+        Page<StatCpcTransactionCampaignMedia> page = statCpcTransactionCampaignRepository.findAll(getSpecificationStatCpcTransactionCampaign(request), pageable);
         return page;
     }
 
-    private Specification<StatCpcTransactionCampaign> getSpecificationStatCpcTransactionCampaign(Filter request) {
+    private Specification<StatCpcTransactionCampaignMedia> getSpecificationStatCpcTransactionCampaign(Filter request) {
         return (root, query, cb) -> {
             Predicate completePredicate = null;
             List<Predicate> predicates = new ArrayList<>();
@@ -153,25 +151,6 @@ public class StatsBusiness {
         };
     }
 
-    public Page<StatCpcTransactionCampaignWeek> searchStatCpcTransactionCampaignWeek(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-        Page<StatCpcTransactionCampaignWeek> page = statCpcTransactionCampaignWeekRepository.findAll(getSpecificationStatCpcTransactionCampaignWeek(request), pageable);
-        return page;
-    }
-
-    private Specification<StatCpcTransactionCampaignWeek> getSpecificationStatCpcTransactionCampaignWeek(Filter request) {
-        return (root, query, cb) -> {
-            Predicate completePredicate = null;
-            List<Predicate> predicates = new ArrayList<>();
-
-            if (request.getId() != null) {
-                predicates.add(cb.equal(root.get("id"), request.getId()));
-            }
-
-            completePredicate = cb.and(predicates.toArray(new Predicate[0]));
-            return completePredicate;
-        };
-    }
 
     /**
      * ============================================================================================================

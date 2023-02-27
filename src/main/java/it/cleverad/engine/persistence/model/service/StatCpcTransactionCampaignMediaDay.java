@@ -14,7 +14,7 @@ import javax.persistence.Table;
 @Getter
 @Setter
 @NoArgsConstructor
-public class StatCpcTransactionCampaignWeek {
+public class StatCpcTransactionCampaignMediaDay {
 
     @Id
     private Long id;
@@ -29,6 +29,8 @@ public class StatCpcTransactionCampaignWeek {
     @Column(name = "file_id")
     private Long fileId;
     private Double year;
+    private Double month;
     private Double week;
+    private Double day;
 
 }

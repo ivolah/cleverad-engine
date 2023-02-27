@@ -19,14 +19,16 @@ public class TransactionCPC {
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    @Column(name = "date_time")
     private LocalDateTime dateTime;
     private Double value;
     private Boolean approved;
 
     private String ip;
     private String agent;
+    @Column(name = "click_number")
     private Long clickNumber;
+    @Column(name = "payout_reference")
     private String payoutReference;
     private String note;
 

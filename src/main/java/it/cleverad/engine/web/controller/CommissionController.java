@@ -40,16 +40,28 @@ public class CommissionController {
         return business.update(id, request);
     }
 
+    @PatchMapping(path = "/{id}/disable")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public CommissionDTO disable(@PathVariable Long id) {
+        return business.disable(id);
+    }
+
+    @PatchMapping(path = "/{id}/enable")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public CommissionDTO enable(@PathVariable Long id) {
+        return business.enable(id);
+    }
+
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public CommissionDTO getByUuid(@PathVariable Long id) {
         return business.findById(id);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{commissionId}/campaign/{campaignId}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void delete(@PathVariable Long id) {
-        this.business.delete(id);
+    public void delete(@PathVariable Long campaignId, @PathVariable Long commissionId ) {
+        this.business.delete(campaignId, commissionId);
     }
 
     @GetMapping("/types")

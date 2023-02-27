@@ -86,11 +86,23 @@ public class AffiliateChannelCommissionCampaignBusiness {
     public void delete(Long id) {
         try {
             AffiliateChannelCommissionCampaign affiliateChannelCommissionCampaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("AffiliateChannelCommissionCampaign", id));
-
             repository.deleteById(affiliateChannelCommissionCampaign.getId());
-
             //campaignAffiliateBusiness.deleteByCampaignIdAndAffiliateId(affiliateChannelCommissionCampaign.getCampaign().getId(), affiliateChannelCommissionCampaign.getAffiliate().getId());
+        } catch (ConstraintViolationException ex) {
+            throw ex;
+        } catch (Exception ee) {
+            throw new PostgresDeleteCleveradException(ee);
+        }
+    }
 
+    public void deletebyCampaignAndCommission(Long campaignId, Long commissionId) {
+        try {
+            Filter request = new Filter();
+            request.setCampaignId(campaignId);
+            request.setCommissionId(commissionId);
+            Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id")));
+            Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(request), pageable);
+            page.stream().spliterator().forEachRemaining(affiliateChannelCommissionCampaign -> repository.deleteById(affiliateChannelCommissionCampaign.getId()));
         } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
@@ -121,8 +133,7 @@ public class AffiliateChannelCommissionCampaignBusiness {
 
         if (page.getTotalPages() > 0) {
             return page.getContent().get(0);
-        } else
-            return null;
+        } else return null;
     }
 
     public Page<AffiliateChannelCommissionCampaignDTO> search(Filter request, Pageable pageableR) {

@@ -26,6 +26,6 @@ public class CampaignAffiliate {
     @ManyToOne
     @JoinColumn(name = "campaign_id")
     private Campaign campaign;
-
+    @Column(name = "follow_through")
     private String followThrough;
 }

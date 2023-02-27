@@ -20,16 +20,18 @@ public class TransactionCPM {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "date_time")
     private LocalDateTime dateTime;
     private String type;
     private Double value;
     private Boolean approved;
-
+    @Column(name = "image_id")
     private Long imageId;
 
     private String ip;
     private String agent;
     private String data;
+    @Column(name = "payout_reference")
     private String payoutReference;
     private String note;
 

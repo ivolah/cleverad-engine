@@ -7,15 +7,14 @@ import lombok.Setter;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "v_cpc_click_campaign_media")
+@Table(name = "v_cpc_click_campaign_media_day")
 @Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
 @NoArgsConstructor
-public class StatCpcClickCampaign {
+public class StatCpcClickCampaignMediaDay {
 
     @Id
-    @Column(name = "id", nullable = false)
     private Long id;
 
     private Long click;
@@ -27,5 +26,10 @@ public class StatCpcClickCampaign {
     private String media;
     @Column(name = "file_id")
     private Long fileId;
+    private Double year;
+    private Double month;
+    private Double day;
+    private Double week;
+
 
 }

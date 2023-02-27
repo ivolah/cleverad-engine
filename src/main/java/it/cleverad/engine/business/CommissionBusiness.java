@@ -8,12 +8,10 @@ import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
 import it.cleverad.engine.web.dto.CommissionDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
-import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -44,8 +42,9 @@ public class CommissionBusiness {
     @Autowired
     private DictionaryBusiness dictionaryBusiness;
     @Autowired
+    private AffiliateChannelCommissionCampaignBusiness affiliateChannelCommissionCampaignBusiness;
+    @Autowired
     private DictionaryRepository dictionaryRepository;
-
     @Autowired
     private CampaignRepository campaignRepository;
 
@@ -73,14 +72,9 @@ public class CommissionBusiness {
     }
 
     // DELETE BY ID
-    public void delete(Long id) {
-        try {
-            repository.deleteById(id);
-        } catch (ConstraintViolationException ex) {
-            throw ex;
-        } catch (Exception ee) {
-            throw new PostgresDeleteCleveradException(ee);
-        }
+    public void delete(Long campaignId, Long commissionId) {
+        affiliateChannelCommissionCampaignBusiness.deletebyCampaignAndCommission(campaignId, commissionId);
+        repository.deleteById(commissionId);
     }
 
     // SEARCH PAGINATED
@@ -106,6 +100,19 @@ public class CommissionBusiness {
 
         return CommissionDTO.from(repository.save(mappedEntity));
     }
+
+    public CommissionDTO disable(Long id) {
+        Commission commission = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Commission", id));
+        commission.setStatus(false);
+        return CommissionDTO.from(repository.save(commission));
+    }
+
+    public CommissionDTO enable(Long id) {
+        Commission commission = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Commission", id));
+        commission.setStatus(true);
+        return CommissionDTO.from(repository.save(commission));
+    }
+
 
     //  GET TIPI
     public Page<DictionaryDTO> getTypes() {

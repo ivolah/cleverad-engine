@@ -22,14 +22,14 @@ public class StatisticsController {
 
     @GetMapping(path = "/cpc/click")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<StatCpcClickCampaign> getStatCpcClickCampaign(StatsBusiness.Filter request, Pageable pageable) {
+    public Page<StatCpcClickCampaignMedia> getStatCpcClickCampaign(StatsBusiness.Filter request, Pageable pageable) {
         return business.searchStatCpcClickCampaign(request, pageable);
     }
 
-    @GetMapping(path = "/cpc/click/week")
+    @GetMapping(path = "/cpc/click/day")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<StatCpcClickCampaignWeek> getStatCpcClickCampaignWeek(StatsBusiness.Filter request, Pageable pageable) {
-        return business.searchStatCpcClickCampaignWeek(request, pageable);
+    public Page<StatCpcClickCampaignMediaDay> getStatCpcClickCampaignDay(StatsBusiness.Filter request, Pageable pageable) {
+        return business.searchStatCpcClickCampaignMediaDay(request, pageable);
     }
 
     @GetMapping(path = "/cpc/value")
@@ -38,7 +38,7 @@ public class StatisticsController {
         return business.searchStatCpcValueCampaign(request, pageable);
     }
 
-    @GetMapping(path = "/cpc/value/week")
+    @GetMapping(path = "/cpc/value/day")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<StatCpcValueCampaignWeek> getTargetStatCpcValueCampaignWeek(StatsBusiness.Filter request, Pageable pageable) {
         return business.searchStatCpcValueCampaignWeek(request, pageable);
@@ -46,15 +46,10 @@ public class StatisticsController {
 
     @GetMapping(path = "/cpc/transaction")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<StatCpcTransactionCampaign> getStatCpcTransactionCampaign(StatsBusiness.Filter request, Pageable pageable) {
+    public Page<StatCpcTransactionCampaignMedia> getStatCpcTransactionCampaign(StatsBusiness.Filter request, Pageable pageable) {
         return business.searchStatCpcTransactionCampaign(request, pageable);
     }
 
-    @GetMapping(path = "/cpc/transaction/week")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<StatCpcTransactionCampaignWeek> getStatCpcTransactionCampaignWeek(StatsBusiness.Filter request, Pageable pageable) {
-        return business.searchStatCpcTransactionCampaignWeek(request, pageable);
-    }
 
     @GetMapping(path = "/cpl/value")
     @ResponseStatus(HttpStatus.ACCEPTED)

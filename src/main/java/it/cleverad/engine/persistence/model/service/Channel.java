@@ -24,7 +24,7 @@ public class Channel {
     private String name;
     @Column(name = "short_description")
     private String shortDescription;
-    private String type;
+
     private String url;
 
     private Boolean status = true;
@@ -40,6 +40,11 @@ public class Channel {
     @ManyToOne
     @JoinColumn(name = "affiliate_id")
     private Affiliate affiliate;
+
+    @ManyToOne
+    @JoinColumn(name = "type_id")
+    private Dictionary dictionaryType;
+
 
 //    @ManyToMany
 //    @JoinTable(

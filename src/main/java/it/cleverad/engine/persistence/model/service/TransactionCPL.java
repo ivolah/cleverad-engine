@@ -20,6 +20,7 @@ public class TransactionCPL {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "date_time")
     private LocalDateTime dateTime;
     private Double value;
     private Boolean approved;
@@ -29,6 +30,7 @@ public class TransactionCPL {
     private String ip;
     private String agent;
     private String data;
+    @Column(name = "payout_reference")
     private String payoutReference;
     private String note;
 
