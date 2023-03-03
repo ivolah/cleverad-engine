@@ -6,6 +6,7 @@ import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.CampaignAffiliate;
 import it.cleverad.engine.persistence.repository.service.CampaignAffiliateRepository;
 import it.cleverad.engine.web.dto.CampaignAffiliateDTO;
+import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -35,6 +36,9 @@ public class CampaignAffiliateBusiness {
     private CampaignAffiliateRepository repository;
 
     @Autowired
+    private DictionaryBusiness dictionaryBusiness;
+
+    @Autowired
     private Mapper mapper;
 
     /**
@@ -44,7 +48,6 @@ public class CampaignAffiliateBusiness {
     // CREATE
     public CampaignAffiliateDTO create(BaseCreateRequest request) {
         CampaignAffiliate map = mapper.map(request, CampaignAffiliate.class);
-
 
         Affiliate cat = new Affiliate();
         cat.setId(request.getAffiliateId());
@@ -155,6 +158,11 @@ public class CampaignAffiliateBusiness {
         return CampaignAffiliateDTO.from(repository.save(mappedEntity));
     }
 
+
+    public Page<DictionaryDTO> getTypes() {
+        return dictionaryBusiness.getCampaignAffiliateStatus();
+    }
+
     /**
      * ============================================================================================================
      **/
@@ -192,6 +200,7 @@ public class CampaignAffiliateBusiness {
         private Long campaignId;
         private Long affiliateId;
         private String followThrough;
+        private Long statusId;
     }
 
 
@@ -203,6 +212,7 @@ public class CampaignAffiliateBusiness {
         private String followThrough;
         private Long campaignId;
         private Long affiliateId;
+        private Long statusId;
     }
 
 }

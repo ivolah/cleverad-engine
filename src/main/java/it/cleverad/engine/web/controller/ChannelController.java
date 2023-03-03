@@ -72,8 +72,18 @@ public class ChannelController {
         return business.search(request, pageable);
     }
 
+    @GetMapping("/{id}/affiliate/active")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<ChannelDTO> getbyIdAffiliateAllActive(@PathVariable Long id, Pageable pageable) {
+        ChannelBusiness.Filter request = new ChannelBusiness.Filter();
+        request.setAffiliateId(id);
+        request.setStatus(true);
+        return business.search(request, pageable);
+    }
+
     @GetMapping("/{id}/affiliatechannelcommissioncampaign")
     @ResponseStatus(HttpStatus.ACCEPTED)
+
     public Page<ChannelDTO> getbyIdAffiliateChannelCommissionTemplate(@PathVariable Long id, Pageable pageable) {
         return business.getbyIdAffiliateChannelCommissionTemplate(id, pageable);
     }

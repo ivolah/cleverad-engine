@@ -39,6 +39,19 @@ public class MediaController {
         return business.update(id, request);
     }
 
+    @PatchMapping(path = "/{id}/enable")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public MediaDTO enable(@PathVariable Long id) {
+        return business.enable(id);
+    }
+
+
+    @PatchMapping(path = "/{id}/disable")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public MediaDTO disable(@PathVariable Long id) {
+        return business.disable(id);
+    }
+
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public MediaDTO getByUuid(@PathVariable Long id) {
@@ -68,6 +81,9 @@ public class MediaController {
     public MediaDTO getByCampaignId(@PathVariable Long id, @PathVariable Long idCampaign, @PathVariable Long idChannel) {
         return business.getByIdAndCampaignIDChannelID(id, idCampaign, idChannel);
     }
+
+
+
 
     /**
      * ============================================================================================================

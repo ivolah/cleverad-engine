@@ -47,6 +47,7 @@ public class DealerBusiness {
     public DealerDTO create(BaseCreateRequest request) {
         Dealer map = mapper.map(request, Dealer.class);
         //map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
+        map.setStatus(true);
         return DealerDTO.from(repository.save(map));
     }
 
@@ -77,11 +78,10 @@ public class DealerBusiness {
     public Page<DealerDTO> findByIdCampaign(Long id) {
         Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
-       // request.setCampaignId(id);
+        // request.setCampaignId(id);
         Page<Dealer> page = repository.findAll(getSpecification(request), pageable);
         return page.map(DealerDTO::from);
     }
-
 
     // UPDATE
     public DealerDTO update(Long id, Filter filter) {
@@ -92,7 +92,7 @@ public class DealerBusiness {
 
         Dealer mappedEntity = mapper.map(channel, Dealer.class);
         mapper.map(campaignDTOfrom, mappedEntity);
-
+        mappedEntity.setStatus(true);
         ///mappedEntity.setCampaign(campaignRepository.findById(filter.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", filter.campaignId)));
         return DealerDTO.from(repository.save(mappedEntity));
     }
@@ -100,7 +100,7 @@ public class DealerBusiness {
     /**
      * ============================================================================================================
      **/
-    
+
     private Specification<Dealer> getSpecification(Filter request) {
         return (root, query, cb) -> {
             Predicate completePredicate = null;
@@ -166,7 +166,7 @@ public class DealerBusiness {
         private String mobilePrefix;
         private String mobile;
 
-      //  private Long campaignId;
+        //  private Long campaignId;
 
         private Boolean status;
     }

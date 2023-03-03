@@ -9,13 +9,13 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "t_file_affiliate")
+@Table(name = "t_file_user")
 @Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class FileAffiliate {
+public class FileUser {
 
     @Id
     @Column(name = "id", nullable = false)
@@ -31,19 +31,14 @@ public class FileAffiliate {
     private byte[] data;
 
     @ManyToOne
-    @JoinColumn(name = "affiliate_id")
-    private Affiliate affiliate;
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "dictionary_id")
-    private Dictionary dictionary;
-
-    public FileAffiliate(String name, String docType, byte[] data, Affiliate affiliate, Dictionary dictionary, String note) {
+    public FileUser(String name, String docType, byte[] data, User user, String note) {
         this.name = name;
         this.type = docType;
         this.data = data;
-        this.affiliate = affiliate;
-        this.dictionary = dictionary;
+        this.user = user;
         this.note = note;
     }
 

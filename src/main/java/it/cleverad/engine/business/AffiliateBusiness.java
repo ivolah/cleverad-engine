@@ -61,7 +61,7 @@ public class AffiliateBusiness {
     // CREATE
     public AffiliateDTO create(BaseCreateRequest request) {
         Affiliate map = mapper.map(request, Affiliate.class);
-        map.setDictionaryChannelType(dictionaryRepository.findById(Long.valueOf(request.getCategorytypeId())).orElseThrow(() -> new ElementCleveradException("Dictionary Channel Type", request.getCategorytypeId())));
+        //  map.setDictionaryChannelType(dictionaryRepository.findById(Long.valueOf(request.getCategorytypeId())).orElseThrow(() -> new ElementCleveradException("Dictionary Channel Type", request.getCategorytypeId())));
         //        map.setDictionaryCompanyType(dictionaryRepository.findById(request.getCompanytypeId()).orElseThrow(() -> new ElementCleveradException("Dictionary Company Type", request.getCompanytypeId())));
 
         AffiliateDTO dto = AffiliateDTO.from(repository.save(map));
@@ -128,8 +128,8 @@ public class AffiliateBusiness {
         mappedEntity.setLastModificationDate(LocalDateTime.now());
 
         mapper.map(affiliateDTOfrom, mappedEntity);
-        mappedEntity.setDictionaryChannelType(dictionaryRepository.findById(Long.valueOf(filter.getCategorytypeId())).orElseThrow(() -> new ElementCleveradException("Dictionary Category Type", filter.getCategorytypeId())));
-//        mappedEntity.setDictionaryCompanyType(dictionaryRepository.findById(filter.getCompanytypeId()).orElseThrow(() -> new ElementCleveradException("Dictionary Company Type", filter.getCompanytypeId())));
+       //TODO mappedEntity.setDictionaryChannelType(dictionaryRepository.findById(Long.valueOf(filter.getCategorytypeId())).orElseThrow(() -> new ElementCleveradException("Dictionary Category Type", filter.getCategorytypeId())));
+       // NOTTODO mappedEntity.setDictionaryCompanyType(dictionaryRepository.findById(filter.getCompanytypeId()).orElseThrow(() -> new ElementCleveradException("Dictionary Company Type", filter.getCompanytypeId())));
 
         return AffiliateDTO.from(repository.save(mappedEntity));
     }

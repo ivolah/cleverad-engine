@@ -16,13 +16,18 @@ public class CampaignAffiliateDTO {
     private Long campaignId;
     private String campaignName;
     private String followThrough;
+    private Long statusId;
+    private String statusName;
 
     public static CampaignAffiliateDTO from(CampaignAffiliate campaignAffiliate) {
         return new CampaignAffiliateDTO(
                 campaignAffiliate.getId(),
                 campaignAffiliate.getAffiliate().getId(), campaignAffiliate.getAffiliate().getName(),
                 campaignAffiliate.getCampaign().getId(), campaignAffiliate.getCampaign().getName(),
-                campaignAffiliate.getFollowThrough()
+                campaignAffiliate.getFollowThrough(),
+                null, null
+                // campaignAffiliate.getDictionaryStatusCampaignAffiliate().getId(), campaignAffiliate.getDictionaryStatusCampaignAffiliate().getName()
+
         );
     }
 

@@ -53,4 +53,8 @@ public class Payout {
     @OneToMany(mappedBy = "payout")
     private Set<TransactionCPM> transactionCPMS;
 
+    @OneToMany(mappedBy = "payout")
+    private Set<FilePayout> filePayouts;
+
+
 }

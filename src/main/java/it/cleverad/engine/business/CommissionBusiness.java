@@ -128,6 +128,16 @@ public class CommissionBusiness {
         return page.map(CommissionDTO::from);
     }
 
+    public Page<CommissionDTO> getByIdCampaignAttive(Long id) {
+        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Filter request = new Filter();
+        request.setCampaignId(id);
+        request.setStatus(true);
+        Page<Commission> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(CommissionDTO::from);
+    }
+
+
     /**
      * ============================================================================================================
      **/

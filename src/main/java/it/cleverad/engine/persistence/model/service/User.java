@@ -44,4 +44,8 @@ public class User {
     @JoinColumn(name = "role_id")
     private Dictionary dictionary;
 
+    @ManyToOne
+    @JoinColumn(name = "file_id")
+    private FileUser fileUser;
+
 }

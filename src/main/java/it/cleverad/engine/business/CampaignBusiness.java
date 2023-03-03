@@ -68,6 +68,7 @@ public class CampaignBusiness {
 
     // CREATE
     public CampaignDTO create(BaseCreateRequest request) {
+
         Campaign map = mapper.map(request, Campaign.class);
         map.setCookie(cookieRepository.findById(request.getCookieId()).orElseThrow(() -> new ElementCleveradException("Cookie", request.cookieId)));
         map.setAdvertiser(advertiserRepository.findById(request.getCompanyId()).orElseThrow(() -> new ElementCleveradException("Advertiser", request.getCompanyId())));
@@ -85,6 +86,7 @@ public class CampaignBusiness {
 
         Campaign campaign = repository.findById(dto.getId()).orElseThrow(() -> new ElementCleveradException("Campaign", finalDto.getId()));
         campaign.setEncodedId(encodedID);
+
         dto = CampaignDTO.from(repository.save(map));
 
         return dto;
@@ -161,8 +163,10 @@ public class CampaignBusiness {
         // SET
         mappedEntity.setCookie(cookieRepository.findById(filter.getCookieId()).orElseThrow(() -> new ElementCleveradException("Cookie", filter.cookieId)));
         mappedEntity.setAdvertiser(advertiserRepository.findById(filter.getCompanyId()).orElseThrow(() -> new ElementCleveradException("Advertiser", filter.companyId)));
-        mappedEntity.setDealer(dealerRepository.findById(filter.getDealerId()).orElseThrow(() -> new ElementCleveradException("Dealer", filter.dealerId)));
-        mappedEntity.setPlanner(plannerRepository.findById(filter.getPlannerId()).orElseThrow(() -> new ElementCleveradException("Planner", filter.plannerId)));
+        if (filter.getDealerId() != null)
+            mappedEntity.setDealer(dealerRepository.findById(filter.getDealerId()).orElseThrow(() -> new ElementCleveradException("Dealer", filter.dealerId)));
+        if (filter.getPlannerId() != null)
+            mappedEntity.setPlanner(plannerRepository.findById(filter.getPlannerId()).orElseThrow(() -> new ElementCleveradException("Planner", filter.plannerId)));
 
         // SET Category - cancello precedenti
         campaignCategoryBusiness.deleteByCampaignID(id);
@@ -184,7 +188,7 @@ public class CampaignBusiness {
 
         //         Set<Campaign> list = cc.getCampaigns();
         //        Page<Campaign> page = new PageImpl<>(list.stream().distinct().collect(Collectors.toList()));
-        Page<CampaignAffiliateDTO> affs =   campaignAffiliateBusiness.searchByAffiliateID(affiliateId);
+        Page<CampaignAffiliateDTO> affs = campaignAffiliateBusiness.searchByAffiliateID(affiliateId);
 
         Affiliate cc = affiliateRepository.findById(affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", affiliateId));
 

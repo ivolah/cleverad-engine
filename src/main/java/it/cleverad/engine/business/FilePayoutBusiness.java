@@ -1,14 +1,14 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.Dictionary;
-import it.cleverad.engine.persistence.model.service.FileAffiliate;
-import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
+import it.cleverad.engine.persistence.model.service.FilePayout;
+import it.cleverad.engine.persistence.model.service.Payout;
 import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
-import it.cleverad.engine.persistence.repository.service.FileAffiliateRepository;
+import it.cleverad.engine.persistence.repository.service.FilePayoutRepository;
+import it.cleverad.engine.persistence.repository.service.PayoutRepository;
 import it.cleverad.engine.web.dto.DictionaryDTO;
-import it.cleverad.engine.web.dto.FileAffiliateDTO;
+import it.cleverad.engine.web.dto.FilePayoutDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -39,12 +39,12 @@ import java.util.List;
 @Slf4j
 @Component
 @Transactional
-public class FileAffiliateBusiness {
+public class FilePayoutBusiness {
 
     @Autowired
-    private FileAffiliateRepository repository;
+    private FilePayoutRepository repository;
     @Autowired
-    private AffiliateRepository affiliateRepository;
+    private PayoutRepository payoutRepository;
     @Autowired
     private DictionaryRepository dictionaryRepository;
     @Autowired
@@ -57,17 +57,25 @@ public class FileAffiliateBusiness {
      **/
 
     // CREATE
-    public Long store(MultipartFile file, BaseCreateRequest request) throws IOException {
-        Affiliate aff = affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId));
+    public Long store(MultipartFile file, BaseCreateRequest request)  {
+        Payout payout = payoutRepository.findById(request.payoutId).orElseThrow(() -> new ElementCleveradException("Payout", request.payoutId));
         Dictionary dictionary = (dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
-        FileAffiliate fileDB = new FileAffiliate(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), file.getBytes(), aff, dictionary, request.note);
+
+        FilePayout fileDB = null;
+        try {
+            fileDB = new FilePayout(StringUtils.cleanPath(file.getOriginalFilename()),
+                    file.getContentType(), file.getBytes(), payout, dictionary);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         return repository.save(fileDB).getId();
     }
 
     // GET BY ID
-    public FileAffiliateDTO findById(Long id) {
-        FileAffiliate file = repository.findById(id).orElseThrow(() -> new ElementCleveradException("FileAffiliate", id));
-        return FileAffiliateDTO.from(file);
+    public FilePayoutDTO findById(Long id) {
+        FilePayout file = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File Payout ", id));
+        return FilePayoutDTO.from(file);
     }
 
     // DELETE BY ID
@@ -82,22 +90,22 @@ public class FileAffiliateBusiness {
     }
 
     // SEARCH PAGINATED
-    public Page<FileAffiliateDTO> search(FileAffiliateBusiness.Filter request, Pageable pageableRequest) {
+    public Page<FilePayoutDTO> search(FilePayoutBusiness.Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-        Page<FileAffiliate> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(FileAffiliateDTO::from);
+        Page<FilePayout> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(FilePayoutDTO::from);
     }
 
     // UPDATE
-    public FileAffiliateDTO update(Long id, FileAffiliateBusiness.Filter filter) {
-        FileAffiliate fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File", id));
-        FileAffiliateDTO from = FileAffiliateDTO.from(fil);
+    public FilePayoutDTO update(Long id, FilePayoutBusiness.Filter filter) {
+        FilePayout fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File", id));
+        FilePayoutDTO from = FilePayoutDTO.from(fil);
         mapper.map(filter, from);
-        FileAffiliate mappedEntity = mapper.map(fil, FileAffiliate.class);
+        FilePayout mappedEntity = mapper.map(fil, FilePayout.class);
         mapper.map(from, mappedEntity);
         mappedEntity.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.dictionaryId)));
-        mappedEntity.setAffiliate(affiliateRepository.findById(filter.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", filter.affiliateId)));
-        return FileAffiliateDTO.from(repository.save(mappedEntity));
+        mappedEntity.setPayout(payoutRepository.findById(filter.payoutId).orElseThrow(() -> new ElementCleveradException("Payout", filter.payoutId)));
+        return FilePayoutDTO.from(repository.save(mappedEntity));
     }
 
     //  GET TIPI
@@ -108,7 +116,7 @@ public class FileAffiliateBusiness {
     /**
      * ============================================================================================================
      **/
-    private Specification<FileAffiliate> getSpecification(FileAffiliateBusiness.Filter request) {
+    private Specification<FilePayout> getSpecification(FilePayoutBusiness.Filter request) {
         return (root, query, cb) -> {
             Predicate completePredicate = null;
             List<Predicate> predicates = new ArrayList<>();
@@ -119,14 +127,9 @@ public class FileAffiliateBusiness {
             if (request.getName() != null) {
                 predicates.add(cb.equal(root.get("name"), request.getName()));
             }
-            if (request.getType() != null) {
-                predicates.add(cb.equal(root.get("type"), request.getType()));
+            if (request.getPayoutId() != null) {
+                predicates.add(cb.equal(root.get("payout").get("id"), request.getPayoutId()));
             }
-
-            if (request.getAffiliateId() != null) {
-                predicates.add(cb.equal(root.get("affiliate").get("id"), request.getAffiliateId()));
-            }
-
             if (request.getCreationDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("creationDate"), LocalDateTime.ofInstant(request.getCreationDateFrom(), ZoneOffset.UTC)));
             }
@@ -149,12 +152,9 @@ public class FileAffiliateBusiness {
     @AllArgsConstructor
     public static class BaseCreateRequest {
         private String name;
-        private String type;
         private byte[] data;
-        private Long affiliateId;
+        private Long payoutId;
         private Long dictionaryId;
-        private String docType;
-        private String note;
     }
 
     @Data
@@ -163,14 +163,11 @@ public class FileAffiliateBusiness {
     public static class Filter {
         private Long id;
         private String name;
-        private String type;
         private byte[] data;
-        private Long affiliateId;
+        private Long payoutId;
         private Long dictionaryId;
-        private String docType;
         private Instant creationDateFrom;
         private Instant creationDateTo;
-        private String note;
     }
 
 }

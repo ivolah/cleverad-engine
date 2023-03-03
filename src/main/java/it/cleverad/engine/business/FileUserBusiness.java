@@ -1,14 +1,12 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.service.Affiliate;
-import it.cleverad.engine.persistence.model.service.Dictionary;
-import it.cleverad.engine.persistence.model.service.FileAffiliate;
-import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
-import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
-import it.cleverad.engine.persistence.repository.service.FileAffiliateRepository;
+import it.cleverad.engine.persistence.model.service.FileUser;
+import it.cleverad.engine.persistence.model.service.User;
+import it.cleverad.engine.persistence.repository.service.FileUserRepository;
+import it.cleverad.engine.persistence.repository.service.UserRepository;
 import it.cleverad.engine.web.dto.DictionaryDTO;
-import it.cleverad.engine.web.dto.FileAffiliateDTO;
+import it.cleverad.engine.web.dto.FileUserDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -39,16 +37,13 @@ import java.util.List;
 @Slf4j
 @Component
 @Transactional
-public class FileAffiliateBusiness {
+public class FileUserBusiness {
 
     @Autowired
-    private FileAffiliateRepository repository;
+    private FileUserRepository repository;
     @Autowired
-    private AffiliateRepository affiliateRepository;
-    @Autowired
-    private DictionaryRepository dictionaryRepository;
-    @Autowired
-    private DictionaryBusiness dictionaryBusiness;
+    private UserRepository userRepository;
+
     @Autowired
     private Mapper mapper;
 
@@ -58,16 +53,19 @@ public class FileAffiliateBusiness {
 
     // CREATE
     public Long store(MultipartFile file, BaseCreateRequest request) throws IOException {
-        Affiliate aff = affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId));
-        Dictionary dictionary = (dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
-        FileAffiliate fileDB = new FileAffiliate(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), file.getBytes(), aff, dictionary, request.note);
+        User user = userRepository.findById(request.userId).orElseThrow(() -> new ElementCleveradException("User", request.userId));
+
+        FileUser fileDB = null;
+        fileDB = new FileUser(StringUtils.cleanPath(file.getOriginalFilename()),
+                file.getContentType(), file.getBytes(), user, request.note);
+
         return repository.save(fileDB).getId();
     }
 
     // GET BY ID
-    public FileAffiliateDTO findById(Long id) {
-        FileAffiliate file = repository.findById(id).orElseThrow(() -> new ElementCleveradException("FileAffiliate", id));
-        return FileAffiliateDTO.from(file);
+    public FileUserDTO findById(Long id) {
+        FileUser file = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File User ", id));
+        return FileUserDTO.from(file);
     }
 
     // DELETE BY ID
@@ -82,33 +80,28 @@ public class FileAffiliateBusiness {
     }
 
     // SEARCH PAGINATED
-    public Page<FileAffiliateDTO> search(FileAffiliateBusiness.Filter request, Pageable pageableRequest) {
+    public Page<FileUserDTO> search(FileUserBusiness.Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-        Page<FileAffiliate> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(FileAffiliateDTO::from);
+        Page<FileUser> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(FileUserDTO::from);
     }
 
     // UPDATE
-    public FileAffiliateDTO update(Long id, FileAffiliateBusiness.Filter filter) {
-        FileAffiliate fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File", id));
-        FileAffiliateDTO from = FileAffiliateDTO.from(fil);
+    public FileUserDTO update(Long id, FileUserBusiness.Filter filter) {
+        FileUser fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File", id));
+        FileUserDTO from = FileUserDTO.from(fil);
         mapper.map(filter, from);
-        FileAffiliate mappedEntity = mapper.map(fil, FileAffiliate.class);
+        FileUser mappedEntity = mapper.map(fil, FileUser.class);
         mapper.map(from, mappedEntity);
-        mappedEntity.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.dictionaryId)));
-        mappedEntity.setAffiliate(affiliateRepository.findById(filter.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", filter.affiliateId)));
-        return FileAffiliateDTO.from(repository.save(mappedEntity));
+        mappedEntity.setUser(userRepository.findById(filter.userId).orElseThrow(() -> new ElementCleveradException("User", filter.userId)));
+        return FileUserDTO.from(repository.save(mappedEntity));
     }
 
-    //  GET TIPI
-    public Page<DictionaryDTO> getTypes() {
-        return dictionaryBusiness.getTypeDocument();
-    }
 
     /**
      * ============================================================================================================
      **/
-    private Specification<FileAffiliate> getSpecification(FileAffiliateBusiness.Filter request) {
+    private Specification<FileUser> getSpecification(FileUserBusiness.Filter request) {
         return (root, query, cb) -> {
             Predicate completePredicate = null;
             List<Predicate> predicates = new ArrayList<>();
@@ -119,14 +112,9 @@ public class FileAffiliateBusiness {
             if (request.getName() != null) {
                 predicates.add(cb.equal(root.get("name"), request.getName()));
             }
-            if (request.getType() != null) {
-                predicates.add(cb.equal(root.get("type"), request.getType()));
+            if (request.getUserId() != null) {
+                predicates.add(cb.equal(root.get("user").get("id"), request.getUserId()));
             }
-
-            if (request.getAffiliateId() != null) {
-                predicates.add(cb.equal(root.get("affiliate").get("id"), request.getAffiliateId()));
-            }
-
             if (request.getCreationDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("creationDate"), LocalDateTime.ofInstant(request.getCreationDateFrom(), ZoneOffset.UTC)));
             }
@@ -149,11 +137,9 @@ public class FileAffiliateBusiness {
     @AllArgsConstructor
     public static class BaseCreateRequest {
         private String name;
-        private String type;
         private byte[] data;
-        private Long affiliateId;
+        private Long userId;
         private Long dictionaryId;
-        private String docType;
         private String note;
     }
 
@@ -163,11 +149,9 @@ public class FileAffiliateBusiness {
     public static class Filter {
         private Long id;
         private String name;
-        private String type;
         private byte[] data;
-        private Long affiliateId;
+        private Long userId;
         private Long dictionaryId;
-        private String docType;
         private Instant creationDateFrom;
         private Instant creationDateTo;
         private String note;

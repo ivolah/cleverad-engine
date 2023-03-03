@@ -2,6 +2,7 @@ package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.CampaignAffiliateBusiness;
 import it.cleverad.engine.web.dto.CampaignAffiliateDTO;
+import it.cleverad.engine.web.dto.DictionaryDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +25,7 @@ public class CampaignAffiliateController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public CampaignAffiliateDTO create(@ModelAttribute CampaignAffiliateBusiness.BaseCreateRequest request) {
-        return   business.create(request);
+        return business.create(request);
     }
 
     @GetMapping
@@ -33,10 +34,10 @@ public class CampaignAffiliateController {
         return business.search(request, pageable);
     }
 
-    @PatchMapping(path = "/{id}" )
+    @PatchMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public CampaignAffiliateDTO update(@PathVariable Long id, @RequestBody CampaignAffiliateBusiness.Filter request) {
-        return  business.update(id, request);
+        return business.update(id, request);
     }
 
     @GetMapping("/{id}")
@@ -55,6 +56,12 @@ public class CampaignAffiliateController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void delete(@PathVariable Long id) {
         this.business.delete(id);
+    }
+
+    @GetMapping("/types")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<DictionaryDTO> status() {
+        return this.business.getTypes();
     }
 
     /**

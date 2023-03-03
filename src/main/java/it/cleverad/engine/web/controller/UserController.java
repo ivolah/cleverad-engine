@@ -76,6 +76,12 @@ public class UserController {
         return business.disableUser(id);
     }
 
+    @PatchMapping(path = "/{id}/reset")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public UserDTO reset(@PathVariable Long id, @ModelAttribute UserBusiness.BaseCreateRequest request) throws Exception {
+        return business.resetPassword(id, request.getPassword());
+    }
+
     /**
      * ============================================================================================================
      **/

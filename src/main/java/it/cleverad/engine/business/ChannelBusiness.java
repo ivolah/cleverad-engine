@@ -62,7 +62,7 @@ public class ChannelBusiness {
         request.setStatus(true);
         Channel map = mapper.map(request, Channel.class);
         map.setDictionary(dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
-       map.setDictionaryType(dictionaryRepository.findById(request.typeId).orElseThrow(() -> new ElementCleveradException("Type", request.typeId)));
+        map.setDictionaryType(dictionaryRepository.findById(request.typeId).orElseThrow(() -> new ElementCleveradException("Type", request.typeId)));
         if (request.affiliateId != null) {
             map.setAffiliate(affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId)));
         } else {
@@ -131,6 +131,7 @@ public class ChannelBusiness {
 
         Channel mappedEntity = mapper.map(channel, Channel.class);
         mappedEntity.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.dictionaryId)));
+        mappedEntity.setDictionaryType(dictionaryRepository.findById(filter.typeId).orElseThrow(() -> new ElementCleveradException("Type", filter.typeId)));
 
         mappedEntity.setLastModificationDate(LocalDateTime.now());
         mapper.map(campaignDTOfrom, mappedEntity);
@@ -163,6 +164,18 @@ public class ChannelBusiness {
             return page.map(ChannelDTO::from);
         }
     }
+
+    public Page<ChannelDTO> getbyIdAffiliateAllActive(Pageable pageableRequest) {
+        if (jwtUserDetailsService.getRole().equals("Admin")) {
+            Filter request = new Filter();
+            Page<Channel> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id"))));
+            return page.map(ChannelDTO::from);
+        } else {
+            Page<Channel> page = repository.findByAffiliateIdAndStatus(jwtUserDetailsService.getAffiliateID(),true, pageableRequest);
+            return page.map(ChannelDTO::from);
+        }
+    }
+
 
     public Page<ChannelDTO> getbyIdUser(Long id, Pageable pageableRequest) {
         AffiliateChannelCommissionCampaignBusiness.Filter rr = new AffiliateChannelCommissionCampaignBusiness.Filter();

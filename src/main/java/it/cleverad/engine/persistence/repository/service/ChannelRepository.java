@@ -9,4 +9,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpecificationExecutor<Channel> {
 
     Page<Channel> findByAffiliateId(Long affiliateID, Pageable pageableRequest);
+
+    Page<Channel> findByAffiliateIdAndStatus(Long affiliateID, Boolean status, Pageable pageableRequest);
 }

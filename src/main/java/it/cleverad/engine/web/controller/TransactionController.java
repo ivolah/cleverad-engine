@@ -2,10 +2,7 @@ package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.TransactionAllBusiness;
 import it.cleverad.engine.business.TransactionBusiness;
-import it.cleverad.engine.web.dto.TransactionAllDTO;
-import it.cleverad.engine.web.dto.TransactionCPCDTO;
-import it.cleverad.engine.web.dto.TransactionCPLDTO;
-import it.cleverad.engine.web.dto.TransactionCPMDTO;
+import it.cleverad.engine.web.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +25,12 @@ public class TransactionController {
      * ============================================================================================================
      **/
 
+    @GetMapping("/types")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<DictionaryDTO> status() {
+        return this.business.getTypes();
+    }
+
     @PostMapping(path = "/cpc", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public TransactionCPCDTO createcpc(@ModelAttribute TransactionBusiness.BaseCreateRequest request) {
@@ -45,7 +48,6 @@ public class TransactionController {
     public TransactionCPMDTO createcpm(@ModelAttribute TransactionBusiness.BaseCreateRequest request) {
         return business.createCpm(request);
     }
-
 
 //    @Operation(summary = "Lists the Transactions", description = "Lists the Transactions, searched and paginated")
 //    @GetMapping

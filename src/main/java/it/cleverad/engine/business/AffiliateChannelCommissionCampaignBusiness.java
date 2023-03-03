@@ -54,7 +54,6 @@ public class AffiliateChannelCommissionCampaignBusiness {
 
     // CREATE
     public AffiliateChannelCommissionCampaignDTO create(BaseCreateRequest request) {
-        AffiliateChannelCommissionCampaignDTO dto = null;
 
         AffiliateChannelCommissionCampaign map = mapper.map(request, AffiliateChannelCommissionCampaign.class);
         map.setCreationDate(LocalDateTime.now());
@@ -62,24 +61,16 @@ public class AffiliateChannelCommissionCampaignBusiness {
 
         Affiliate affiliate = affiliateRepository.findById(request.getAffiliateId()).orElseThrow(() -> new ElementCleveradException("Affilirte", request.getAffiliateId()));
         map.setAffiliate(affiliate);
-
         Channel channel = channelRepository.findById(request.getChannelId()).orElseThrow(() -> new ElementCleveradException("Channel", request.getChannelId()));
         map.setChannel(channel);
-
         Commission commission = commissionRepository.findById(request.getCommissionId()).orElseThrow(() -> new ElementCleveradException("Commission", request.getCommissionId()));
         map.setCommission(commission);
-
         Campaign campaign = campaignRepository.findById(request.getCampaignId()).orElseThrow(() -> new ElementCleveradException("Campaign", request.getCampaignId()));
         map.setCampaign(campaign);
 
-        campaignAffiliateBusiness.create(new CampaignAffiliateBusiness.BaseCreateRequest(campaign.getId(), affiliate.getId(), null));
-        //addAffiliate(affiliate);
+        campaignAffiliateBusiness.create(new CampaignAffiliateBusiness.BaseCreateRequest(campaign.getId(), affiliate.getId(), null, null));
 
-        map = repository.save(map);
-
-        dto = AffiliateChannelCommissionCampaignDTO.from(map);
-
-        return dto;
+        return AffiliateChannelCommissionCampaignDTO.from(repository.save(map));
     }
 
     // DELETE BY ID
@@ -125,6 +116,15 @@ public class AffiliateChannelCommissionCampaignBusiness {
         Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
         return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
+
+    public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignIdAffiliate(Long campaignId, Pageable pageableRequest) {
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Filter filter = new Filter();
+        filter.setCampaignId(campaignId);
+        Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
+        return page.map(AffiliateChannelCommissionCampaignDTO::from);
+    }
+
 
     // SEARCH searchScheduledActivities
     public AffiliateChannelCommissionCampaign searchScheduledActivities(Filter request) {

@@ -4,6 +4,7 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.*;
 import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.service.JwtUserDetailsService;
+import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.TransactionCPCDTO;
 import it.cleverad.engine.web.dto.TransactionCPLDTO;
 import it.cleverad.engine.web.dto.TransactionCPMDTO;
@@ -45,6 +46,9 @@ public class TransactionBusiness {
 
     @Autowired
     private Mapper mapper;
+
+    @Autowired
+    private DictionaryBusiness dictionaryBusiness;
 
     @Autowired
     private AffiliateRepository affiliateRepository;
@@ -251,6 +255,9 @@ public class TransactionBusiness {
     //        return TransactionDTO.from(repository.save(mappedEntity));
     //    }
 
+    public Page<DictionaryDTO> getTypes() {
+        return dictionaryBusiness.getTransactionTypes();
+    }
 
     /**
      * ============================================================================================================
@@ -375,7 +382,6 @@ public class TransactionBusiness {
             return completePredicate;
         };
     }
-
 
     /**
      * ============================================================================================================

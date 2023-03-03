@@ -13,14 +13,13 @@ import it.cleverad.engine.service.RefferalService;
 import it.cleverad.engine.web.dto.MediaDTO;
 import it.cleverad.engine.web.dto.MediaTypeDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
-import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
@@ -74,12 +73,10 @@ public class MediaBusiness {
 
         String bannerCode = request.getBannerCode();
         String url = request.getUrl();
-        if (StringUtils.isNotBlank(url))
-            bannerCode.replace("{{url}}", url);
+        if (StringUtils.isNotBlank(url)) bannerCode.replace("{{url}}", url);
 
         String target = request.getTarget();
-        if (StringUtils.isNotBlank(target))
-            bannerCode.replace("{{target}}", target);
+        if (StringUtils.isNotBlank(target)) bannerCode.replace("{{target}}", target);
 
         request.setBannerCode(bannerCode);
 
@@ -115,10 +112,9 @@ public class MediaBusiness {
                 });
             }
             repository.deleteById(id);
-        } catch (ConstraintViolationException ex) {
-            throw ex;
-        } catch (Exception ee) {
-            throw new PostgresDeleteCleveradException(ee);
+        } catch (DataIntegrityViolationException ex) {
+            this.disable(id);
+            log.error("Eccezione gestita nella cancellazione, disabilito media " + id, ex);
         }
     }
 
@@ -134,12 +130,10 @@ public class MediaBusiness {
 
         String bannerCode = mappedEntity.getBannerCode();
         String url = mappedEntity.getUrl();
-        if (StringUtils.isNotBlank(url))
-            bannerCode.replace("{{url}}", url);
+        if (StringUtils.isNotBlank(url)) bannerCode.replace("{{url}}", url);
 
         String target = mappedEntity.getTarget();
-        if (StringUtils.isNotBlank(target))
-            bannerCode.replace("{{target}}", target);
+        if (StringUtils.isNotBlank(target)) bannerCode.replace("{{target}}", target);
         mappedEntity.setBannerCode(bannerCode);
         Media saved = repository.save(mappedEntity);
 
@@ -148,6 +142,18 @@ public class MediaBusiness {
         campaignRepository.save(cc);
 
         return MediaDTO.from(saved);
+    }
+
+    public MediaDTO enable(Long id) {
+        Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Media", id));
+        media.setStatus(true);
+        return MediaDTO.from(repository.save(media));
+    }
+
+    public MediaDTO disable(Long id) {
+        Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Media", id));
+        media.setStatus(false);
+        return MediaDTO.from(repository.save(media));
     }
 
     // SEARCH PAGINATED
@@ -186,11 +192,17 @@ public class MediaBusiness {
 
     public Page<MediaDTO> getByCampaignId(Long campaignId, Pageable pageableRequest) {
         Campaign cc = campaignRepository.findById(campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", campaignId));
-        Set<Media> list = cc.getMedias();
+        Set<Media> list = new HashSet<>();
+        if (jwtUserDetailsService.getRole().equals("Admin")) {
+            list = cc.getMedias();
+        } else {
+            // N.B. Lista presettata a status == True
+            list = cc.getMedias().stream().filter(media -> media.getStatus().booleanValue() == true).collect(Collectors.toSet());
+        }
         Page<Media> page = new PageImpl<>(list.stream().distinct().collect(Collectors.toList()));
+
         return page.map(media -> {
             MediaDTO dto = MediaDTO.from(media);
-
             dto.setBannerCode(generaBannerCode(dto, media.getId(), campaignId, 0L));
             return dto;
         });
@@ -213,18 +225,14 @@ public class MediaBusiness {
     private String generaBannerCode(MediaDTO dto, Long mediaId, Long campaignId, Long channelID) {
         String bannerCode = dto.getBannerCode();
 
-        if (StringUtils.isNotBlank(dto.getUrl()))
-            bannerCode = bannerCode.replace("{{url}}", dto.getUrl());
-        if (StringUtils.isNotBlank(dto.getTarget()))
-            bannerCode = bannerCode.replace("{{target}}", dto.getTarget());
+        if (StringUtils.isNotBlank(dto.getUrl())) bannerCode = bannerCode.replace("{{url}}", dto.getUrl());
+        if (StringUtils.isNotBlank(dto.getTarget())) bannerCode = bannerCode.replace("{{target}}", dto.getTarget());
 
         String url = dto.getUrl();
-        if (StringUtils.isNotBlank(url))
-            bannerCode = bannerCode.replace("{{url}}", url);
+        if (StringUtils.isNotBlank(url)) bannerCode = bannerCode.replace("{{url}}", url);
 
         String target = dto.getTarget();
-        if (StringUtils.isNotBlank(target))
-            bannerCode = bannerCode.replace("{{target}}", target);
+        if (StringUtils.isNotBlank(target)) bannerCode = bannerCode.replace("{{target}}", target);
 
         if (!jwtUserDetailsService.getRole().equals("Admin")) {
             bannerCode = bannerCode.replace("{{refferalId}}", refferalService.creaEncoding(Long.toString(campaignId), Long.toString(mediaId), String.valueOf(jwtUserDetailsService.getAffiliateID()), Long.toString(channelID)));
@@ -294,7 +302,6 @@ public class MediaBusiness {
             return completePredicate;
         };
     }
-
 
     /**
      * ============================================================================================================

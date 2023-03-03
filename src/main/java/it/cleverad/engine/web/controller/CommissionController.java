@@ -76,6 +76,12 @@ public class CommissionController {
         return business.getByIdCampaign(id);
     }
 
+    @GetMapping("/{id}/campaign/active")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<CommissionDTO> getByIdCampaignAttive(@PathVariable Long id) {
+        return business.getByIdCampaignAttive(id);
+    }
+
     /**
      * ============================================================================================================
      **/

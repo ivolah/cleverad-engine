@@ -47,6 +47,7 @@ public class PlannerBusiness {
     public PlannerDTO create(BaseCreateRequest request) {
         Planner map = mapper.map(request, Planner.class);
 //        map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
+        map.setStatus(true);
         return PlannerDTO.from(repository.save(map));
     }
 
@@ -91,7 +92,7 @@ public class PlannerBusiness {
 
         Planner mappedEntity = mapper.map(channel, Planner.class);
         mapper.map(campaignDTOfrom, mappedEntity);
-
+        mappedEntity.setStatus(true);
 //        mappedEntity.setCampaign(campaignRepository.findById(filter.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", filter.campaignId)));
         return PlannerDTO.from(repository.save(mappedEntity));
     }
@@ -99,7 +100,7 @@ public class PlannerBusiness {
     /**
      * ============================================================================================================
      **/
-    
+
     private Specification<Planner> getSpecification(Filter request) {
         return (root, query, cb) -> {
             Predicate completePredicate = null;
