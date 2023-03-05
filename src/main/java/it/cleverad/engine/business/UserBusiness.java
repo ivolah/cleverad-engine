@@ -2,9 +2,10 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.User;
-import it.cleverad.engine.persistence.repository.service.UserRepository;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
+import it.cleverad.engine.persistence.repository.service.UserRepository;
+import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.AffiliateDTO;
 import it.cleverad.engine.web.dto.UserDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -55,6 +56,9 @@ public class UserBusiness {
     @Autowired
     private PasswordEncoder bcryptEncoder;
 
+    @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
+
     /**
      * ============================================================================================================
      **/
@@ -86,7 +90,6 @@ public class UserBusiness {
             } else if (StringUtils.isNotBlank(username.trim())) {
                 Filter request = new Filter();
                 request.setUsername(username);
-
                 Page<User> page = repository.findAll(getSpecification(request), PageRequest.of(0, 1, Sort.by(Sort.Order.asc("id"))));
                 UserDTO dto = UserDTO.from(page.stream().findFirst().get());
 
@@ -103,6 +106,7 @@ public class UserBusiness {
                 dto.setRole("Admin");
                 return dto;
             }
+
         } catch (Exception e) {
             log.error("Errore in findByUsername", e);
             return null;

@@ -35,12 +35,23 @@ public class MailController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "/conferma/canale")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public MailDTO inviaCanaleApprovato(@ModelAttribute MailService.BaseCreateRequest request) {
-        return business.conferma(request, "CANALE");
+        return business.confermaCanale(request);
     }
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "/rifiuto/canale")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public MailDTO inviaCanaleRifiutato(@ModelAttribute MailService.BaseCreateRequest request) {
+        return business.rifiutoCanale(request);
+    }
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "/conferma/affiliato")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public MailDTO inviaAffiliatoApprovato(@ModelAttribute MailService.BaseCreateRequest request) {
-        return business.conferma(request, "Affiliato");
+        return business.confermaAffiliato(request);
+    }
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "/rifiuto/affiliato")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public MailDTO inviaAffiliatoRifiutato(@ModelAttribute MailService.BaseCreateRequest request) {
+        return business.rifiutoAffiliato(request);
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "/campagna")

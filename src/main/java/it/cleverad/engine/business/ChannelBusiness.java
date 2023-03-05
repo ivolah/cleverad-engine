@@ -6,6 +6,7 @@ import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.ChannelRepository;
 import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
+import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.dto.ChannelDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
@@ -37,19 +38,26 @@ import java.util.stream.Collectors;
 public class ChannelBusiness {
 
     @Autowired
-    UserBusiness userBusiness;
-    @Autowired
     private ChannelRepository repository;
     @Autowired
-    private DictionaryBusiness dictionaryBusiness;
+    private Mapper mapper;
+
     @Autowired
     private DictionaryRepository dictionaryRepository;
     @Autowired
     private AffiliateRepository affiliateRepository;
+
     @Autowired
-    private Mapper mapper;
+    private DictionaryBusiness dictionaryBusiness;
+    @Autowired
+    UserBusiness userBusiness;
+
     @Autowired
     private AffiliateChannelCommissionCampaignBusiness accc;
+
+    @Autowired
+    private MailService mailService;
+
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
 
@@ -63,12 +71,30 @@ public class ChannelBusiness {
         Channel map = mapper.map(request, Channel.class);
         map.setDictionary(dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
         map.setDictionaryType(dictionaryRepository.findById(request.typeId).orElseThrow(() -> new ElementCleveradException("Type", request.typeId)));
+
         if (request.affiliateId != null) {
             map.setAffiliate(affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId)));
         } else {
             map.setAffiliate(affiliateRepository.findById(jwtUserDetailsService.getAffiliateID()).orElseThrow(() -> new ElementCleveradException("Affiliate", jwtUserDetailsService.getAffiliateID())));
         }
-        return ChannelDTO.from(repository.save(map));
+
+        ChannelDTO channelDTO = ChannelDTO.from(repository.save(map));
+
+        MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
+        if (request.dictionaryId == 12) {
+            // mail pendig
+        } else if (request.dictionaryId == 13) {
+            // approvato
+            mailRequest.setTemplateId(9L);
+        } else if (request.dictionaryId == 14) {
+            // rigettato
+            mailRequest.setTemplateId(10L);
+        }
+        mailRequest.setChannelId(channelDTO.getId());
+        mailRequest.setAffiliateId(request.affiliateId);
+        mailService.invio(mailRequest);
+
+        return channelDTO;
     }
 
     // GET BY ID
@@ -136,6 +162,21 @@ public class ChannelBusiness {
         mappedEntity.setLastModificationDate(LocalDateTime.now());
         mapper.map(campaignDTOfrom, mappedEntity);
 
+        MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
+        mailRequest.setChannelId(filter.getId());
+        mailRequest.setAffiliateId(channel.getAffiliate().getId());
+        if (filter.dictionaryId == 12) {
+            // mail pendig
+        } else if (filter.dictionaryId == 13) {
+            // approvato
+            mailRequest.setTemplateId(9L);
+            mailService.invio(mailRequest);
+        } else if (filter.dictionaryId == 14) {
+            // rigettato
+            mailRequest.setTemplateId(10L);
+            mailService.invio(mailRequest);
+        }
+
         return ChannelDTO.from(repository.save(mappedEntity));
     }
 
@@ -171,7 +212,7 @@ public class ChannelBusiness {
             Page<Channel> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id"))));
             return page.map(ChannelDTO::from);
         } else {
-            Page<Channel> page = repository.findByAffiliateIdAndStatus(jwtUserDetailsService.getAffiliateID(),true, pageableRequest);
+            Page<Channel> page = repository.findByAffiliateIdAndStatus(jwtUserDetailsService.getAffiliateID(), true, pageableRequest);
             return page.map(ChannelDTO::from);
         }
     }

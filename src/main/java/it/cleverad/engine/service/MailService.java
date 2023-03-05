@@ -2,13 +2,8 @@ package it.cleverad.engine.service;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import it.cleverad.engine.business.AffiliateBusiness;
-import it.cleverad.engine.business.CampaignBusiness;
-import it.cleverad.engine.business.MailTempalteBusiness;
-import it.cleverad.engine.web.dto.AffiliateDTO;
-import it.cleverad.engine.web.dto.CampaignDTO;
-import it.cleverad.engine.web.dto.MailDTO;
-import it.cleverad.engine.web.dto.MailTemplateDTO;
+import it.cleverad.engine.business.*;
+import it.cleverad.engine.web.dto.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -38,6 +33,12 @@ public class MailService {
     AffiliateBusiness affiliateBusiness;
     @Autowired
     CampaignBusiness campaignBusiness;
+    @Autowired
+    UserBusiness userBusiness;
+    @Autowired
+    ChannelBusiness channelBusiness;
+    @Autowired
+    PlannerBusiness plannerBusiness;
 
     @Autowired
     private JavaMailSender emailSender;
@@ -81,87 +82,87 @@ public class MailService {
         return null;
     }
 
-    @SneakyThrows
-    public MailDTO inviaMailRegistrazione(BaseCreateRequest request) {
-        AffiliateDTO affiliate = affiliateBusiness.findById(request.getAffiliateId());
 
-        MailTemplateDTO mailTemplate = mailTempalteBusiness.findById(request.getTemplateId());
-        String templateStr = mailTemplate.getContent();
+    /**
+     * ============================================================================================================
+     **/
 
-        Template t = new Template(mailTemplate.getName(), new StringReader(templateStr), new Configuration());
-        StringWriter stringWriter = new StringWriter();
-        Map<String, Object> model = new HashMap<>();
-        model.put("affiliate", affiliate);
-        t.process(model, stringWriter);
-
-        MimeMessage mimeMessage = emailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
-        helper.setFrom("info@cleverad.it");
-        helper.setTo(affiliate.getPrimaryMail());
-        helper.setSubject(mailTemplate.getSubject());
-        String emailContent = stringWriter.toString();
-        helper.setText(emailContent, true);
-        emailSender.send(mimeMessage);
-
-        return null;
-    }
 
     @SneakyThrows
-    public MailDTO conferma(BaseCreateRequest request, String canale) {
+    public MailDTO invio(BaseCreateRequest request) {
+        log.info("INVIO {} - {}", request.getTemplateId(), request);
+        MailTemplateDTO mailTemplate = mailTempalteBusiness.findById(request.templateId);
 
-        AffiliateDTO affiliate = affiliateBusiness.findById(request.getAffiliateId());
+        AffiliateDTO affiliate = null;
+        CampaignDTO campaign = null;
+        UserDTO user = null;
+        ChannelDTO channelDTO = null;
+        PlannerDTO plannerDTO = null;
+        if (request.affiliateId != null) affiliate = affiliateBusiness.findById(request.affiliateId);
+        if (request.campaignId != null) campaign = campaignBusiness.findById(request.campaignId);
+        if (request.userId != null) user = userBusiness.findById(request.userId);
+        if (request.channelId != null) channelDTO = channelBusiness.findById(request.channelId);
+        if (request.plannerId != null) plannerDTO = plannerBusiness.findById(request.plannerId);
 
-        MailTemplateDTO mailTemplate = null;
-        if (canale.equals("CANALE")) {
-            mailTemplate = mailTempalteBusiness.findById(4L);
-        } else {
-            mailTemplate = mailTempalteBusiness.findById(3L);
-        }
-
-        String templateStr = mailTemplate.getContent();
-
-        Template t = new Template(mailTemplate.getName(), new StringReader(templateStr), new Configuration());
+        Template t = new Template(mailTemplate.getName(), new StringReader(mailTemplate.getContent()), new Configuration());
         StringWriter stringWriter = new StringWriter();
         Map<String, Object> model = new HashMap<>();
-        model.put("affiliate", affiliate);
-        t.process(model, stringWriter);
-
-        MimeMessage mimeMessage = emailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
-        helper.setFrom("info@cleverad.it");
-        helper.setTo(affiliate.getPrimaryMail());
-        helper.setSubject(mailTemplate.getSubject());
-        String emailContent = stringWriter.toString();
-        helper.setText(emailContent, true);
-        emailSender.send(mimeMessage);
-
-        return null;
-    }
-
-    @SneakyThrows
-    public MailDTO invitoCampagna(BaseCreateRequest request) {
-        AffiliateDTO affiliate = affiliateBusiness.findById(request.affiliateId);
-        CampaignDTO campaign = campaignBusiness.findById(request.campaignId);
-        MailTemplateDTO mailTemplate = mailTempalteBusiness.findById(5L);
-        String templateStr = mailTemplate.getContent();
-
-        Template t = new Template(mailTemplate.getName(), new StringReader(templateStr), new Configuration());
-        StringWriter stringWriter = new StringWriter();
-        Map<String, Object> model = new HashMap<>();
+        if (request.campaignId != null) model.put("plannerName", campaign.getPlannerName());
+        if (request.status != null) model.put("status", request.status);
         model.put("affiliate", affiliate);
         model.put("campaign", campaign);
-        model.put("plannerName", campaign.getPlannerName());
+        model.put("channel", channelDTO);
+        model.put("planner", plannerDTO);
+        model.put("user", user);
+
         t.process(model, stringWriter);
 
         MimeMessage mimeMessage = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
-        helper.setFrom(campaign.getPlannerMail());
+        helper.setFrom("attivazioni@cleverad.it");
         helper.setTo(affiliate.getPrimaryMail());
-        helper.setSubject(mailTemplate.getSubject() + campaign.getName());
+        helper.setSubject(mailTemplate.getSubject());
         String emailContent = stringWriter.toString();
         helper.setText(emailContent, true);
         emailSender.send(mimeMessage);
 
+        return null;
+    }
+
+    public MailDTO invitoCampagna(BaseCreateRequest request) {
+        request.setTemplateId(11L);
+        this.invio(request);
+        return null;
+    }
+
+    public MailDTO inviaMailRegistrazione(BaseCreateRequest request) {
+        request.setTemplateId(6L);
+        this.invio(request);
+        return null;
+    }
+
+    public MailDTO confermaCanale(BaseCreateRequest request) {
+        request.setTemplateId(9L);
+        this.invio(request);
+        return null;
+    }
+
+    public MailDTO rifiutoCanale(BaseCreateRequest request) {
+        request.setTemplateId(10L);
+        this.invio(request);
+        return null;
+    }
+
+
+    public MailDTO confermaAffiliato(BaseCreateRequest request) {
+        request.setTemplateId(7L);
+        this.invio(request);
+        return null;
+    }
+
+    public MailDTO rifiutoAffiliato(BaseCreateRequest request) {
+        request.setTemplateId(8L);
+        this.invio(request);
         return null;
     }
 
@@ -173,12 +174,17 @@ public class MailService {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class BaseCreateRequest {
+        public String status;
+        public Long plannerId;
         private Long templateId;
         private Long campaignId;
         private Long affiliateId;
+        private Long channelId;
+        private Long userId;
         private String email;
         private String oggetto;
         private String testo;
+        private ChannelDTO channelDTO;
     }
 
 }

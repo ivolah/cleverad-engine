@@ -3,6 +3,7 @@ package it.cleverad.engine.web.controller;
 import it.cleverad.engine.business.AdvertiserBusiness;
 import it.cleverad.engine.business.RepresentativeBusiness;
 import it.cleverad.engine.web.dto.AdvertiserDTO;
+import it.cleverad.engine.web.dto.ChannelDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -55,20 +56,16 @@ public class AdvertiserController {
         this.business.delete(id);
     }
 
-    @PatchMapping(path = "/{id}/enable")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public AdvertiserDTO enable(@PathVariable Long id) {
-        AdvertiserBusiness.Filter request = new AdvertiserBusiness.Filter();
-        request.setStatus(true);
-        return business.update(id, request);
-    }
-
     @PatchMapping(path = "/{id}/disable")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public AdvertiserDTO disable(@PathVariable Long id) {
-        AdvertiserBusiness.Filter request = new AdvertiserBusiness.Filter();
-        request.setStatus(false);
-        return business.update(id, request);
+        return business.disable(id);
+    }
+
+    @PatchMapping(path = "/{id}/enable")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public AdvertiserDTO enable(@PathVariable Long id) {
+        return business.enable(id);
     }
 
 

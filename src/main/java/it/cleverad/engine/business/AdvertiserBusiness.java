@@ -2,8 +2,10 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Advertiser;
+import it.cleverad.engine.persistence.model.service.Channel;
 import it.cleverad.engine.persistence.repository.service.AdvertiserRepository;
 import it.cleverad.engine.web.dto.AdvertiserDTO;
+import it.cleverad.engine.web.dto.ChannelDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -73,8 +75,15 @@ public class AdvertiserBusiness {
     // SEARCH PAGINATED
     public Page<AdvertiserDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        request.setStatus(true);
         Page<Advertiser> page = repository.findAll(getSpecification(request), pageable);
 
+        return page.map(AdvertiserDTO::from);
+    }
+
+    public Page<AdvertiserDTO> searchAll(Filter request, Pageable pageableRequest) {
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Page<Advertiser> page = repository.findAll(getSpecification(request), pageable);
         return page.map(AdvertiserDTO::from);
     }
 
@@ -90,6 +99,18 @@ public class AdvertiserBusiness {
         mapper.map(AdvertiserDTOfrom, mappedEntity);
 
         return AdvertiserDTO.from(repository.save(mappedEntity));
+    }
+
+    public AdvertiserDTO disable(Long id) {
+        Advertiser entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Channel", id));
+        entity.setStatus(false);
+        return AdvertiserDTO.from(repository.save(entity));
+    }
+
+    public AdvertiserDTO enable(Long id) {
+        Advertiser entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Channel", id));
+        entity.setStatus(true);
+        return AdvertiserDTO.from(repository.save(entity));
     }
 
     /**

@@ -78,9 +78,10 @@ public class AffiliateBusiness {
 
         // invio mail
         MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
-        mailRequest.setTemplateId(2L);
+        mailRequest.setTemplateId(6L);
         mailRequest.setAffiliateId(dto.getId());
-        mailService.inviaMailRegistrazione(mailRequest);
+        //mailRequest.setUserId();
+        mailService.invio(mailRequest);
 
         return dto;
     }
@@ -128,8 +129,22 @@ public class AffiliateBusiness {
         mappedEntity.setLastModificationDate(LocalDateTime.now());
 
         mapper.map(affiliateDTOfrom, mappedEntity);
-       //TODO mappedEntity.setDictionaryChannelType(dictionaryRepository.findById(Long.valueOf(filter.getCategorytypeId())).orElseThrow(() -> new ElementCleveradException("Dictionary Category Type", filter.getCategorytypeId())));
-       // NOTTODO mappedEntity.setDictionaryCompanyType(dictionaryRepository.findById(filter.getCompanytypeId()).orElseThrow(() -> new ElementCleveradException("Dictionary Company Type", filter.getCompanytypeId())));
+        //TODO mappedEntity.setDictionaryChannelType(dictionaryRepository.findById(Long.valueOf(filter.getCategorytypeId())).orElseThrow(() -> new ElementCleveradException("Dictionary Category Type", filter.getCategorytypeId())));
+        // NOTTODO mappedEntity.setDictionaryCompanyType(dictionaryRepository.findById(filter.getCompanytypeId()).orElseThrow(() -> new ElementCleveradException("Dictionary Company Type", filter.getCompanytypeId())));
+
+        Boolean status = affiliate.getStatus();
+        MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
+        if (status == false && filter.status == true) {
+            // invio mail approvato
+            mailRequest.setTemplateId(7L);
+            mailRequest.setAffiliateId(id);
+            mailService.invio(mailRequest);
+        } else if (status == false && filter.status == false) {
+            // invio mail non approvato
+            mailRequest.setTemplateId(8L);
+            mailRequest.setAffiliateId(id);
+            mailService.invio(mailRequest);
+        }
 
         return AffiliateDTO.from(repository.save(mappedEntity));
     }

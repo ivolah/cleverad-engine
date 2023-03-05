@@ -3,6 +3,7 @@ package it.cleverad.engine.service;
 
 import it.cleverad.engine.business.UserBusiness;
 import it.cleverad.engine.web.dto.UserDTO;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 
 @Service
+@Slf4j
 public class JwtUserDetailsService implements UserDetailsService {
 
     @Autowired
@@ -24,6 +26,7 @@ public class JwtUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserDTO userDTO = userBusiness.findByUsername(username);
+        //log.info(">>>" + username + " --- " + userDTO.getUsername() + " " + userDTO.getAffiliateId());
         if (userDTO != null) {
             return new User(userDTO.getUsername(), userDTO.getPassword(), new ArrayList<>());
         } else {
@@ -50,14 +53,20 @@ public class JwtUserDetailsService implements UserDetailsService {
 
     public String getRole() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (username.equals("anonymousUser")) {
+        if (username.equals("anonymousUser") || userBusiness.findByUsername(username).getRoleId() == 3) {
             return "Admin";
-        }
-        else if(userBusiness.findByUsername(username).getRoleId() == 3){
-            return "Admin";
-        }
-        else{
+        } else {
             return "User";
+        }
+    }
+
+    public Boolean isAdmin() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        if (username.equals("anonymousUser") || userBusiness.findByUsername(username).getRoleId() == 3) {
+            return true;
+        } else {
+            return false;
         }
     }
 
