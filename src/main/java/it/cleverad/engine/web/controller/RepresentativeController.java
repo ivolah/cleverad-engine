@@ -66,6 +66,11 @@ public class RepresentativeController {
     public void delete(@PathVariable Long id) {
         this.business.delete(id);
     }
+    @DeleteMapping("/{id}/advertiser")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void deleteDaAdvertiser(@PathVariable Long id) {
+        this.business.delete(id);
+    }
 
     @GetMapping("/{id}/affiliate")
     @ResponseStatus(HttpStatus.OK)

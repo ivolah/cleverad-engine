@@ -35,7 +35,8 @@ public class AdvertiserBusiness {
 
     @Autowired
     private AdvertiserRepository repository;
-
+    @Autowired
+    private RepresentativeBusiness representativeBusiness;
     @Autowired
     private Mapper mapper;
 
@@ -58,6 +59,9 @@ public class AdvertiserBusiness {
     // DELETE BY ID
     public void delete(Long id) {
         try {
+            representativeBusiness.findByIdAdvertiser(id).forEach(representativeDTO -> {
+                representativeBusiness.delete(representativeDTO.getId());
+            });
             repository.deleteById(id);
         } catch (ConstraintViolationException ex) {
             throw ex;
@@ -165,6 +169,8 @@ public class AdvertiserBusiness {
         private String primaryMail;
         private String secondaryMail;
         private Boolean status;
+        private String country;
+
     }
 
     @Data
@@ -176,6 +182,7 @@ public class AdvertiserBusiness {
         private String name;
         private String vatNumber;
         private String street;
+        private String country;
         private String streetNumber;
         private String city;
         private String zipCode;

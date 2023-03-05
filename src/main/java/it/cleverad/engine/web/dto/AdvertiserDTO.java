@@ -27,7 +27,9 @@ public class AdvertiserDTO {
 
     private List<BasicCampaignDTO> basicCampaignDTOS;
 
-    public AdvertiserDTO(long id, String name, String vatNumber, String street, String streetNumber, String city, String zipCode, String primaryMail, String secondaryMail, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, List<BasicCampaignDTO> basicCampaignDTOS) {
+    private String country;
+
+    public AdvertiserDTO(long id, String name, String vatNumber, String street, String streetNumber, String city, String zipCode, String primaryMail, String secondaryMail, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, List<BasicCampaignDTO> basicCampaignDTOS, String country) {
         this.id = id;
         this.name = name;
         this.vatNumber = vatNumber;
@@ -41,6 +43,7 @@ public class AdvertiserDTO {
         this.creationDate = creationDate;
         this.lastModificationDate = lastModificationDate;
         this.basicCampaignDTOS = basicCampaignDTOS;
+        this.country = country;
     }
 
     public static AdvertiserDTO from(Advertiser advertiser) {
@@ -58,7 +61,7 @@ public class AdvertiserDTO {
             }).collect(Collectors.toList());
         }
 
-        return new AdvertiserDTO(advertiser.getId(), advertiser.getName(), advertiser.getVatNumber(), advertiser.getStreet(), advertiser.getStreetNumber(), advertiser.getCity(), advertiser.getZipCode(), advertiser.getPrimaryMail(), advertiser.getSecondaryMail(), advertiser.getStatus(), advertiser.getCreationDate(), advertiser.getLastModificationDate(), collect);
+        return new AdvertiserDTO(advertiser.getId(), advertiser.getName(), advertiser.getVatNumber(), advertiser.getStreet(), advertiser.getStreetNumber(), advertiser.getCity(), advertiser.getZipCode(), advertiser.getPrimaryMail(), advertiser.getSecondaryMail(), advertiser.getStatus(), advertiser.getCreationDate(), advertiser.getLastModificationDate(), collect, advertiser.getCountry());
     }
 
 }

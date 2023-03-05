@@ -25,6 +25,7 @@ public class Advertiser {
     @Column(name = "vat_number")
     private String vatNumber;
     private String street;
+    private String country;
     @Column(name = "street_number")
     private String streetNumber;
     private String city;
