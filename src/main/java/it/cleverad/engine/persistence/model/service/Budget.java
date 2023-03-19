@@ -24,7 +24,7 @@ public class Budget {
 
     private Long budget;
     @Column(name = "due_date")
-    private Date dueDate;
+    private LocalDate dueDate;
     @Column(name = "start_date")
     private LocalDate startDate;
     @Column(nullable = false)
