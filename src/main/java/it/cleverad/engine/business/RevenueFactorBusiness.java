@@ -173,6 +173,8 @@ public class RevenueFactorBusiness {
     public static class BaseCreateRequest {
         private Double revenue;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate startDate;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dueDate;
         private Boolean status;
         private Long campaignId;
@@ -185,8 +187,10 @@ public class RevenueFactorBusiness {
     public static class Filter {
         private Long id;
         private Double revenue;
-        @DateTimeFormat(pattern = "yyyy-MM-dd")
-        private LocalDate dueDate;
+        private Instant dueDateFrom;
+        private Instant dueDateTo;
+        private Instant startDateFrom;
+        private Instant startDateTo;
         private Boolean status;
 
         private Long campaignId;

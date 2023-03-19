@@ -129,7 +129,7 @@ public class CampaignBusiness {
 
     // SEARCH PAGINATED
     public Page<CampaignDTO> search(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Page<Campaign> page;
         if (jwtUserDetailsService.getRole().equals("Admin")) {
             page = repository.findAll(getSpecification(request), pageable);
@@ -184,7 +184,7 @@ public class CampaignBusiness {
 
     // TROVA LE CAMPAGNE DELL AFFILIATE
     public Page<CampaignDTO> getCampaigns(Long affiliateId) {
-        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id")));
 
         //         Set<Campaign> list = cc.getCampaigns();
         //        Page<Campaign> page = new PageImpl<>(list.stream().distinct().collect(Collectors.toList()));
@@ -207,7 +207,7 @@ public class CampaignBusiness {
 
     // TROVA LE CAMPAGNE DELL AFFILIATE filtrate per ID AFFIALIseTE DAL USER
     public Page<CampaignDTO> getCampaignsGuest(Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         Page<Campaign> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CampaignDTO::from);

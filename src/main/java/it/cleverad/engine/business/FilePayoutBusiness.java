@@ -110,7 +110,7 @@ public class FilePayoutBusiness {
 
     //  GET TIPI
     public Page<DictionaryDTO> getTypes() {
-        return dictionaryBusiness.getTypeDocument();
+        return dictionaryBusiness.getFilePayoutTypes();
     }
 
     /**

@@ -70,7 +70,7 @@ public class PayoutBusiness {
             map.setCreationDate(LocalDateTime.now());
             map.setLastModificationDate(LocalDateTime.now());
             map.setTotale(0.0);
-            Dictionary dictionary = dictionaryRepository.findById(18L).orElseThrow(() -> new ElementCleveradException("Dictionary", 18L));
+            Dictionary dictionary = dictionaryRepository.findById(19L).orElseThrow(() -> new ElementCleveradException("Dictionary", 18L));
             map.setDictionary(dictionary);
             map = repository.save(map);
             affiliatoPayout.put(idAffiliate, map.getId());
@@ -107,12 +107,61 @@ public class PayoutBusiness {
         return page.map(PayoutDTO::from);
     }
 
-    // CREATE
-    public PayoutDTO create(BaseCreateRequest request) {
-        Payout map = mapper.map(request, Payout.class);
-        map.setCreationDate(LocalDateTime.now());
-        map.setLastModificationDate(LocalDateTime.now());
-        return PayoutDTO.from(repository.save(map));
+    public Page<PayoutDTO> createCpl(List<Long> listaTransactions) {
+
+        //prndo tutti gli affigliati
+        List<Long> affiliatesList = new ArrayList<>();
+        listaTransactions.stream().forEach(id -> {
+            TransactionCPL transaction = cplRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction CPL", id));
+            affiliatesList.add(transaction.getAffiliate().getId());
+        });
+
+        // faccio distinct e creo un pqyout vuoto per ognuno
+        HashMap<Long, Long> affiliatoPayout = new HashMap<>();
+        affiliatesList.stream().distinct().forEach(idAffiliate -> {
+            Payout map = new Payout();
+            Affiliate affiliate = affiliateRepository.findById(idAffiliate).orElseThrow(() -> new ElementCleveradException("Affiliate", idAffiliate));
+            map.setAffiliate(affiliate);
+            map.setData(LocalDate.now());
+            map.setValuta("EUR");
+            map.setCreationDate(LocalDateTime.now());
+            map.setLastModificationDate(LocalDateTime.now());
+            map.setTotale(0.0);
+            Dictionary dictionary = dictionaryRepository.findById(19L).orElseThrow(() -> new ElementCleveradException("Dictionary", 18L));
+            map.setDictionary(dictionary);
+            map = repository.save(map);
+            affiliatoPayout.put(idAffiliate, map.getId());
+        });
+
+        Set<Payout> list = new HashSet<>();
+        // per ogni singola transazione
+        listaTransactions.stream().forEach(id -> {
+            TransactionCPL transaction = cplRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction CPL", id));
+            Long payoutId = affiliatoPayout.get(transaction.getAffiliate().getId());
+            Payout payout = repository.findById(payoutId).orElseThrow(() -> new ElementCleveradException("PAYOUT CPL", payoutId));
+
+            //aumento il valore
+            Double totale = payout.getTotale();
+            totale = totale + transaction.getValue();
+
+            //aggiorno payout
+            payout.setTotale(totale);
+            Payout pp = repository.save(payout);
+            list.add(pp);
+
+            //aggiorno transazione e setto riferimento a payout
+            transaction.setPayout(payout);
+            transaction.setPayoutReference("Payout " + payoutId);
+            cplRepository.save(transaction);
+        });
+
+        Set<Payout> list2 = new HashSet<>();
+        list.forEach(payout -> {
+            list2.add(repository.findById(payout.getId()).orElseThrow(() -> new ElementCleveradException("PAYOUT CPL", payout.getId())));
+        });
+
+        Page<Payout> page = new PageImpl<>(list2.stream().distinct().collect(Collectors.toList()));
+        return page.map(PayoutDTO::from);
     }
 
     // GET BY ID
@@ -152,13 +201,13 @@ public class PayoutBusiness {
 
     // SEARCH PAGINATED
     public Page<PayoutDTO> search(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Page<Payout> page = repository.findAll(getSpecification(request), pageable);
         return page.map(PayoutDTO::from);
     }
 
     public Page<PayoutDTO> findByIdAffilaite(Long id, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         if (id != null)
             request.setAffiliateId(id);

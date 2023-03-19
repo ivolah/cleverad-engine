@@ -66,6 +66,12 @@ public class FilePayoutController {
         this.business.delete(id);
     }
 
+    @GetMapping("/types")
+    @ResponseStatus(HttpStatus.OK)
+    public Page<DictionaryDTO> getTypes() {
+        return business.getTypes();
+    }
+
     /**
      * ============================================================================================================
      **/

@@ -3,6 +3,7 @@ package it.cleverad.engine.persistence.model.service;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -13,7 +14,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-public class TransactionAll {
+public class
+TransactionAll {
 
     @Id
     @Column(name = "id", nullable = false)
@@ -46,6 +48,8 @@ public class TransactionAll {
     private Long commissionId;
     @Column(name = "commission_name")
     private String commissionName;
+
+    @Nullable
     @Column(name = "payout_id")
     private Long payoutId;
     @Column(name = "wallet_id")

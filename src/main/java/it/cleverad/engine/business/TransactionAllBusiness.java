@@ -22,7 +22,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,12 +76,14 @@ public class TransactionAllBusiness {
     // SEARCH PAGINATED
     public Page<TransactionAllDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+        request.setPayoutId(null);
         Page<TransactionAll> page = repository.findAll(getSpecification(request), pageable);
         return page.map(TransactionAllDTO::from);
     }
 
     public Page<TransactionAllDTO> searchPrefiltrato(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+        request.setPayoutId(null);
         if (jwtUserDetailsService.getRole().equals("Admin")) {
             Page<TransactionAll> page = repository.findAll(getSpecification(request), pageable);
             return page.map(TransactionAllDTO::from);
@@ -173,6 +178,24 @@ public class TransactionAllBusiness {
                 predicates.add(cb.equal(root.get("tipo"), request.getTipo()));
             }
 
+
+            if (request.getCreationDateFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("creationDate"), LocalDateTime.ofInstant(request.getCreationDateFrom(), ZoneOffset.UTC)));
+            }
+            if (request.getCreationDateTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("creationDate"), LocalDateTime.ofInstant(request.getCreationDateTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
+            }
+
+            if (request.getCreationDateFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("dateTime"), LocalDateTime.ofInstant(request.getDateTimeFrom(), ZoneOffset.UTC)));
+            }
+            if (request.getCreationDateTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), LocalDateTime.ofInstant(request.getDateTimeTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
+            }
+
+
+            predicates.add(cb.isNull(root.get("payoutId")));
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
@@ -217,8 +240,10 @@ public class TransactionAllBusiness {
         private Long id;
         private String agent;
         private Boolean approved;
-        private LocalDateTime creationDate;
-        private LocalDateTime dateTime;
+        private Instant creationDateFrom;
+        private Instant creationDateTo;
+        private Instant dateTimeFrom;
+        private Instant dateTimeTo;
         private String ip;
         private String note;
         private String payoutReference;

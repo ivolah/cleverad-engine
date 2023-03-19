@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -161,6 +162,8 @@ public class BudgetBusiness {
         private Long campaignId;
         private Long budget;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate startDate;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
         private Date dueDate;
     }
 
@@ -172,8 +175,10 @@ public class BudgetBusiness {
         private Long affiliateId;
         private Long campaignId;
         private Long budget;
-        private Date dueDate;
-
+        private Date dueDate;        private Instant dueDateFrom;
+        private Instant dueDateTo;
+        private Instant startDateFrom;
+        private Instant startDateTo;
         private boolean status;
         private Instant creationDateFrom;
         private Instant creationDateTo;

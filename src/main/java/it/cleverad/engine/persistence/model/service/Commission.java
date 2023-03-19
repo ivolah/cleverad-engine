@@ -27,7 +27,8 @@ public class Commission {
     private String description;
     @Column(name = "due_date")
     private LocalDate dueDate;
-
+    @Column(name = "start_date")
+    private LocalDate startDate;
     @Column(nullable = false)
     private Boolean status = true;
     @Column(name = "creation_date")

@@ -34,8 +34,8 @@ public class PayoutController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "/cpl")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public PayoutDTO create(@ModelAttribute PayoutBusiness.BaseCreateRequest request) {
-        return business.create(request);
+    public Page<PayoutDTO> create(@ModelAttribute PayoutBusiness.BaseCreateRequest request) {
+        return business.createCpl(request.getTransazioni());
     }
 
     @GetMapping

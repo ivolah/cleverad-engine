@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -24,7 +25,8 @@ public class Budget {
     private Long budget;
     @Column(name = "due_date")
     private Date dueDate;
-
+    @Column(name = "start_date")
+    private LocalDate startDate;
     @Column(nullable = false)
     private Boolean status = true;
     @Column(name = "creation_date")

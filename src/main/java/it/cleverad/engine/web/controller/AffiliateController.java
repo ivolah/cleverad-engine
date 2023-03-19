@@ -68,7 +68,7 @@ public class AffiliateController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<AffiliateDTO> daApprovare(Pageable pageable) {
         AffiliateBusiness.Filter request = new AffiliateBusiness.Filter();
-        request.setStatus(false);
+        request.setStatus(true);
         return business.search(request, pageable);
     }
 

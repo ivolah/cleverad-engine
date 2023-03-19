@@ -204,6 +204,9 @@ public class CommissionBusiness {
         private String value;
         private String description;
         private Boolean status;
+
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate startDate;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dueDate;
 
@@ -222,8 +225,10 @@ public class CommissionBusiness {
         private String value;
         private String description;
         private Boolean status;
-        private LocalDate dueDate;
-
+        private Instant dueDateFrom;
+        private Instant dueDateTo;
+        private Instant startDateFrom;
+        private Instant startDateTo;
         private Long campaignId;
         private Long dictionaryId;
 

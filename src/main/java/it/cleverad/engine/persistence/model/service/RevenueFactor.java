@@ -24,7 +24,8 @@ public class RevenueFactor {
     private Double revenue;
     @Column(name = "due_date")
     private LocalDate dueDate;
-
+    @Column(name = "start_date")
+    private LocalDate startDate;
     private Boolean status = true;
     @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();

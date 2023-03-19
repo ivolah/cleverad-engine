@@ -2,10 +2,8 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Advertiser;
-import it.cleverad.engine.persistence.model.service.Channel;
 import it.cleverad.engine.persistence.repository.service.AdvertiserRepository;
 import it.cleverad.engine.web.dto.AdvertiserDTO;
-import it.cleverad.engine.web.dto.ChannelDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -191,7 +189,6 @@ public class AdvertiserBusiness {
         private String secondaryMail;
         private Boolean status;
         private String country;
-
     }
 
     @Data
@@ -199,7 +196,6 @@ public class AdvertiserBusiness {
     @AllArgsConstructor
     public static class Filter {
         private Long id;
-
         private String name;
         private String vatNumber;
         private String street;
