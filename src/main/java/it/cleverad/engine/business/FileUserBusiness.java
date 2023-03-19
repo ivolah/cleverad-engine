@@ -5,7 +5,6 @@ import it.cleverad.engine.persistence.model.service.FileUser;
 import it.cleverad.engine.persistence.model.service.User;
 import it.cleverad.engine.persistence.repository.service.FileUserRepository;
 import it.cleverad.engine.persistence.repository.service.UserRepository;
-import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.FileUserDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -54,17 +53,18 @@ public class FileUserBusiness {
     // CREATE
     public Long store(MultipartFile file, BaseCreateRequest request) throws IOException {
         User user = userRepository.findById(request.userId).orElseThrow(() -> new ElementCleveradException("User", request.userId));
-
-        FileUser fileDB = null;
-        fileDB = new FileUser(StringUtils.cleanPath(file.getOriginalFilename()),
-                file.getContentType(), file.getBytes(), user, request.note);
-
+        FileUser fileDB = new FileUser(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), file.getBytes(), user, request.note, request.avatar);
         return repository.save(fileDB).getId();
     }
 
     // GET BY ID
     public FileUserDTO findById(Long id) {
         FileUser file = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File User ", id));
+        return FileUserDTO.from(file);
+    }
+
+    public FileUserDTO findByIdUser(Long id) {
+        FileUser file = repository.findByUserId(id);
         return FileUserDTO.from(file);
     }
 
@@ -93,7 +93,7 @@ public class FileUserBusiness {
         mapper.map(filter, from);
         FileUser mappedEntity = mapper.map(fil, FileUser.class);
         mapper.map(from, mappedEntity);
-        mappedEntity.setUser(userRepository.findById(filter.userId).orElseThrow(() -> new ElementCleveradException("User", filter.userId)));
+        mappedEntity.setUserFiles(userRepository.findById(filter.userId).orElseThrow(() -> new ElementCleveradException("User", filter.userId)));
         return FileUserDTO.from(repository.save(mappedEntity));
     }
 
@@ -112,6 +112,9 @@ public class FileUserBusiness {
             if (request.getName() != null) {
                 predicates.add(cb.equal(root.get("name"), request.getName()));
             }
+            if (request.getAvatar() != null) {
+                predicates.add(cb.equal(root.get("avatar"), request.getAvatar()));
+            }
             if (request.getUserId() != null) {
                 predicates.add(cb.equal(root.get("user").get("id"), request.getUserId()));
             }
@@ -128,6 +131,7 @@ public class FileUserBusiness {
         };
     }
 
+
     /**
      * ============================================================================================================
      **/
@@ -141,6 +145,7 @@ public class FileUserBusiness {
         private Long userId;
         private Long dictionaryId;
         private String note;
+        private Boolean avatar;
     }
 
     @Data
@@ -155,6 +160,7 @@ public class FileUserBusiness {
         private Instant creationDateFrom;
         private Instant creationDateTo;
         private String note;
+        private Boolean avatar;
     }
 
 }

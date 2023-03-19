@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "t_user")
@@ -44,8 +45,6 @@ public class User {
     @JoinColumn(name = "role_id")
     private Dictionary dictionary;
 
-    @ManyToOne
-    @JoinColumn(name = "file_id")
-    private FileUser fileUser;
-
+    @OneToMany(mappedBy = "user")
+    private Set<FileUser> fileUsers;
 }

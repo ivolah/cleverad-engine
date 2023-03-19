@@ -1,6 +1,5 @@
 package it.cleverad.engine.web.dto;
 
-import it.cleverad.engine.persistence.model.service.FileAffiliate;
 import it.cleverad.engine.persistence.model.service.FileUser;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,8 +19,11 @@ public class FileUserDTO {
     private LocalDateTime creationDate;
     private String note;
 
+    private Long userId;
+    private Boolean avatar;
+
     public static FileUserDTO from(FileUser file) {
-        return new FileUserDTO(file.getId(), file.getName(), file.getType(), file.getData(), file.getCreationDate(), file.getNote());
+        return new FileUserDTO(file.getId(), file.getName(), file.getType(), file.getData(), file.getCreationDate(), file.getNote(), file.getUserFiles().getId(), file.getAvatar());
     }
 
 }

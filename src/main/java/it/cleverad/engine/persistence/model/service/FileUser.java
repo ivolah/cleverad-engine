@@ -24,6 +24,7 @@ public class FileUser {
     private String name;
     private String type;
     private String note;
+    private Boolean avatar;
     @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
 
@@ -32,14 +33,15 @@ public class FileUser {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    private User userFiles;
 
-    public FileUser(String name, String docType, byte[] data, User user, String note) {
+    public FileUser(String name, String docType, byte[] data, User userFiles,  String note, Boolean avatar) {
         this.name = name;
         this.type = docType;
         this.data = data;
-        this.user = user;
+        this.userFiles = userFiles;
         this.note = note;
+        this.avatar = avatar;
     }
 
 }

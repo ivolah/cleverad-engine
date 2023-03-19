@@ -1,6 +1,7 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
+import it.cleverad.engine.persistence.model.service.FileUser;
 import it.cleverad.engine.persistence.model.service.User;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
@@ -44,6 +45,8 @@ public class UserBusiness {
 
     @Autowired
     private AffiliateBusiness affiliateBusiness;
+    @Autowired
+    private FileUserBusiness fileUserBusiness;
 
     @Autowired
     private AffiliateRepository affiliateRepository;
@@ -55,9 +58,6 @@ public class UserBusiness {
 
     @Autowired
     private PasswordEncoder bcryptEncoder;
-
-    @Autowired
-    private JwtUserDetailsService jwtUserDetailsService;
 
     /**
      * ============================================================================================================
