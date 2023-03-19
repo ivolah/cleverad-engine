@@ -173,6 +173,12 @@ public class TransactionController {
         return business.searchByAffiliateCpl(request, null, pageable);
     }
 
+    @GetMapping("/affiliate/cps")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<TransactionCPSDTO> searchByAffiliateCps(TransactionBusiness.Filter request, Pageable pageable) {
+        return business.searchByAffiliateCps(request, null, pageable);
+    }
+
     /**
      * ============================================================================================================
      **/

@@ -4,10 +4,7 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.*;
 import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.service.JwtUserDetailsService;
-import it.cleverad.engine.web.dto.DictionaryDTO;
-import it.cleverad.engine.web.dto.TransactionCPCDTO;
-import it.cleverad.engine.web.dto.TransactionCPLDTO;
-import it.cleverad.engine.web.dto.TransactionCPMDTO;
+import it.cleverad.engine.web.dto.*;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -43,7 +40,8 @@ public class TransactionBusiness {
     private TransactionCPLRepository cplRepository;
     @Autowired
     private TransactionCPMRepository cpmRepository;
-
+    @Autowired
+    private TransactionCPSRepository cpsRepository;
     @Autowired
     private Mapper mapper;
 
@@ -128,6 +126,25 @@ public class TransactionBusiness {
         return TransactionCPMDTO.from(cpmRepository.save(map));
     }
 
+    public TransactionCPSDTO createCps(BaseCreateRequest request) {
+        TransactionCPS map = mapper.map(request, TransactionCPS.class);
+
+        Affiliate aa = affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId));
+        map.setAffiliate(aa);
+        map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
+        map.setChannel(channelRepository.findById(request.channelId).orElseThrow(() -> new ElementCleveradException("Channel", request.channelId)));
+        map.setCommission(commissionRepository.findById(request.commissionId).orElseThrow(() -> new ElementCleveradException("Commission", request.commissionId)));
+        Wallet ww;
+        if (request.walletId != null) {
+            ww = walletRepository.findById(request.walletId).orElseThrow(() -> new ElementCleveradException("Wallet", request.walletId));
+        } else {
+            ww = aa.getWallets().stream().findFirst().get();
+        }
+        map.setWallet(ww);
+        map.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
+
+        return TransactionCPSDTO.from(cpsRepository.save(map));
+    }
 
     // GET BY ID CPC
     public TransactionCPCDTO findByIdCPC(Long id) {
@@ -171,6 +188,20 @@ public class TransactionBusiness {
         return TransactionCPMDTO.from(transaction);
     }
 
+    // GET BY ID CPs
+    public TransactionCPSDTO findByIdCPS(Long id) {
+        TransactionCPS transaction = null;
+        if (jwtUserDetailsService.getRole().equals("Admin")) {
+            transaction = cpsRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
+        } else {
+            CampaignBusiness.Filter request = new CampaignBusiness.Filter();
+            request.setId(id);
+            // TODO logica per seach di quelli assegnati
+            transaction = cpsRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
+        }
+        return TransactionCPSDTO.from(transaction);
+    }
+
     // DELETE BY ID
     public void delete(Long id, String type) {
         try {
@@ -180,6 +211,8 @@ public class TransactionBusiness {
                 cplRepository.deleteById(id);
             } else if (type.equals("CPM")) {
                 cpmRepository.deleteById(id);
+            } else if (type.equals("CPS")) {
+                cpsRepository.deleteById(id);
             }
         } catch (ConstraintViolationException ex) {
             throw ex;
@@ -206,6 +239,11 @@ public class TransactionBusiness {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Page<TransactionCPM> page = cpmRepository.findAll(getSpecificationCPM(request), pageable);
         return page.map(TransactionCPMDTO::from);
+    }
+    public Page<TransactionCPSDTO> searchCps(Filter request, Pageable pageableRequest) {
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+        Page<TransactionCPS> page = cpsRepository.findAll(getSpecificationCPS(request), pageable);
+        return page.map(TransactionCPSDTO::from);
     }
 
     //SEARCH BY AFFILIATE ID
@@ -240,6 +278,17 @@ public class TransactionBusiness {
         }
         Page<TransactionCPM> page = cpmRepository.findAll(getSpecificationCPM(request), pageable);
         return page.map(TransactionCPMDTO::from);
+    }
+
+    public Page<TransactionCPSDTO> searchByAffiliateCps(Filter request, Long id, Pageable pageableRequest) {
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+        if (jwtUserDetailsService.getRole().equals("Admin")) {
+        } else {
+            //    request.setApproved(true);
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+        }
+        Page<TransactionCPS> page = cpsRepository.findAll(getSpecificationCPS(request), pageable);
+        return page.map(TransactionCPSDTO::from);
     }
 
     // UPDATE
@@ -344,6 +393,46 @@ public class TransactionBusiness {
     }
 
     private Specification<TransactionCPM> getSpecificationCPM(Filter request) {
+        return (root, query, cb) -> {
+            Predicate completePredicate = null;
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (request.getId() != null) {
+                predicates.add(cb.equal(root.get("id"), request.getId()));
+            }
+            if (request.getApproved() != null) {
+                predicates.add(cb.equal(root.get("approved"), request.getApproved()));
+            }
+
+            if (request.getIp() != null) {
+                predicates.add(cb.equal(root.get("ip"), request.getIp()));
+            }
+            if (request.getAgent() != null) {
+                predicates.add(cb.equal(root.get("agent"), request.getAgent()));
+            }
+
+            if (request.getAffiliateId() != null) {
+                predicates.add(cb.equal(root.get("affiliate").get("id"), request.getAffiliateId()));
+            }
+            if (request.getCampaignId() != null) {
+                predicates.add(cb.equal(root.get("campaign").get("id"), request.getCampaignId()));
+            }
+            if (request.getCommissionId() != null) {
+                predicates.add(cb.equal(root.get("commission").get("id"), request.getCommissionId()));
+            }
+            if (request.getChannelId() != null) {
+                predicates.add(cb.equal(root.get("channel").get("id"), request.getChannelId()));
+            }
+            if (request.getWalletId() != null) {
+                predicates.add(cb.equal(root.get("wallet").get("id"), request.getWalletId()));
+            }
+
+            completePredicate = cb.and(predicates.toArray(new Predicate[0]));
+            return completePredicate;
+        };
+    }
+
+    private Specification<TransactionCPS> getSpecificationCPS(Filter request) {
         return (root, query, cb) -> {
             Predicate completePredicate = null;
             List<Predicate> predicates = new ArrayList<>();
