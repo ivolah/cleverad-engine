@@ -1,7 +1,7 @@
 package it.cleverad.engine.web.dto;
 
-import it.cleverad.engine.persistence.model.service.TransactionCPL;
 import it.cleverad.engine.persistence.model.service.TransactionCPS;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class TransactionCPSDTO {
 
     private Long id;
@@ -38,30 +39,8 @@ public class TransactionCPSDTO {
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
 
-    public TransactionCPSDTO(Long id, Long affiliateId, String affiliateName, Long campaignId, String campaignName, Long commissionId, String commissionName, Long channelId, String channelName, Long mediaId, String mediaName, LocalDateTime dateTime, Double value, Boolean approved, String ip, String agent, String data, String payoutReference, Long payoutId, String note, LocalDateTime creationDate, LocalDateTime lastModificationDate) {
-        this.id = id;
-        this.affiliateId = affiliateId;
-        this.affiliateName = affiliateName;
-        this.campaignId = campaignId;
-        this.campaignName = campaignName;
-        this.commissionId = commissionId;
-        this.commissionName = commissionName;
-        this.channelId = channelId;
-        this.channelName = channelName;
-        this.mediaId = mediaId;
-        this.mediaName = mediaName;
-        this.dateTime = dateTime;
-        this.value = value;
-        this.approved = approved;
-        this.ip = ip;
-        this.agent = agent;
-        this.data = data;
-        this.payoutReference = payoutReference;
-        this.payoutId = payoutId;
-        this.note = note;
-        this.creationDate = creationDate;
-        this.lastModificationDate = lastModificationDate;
-    }
+    private Long dictionaryId;
+    private String dictionaryName;
 
     public static TransactionCPSDTO from(TransactionCPS transaction) {
         return new TransactionCPSDTO(transaction.getId(), transaction.getAffiliate() != null ? transaction.getAffiliate().getId() : null, transaction.getAffiliate() != null ? transaction.getAffiliate().getName() : null,
@@ -81,7 +60,9 @@ public class TransactionCPSDTO {
                 transaction.getPayoutReference(),
                 transaction.getPayout() != null ? transaction.getPayout().getId() : null,
 
-                transaction.getNote(), transaction.getCreationDate(), transaction.getLastModificationDate());
+                transaction.getNote(), transaction.getCreationDate(), transaction.getLastModificationDate(),
+
+                transaction.getDictionary().getId(), transaction.getDictionary().getName());
     }
 
 }

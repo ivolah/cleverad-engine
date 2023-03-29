@@ -22,7 +22,7 @@ public class Budget {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long budget;
+    private Double budget;
     @Column(name = "due_date")
     private LocalDate dueDate;
     @Column(name = "start_date")

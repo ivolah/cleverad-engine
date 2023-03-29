@@ -23,7 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -40,15 +42,39 @@ public class PayoutBusiness {
     @Autowired
     private TransactionCPCRepository cpcRepository;
     @Autowired
+    private TransactionCPSRepository cpsRepository;
+    @Autowired
     private DictionaryBusiness dictionaryBusiness;
     @Autowired
     private DictionaryRepository dictionaryRepository;
+    @Autowired
+    private WalletBusiness walletBusiness;
     @Autowired
     private Mapper mapper;
 
     /**
      * ============================================================================================================
      **/
+
+    public Page<PayoutDTO> create(Lista lista) {
+        AtomicReference<Page<PayoutDTO>> res = new AtomicReference<>();
+        lista.getLista().forEach((s1, s2) -> {
+            if (s1.equals("CPC")) {
+                String[] ids = s2.split(",");
+                List<Long> listaTransactions = Arrays.stream(ids).map(s -> Long.valueOf(s)).collect(Collectors.toList());
+                res.set(createCpc(listaTransactions));
+            } else if (s1.equals("CPL")) {
+                String[] ids = s2.split(",");
+                List<Long> listaTransactions = Arrays.stream(ids).map(s -> Long.valueOf(s)).collect(Collectors.toList());
+                res.set(createCpl(listaTransactions));
+            } else if (s1.equals("CPS")) {
+                String[] ids = s2.split(",");
+                List<Long> listaTransactions = Arrays.stream(ids).map(s -> Long.valueOf(s)).collect(Collectors.toList());
+                res.set(createCps(listaTransactions));
+            }
+        });
+        return res.get();
+    }
 
     public Page<PayoutDTO> createCpc(List<Long> listaTransactions) {
 
@@ -92,6 +118,9 @@ public class PayoutBusiness {
             Payout pp = repository.save(payout);
             list.add(pp);
 
+            // decermeto valore wallet
+            walletBusiness.decrement(transaction.getWallet().getId(), totale);
+
             //aggiorno transazione e setto riferimento a payout
             transaction.setPayout(payout);
             transaction.setPayoutReference("Payout " + payoutId);
@@ -102,6 +131,7 @@ public class PayoutBusiness {
         list.forEach(payout -> {
             list2.add(repository.findById(payout.getId()).orElseThrow(() -> new ElementCleveradException("PAYOUT CPC", payout.getId())));
         });
+
 
         Page<Payout> page = new PageImpl<>(list2.stream().distinct().collect(Collectors.toList()));
         return page.map(PayoutDTO::from);
@@ -149,10 +179,74 @@ public class PayoutBusiness {
             Payout pp = repository.save(payout);
             list.add(pp);
 
+            // decermeto valore wallet
+            walletBusiness.decrement(transaction.getWallet().getId(), totale);
+
             //aggiorno transazione e setto riferimento a payout
             transaction.setPayout(payout);
             transaction.setPayoutReference("Payout " + payoutId);
             cplRepository.save(transaction);
+        });
+
+        Set<Payout> listaPayout = new HashSet<>();
+        list.forEach(payout -> {
+            //aggiungo payout
+            listaPayout.add(repository.findById(payout.getId()).orElseThrow(() -> new ElementCleveradException("PAYOUT CPL", payout.getId())));
+        });
+
+        Page<Payout> page = new PageImpl<>(listaPayout.stream().distinct().collect(Collectors.toList()));
+        return page.map(PayoutDTO::from);
+    }
+
+    public Page<PayoutDTO> createCps(List<Long> listaTransactions) {
+
+        //prndo tutti gli affigliati
+        List<Long> affiliatesList = new ArrayList<>();
+        listaTransactions.stream().forEach(id -> {
+            TransactionCPS transaction = cpsRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction CPS", id));
+            affiliatesList.add(transaction.getAffiliate().getId());
+        });
+
+        // faccio distinct e creo un pqyout vuoto per ognuno
+        HashMap<Long, Long> affiliatoPayout = new HashMap<>();
+        affiliatesList.stream().distinct().forEach(idAffiliate -> {
+            Payout map = new Payout();
+            Affiliate affiliate = affiliateRepository.findById(idAffiliate).orElseThrow(() -> new ElementCleveradException("Affiliate", idAffiliate));
+            map.setAffiliate(affiliate);
+            map.setData(LocalDate.now());
+            map.setValuta("EUR");
+            map.setCreationDate(LocalDateTime.now());
+            map.setLastModificationDate(LocalDateTime.now());
+            map.setTotale(0.0);
+            Dictionary dictionary = dictionaryRepository.findById(19L).orElseThrow(() -> new ElementCleveradException("Dictionary", 18L));
+            map.setDictionary(dictionary);
+            map = repository.save(map);
+            affiliatoPayout.put(idAffiliate, map.getId());
+        });
+
+        Set<Payout> list = new HashSet<>();
+        // per ogni singola transazione
+        listaTransactions.stream().forEach(id -> {
+            TransactionCPS transaction = cpsRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction CPs", id));
+            Long payoutId = affiliatoPayout.get(transaction.getAffiliate().getId());
+            Payout payout = repository.findById(payoutId).orElseThrow(() -> new ElementCleveradException("PAYOUT CPs", payoutId));
+
+            //aumento il valore
+            Double totale = payout.getTotale();
+            totale = totale + transaction.getValue();
+
+            //aggiorno payout
+            payout.setTotale(totale);
+            Payout pp = repository.save(payout);
+            list.add(pp);
+
+            // decermeto valore wallet
+            walletBusiness.decrement(transaction.getWallet().getId(), totale);
+
+            //aggiorno transazione e setto riferimento a payout
+            transaction.setPayout(payout);
+            transaction.setPayoutReference("Payout " + payoutId);
+            cpsRepository.save(transaction);
         });
 
         Set<Payout> list2 = new HashSet<>();
@@ -164,6 +258,7 @@ public class PayoutBusiness {
         return page.map(PayoutDTO::from);
     }
 
+
     // GET BY ID
     public PayoutDTO findById(Long id) {
         Payout payout = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Payout", id));
@@ -173,8 +268,6 @@ public class PayoutBusiness {
     // DELETE BY ID
     public void delete(Long id) {
         try {
-
-
             Payout payout = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Payout", id));
             payout.getTransactionCPCS().forEach(transactionCPC -> {
                 // rimuovo relazione
@@ -182,14 +275,33 @@ public class PayoutBusiness {
                 cpc.setPayout(null);
                 cpc.setPayoutReference(null);
                 cpcRepository.save(cpc);
+
+                // incemento valore wallet
+                walletBusiness.incement(cpc.getWallet().getId(), cpc.getValue());
+
             });
             payout.getTransactionCPLS().forEach(transactionCPL -> {
                 // rimuovo relazione
-                TransactionCPL cpl = cplRepository.findById(transactionCPL.getId()).orElseThrow(() -> new ElementCleveradException("Transaction CPL", transactionCPL.getId()));
+                TransactionCPL cpl= cplRepository.findById(transactionCPL.getId()).orElseThrow(() -> new ElementCleveradException("Transaction CPL", transactionCPL.getId()));
                 cpl.setPayout(null);
                 cpl.setPayoutReference(null);
                 cplRepository.save(cpl);
+
+                // incemento valore wallet
+                walletBusiness.incement(cpl.getWallet().getId(), cpl.getValue());
+
             });
+            payout.getTransactionCPSS().forEach(transactionCPS -> {
+                // rimuovo relazione
+                TransactionCPS cps = cpsRepository.findById(transactionCPS.getId()).orElseThrow(() -> new ElementCleveradException("Transaction CPS", transactionCPS.getId()));
+                cps.setPayout(null);
+                cps.setPayoutReference(null);
+                cpsRepository.save(cps);
+
+                // incemento valore wallet
+                walletBusiness.incement(cps.getWallet().getId(), cps.getValue());
+            });
+
 
             repository.deleteById(id);
         } catch (ConstraintViolationException ex) {
@@ -209,8 +321,7 @@ public class PayoutBusiness {
     public Page<PayoutDTO> findByIdAffilaite(Long id, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
-        if (id != null)
-            request.setAffiliateId(id);
+        if (id != null) request.setAffiliateId(id);
         Page<Payout> page = repository.findAll(getSpecification(request), pageable);
         return page.map(PayoutDTO::from);
     }
@@ -302,6 +413,13 @@ public class PayoutBusiness {
                 predicates.add(cb.equal(root.get("dictionary").get("id"), request.getDictionaryId()));
             }
 
+            if (request.getDateFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("data"), request.getDateFrom()));
+            }
+            if (request.getDateTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("data"), request.getDateTo().plus(1, ChronoUnit.DAYS)));
+            }
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
@@ -336,9 +454,18 @@ public class PayoutBusiness {
         private String valuta;
         private String note;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
-        private LocalDate data;
+        private LocalDate dateFrom;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate dateTo;
         private Long fileId;
         private Long dictionaryId;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Lista {
+        HashMap<String, String> lista;
     }
 
 }

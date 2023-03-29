@@ -18,13 +18,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -178,21 +178,23 @@ public class TransactionAllBusiness {
                 predicates.add(cb.equal(root.get("tipo"), request.getTipo()));
             }
 
-
-            if (request.getCreationDateFrom() != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("creationDate"), LocalDateTime.ofInstant(request.getCreationDateFrom(), ZoneOffset.UTC)));
-            }
-            if (request.getCreationDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("creationDate"), LocalDateTime.ofInstant(request.getCreationDateTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
+            if (request.getTipo() != null) {
+                predicates.add(cb.equal(root.get("dictionaryId"), request.getTipo()));
             }
 
             if (request.getCreationDateFrom() != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("dateTime"), LocalDateTime.ofInstant(request.getDateTimeFrom(), ZoneOffset.UTC)));
+                predicates.add(cb.greaterThanOrEqualTo(root.get("creationDate"), request.getCreationDateFrom().atStartOfDay()));
             }
             if (request.getCreationDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), LocalDateTime.ofInstant(request.getDateTimeTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
+                predicates.add(cb.lessThanOrEqualTo(root.get("creationDate"), request.getCreationDateTo().plus(1, ChronoUnit.DAYS).atStartOfDay()));
             }
 
+            if (request.getDateTimeFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("dateTime"), request.getDateTimeFrom().atStartOfDay()));
+            }
+            if (request.getDateTimeTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), request.getDateTimeTo().plus(1, ChronoUnit.DAYS).atStartOfDay()));
+            }
 
             predicates.add(cb.isNull(root.get("payoutId")));
 
@@ -200,7 +202,6 @@ public class TransactionAllBusiness {
             return completePredicate;
         };
     }
-
 
     /**
      * ============================================================================================================
@@ -231,6 +232,7 @@ public class TransactionAllBusiness {
         private Long advertiserId;
         private String data;
         private String tipo;
+        private Long dictionaryId;
     }
 
     @Data
@@ -240,10 +242,17 @@ public class TransactionAllBusiness {
         private Long id;
         private String agent;
         private Boolean approved;
-        private Instant creationDateFrom;
-        private Instant creationDateTo;
-        private Instant dateTimeFrom;
-        private Instant dateTimeTo;
+
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate creationDateFrom;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate creationDateTo;
+
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate dateTimeFrom;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate dateTimeTo;
+
         private String ip;
         private String note;
         private String payoutReference;
@@ -261,6 +270,7 @@ public class TransactionAllBusiness {
         private Long advertiserId;
         private String data;
         private String tipo;
+        private Long dictionaryId;
     }
 
 }

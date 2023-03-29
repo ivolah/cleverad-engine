@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -219,6 +220,15 @@ public class CampaignBusiness {
         return null;
     }
 
+    public List<CampaignDTO> getCampaignsToDisable() {
+        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id")));
+        Filter request = new Filter();
+        request.setStatus(true);
+        request.setEndDateTo(LocalDate.now());
+        Page<Campaign> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(CampaignDTO::from).toList();
+    }
+
     /**
      * ============================================================================================================
      **/
@@ -231,13 +241,13 @@ public class CampaignBusiness {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
             if (request.getName() != null) {
-                predicates.add(cb.equal(root.get("name"), request.getName()));
+                predicates.add(cb.like(root.get("name"), "%" + request.getName() + "%"));
             }
             if (request.getShortDescription() != null) {
-                predicates.add(cb.equal(root.get("shortDescription"), request.getShortDescription()));
+                predicates.add(cb.like(root.get("shortDescription"), "%" + request.getShortDescription() + "%"));
             }
             if (request.getLongDescription() != null) {
-                predicates.add(cb.equal(root.get("longDescription"), request.getLongDescription()));
+                predicates.add(cb.like(root.get("longDescription"), "%" + request.getLongDescription() + "%"));
             }
             if (request.getStatus() != null) {
                 predicates.add(cb.equal(root.get("status"), request.getStatus()));
@@ -258,17 +268,17 @@ public class CampaignBusiness {
             }
 
             if (request.getStartDateFrom() != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), LocalDateTime.ofInstant(request.getStartDateFrom(), ZoneOffset.UTC)));
+                predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), request.getStartDateFrom()));
             }
             if (request.getStartDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), LocalDateTime.ofInstant(request.getStartDateTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
+                predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), (request.getStartDateTo().plus(1, ChronoUnit.DAYS))));
             }
 
             if (request.getEndDateFrom() != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("endDate"), LocalDateTime.ofInstant(request.getEndDateFrom(), ZoneOffset.UTC)));
+                predicates.add(cb.greaterThanOrEqualTo(root.get("endDate"), (request.getEndDateFrom())));
             }
             if (request.getEndDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("endDate"), LocalDateTime.ofInstant(request.getEndDateTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
+                predicates.add(cb.lessThanOrEqualTo(root.get("endDate"), (request.getEndDateTo().plus(1, ChronoUnit.DAYS))));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -297,7 +307,7 @@ public class CampaignBusiness {
         private Long plannerId;
         private Long dealerId;
         private String valuta;
-        private Long budget;
+        private Double budget;
         private String trackingCode;
         @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSz")
         private LocalDateTime startDate;
@@ -316,7 +326,7 @@ public class CampaignBusiness {
         private Boolean status;
         private String idFile;
         private String valuta;
-        private Long budget;
+        private Double budget;
         private Long cookieId;
         private String comissions;
         private List<Long> categoryList;
@@ -325,10 +335,14 @@ public class CampaignBusiness {
         private Instant creationDateTo;
         private Instant lastModificationDateFrom;
         private Instant lastModificationDateTo;
-        private Instant startDateFrom;
-        private Instant startDateTo;
-        private Instant endDateFrom;
-        private Instant endDateTo;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate startDateFrom;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate startDateTo;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate endDateFrom;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate endDateTo;
         private Long companyId;
         private Long plannerId;
         private Long dealerId;

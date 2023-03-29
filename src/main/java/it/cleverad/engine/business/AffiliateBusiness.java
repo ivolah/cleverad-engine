@@ -7,6 +7,7 @@ import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
 import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.web.dto.AffiliateDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
+import it.cleverad.engine.web.dto.UserDTO;
 import it.cleverad.engine.web.dto.WalletDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresCleveradException;
@@ -32,6 +33,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -47,6 +49,8 @@ public class AffiliateBusiness {
     private DictionaryRepository dictionaryRepository;
     @Autowired
     private DictionaryBusiness dictionaryBusiness;
+    @Autowired
+    private UserBusiness userBusiness;
 
     @Autowired
     private MailService mailService;
@@ -66,6 +70,14 @@ public class AffiliateBusiness {
 
         AffiliateDTO dto = AffiliateDTO.from(repository.save(map));
 
+        // invio mail Affiliate
+        MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
+        mailRequest.setTemplateId(6L);
+        mailRequest.setAffiliateId(dto.getId());
+        mailRequest.setEmail(request.primaryMail);
+        //mailRequest.setUserId();
+        mailService.invio(mailRequest);
+
         // creo wallet associato
         WalletBusiness.BaseCreateRequest wal = new WalletBusiness.BaseCreateRequest();
         wal.setAffiliateId(dto.getId());
@@ -76,11 +88,24 @@ public class AffiliateBusiness {
         wal.setStatus(true);
         walletBusiness.create(wal);
 
-        // invio mail
-        MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
-        mailRequest.setTemplateId(6L);
+        // creo user associato
+        UserBusiness.BaseCreateRequest nuovoUser = new UserBusiness.BaseCreateRequest();
+        nuovoUser.setAffiliateId(dto.getId());
+        nuovoUser.setStatus(false);
+        nuovoUser.setName(request.firstName);
+        nuovoUser.setEmail(request.primaryMail);
+        nuovoUser.setSurname(request.getLastName());
+        nuovoUser.setRoleId(4L);
+        String uuid = UUID.randomUUID().toString();
+        nuovoUser.setUsername(uuid);
+        nuovoUser.setPassword("piciulin");
+        UserDTO userDto = userBusiness.create(nuovoUser);
+
+        // invio mail USER
+        mailRequest = new MailService.BaseCreateRequest();
+        mailRequest.setTemplateId(16L);
         mailRequest.setAffiliateId(dto.getId());
-        //mailRequest.setUserId();
+        mailRequest.setUserId(userDto.getId());
         mailService.invio(mailRequest);
 
         return dto;
@@ -166,6 +191,8 @@ public class AffiliateBusiness {
         return lista;
     }
 
+
+
     /**
      * ============================================================================================================
      **/
@@ -178,29 +205,29 @@ public class AffiliateBusiness {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
             if (request.getName() != null) {
-                predicates.add(cb.equal(root.get("name"), request.getName()));
+                predicates.add(cb.like(root.get("name"), request.getName()));
             }
             if (request.getVatNumber() != null) {
-                predicates.add(cb.equal(root.get("vatNumber"), request.getVatNumber()));
+                predicates.add(cb.like(root.get("vatNumber"), request.getVatNumber()));
             }
             if (request.getStreet() != null) {
-                predicates.add(cb.equal(root.get("street"), request.getStreet()));
+                predicates.add(cb.like(root.get("street"), request.getStreet()));
             }
             if (request.getStreetNumber() != null) {
-                predicates.add(cb.equal(root.get("streetNumber"), request.getStreetNumber()));
+                predicates.add(cb.like(root.get("streetNumber"), request.getStreetNumber()));
             }
 
             if (request.getCity() != null) {
-                predicates.add(cb.equal(root.get("city"), request.getCity()));
+                predicates.add(cb.like(root.get("city"), request.getCity()));
             }
             if (request.getZipCode() != null) {
                 predicates.add(cb.equal(root.get("zipCode"), request.getZipCode()));
             }
             if (request.getPrimaryMail() != null) {
-                predicates.add(cb.equal(root.get("primaryMail"), request.getPrimaryMail()));
+                predicates.add(cb.like(root.get("primaryMail"), request.getPrimaryMail()));
             }
             if (request.getSecondaryMail() != null) {
-                predicates.add(cb.equal(root.get("secondaryMail"), request.getSecondaryMail()));
+                predicates.add(cb.like(root.get("secondaryMail"), request.getSecondaryMail()));
             }
             if (request.getStatus() != null) {
                 predicates.add(cb.equal(root.get("status"), request.getStatus()));
@@ -224,7 +251,6 @@ public class AffiliateBusiness {
             return completePredicate;
         };
     }
-
 
     /**
      * ============================================================================================================

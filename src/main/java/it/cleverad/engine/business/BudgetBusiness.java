@@ -102,11 +102,30 @@ public class BudgetBusiness {
     }
 
     public Page<BudgetDTO> getByIdCampaign(Long id) {
-        Pageable pageable = PageRequest.of(0,1000, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setCampaignId(id);
         Page<Budget> page = repository.findAll(getSpecification(request), pageable);
         return page.map(BudgetDTO::from);
+    }
+
+    public Page<BudgetDTO> getByIdCampaignAndIdAffiliate(Long idCampaign, Long idAffilaite) {
+        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id")));
+        Filter request = new Filter();
+        request.setCampaignId(idCampaign);
+        request.setAffiliateId(idAffilaite);
+        request.setStatus(true);
+        Page<Budget> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(BudgetDTO::from);
+    }
+
+    public List<BudgetDTO> getBudgetToDisable() {
+        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id")));
+        Filter request = new Filter();
+        request.setDueDateTo(LocalDate.now());
+        request.setStatus(true);
+        Page<Budget> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(BudgetDTO::from).toList();
     }
 
     /**
@@ -126,8 +145,8 @@ public class BudgetBusiness {
             if (request.getCampaignId() != null) {
                 predicates.add(cb.equal(root.get("campaign").get("id"), request.getCampaignId()));
             }
-            if (request.isStatus()) {
-                predicates.add(cb.equal(root.get("status"), request.isStatus()));
+            if (request.getStatus() != null) {
+                predicates.add(cb.equal(root.get("status"), request.getStatus()));
             }
             if (request.getCreationDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("creationDate"), LocalDateTime.ofInstant(request.getCreationDateFrom(), ZoneOffset.UTC)));
@@ -143,12 +162,25 @@ public class BudgetBusiness {
                 predicates.add(cb.lessThanOrEqualTo(root.get("lastModificationDate"), LocalDateTime.ofInstant(request.getLastModificationDateTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
             }
 
+            if (request.getStartDateFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), request.getStartDateFrom()));
+            }
+            if (request.getStartDateTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), (request.getStartDateTo().plus(1, ChronoUnit.DAYS))));
+            }
+
+            if (request.getDueDateFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("dueDate"), (request.getDueDateFrom())));
+            }
+            if (request.getDueDateTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), (request.getDueDateTo().plus(1, ChronoUnit.DAYS))));
+            }
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 
             return completePredicate;
         };
     }
-
 
     /**
      * ============================================================================================================
@@ -160,7 +192,7 @@ public class BudgetBusiness {
     public static class BaseCreateRequest {
         private Long affiliateId;
         private Long campaignId;
-        private Long budget;
+        private Double budget;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate startDate;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -174,16 +206,26 @@ public class BudgetBusiness {
         private Long id;
         private Long affiliateId;
         private Long campaignId;
-        private Long budget;
-        private Date dueDate;        private Instant dueDateFrom;
-        private Instant dueDateTo;
-        private Instant startDateFrom;
-        private Instant startDateTo;
-        private boolean status;
+        private Double budget;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate startDate;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private Date dueDate;
+
+        private Boolean status;
         private Instant creationDateFrom;
         private Instant creationDateTo;
         private Instant lastModificationDateFrom;
         private Instant lastModificationDateTo;
+
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate dueDateFrom;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate dueDateTo;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate startDateFrom;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate startDateTo;
     }
 
 }

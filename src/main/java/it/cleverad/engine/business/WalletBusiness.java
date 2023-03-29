@@ -33,6 +33,9 @@ public class WalletBusiness {
     private WalletRepository repository;
 
     @Autowired
+    private WalletTransactionBusiness walletTransactionBusiness;
+
+    @Autowired
     private Mapper mapper;
 
     /**
@@ -102,6 +105,17 @@ public class WalletBusiness {
         residual = residual + value;
         wallet.setResidual(residual);
 
+        // savo storicizzazione wallet
+        WalletTransactionBusiness.BaseCreateRequest req = new WalletTransactionBusiness.BaseCreateRequest();
+        req.setTotalBefore(wallet.getTotal());
+        req.setTotalAfter(totale);
+        req.setPayedBefore(wallet.getPayed());
+        req.setPayedAfter(wallet.getPayed());
+        req.setResidualBefore(wallet.getResidual());
+        req.setResidualAfter(residual);
+        req.setWalletId(id);
+        walletTransactionBusiness.create(req);
+
         return WalletDTO.from(repository.save(wallet));
     }
 
@@ -115,6 +129,17 @@ public class WalletBusiness {
         Double payed = wallet.getPayed();
         payed = payed + value;
         wallet.setPayed(payed);
+
+        // savo storicizzazione wallet
+        WalletTransactionBusiness.BaseCreateRequest req = new WalletTransactionBusiness.BaseCreateRequest();
+        req.setTotalBefore(wallet.getTotal());
+        req.setTotalAfter(wallet.getTotal() - value);
+        req.setPayedBefore(wallet.getPayed());
+        req.setPayedAfter(payed);
+        req.setResidualBefore(wallet.getResidual());
+        req.setResidualAfter(residual);
+        req.setWalletId(id);
+        walletTransactionBusiness.create(req);
 
         return WalletDTO.from(repository.save(wallet));
     }

@@ -71,4 +71,8 @@ public class TransactionCPS {
     @JoinColumn(name = "payout_id")
     private Payout payout;
 
+    @ManyToOne
+    @JoinColumn(name = "dictionary_id")
+    private Dictionary dictionary;
+
 }

@@ -28,7 +28,7 @@ public class CampaignDTO {
     private LocalDate endDate;
     private String idFile;
     private String valuta;
-    private Long budget;
+    private Double budget;
     private String trackingCode;
     private String encodedId;
 

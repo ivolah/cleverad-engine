@@ -23,5 +23,4 @@ public interface MediaRepository extends JpaRepository<Media, Long>, JpaSpecific
 
     Media findByIdFile(String Id);
 
-
 }

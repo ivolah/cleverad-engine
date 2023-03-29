@@ -43,4 +43,7 @@ public class Wallet {
     @OneToMany(mappedBy = "wallet")
     private Set<TransactionCPL> transactionCPLS;
 
+    @OneToMany(mappedBy = "wallet")
+    private Set<WalletTransaction> walletTransactions;
+
 }

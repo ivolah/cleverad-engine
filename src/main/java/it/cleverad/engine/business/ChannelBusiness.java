@@ -260,7 +260,7 @@ public class ChannelBusiness {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
             if (request.getName() != null) {
-                predicates.add(cb.equal(root.get("name"), request.getName()));
+                predicates.add(cb.like(root.get("name"), "%" + request.getName() + "%"));
             }
             if (request.getShortDescription() != null) {
                 predicates.add(cb.equal(root.get("shortDescription"), request.getShortDescription()));

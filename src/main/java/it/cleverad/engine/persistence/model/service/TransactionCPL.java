@@ -33,6 +33,8 @@ public class TransactionCPL {
     @Column(name = "payout_reference")
     private String payoutReference;
     private String note;
+    @Column(name = "lead_number")
+    private Long leadNumber;
 
     @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
@@ -70,5 +72,9 @@ public class TransactionCPL {
     @ManyToOne
     @JoinColumn(name = "payout_id")
     private Payout payout;
+
+    @ManyToOne
+    @JoinColumn(name = "dictionary_id")
+    private Dictionary dictionary;
 
 }

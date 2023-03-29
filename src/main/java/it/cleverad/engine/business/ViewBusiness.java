@@ -22,7 +22,7 @@ import java.util.List;
 @Slf4j
 @Component
 @Transactional
-public class StatsBusiness {
+public class ViewBusiness {
 
     @Autowired
     private StatCpcClickCampaignRepository statCpcClickCampaignRepository;
@@ -151,8 +151,7 @@ public class StatsBusiness {
         };
     }
 
-
-    /**
+        /**
      * ============================================================================================================
      **/
 
@@ -205,6 +204,8 @@ public class StatsBusiness {
     @AllArgsConstructor
     public static class Filter {
         private Long id;
+        private String name;
+        private String description;
     }
 
 }

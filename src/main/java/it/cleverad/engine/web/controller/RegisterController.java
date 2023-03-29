@@ -1,8 +1,10 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.AffiliateBusiness;
+import it.cleverad.engine.business.UserBusiness;
 import it.cleverad.engine.web.dto.AffiliateDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
+import it.cleverad.engine.web.dto.UserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,8 @@ public class RegisterController {
 
     @Autowired
     private AffiliateBusiness business;
+    @Autowired
+    private UserBusiness userBusiness;
 
     /**
      * ============================================================================================================
@@ -26,6 +30,18 @@ public class RegisterController {
     public AffiliateDTO create(@ModelAttribute AffiliateBusiness.BaseCreateRequest request) {
         request.setStatus(false);
         return business.create(request);
+    }
+
+    @GetMapping("/user/{uuid}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public UserDTO getUserToRegister(@PathVariable String uuid) {
+        return userBusiness.getUserToRegister(uuid);
+    }
+
+    @PatchMapping(path = "/user/confirm")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void confirmUser(@RequestBody UserBusiness.Confirm request) {
+        userBusiness.confirm(request);
     }
 
     @GetMapping("/types/company")

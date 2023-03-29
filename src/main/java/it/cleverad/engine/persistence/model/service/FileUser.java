@@ -33,13 +33,13 @@ public class FileUser {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User userFiles;
+    private User user;
 
     public FileUser(String name, String docType, byte[] data, User userFiles,  String note, Boolean avatar) {
         this.name = name;
         this.type = docType;
         this.data = data;
-        this.userFiles = userFiles;
+        this.user = userFiles;
         this.note = note;
         this.avatar = avatar;
     }

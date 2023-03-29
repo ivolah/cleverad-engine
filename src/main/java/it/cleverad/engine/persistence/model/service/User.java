@@ -29,6 +29,7 @@ public class User {
     private String password;
     private String surname;
     private String email;
+    private String role;
 
     @Column(nullable = false)
     private Boolean status = true;

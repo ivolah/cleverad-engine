@@ -120,7 +120,10 @@ public class MailService {
         MimeMessage mimeMessage = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
         helper.setFrom("attivazioni@cleverad.it");
-        helper.setTo(affiliate.getPrimaryMail());
+        if (request.getEmail() != null)
+            helper.setTo(request.getEmail());
+        else
+            helper.setTo(affiliate.getPrimaryMail());
         helper.setSubject(mailTemplate.getSubject());
         String emailContent = stringWriter.toString();
         helper.setText(emailContent, true);

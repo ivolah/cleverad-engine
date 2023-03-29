@@ -116,11 +116,26 @@ public class RevenueFactorBusiness {
         return page.map(RevenueFactorDTO::from);
     }
 
+    public RevenueFactor getbyIdCampaign(Long id) {
+        Filter request = new Filter();
+        request.setCampaignId(id);
+        RevenueFactor revenueFactor = repository.findAll(getSpecification(request)).stream().findFirst().get();
+        return revenueFactor;
+    }
+
     //  GET TIPI
     public Page<DictionaryDTO> getTypes() {
         return dictionaryBusiness.getTypeCommission();
     }
 
+    public List<RevenueFactorDTO> getRevenueToDisable() {
+        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id")));
+        Filter request = new Filter();
+        request.setDueDateTo(LocalDate.now());
+        request.setStatus(true);
+        Page<RevenueFactor> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(RevenueFactorDTO::from).toList();
+    }
 
     /**
      * ============================================================================================================
@@ -157,6 +172,21 @@ public class RevenueFactorBusiness {
             if (request.getLastModificationDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("lastModificationDate"), LocalDateTime.ofInstant(request.getLastModificationDateTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
             }
+
+            if (request.getStartDateFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), request.getStartDateFrom()));
+            }
+            if (request.getStartDateTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), (request.getStartDateTo().plus(1, ChronoUnit.DAYS))));
+            }
+
+            if (request.getDueDateFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("dueDate"), (request.getDueDateFrom())));
+            }
+            if (request.getDueDateTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), (request.getDueDateTo().plus(1, ChronoUnit.DAYS))));
+            }
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 
             return completePredicate;
@@ -185,12 +215,21 @@ public class RevenueFactorBusiness {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Filter {
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate startDate;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate dueDate;
+
         private Long id;
         private Double revenue;
-        private Instant dueDateFrom;
-        private Instant dueDateTo;
-        private Instant startDateFrom;
-        private Instant startDateTo;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate dueDateFrom;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate dueDateTo;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate startDateFrom;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate startDateTo;
         private Boolean status;
 
         private Long campaignId;

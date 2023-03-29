@@ -34,6 +34,8 @@ public class TransactionCPM {
     @Column(name = "payout_reference")
     private String payoutReference;
     private String note;
+    @Column(name = "impression_number")
+    private Long impressionNumber;
 
     @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
@@ -67,5 +69,9 @@ public class TransactionCPM {
     @ManyToOne
     @JoinColumn(name = "payout_id")
     private Payout payout;
+
+    @ManyToOne
+    @JoinColumn(name = "dictionary_id")
+    private Dictionary dictionary;
 
 }

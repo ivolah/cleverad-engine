@@ -40,6 +40,9 @@ public class TransactionAllDTO {
     private String data;
     private String tipo;
 
+    private Long dictionaryId;
+    private String dictionaryName;
+
     public static TransactionAllDTO from(TransactionAll transaction) {
         return new TransactionAllDTO(
                 transaction.getId(),
@@ -68,7 +71,8 @@ public class TransactionAllDTO {
                 transaction.getCompanyId(),
                 transaction.getAdvertiserId(),
                 transaction.getData(),
-                transaction.getTipo()
+                transaction.getTipo(),
+                transaction.getDictionaryId(), transaction.getDictionaryName()
         );
     }
 

@@ -138,6 +138,16 @@ public class CommissionBusiness {
     }
 
 
+    public List<CommissionDTO> getCommissionToDisable() {
+        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id")));
+        Filter request = new Filter();
+        request.setDueDateTo(LocalDate.now());
+        request.setStatus(true);
+        Page<Commission> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(CommissionDTO::from).toList();
+    }
+
+
     /**
      * ============================================================================================================
      **/
@@ -151,14 +161,14 @@ public class CommissionBusiness {
             }
 
             if (request.getName() != null) {
-                predicates.add(cb.equal(root.get("name"), request.getName()));
+                predicates.add(cb.like(root.get("name"), "%" + request.getName() + "%"));
             }
 
             if (request.getValue() != null) {
                 predicates.add(cb.equal(root.get("value"), request.getValue()));
             }
             if (request.getDescription() != null) {
-                predicates.add(cb.equal(root.get("description"), request.getDescription()));
+                predicates.add(cb.like(root.get("description"), "%" + request.getDescription() + "%"));
             }
             if (request.getStatus() != null) {
                 predicates.add(cb.equal(root.get("status"), request.getStatus()));
@@ -184,12 +194,27 @@ public class CommissionBusiness {
             if (request.getLastModificationDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("lastModificationDate"), LocalDateTime.ofInstant(request.getLastModificationDateTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
             }
+
+            if (request.getStartDateFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), request.getStartDateFrom()));
+            }
+            if (request.getStartDateTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), (request.getStartDateTo().plus(1, ChronoUnit.DAYS))));
+            }
+
+            if (request.getDueDateFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("dueDate"), (request.getDueDateFrom())));
+            }
+            if (request.getDueDateTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), (request.getDueDateTo().plus(1, ChronoUnit.DAYS))));
+            }
+
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 
             return completePredicate;
         };
     }
-
 
     /**
      * ============================================================================================================
@@ -221,14 +246,23 @@ public class CommissionBusiness {
     public static class Filter {
         private Long id;
 
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate startDate;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate dueDate;
+
         private String name;
         private String value;
         private String description;
         private Boolean status;
-        private Instant dueDateFrom;
-        private Instant dueDateTo;
-        private Instant startDateFrom;
-        private Instant startDateTo;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate dueDateFrom;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate dueDateTo;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate startDateFrom;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate startDateTo;
         private Long campaignId;
         private Long dictionaryId;
 

@@ -14,8 +14,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-public class
-TransactionAll {
+public class TransactionAll {
 
     @Id
     @Column(name = "id", nullable = false)
@@ -58,8 +57,14 @@ TransactionAll {
     private Long mediaId;
     @Column(name = "media_name")
     private String mediaName;
+
     @Column(name = "click_number")
     private Long clickNumber;
+    @Column(name = "impression_number")
+    private Long impressionNumber;
+    @Column(name = "lead_number")
+    private Long leadNumber;
+
     private String refferal;
     @Column(name = "company_id")
     private Long companyId;
@@ -67,5 +72,10 @@ TransactionAll {
     private Long advertiserId;
     private String data;
     private String tipo;
+
+    @Column(name = "dictionary_id")
+    private Long dictionaryId;
+    @Column(name = "dictionary_name")
+    private String dictionaryName;
 
 }

@@ -123,33 +123,35 @@ public class AdvertiserBusiness {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
             if (request.getName() != null) {
-                predicates.add(cb.equal(root.get("name"), request.getName()));
+                predicates.add(cb.like(root.get("name"), request.getName()));
             }
             if (request.getVatNumber() != null) {
-                predicates.add(cb.equal(root.get("vatNumber"), request.getVatNumber()));
+                predicates.add(cb.like(root.get("vatNumber"), request.getVatNumber()));
             }
             if (request.getStreet() != null) {
-                predicates.add(cb.equal(root.get("street"), request.getStreet()));
+                predicates.add(cb.like(root.get("street"), request.getStreet()));
             }
             if (request.getStreetNumber() != null) {
                 predicates.add(cb.equal(root.get("streetNumber"), request.getStreetNumber()));
             }
 
             if (request.getCity() != null) {
-                predicates.add(cb.equal(root.get("city"), request.getCity()));
+                predicates.add(cb.like(root.get("city"), request.getCity()));
             }
             if (request.getZipCode() != null) {
                 predicates.add(cb.equal(root.get("zipCode"), request.getZipCode()));
             }
             if (request.getPrimaryMail() != null) {
-                predicates.add(cb.equal(root.get("primaryMail"), request.getPrimaryMail()));
+                predicates.add(cb.like(root.get("primaryMail"), request.getPrimaryMail()));
             }
             if (request.getSecondaryMail() != null) {
-                predicates.add(cb.equal(root.get("secondaryMail"), request.getSecondaryMail()));
+                predicates.add(cb.like(root.get("secondaryMail"), request.getSecondaryMail()));
             }
+
             if (request.getStatus() != null) {
                 predicates.add(cb.equal(root.get("status"), request.getStatus()));
             }
+
             if (request.getCreationDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("creationDate"), LocalDateTime.ofInstant(request.getCreationDateFrom(), ZoneOffset.UTC)));
             }

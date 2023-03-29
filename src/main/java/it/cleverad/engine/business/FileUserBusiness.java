@@ -93,7 +93,7 @@ public class FileUserBusiness {
         mapper.map(filter, from);
         FileUser mappedEntity = mapper.map(fil, FileUser.class);
         mapper.map(from, mappedEntity);
-        mappedEntity.setUserFiles(userRepository.findById(filter.userId).orElseThrow(() -> new ElementCleveradException("User", filter.userId)));
+        mappedEntity.setUser(userRepository.findById(filter.userId).orElseThrow(() -> new ElementCleveradException("User", filter.userId)));
         return FileUserDTO.from(repository.save(mappedEntity));
     }
 

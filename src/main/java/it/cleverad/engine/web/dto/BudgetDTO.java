@@ -1,6 +1,7 @@
 package it.cleverad.engine.web.dto;
 
 import it.cleverad.engine.persistence.model.service.Budget;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,11 +11,12 @@ import java.util.Date;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class BudgetDTO {
 
     private Long id;
 
-    private Long budget;
+    private Double budget;
     private LocalDate startDate;
     private LocalDate dueDate;
 
@@ -31,17 +33,4 @@ public class BudgetDTO {
         return new BudgetDTO(budget.getId(), budget.getBudget(), budget.getStartDate(), budget.getDueDate(), budget.getAffiliate() != null ? budget.getAffiliate().getId() : null, budget.getAffiliate() != null ? budget.getAffiliate().getName() : null, budget.getCampaign() != null ? budget.getCampaign().getId() : null, budget.getCampaign() != null ? budget.getCampaign().getName() : null, budget.getStatus(), budget.getCreationDate(), budget.getLastModificationDate());
     }
 
-    public BudgetDTO(Long id, Long budget, LocalDate startDate, LocalDate dueDate, Long affiliateId, String affiliateName, Long campaignId, String campaignName, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate) {
-        this.id = id;
-        this.budget = budget;
-        this.startDate = startDate;
-        this.dueDate = dueDate;
-        this.affiliateId = affiliateId;
-        this.affiliateName = affiliateName;
-        this.campaignId = campaignId;
-        this.campaignName = campaignName;
-        this.status = status;
-        this.creationDate = creationDate;
-        this.lastModificationDate = lastModificationDate;
-    }
 }

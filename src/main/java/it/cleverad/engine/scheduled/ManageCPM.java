@@ -8,22 +8,25 @@ import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.service.RefferalService;
 import it.cleverad.engine.web.dto.BudgetDTO;
 import it.cleverad.engine.web.dto.CampaignDTO;
+import it.cleverad.engine.web.dto.CpmDTO;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
-public class ManageCPL {
+public class ManageCPM {
 
     @Autowired
-    private CplBusiness cplBusiness;
+    private CpmBusiness CpmBusiness;
     @Autowired
     private TransactionBusiness transactionBusiness;
     @Autowired
@@ -41,30 +44,38 @@ public class ManageCPL {
     @Autowired
     private RefferalService refferalService;
 
-    //TODO  controlla quotidianamente se la data scadenza delle campagne è stata superata
-
     @Async
-    @Scheduled(cron = "0 0/9 * * * ?")
-    public void trasformaTrackingCPL() {
+    @Scheduled(cron = "* 0/5 * * * ?")
+    public void trasformaTrackingCPM() {
         try {
-            // trovo uttti i tracking con read == false
-            cplBusiness.getUnread().stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
+
+            // trovo tutti i tracking con read == false
+            Map<String, Integer> mappa = new HashMap<>();
+            Page<CpmDTO> last = CpmBusiness.getUnreadLastHour();
+            last.stream().filter(CpmDTO -> CpmDTO.getRefferal() != null).forEach(CpmDTO -> {
+                // gestisco calcolatore
+                Integer num = mappa.get(CpmDTO.getRefferal());
+                if (num == null) num = 0;
+                mappa.put(CpmDTO.getRefferal(), num + 1);
+                // setto a gestito
+                CpmBusiness.setRead(CpmDTO.getId());
+            });
+
+            mappa.forEach((s, aLong) -> {
+                log.info("Gestisco trasformaTrackingCpm ID {}", aLong);
 
                 // prendo reffereal e lo leggo
-                Refferal refferal = refferalService.decodificaRefferal(cplDTO.getRefferal());
-                log.info("CPL :: {} - {}", cplDTO, refferal);
+                Refferal refferal = refferalService.decodificaRefferal(s);
+                log.info("Cpm :: {} - {}", s, refferal);
 
                 // setta transazione
                 TransactionBusiness.BaseCreateRequest rr = new TransactionBusiness.BaseCreateRequest();
                 rr.setAffiliateId(refferal.getAffiliateId());
                 rr.setCampaignId(refferal.getCampaignId());
                 rr.setChannelId(refferal.getChannelId());
+                //     rr.setDateTime(LocalDateTime.now());
                 rr.setMediaId(refferal.getMediaId());
-                //   rr.setDateTime(cplDTO.getDate());
                 rr.setApproved(true);
-                rr.setAgent(cplDTO.getAgent());
-                rr.setIp(cplDTO.getIp());
-                rr.setData(cplDTO.getData());
                 rr.setMediaId(refferal.getMediaId());
 
                 // controlla data scadneza camapgna
@@ -79,7 +90,6 @@ public class ManageCPL {
 
                 // associo a wallet
                 Long affiliateID = refferal.getAffiliateId();
-                log.info("AFFILIATE >>>> {}", affiliateID);
                 Long walletID;
                 if (affiliateID != null) {
                     walletID = walletRepository.findByAffiliateId(affiliateID).getId();
@@ -91,12 +101,12 @@ public class ManageCPL {
                 // gesione commisione
                 List<AffiliateChannelCommissionCampaign> accc = affiliateChannelCommissionCampaignRepository.findByAffiliateIdAndChannelIdAndCampaignId(refferal.getAffiliateId(), refferal.getChannelId(), refferal.getCampaignId());
                 accc.stream().forEach(affiliateChannelCommissionCampaign -> {
-                    if (affiliateChannelCommissionCampaign.getCommission().getDictionary().getName().equals("CPL")) {
+                    if (affiliateChannelCommissionCampaign.getCommission().getDictionary().getName().equals("Cpm")) {
                         rr.setCommissionId(affiliateChannelCommissionCampaign.getCommission().getId());
 
-                        Double totale = Double.valueOf(affiliateChannelCommissionCampaign.getCommission().getValue()) * 1;
+                        Double totale = Double.valueOf(affiliateChannelCommissionCampaign.getCommission().getValue()) * aLong;
                         rr.setValue(totale);
-                        rr.setLeadNumber(Long.valueOf(1));
+                        rr.setImpressionNumber(Long.valueOf(aLong));
 
                         // incemento valore
                         walletBusiness.incement(walletID, totale);
@@ -130,17 +140,15 @@ public class ManageCPL {
                         }
 
                         // creo la transazione
-                        transactionBusiness.createCpl(rr);
+                        transactionBusiness.createCpm(rr);
                     }
                 });
-
-                // setto a gestito
-                cplBusiness.setRead(cplDTO.getId());
-
             });
+
         } catch (Exception e) {
-            log.error("Eccezione Scheduler CPL --  {}", e.getMessage(), e);
+            log.error("Eccezione Scheduler Cpm --  {}", e.getMessage(), e);
         }
-    }//trasformaTrackingCPL
+
+    }//trasformaTrackingCpm
 
 }

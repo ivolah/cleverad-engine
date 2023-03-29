@@ -1,12 +1,10 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.service.FileUser;
 import it.cleverad.engine.persistence.model.service.User;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
 import it.cleverad.engine.persistence.repository.service.UserRepository;
-import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.AffiliateDTO;
 import it.cleverad.engine.web.dto.UserDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -14,6 +12,7 @@ import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.exception.ConstraintViolationException;
@@ -144,17 +143,17 @@ public class UserBusiness {
         User wser = repository.findById(id).get();
 
         UserDTO userDTOfrom = UserDTO.from(wser);
-
         mapper.map(filter, userDTOfrom);
 
         User mappedEntity = mapper.map(wser, User.class);
         mapper.map(userDTOfrom, mappedEntity);
+
         return UserDTO.from(repository.save(mappedEntity));
     }
 
     public UserDTO resetPassword(Long id, String password) throws Exception {
         User wser = repository.findById(id).orElseThrow(() -> new ElementCleveradException("User", id));
-        wser.setPassword(bcryptEncoder.encode(password));;
+        wser.setPassword(bcryptEncoder.encode(password));
         return UserDTO.from(repository.save(wser));
     }
 
@@ -168,6 +167,35 @@ public class UserBusiness {
         User wser = repository.findById(id).orElseThrow(() -> new ElementCleveradException("User", id));
         wser.setStatus(true);
         return UserDTO.from(repository.save(wser));
+    }
+
+    public UserDTO confirm(Confirm rr) {
+
+        log.info(rr.toString());
+        User user = repository.findByUsername(rr.uuid);
+        log.info(user.toString());
+
+        BaseCreateRequest request = new BaseCreateRequest();
+        request.setUsername(rr.getUsername());
+        request.setPassword(rr.getPassword());
+        request.setSurname(user.getSurname());
+        request.setName(user.getName());
+        request.setStatus(true);
+        request.setAffiliateId(user.getAffiliate().getId());
+        request.setRoleId(4L);
+        request.setEmail(user.getEmail());
+        request.setRole("User");
+
+        repository.deleteById(user.getId());
+        // TODO INVIO MAIL DI CONFERMA ATTIVAZIONE UTENTE???
+        log.info(">> " + request.toString());
+        return this.create(request);
+    }
+
+    public UserDTO getUserToRegister(String uuid) {
+        User user = repository.findByUsername(uuid);
+        //user.setId(0L);
+        return UserDTO.from(user);
     }
 
     /**
@@ -233,6 +261,7 @@ public class UserBusiness {
         private Long affiliateId;
         private Long roleId;
         private String password;
+        private String role;
     }
 
     @Data
@@ -249,6 +278,17 @@ public class UserBusiness {
         private Long roleId;
         private Instant lastLoginFrom;
         private Instant lastLoginTo;
+        private String uuid;
     }
 
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @ToString
+    public static class Confirm {
+        private String username;
+        private String password;
+        private String uuid;
+    }
 }

@@ -1,20 +1,22 @@
 package it.cleverad.engine.scheduled;
 
-import it.cleverad.engine.business.CpcBusiness;
-import it.cleverad.engine.business.TransactionBusiness;
-import it.cleverad.engine.business.WalletBusiness;
+import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.AffiliateChannelCommissionCampaign;
 import it.cleverad.engine.persistence.repository.service.AffiliateChannelCommissionCampaignRepository;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.service.RefferalService;
+import it.cleverad.engine.web.dto.BudgetDTO;
+import it.cleverad.engine.web.dto.CampaignDTO;
 import it.cleverad.engine.web.dto.CpcDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +33,10 @@ public class ManageCPC {
     private WalletRepository walletRepository;
     @Autowired
     private WalletBusiness walletBusiness;
+    @Autowired
+    private BudgetBusiness budgetBusiness;
+    @Autowired
+    private CampaignBusiness campaignBusiness;
 
     @Autowired
     private AffiliateChannelCommissionCampaignRepository affiliateChannelCommissionCampaignRepository;
@@ -38,10 +44,10 @@ public class ManageCPC {
     @Autowired
     private RefferalService refferalService;
 
-    //TODO controlla quotidianamente se la data scadenza delle campagne è stata superata
-
-    @Scheduled(cron = "22 0/4 * * * ?")
+    @Scheduled(cron = "* * 0/1 * * ?")
+    @Async
     public void trasformaTrackingCPC() {
+     //   log.info("trasformaTrackingCPC");
         try {
 
             // trovo tutti i tracking con read == false
@@ -73,6 +79,16 @@ public class ManageCPC {
                 rr.setApproved(true);
                 rr.setMediaId(refferal.getMediaId());
 
+                // controlla data scadneza camapgna
+                CampaignDTO campaignDTO = campaignBusiness.findById(refferal.getCampaignId());
+                LocalDate endDate = campaignDTO.getEndDate();
+                if (endDate.isBefore(LocalDate.now())) {
+                    // setto a campagna scaduta
+                    rr.setDictionaryId(42L);
+                } else {
+                    rr.setDictionaryId(42L);
+                }
+
                 // associo a wallet
                 Long affiliateID = refferal.getAffiliateId();
                 Long walletID;
@@ -95,6 +111,34 @@ public class ManageCPC {
 
                         // incemento valore
                         walletBusiness.incement(walletID, totale);
+
+                        // decremento budget Affiato
+                        BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
+                        if (bb != null) {
+                            Double totBudgetDecrementato = bb.getBudget() - totale;
+                            BudgetBusiness.Filter filter = new BudgetBusiness.Filter();
+                            filter.setBudget(totBudgetDecrementato);
+                            budgetBusiness.update(bb.getId(), filter);
+
+                            // setto stato transazione a ovebudget editore se totale < 0
+                            if (totBudgetDecrementato < 0) {
+                                rr.setDictionaryId(47L);
+                            }
+                        }
+
+                        // decremento budget Campagna
+                        if (campaignDTO != null) {
+                            Double budgetCampagna = campaignDTO.getBudget() - totale;
+
+                            CampaignBusiness.Filter filter = new CampaignBusiness.Filter();
+                            filter.setBudget(budgetCampagna);
+                            campaignBusiness.update(bb.getId(), filter);
+
+                            // setto stato transazione a ovebudget editore se totale < 0
+                            if (budgetCampagna < 0) {
+                                rr.setDictionaryId(48L);
+                            }
+                        }
 
                         // creo la transazione
                         transactionBusiness.createCpc(rr);

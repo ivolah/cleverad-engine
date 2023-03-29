@@ -11,7 +11,7 @@ import it.cleverad.engine.web.dto.CampaignDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -20,10 +20,10 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class ManageCPL {
+public class ManageCPS {
 
     @Autowired
-    private CplBusiness cplBusiness;
+    private CpsBusiness cpsBusiness;
     @Autowired
     private TransactionBusiness transactionBusiness;
     @Autowired
@@ -41,18 +41,16 @@ public class ManageCPL {
     @Autowired
     private RefferalService refferalService;
 
-    //TODO  controlla quotidianamente se la data scadenza delle campagne è stata superata
 
-    @Async
-    @Scheduled(cron = "0 0/9 * * * ?")
-    public void trasformaTrackingCPL() {
+    @Scheduled(cron = "0 0/10 * * * ?")
+    public void trasformaTrackingCPS() {
         try {
             // trovo uttti i tracking con read == false
-            cplBusiness.getUnread().stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
+            cpsBusiness.getUnread().stream().filter(cpsDTO -> StringUtils.isNotBlank(cpsDTO.getRefferal())).forEach(cpsDTO -> {
 
                 // prendo reffereal e lo leggo
-                Refferal refferal = refferalService.decodificaRefferal(cplDTO.getRefferal());
-                log.info("CPL :: {} - {}", cplDTO, refferal);
+                Refferal refferal = refferalService.decodificaRefferal(cpsDTO.getRefferal());
+                log.info("CPS :: {} - {}", cpsDTO, refferal);
 
                 // setta transazione
                 TransactionBusiness.BaseCreateRequest rr = new TransactionBusiness.BaseCreateRequest();
@@ -60,11 +58,11 @@ public class ManageCPL {
                 rr.setCampaignId(refferal.getCampaignId());
                 rr.setChannelId(refferal.getChannelId());
                 rr.setMediaId(refferal.getMediaId());
-                //   rr.setDateTime(cplDTO.getDate());
+                //   rr.setDateTime(cpsDTO.getDate());
                 rr.setApproved(true);
-                rr.setAgent(cplDTO.getAgent());
-                rr.setIp(cplDTO.getIp());
-                rr.setData(cplDTO.getData());
+                rr.setAgent(cpsDTO.getAgent());
+                rr.setIp(cpsDTO.getIp());
+                rr.setData(cpsDTO.getData());
                 rr.setMediaId(refferal.getMediaId());
 
                 // controlla data scadneza camapgna
@@ -91,12 +89,12 @@ public class ManageCPL {
                 // gesione commisione
                 List<AffiliateChannelCommissionCampaign> accc = affiliateChannelCommissionCampaignRepository.findByAffiliateIdAndChannelIdAndCampaignId(refferal.getAffiliateId(), refferal.getChannelId(), refferal.getCampaignId());
                 accc.stream().forEach(affiliateChannelCommissionCampaign -> {
-                    if (affiliateChannelCommissionCampaign.getCommission().getDictionary().getName().equals("CPL")) {
+                    if (affiliateChannelCommissionCampaign.getCommission().getDictionary().getName().equals("CPS")) {
                         rr.setCommissionId(affiliateChannelCommissionCampaign.getCommission().getId());
 
                         Double totale = Double.valueOf(affiliateChannelCommissionCampaign.getCommission().getValue()) * 1;
                         rr.setValue(totale);
-                        rr.setLeadNumber(Long.valueOf(1));
+                        rr.setClickNumber(Long.valueOf(1));
 
                         // incemento valore
                         walletBusiness.incement(walletID, totale);
@@ -130,17 +128,17 @@ public class ManageCPL {
                         }
 
                         // creo la transazione
-                        transactionBusiness.createCpl(rr);
+                        transactionBusiness.createCps(rr);
                     }
                 });
 
                 // setto a gestito
-                cplBusiness.setRead(cplDTO.getId());
+                cpsBusiness.setRead(cpsDTO.getId());
 
             });
         } catch (Exception e) {
-            log.error("Eccezione Scheduler CPL --  {}", e.getMessage(), e);
+            log.error("Eccezione Scheduler CPS --  {}", e.getMessage(), e);
         }
-    }//trasformaTrackingCPL
+    }//trasformaTrackingCPS
 
 }

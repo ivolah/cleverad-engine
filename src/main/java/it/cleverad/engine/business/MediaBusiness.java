@@ -254,7 +254,7 @@ public class MediaBusiness {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
             if (request.getName() != null) {
-                predicates.add(cb.equal(root.get("name"), request.getName()));
+                predicates.add(cb.equal(root.get("name"), "%" + request.getName() + "%"));
             }
 
             if (request.getStatus() != null) {
@@ -335,9 +335,8 @@ public class MediaBusiness {
         private String bannerCode;
         private String note;
         private Long campaignId;
-
+        private Boolean status;
         private String idFile;
-        private String status;
         private LocalDateTime creationDate;
         private LocalDateTime lastModificationDate;
 

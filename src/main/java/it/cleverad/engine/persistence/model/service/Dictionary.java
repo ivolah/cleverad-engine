@@ -67,6 +67,18 @@ public class Dictionary {
     @OneToMany
     @JoinColumn(name = "status_id")
     private Set<CampaignAffiliate> campaignAffiliates;
+    @OneToMany
+    @JoinColumn(name = "dictionary_id")
+    private Set<TransactionCPC> transactionCPCS;
+    @OneToMany
+    @JoinColumn(name = "dictionary_id")
+    private Set<TransactionCPM> transactionCPMS;
+    @OneToMany
+    @JoinColumn(name = "dictionary_id")
+    private Set<TransactionCPL> transactionCPLS;
+    @OneToMany
+    @JoinColumn(name = "dictionary_id")
+    private Set<TransactionCPS> transactionCPS;
 
 }
 

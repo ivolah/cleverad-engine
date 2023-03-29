@@ -60,6 +60,9 @@ public class TransactionBusiness {
     private CommissionRepository commissionRepository;
     @Autowired
     private MediaRepository mediaRepository;
+    @Autowired
+    private DictionaryRepository dictionaryRepository;
+
 
     /**
      * ============================================================================================================
@@ -68,11 +71,13 @@ public class TransactionBusiness {
     // CREATE
     public TransactionCPCDTO createCpc(BaseCreateRequest request) {
         TransactionCPC map = mapper.map(request, TransactionCPC.class);
+        request.setDictionaryId(42L);
         Affiliate aa = affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId));
         map.setAffiliate(aa);
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
         map.setChannel(channelRepository.findById(request.channelId).orElseThrow(() -> new ElementCleveradException("Channel", request.channelId)));
         map.setCommission(commissionRepository.findById(request.commissionId).orElseThrow(() -> new ElementCleveradException("Commission", request.commissionId)));
+        map.setDictionary(dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", request.dictionaryId)));
         Wallet ww;
         if (request.walletId != null) {
             ww = walletRepository.findById(request.walletId).orElseThrow(() -> new ElementCleveradException("Wallet", request.walletId));
@@ -87,11 +92,13 @@ public class TransactionBusiness {
 
     public TransactionCPLDTO createCpl(BaseCreateRequest request) {
         TransactionCPL map = mapper.map(request, TransactionCPL.class);
+        request.setDictionaryId(42L);
         Affiliate aa = affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId));
         map.setAffiliate(aa);
         map.setAffiliate(affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId)));
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
         map.setChannel(channelRepository.findById(request.channelId).orElseThrow(() -> new ElementCleveradException("Channel", request.channelId)));
+        map.setDictionary(dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", request.dictionaryId)));
         map.setCommission(commissionRepository.findById(request.commissionId).orElseThrow(() -> new ElementCleveradException("Commission", request.commissionId)));
         Wallet ww;
         if (request.walletId != null) {
@@ -100,7 +107,6 @@ public class TransactionBusiness {
             ww = aa.getWallets().stream().findFirst().get();
         }
         map.setWallet(ww);
-
         //map.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
 
         return TransactionCPLDTO.from(cplRepository.save(map));
@@ -108,12 +114,13 @@ public class TransactionBusiness {
 
     public TransactionCPMDTO createCpm(BaseCreateRequest request) {
         TransactionCPM map = mapper.map(request, TransactionCPM.class);
-
+        request.setDictionaryId(42L);
         Affiliate aa = affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId));
         map.setAffiliate(aa);
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
         map.setChannel(channelRepository.findById(request.channelId).orElseThrow(() -> new ElementCleveradException("Channel", request.channelId)));
         map.setCommission(commissionRepository.findById(request.commissionId).orElseThrow(() -> new ElementCleveradException("Commission", request.commissionId)));
+        map.setDictionary(dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", request.dictionaryId)));
         Wallet ww;
         if (request.walletId != null) {
             ww = walletRepository.findById(request.walletId).orElseThrow(() -> new ElementCleveradException("Wallet", request.walletId));
@@ -128,11 +135,12 @@ public class TransactionBusiness {
 
     public TransactionCPSDTO createCps(BaseCreateRequest request) {
         TransactionCPS map = mapper.map(request, TransactionCPS.class);
-
+        request.setDictionaryId(42L);
         Affiliate aa = affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId));
         map.setAffiliate(aa);
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
         map.setChannel(channelRepository.findById(request.channelId).orElseThrow(() -> new ElementCleveradException("Channel", request.channelId)));
+        map.setDictionary(dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", request.dictionaryId)));
         map.setCommission(commissionRepository.findById(request.commissionId).orElseThrow(() -> new ElementCleveradException("Commission", request.commissionId)));
         Wallet ww;
         if (request.walletId != null) {
@@ -240,6 +248,7 @@ public class TransactionBusiness {
         Page<TransactionCPM> page = cpmRepository.findAll(getSpecificationCPM(request), pageable);
         return page.map(TransactionCPMDTO::from);
     }
+
     public Page<TransactionCPSDTO> searchCps(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Page<TransactionCPS> page = cpsRepository.findAll(getSpecificationCPS(request), pageable);
@@ -495,9 +504,14 @@ public class TransactionBusiness {
         private String agent;
         private String refferal;
         private String data;
-        private Long clickNumber;
+
         private String payoutId;
         private String note;
+        private Long dictionaryId;
+        private Long total;
+        private Long impressionNumber;
+        private Long leadNumber;
+        private Long clickNumber;
     }
 
     @Data
@@ -518,6 +532,10 @@ public class TransactionBusiness {
         private Boolean approved;
         private String payoutId;
         private String note;
+        private Long dictionaryId;
+        private Long impressionNumber;
+        private Long leadNumber;
+        private Long clickNumber;
     }
 
 }
