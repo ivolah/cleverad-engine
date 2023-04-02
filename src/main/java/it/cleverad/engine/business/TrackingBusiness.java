@@ -65,15 +65,10 @@ public class TrackingBusiness {
         targetDTO.setTarget(mediaDTO.getTarget());
 
         Long cID = mediaDTO.getCampaignId();
-        if (cID != null) {
-            targetDTO.setCookieTime(campaignBusiness.findById(cID).getCookieValue());
-        } else {
-            targetDTO.setCookieTime("60");
-        }
-        
-        campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(refferal.getAffiliateId(), refferal.getCampaignId()).stream().findFirst().ifPresent(campaignAffiliateDTO ->
-                targetDTO.setFollowThorugh(campaignAffiliateDTO.getFollowThrough())
-        );
+        if (cID != null) targetDTO.setCookieTime(campaignBusiness.findById(cID).getCookieValue());
+        else targetDTO.setCookieTime("60");
+
+        campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(refferal.getAffiliateId(), refferal.getCampaignId()).stream().findFirst().ifPresent(campaignAffiliateDTO -> targetDTO.setFollowThorugh(campaignAffiliateDTO.getFollowThrough()));
 
         return targetDTO;
     }

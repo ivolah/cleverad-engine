@@ -1,6 +1,7 @@
 package it.cleverad.engine.web.dto;
 
 import it.cleverad.engine.persistence.model.service.Campaign;
+import it.cleverad.engine.persistence.model.service.Target;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -65,7 +66,7 @@ public class CampaignDTO {
                 mediaDTO.setId(media.getId());
                 mediaDTO.setName(media.getName());
                 mediaDTO.setNote(media.getNote());
-                mediaDTO.setTarget(media.getTarget());
+             //   mediaDTO.setTarget((List<Target>) media.getTargets());
                 mediaDTO.setUrl(media.getUrl());
                 mediaDTO.setTypeId(String.valueOf(media.getMediaType().getId()));
                 return mediaDTO;

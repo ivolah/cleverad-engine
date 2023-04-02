@@ -132,6 +132,10 @@ public class MailService {
         return null;
     }
 
+    public MailDTO invioTemplate(BaseCreateRequest request){
+       return this.invio(request);
+    }
+
     public MailDTO invitoCampagna(BaseCreateRequest request) {
         request.setTemplateId(11L);
         this.invio(request);

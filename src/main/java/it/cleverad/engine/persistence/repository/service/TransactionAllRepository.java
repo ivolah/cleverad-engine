@@ -1,5 +1,6 @@
 package it.cleverad.engine.persistence.repository.service;
 
+import it.cleverad.engine.persistence.model.service.TopAffiliates;
 import it.cleverad.engine.persistence.model.service.TopCampaings;
 import it.cleverad.engine.persistence.model.service.TransactionAll;
 import org.springframework.data.domain.Page;
@@ -28,8 +29,8 @@ public interface TransactionAllRepository extends JpaRepository<TransactionAll, 
             "       (tr.revenue - sum(al.value)) / tr.revenue  as marginePC," +
             "       sum(al.value) / sum(al.impressionNumber)     as ecpm," +
             "       sum(al.value) / sum(al.leadNumber)           as ecpl," +
-            "       sum(al.value) / sum(al.clickNumber)          as ecpc,"+
-            "       al.dictionaryId as distionaryId" +
+            "       sum(al.value) / sum(al.clickNumber)          as ecpc," +
+            "       al.dictionaryId as dictionaryId" +
             " from TransactionAll al" +
             " left join RevenueFactor tr on al.campaignId = tr.campaign.id" +
             " where (:dateFrom < al.dateTime) " +
@@ -37,6 +38,32 @@ public interface TransactionAllRepository extends JpaRepository<TransactionAll, 
             " and (al.dictionaryId in (:dictionaryList)) " +
             " group by al.campaignId, al.campaignName, al.dictionaryId, tr.revenue")
     Page<TopCampaings> findGroupByCampaignId(Pageable pageableRequest, @Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList);
+
+    @Query("SELECT count(*),  " +
+            "       al.affiliateId                            as affiliateId,  " +
+            "       al.affiliateName                          as affiliateName,  " +
+            "       al.channelId                              as channelId,  " +
+            "       al.channelName                            as channelName,  " +
+            "       sum(al.impressionNumber)                  as impressionNumber ," +
+            "       sum(al.clickNumber)                       as clickNumber ," +
+            "       sum(al.leadNumber)                        as leadNumber ," +
+            "       sum(al.clickNumber) / sum(al.impressionNumber) as CTR," +
+            "       sum(al.leadNumber) / sum(al.clickNumber)       as LR," +
+            "       sum(al.value)                              as commssion,  " +
+            "       tr.revenue                                 as revenue," +
+            "       tr.revenue - sum(al.value)                 as margine," +
+            "       (tr.revenue - sum(al.value)) / tr.revenue  as marginePC," +
+            "       sum(al.value) / sum(al.impressionNumber)     as ecpm," +
+            "       sum(al.value) / sum(al.leadNumber)           as ecpl," +
+            "       sum(al.value) / sum(al.clickNumber)          as ecpc," +
+            "       al.dictionaryId  from TransactionAll al" +
+            " left join RevenueFactor tr on al.campaignId = tr.campaign.id" +
+            " where (:dateFrom < al.dateTime) " +
+            " and (:dateTo > al.dateTime) " +
+            " and (al.dictionaryId in (:dictionaryList)) " +
+            " group by al.affiliateId, al.affiliateName, al.dictionaryId, al.channelId, al.channelName, tr.revenue")
+    Page<TopAffiliates> findAffiliatesGroupByCampaignId(Pageable pageableRequest, @Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList);
+
 
 }
 

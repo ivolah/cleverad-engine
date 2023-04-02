@@ -131,9 +131,7 @@ public class ChannelBusiness {
 
         if (searchACCC != null) {
 
-            List<Long> channelsACCC = searchACCC.stream().map(dtos -> {
-                return repository.findById(dtos.getChannelId()).get().getId();
-            }).collect(Collectors.toList());
+            List<Long> channelsACCC = searchACCC.stream().map(dtos -> repository.findById(dtos.getChannelId()).get().getId()).collect(Collectors.toList());
 
             List<Channel> channels = new ArrayList<>();
             page.stream().forEach(channel -> {
@@ -186,9 +184,7 @@ public class ChannelBusiness {
         rr.setAffiliateId(id);
         Page<AffiliateChannelCommissionCampaignDTO> search = accc.search(rr, pageableRequest);
 
-        List<Channel> channelList = search.stream().map(affiliateChannelCommissionCampaignDTO -> {
-            return repository.findById(affiliateChannelCommissionCampaignDTO.getChannelId()).get();
-        }).collect(Collectors.toList());
+        List<Channel> channelList = search.stream().map(affiliateChannelCommissionCampaignDTO -> repository.findById(affiliateChannelCommissionCampaignDTO.getChannelId()).get()).collect(Collectors.toList());
 
         //list to page
         Page<Channel> page = new PageImpl<>(channelList.stream().distinct().collect(Collectors.toList()));
@@ -226,6 +222,18 @@ public class ChannelBusiness {
         List<Channel> channelList = search.stream().map(dtos -> {
             return repository.findById(dtos.getChannelId()).get();
         }).collect(Collectors.toList());
+
+        Page<Channel> page = new PageImpl<>(channelList.stream().distinct().collect(Collectors.toList()));
+        return page.map(ChannelDTO::from);
+    }
+
+    public Page<ChannelDTO> getbyIdCampaignPrefiltrato(Long campaignId, Pageable pageableRequest) {
+        AffiliateChannelCommissionCampaignBusiness.Filter rr = new AffiliateChannelCommissionCampaignBusiness.Filter();
+        rr.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+        rr.setCampaignId(campaignId);
+        Page<AffiliateChannelCommissionCampaignDTO> search = accc.search(rr, pageableRequest);
+
+        List<Channel> channelList = search.stream().map(dtos -> repository.findById(dtos.getChannelId()).get()).collect(Collectors.toList());
 
         Page<Channel> page = new PageImpl<>(channelList.stream().distinct().collect(Collectors.toList()));
         return page.map(ChannelDTO::from);

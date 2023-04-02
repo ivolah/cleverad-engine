@@ -63,11 +63,7 @@ public class JwtUserDetailsService implements UserDetailsService {
     public Boolean isAdmin() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        if (username.equals("anonymousUser") || userBusiness.findByUsername(username).getRoleId() == 3) {
-            return true;
-        } else {
-            return false;
-        }
+        return username.equals("anonymousUser") || userBusiness.findByUsername(username).getRoleId() == 3;
     }
 
     public Long getAffilaite() {

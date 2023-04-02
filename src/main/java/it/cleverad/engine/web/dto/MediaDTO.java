@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Data
@@ -16,7 +18,7 @@ public class MediaDTO {
     private long id;
     private String name;
     private String url;
-    private String target;
+    private String mailSubject;
     private String bannerCode;
     private String note;
     private String idFile;
@@ -33,11 +35,13 @@ public class MediaDTO {
 
     private String imageHash;
 
-    public MediaDTO(long id, String name, String url, String target, String bannerCode, String note, String idFile, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long campaignId, String campaignName, Long typeId, String typeName) {
+    private List<TargetDTO> targets;
+
+    public MediaDTO(long id, String name, String url, String mailSubject, String bannerCode, String note, String idFile, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long campaignId, String campaignName, Long typeId, String typeName, List<TargetDTO> targets) {
         this.id = id;
         this.name = name;
         this.url = url;
-        this.target = target;
+        this.mailSubject = mailSubject;
         this.bannerCode = bannerCode;
         this.note = note;
         this.idFile = idFile;
@@ -48,11 +52,30 @@ public class MediaDTO {
         this.campaignName = campaignName;
         this.typeId = typeId;
         this.typeName = typeName;
+        this.targets = targets;
     }
+
 
     public static MediaDTO from(Media media) {
         Campaign campaign = media.getCampaigns().stream().findFirst().orElse(null);
-        return new MediaDTO(media.getId(), media.getName(), media.getUrl(), media.getTarget(), media.getBannerCode(), media.getNote(), media.getIdFile(), media.getStatus(), media.getCreationDate(), media.getLastModificationDate(), campaign != null ? campaign.getId() : null, campaign != null ? campaign.getName() : "NON ASSOCIATO A CAMPAGNA", media.getMediaType().getId(), media.getMediaType().getName());
+
+        List<TargetDTO> targets = null;
+        if (media.getTargets() != null) {
+            targets = media.getTargets().stream().map(tt -> {
+                TargetDTO dto = new TargetDTO();
+                dto.setId(tt.getId());
+                dto.setTarget(tt.getTarget());
+                return dto;
+            }).collect(Collectors.toList());
+        }
+
+        return new MediaDTO(media.getId(), media.getName(), media.getUrl(), media.getMailSubject(), media.getBannerCode(), media.getNote(), media.getIdFile(), media.getStatus(), media.getCreationDate(), media.getLastModificationDate(),
+                campaign != null ? campaign.getId() : null,
+                campaign != null ? campaign.getName() : "NON ASSOCIATO A CAMPAGNA",
+                media.getMediaType().getId(),
+                media.getMediaType().getName(), targets);
     }
 
 }
+
+

@@ -1,6 +1,7 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.ReportBusiness;
+import it.cleverad.engine.persistence.model.service.TopAffiliates;
 import it.cleverad.engine.persistence.model.service.TopCampaings;
 import it.cleverad.engine.web.dto.ReportDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,12 @@ public class ReportController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<TopCampaings> getCamapgneTop(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
         return reportBusiness.searchTopCampaigns(request, pageable);
+    }
+
+    @GetMapping(path = "/affilaites/top")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<TopAffiliates> getAffiliatiTop(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
+        return reportBusiness.searchTopAffilaites(request, pageable);
     }
 
     /**

@@ -60,6 +60,12 @@ public class MailController {
         return business.invitoCampagna(request);
     }
 
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "/template")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public MailDTO inviaTemplate(@ModelAttribute MailService.BaseCreateRequest request) {
+        return business.invioTemplate(request);
+    }
+
 
     /**
      * ============================================================================================================

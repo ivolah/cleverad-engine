@@ -159,12 +159,12 @@ public class AffiliateBusiness {
 
         Boolean status = affiliate.getStatus();
         MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
-        if (status == false && filter.status == true) {
+        if (!status && filter.status) {
             // invio mail approvato
             mailRequest.setTemplateId(7L);
             mailRequest.setAffiliateId(id);
             mailService.invio(mailRequest);
-        } else if (status == false && filter.status == false) {
+        } else if (!status && !filter.status) {
             // invio mail non approvato
             mailRequest.setTemplateId(8L);
             mailRequest.setAffiliateId(id);

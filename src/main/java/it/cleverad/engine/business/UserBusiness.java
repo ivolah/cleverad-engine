@@ -188,7 +188,7 @@ public class UserBusiness {
 
         repository.deleteById(user.getId());
         // TODO INVIO MAIL DI CONFERMA ATTIVAZIONE UTENTE???
-        log.info(">> " + request.toString());
+        log.info(">> " + request);
         return this.create(request);
     }
 

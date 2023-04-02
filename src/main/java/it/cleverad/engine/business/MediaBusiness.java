@@ -4,6 +4,7 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.Media;
+import it.cleverad.engine.persistence.model.service.Target;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.MediaRepository;
@@ -82,6 +83,7 @@ public class MediaBusiness {
 
         Media map = mapper.map(request, Media.class);
         map.setMediaType(mediaTypeRepository.findById(request.typeId).orElseThrow(() -> new ElementCleveradException("Media Type", request.typeId)));
+        map.setStatus(true);
         Media saved = repository.save(map);
         Campaign cc = campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.getCampaignId()));
         cc.addMedia(saved);
@@ -132,9 +134,14 @@ public class MediaBusiness {
         String url = mappedEntity.getUrl();
         if (StringUtils.isNotBlank(url)) bannerCode.replace("{{url}}", url);
 
-        String target = mappedEntity.getTarget();
-        if (StringUtils.isNotBlank(target)) bannerCode.replace("{{target}}", target);
+        List<Target> targets = (List<Target>) mappedEntity.getTargets();
+
+        targets.stream().filter(target -> StringUtils.isNotBlank(target.getTarget())).forEach(target -> {
+            bannerCode.replace("{{target}}", target.getTarget());
+            // TODO COME GESTIRE?????
+        });
         mappedEntity.setBannerCode(bannerCode);
+
         Media saved = repository.save(mappedEntity);
 
         Campaign cc = campaignRepository.findById(filter.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", filter.getCampaignId()));
@@ -197,7 +204,7 @@ public class MediaBusiness {
             list = cc.getMedias();
         } else {
             // N.B. Lista presettata a status == True
-            list = cc.getMedias().stream().filter(media -> media.getStatus().booleanValue() == true).collect(Collectors.toSet());
+            list = cc.getMedias().stream().filter(media -> media.getStatus().booleanValue()).collect(Collectors.toSet());
         }
         Page<Media> page = new PageImpl<>(list.stream().distinct().collect(Collectors.toList()));
 
@@ -320,6 +327,7 @@ public class MediaBusiness {
         private String note;
         private String idFile;
         private Long campaignId;
+        private String mailSubject;
     }
 
     @Data
@@ -327,11 +335,11 @@ public class MediaBusiness {
     @AllArgsConstructor
     public static class Filter {
         private Long id;
-
         private String name;
         private Long typeId;
         private String url;
         private String target;
+        private String mailSubject;
         private String bannerCode;
         private String note;
         private Long campaignId;
@@ -339,12 +347,10 @@ public class MediaBusiness {
         private String idFile;
         private LocalDateTime creationDate;
         private LocalDateTime lastModificationDate;
-
         private Instant creationDateFrom;
         private Instant creationDateTo;
         private Instant lastModificationDateFrom;
         private Instant lastModificationDateTo;
-
     }
 
 }

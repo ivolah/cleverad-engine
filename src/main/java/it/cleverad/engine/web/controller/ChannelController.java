@@ -57,6 +57,12 @@ public class ChannelController {
     public Page<ChannelDTO> getbyIdUser(@PathVariable Long id, Pageable pageable) {
         return business.getbyIdUser(id, pageable);
     }
+    @GetMapping("/{campaignId}/campaign")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<ChannelDTO> getbyIdCampaignPrefiltrato(@PathVariable Long campaignId, Pageable pageable) {
+        return business.getbyIdCampaignPrefiltrato(campaignId, pageable);
+    }
+
 
     @GetMapping("/affiliate")
     @ResponseStatus(HttpStatus.ACCEPTED)
