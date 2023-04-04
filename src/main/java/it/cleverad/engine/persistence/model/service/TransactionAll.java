@@ -78,4 +78,6 @@ public class TransactionAll {
     @Column(name = "dictionary_name")
     private String dictionaryName;
 
+    private Double budget;
+
 }

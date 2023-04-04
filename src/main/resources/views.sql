@@ -2,8 +2,9 @@ create or replace view public.v_transactions_all
             (rn, id, agent, approved, creation_date, date_time, ip, note, payout_reference, value, affiliate_id,
              affiliate_name, campaign_id, campaign_name, channel_id, channel_name, commission_id, commission_name,
              commission_value,
-             payout_id, wallet_id, media_id, media_name, click_number, impression_number, lead_number,refferal, company_id, advertiser_id, data,
-             dictionary_id, dictionary_name, tipo)
+             payout_id, wallet_id, media_id, media_name, click_number, impression_number, lead_number, refferal,
+             company_id, advertiser_id, data,
+             dictionary_id, dictionary_name, budget, tipo)
 as
 SELECT row_number() OVER ()    AS rn,
        t_transaction_cpc.id,
@@ -37,6 +38,7 @@ SELECT row_number() OVER ()    AS rn,
        NULL::character varying AS data,
        t_transaction_cpc.dictionary_id,
        td.name                 AS dictionary_name,
+       tc.budget               AS budget,
        'CPC'::text             AS tipo
 FROM t_transaction_cpc
          LEFT JOIN t_campaign tc
@@ -79,6 +81,7 @@ SELECT row_number() OVER ()          AS rn,
        t_transaction_cpl.data,
        t_transaction_cpl.dictionary_id,
        td.name                       AS dictionary_name,
+       tc.budget                     AS budget,
        'CPL'::text                   AS tipo
 FROM t_transaction_cpl
          LEFT JOIN t_campaign tc ON t_transaction_cpl.campaign_id = tc.id
@@ -120,6 +123,7 @@ SELECT row_number() OVER ()                AS rn,
        t_transaction_cpm.data,
        t_transaction_cpm.dictionary_id,
        td.name                             AS dictionary_name,
+       tc.budget                           AS budget,
        'cpm'::text                         AS tipo
 FROM t_transaction_cpm
          LEFT JOIN t_campaign tc ON t_transaction_cpm.campaign_id = tc.id
@@ -161,6 +165,7 @@ SELECT row_number() OVER () AS rn,
        t_transaction_cps.data,
        t_transaction_cps.dictionary_id,
        td.name              AS dictionary_name,
+       tc.budget            AS budget,
        'CPS'::text          AS tipo
 FROM t_transaction_cps
          LEFT JOIN t_campaign tc ON t_transaction_cps.campaign_id = tc.id

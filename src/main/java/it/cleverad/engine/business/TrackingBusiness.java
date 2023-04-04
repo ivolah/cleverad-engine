@@ -5,7 +5,6 @@ import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.tracking.Tracking;
 import it.cleverad.engine.persistence.repository.tracking.TrackingRepository;
 import it.cleverad.engine.service.RefferalService;
-import it.cleverad.engine.web.dto.MediaDTO;
 import it.cleverad.engine.web.dto.TargetDTO;
 import it.cleverad.engine.web.dto.TrackingDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -14,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -43,6 +43,8 @@ public class TrackingBusiness {
     @Autowired
     private MediaBusiness mediaBusiness;
     @Autowired
+    private TargetBusiness targetBusiness;
+    @Autowired
     private CampaignBusiness campaignBusiness;
     @Autowired
     private CampaignAffiliateBusiness campaignAffiliateBusiness;
@@ -58,16 +60,20 @@ public class TrackingBusiness {
     public TargetDTO getTarget(BaseCreateRequest request) {
 
         Refferal refferal = refferalService.decodificaRefferal(request.getRefferalId());
-        TargetDTO targetDTO = new TargetDTO();
         log.trace("REFFERAL :: {} - {}", request.getRefferalId(), refferal.toString());
 
-        MediaDTO mediaDTO = mediaBusiness.findById(refferal.getMediaId());
-        targetDTO.setTarget(mediaDTO.getTarget());
-
-        Long cID = mediaDTO.getCampaignId();
-        if (cID != null) targetDTO.setCookieTime(campaignBusiness.findById(cID).getCookieValue());
+        TargetDTO targetDTO = new TargetDTO();
+        //set target
+        // TODO eventualmente usare lo stesso oggetto ricavato
+        if (targetBusiness.getByMediaIdAll(refferal.getMediaId()) != null) {
+            TargetDTO target = targetBusiness.getByMediaIdAll(refferal.getMediaId()).filter(targetDTO1 -> targetDTO1.getId().equals(refferal.getTargetId())).stream().findFirst().get();
+            targetDTO.setTarget(target.getTarget());
+        }
+        // set cookie
+        Long campaignId = mediaBusiness.findById(refferal.getMediaId()).getCampaignId();
+        if (campaignId != null) targetDTO.setCookieTime(campaignBusiness.findById(campaignId).getCookieValue());
         else targetDTO.setCookieTime("60");
-
+        // set refferal
         campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(refferal.getAffiliateId(), refferal.getCampaignId()).stream().findFirst().ifPresent(campaignAffiliateDTO -> targetDTO.setFollowThorugh(campaignAffiliateDTO.getFollowThrough()));
 
         return targetDTO;

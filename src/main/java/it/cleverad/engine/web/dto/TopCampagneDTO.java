@@ -15,16 +15,16 @@ public class TopCampagneDTO {
 
     private Long campaignId;
     private String campaignName;
-
-
     private Long dictionaryId;
     private String dictionaryName;
 
     private Double impressionNumber;
     private Double clickNumber;
     private Double leadNumber;
+
     private Double ctr;
     private Double lr;
+
     private Double commssionNumber;
     private Double revenueNumber;
     private Double marginNumber;

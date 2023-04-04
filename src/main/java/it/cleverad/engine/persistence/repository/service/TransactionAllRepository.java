@@ -23,20 +23,23 @@ public interface TransactionAllRepository extends JpaRepository<TransactionAll, 
             "       sum(al.leadNumber)                        as leadNumber ," +
             "       sum(al.clickNumber) / sum(al.impressionNumber) as CTR," +
             "       sum(al.leadNumber) / sum(al.clickNumber)       as LR," +
-            "       sum(al.value)                              as commssion," +
+            "       sum(al.value)                              as commission," +
+            "       al.budget                                  as budget, " +
+            "       sum(al.value)/al.budget                    as budgetPC, " +
             "       tr.revenue                                 as revenue," +
             "       tr.revenue - sum(al.value)                 as margine," +
             "       (tr.revenue - sum(al.value)) / tr.revenue  as marginePC," +
             "       sum(al.value) / sum(al.impressionNumber)     as ecpm," +
             "       sum(al.value) / sum(al.leadNumber)           as ecpl," +
             "       sum(al.value) / sum(al.clickNumber)          as ecpc," +
-            "       al.dictionaryId as dictionaryId" +
+            "       al.dictionaryId as dictionaryId, " +
+            "       al.dictionaryName as dictionaryName " +
             " from TransactionAll al" +
             " left join RevenueFactor tr on al.campaignId = tr.campaign.id" +
             " where (:dateFrom < al.dateTime) " +
             " and (:dateTo > al.dateTime) " +
             " and (al.dictionaryId in (:dictionaryList)) " +
-            " group by al.campaignId, al.campaignName, al.dictionaryId, tr.revenue")
+            " group by al.campaignId, al.campaignName,al.dictionaryName, al.dictionaryId, tr.revenue, al.budget")
     Page<TopCampaings> findGroupByCampaignId(Pageable pageableRequest, @Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList);
 
     @Query("SELECT count(*),  " +
@@ -49,21 +52,22 @@ public interface TransactionAllRepository extends JpaRepository<TransactionAll, 
             "       sum(al.leadNumber)                        as leadNumber ," +
             "       sum(al.clickNumber) / sum(al.impressionNumber) as CTR," +
             "       sum(al.leadNumber) / sum(al.clickNumber)       as LR," +
-            "       sum(al.value)                              as commssion,  " +
+            "       sum(al.value)                              as commission,  " +
             "       tr.revenue                                 as revenue," +
             "       tr.revenue - sum(al.value)                 as margine," +
             "       (tr.revenue - sum(al.value)) / tr.revenue  as marginePC," +
             "       sum(al.value) / sum(al.impressionNumber)     as ecpm," +
             "       sum(al.value) / sum(al.leadNumber)           as ecpl," +
             "       sum(al.value) / sum(al.clickNumber)          as ecpc," +
-            "       al.dictionaryId  from TransactionAll al" +
+            "       al.dictionaryId as dictionaryId, " +
+            "       al.dictionaryName as dictionaryName " +
+            " from TransactionAll al" +
             " left join RevenueFactor tr on al.campaignId = tr.campaign.id" +
             " where (:dateFrom < al.dateTime) " +
             " and (:dateTo > al.dateTime) " +
             " and (al.dictionaryId in (:dictionaryList)) " +
-            " group by al.affiliateId, al.affiliateName, al.dictionaryId, al.channelId, al.channelName, tr.revenue")
+            " group by al.affiliateId, al.affiliateName, al.dictionaryId,al.dictionaryName, al.channelId, al.channelName, tr.revenue, al.budget")
     Page<TopAffiliates> findAffiliatesGroupByCampaignId(Pageable pageableRequest, @Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList);
-
 
 }
 

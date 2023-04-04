@@ -154,6 +154,7 @@ public class AffiliateBusiness {
         mappedEntity.setLastModificationDate(LocalDateTime.now());
 
         mapper.map(affiliateDTOfrom, mappedEntity);
+
         //TODO mappedEntity.setDictionaryChannelType(dictionaryRepository.findById(Long.valueOf(filter.getCategorytypeId())).orElseThrow(() -> new ElementCleveradException("Dictionary Category Type", filter.getCategorytypeId())));
         // NOTTODO mappedEntity.setDictionaryCompanyType(dictionaryRepository.findById(filter.getCompanytypeId()).orElseThrow(() -> new ElementCleveradException("Dictionary Company Type", filter.getCompanytypeId())));
 

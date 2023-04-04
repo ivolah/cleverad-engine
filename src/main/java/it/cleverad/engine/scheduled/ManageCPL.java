@@ -41,8 +41,6 @@ public class ManageCPL {
     @Autowired
     private RefferalService refferalService;
 
-    //TODO  controlla quotidianamente se la data scadenza delle campagne è stata superata
-
     @Async
     @Scheduled(cron = "0 0/9 * * * ?")
     public void trasformaTrackingCPL() {

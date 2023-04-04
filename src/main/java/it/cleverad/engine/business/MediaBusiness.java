@@ -13,6 +13,7 @@ import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.service.RefferalService;
 import it.cleverad.engine.web.dto.MediaDTO;
 import it.cleverad.engine.web.dto.MediaTypeDTO;
+import it.cleverad.engine.web.dto.TargetDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -64,6 +65,8 @@ public class MediaBusiness {
 
     @Autowired
     private RefferalService refferalService;
+    @Autowired
+    private TargetBusiness targetBusiness;
 
     /**
      * ============================================================================================================
@@ -99,7 +102,7 @@ public class MediaBusiness {
         if (dto.getTypeId() != null) {
             MediaTypeDTO mtDto = mediaTypeBusiness.findById(dto.getTypeId());
             dto.setTypeName(mtDto.getName());
-            dto.setBannerCode(generaBannerCode(dto, media.getId(), id, 0L));
+            dto.setBannerCode(generaBannerCode(dto, media.getId(), id, 0L, 0L));
         }
         return dto;
     }
@@ -135,10 +138,10 @@ public class MediaBusiness {
         if (StringUtils.isNotBlank(url)) bannerCode.replace("{{url}}", url);
 
         List<Target> targets = (List<Target>) mappedEntity.getTargets();
-
         targets.stream().filter(target -> StringUtils.isNotBlank(target.getTarget())).forEach(target -> {
             bannerCode.replace("{{target}}", target.getTarget());
-            // TODO COME GESTIRE?????
+            // TODO COME GESTIRE????? NON AGGIORNIAMO ma facciamo in logica target?
+            // multipli banner code??
         });
         mappedEntity.setBannerCode(bannerCode);
 
@@ -210,7 +213,7 @@ public class MediaBusiness {
 
         return page.map(media -> {
             MediaDTO dto = MediaDTO.from(media);
-            dto.setBannerCode(generaBannerCode(dto, media.getId(), campaignId, 0L));
+            dto.setBannerCode(generaBannerCode(dto, media.getId(), campaignId, 0L, 0L));
             return dto;
         });
     }
@@ -218,31 +221,48 @@ public class MediaBusiness {
     public MediaDTO getByIdAndCampaignID(Long mediaId, Long campaignId) {
         Media media = repository.findById(mediaId).orElseThrow(() -> new ElementCleveradException("Media", mediaId));
         MediaDTO dto = MediaDTO.from(media);
-        dto.setBannerCode(generaBannerCode(dto, mediaId, campaignId, 0L));
+        dto.setBannerCode(generaBannerCode(dto, mediaId, campaignId, 0L, 0L));
         return dto;
     }
 
     public MediaDTO getByIdAndCampaignIDChannelID(Long mediaId, Long campaignId, Long channelID) {
         Media media = repository.findById(mediaId).orElseThrow(() -> new ElementCleveradException("Media", mediaId));
         MediaDTO dto = MediaDTO.from(media);
-        dto.setBannerCode(generaBannerCode(dto, mediaId, campaignId, channelID));
+        dto.setBannerCode(generaBannerCode(dto, mediaId, campaignId, channelID, 0L));
         return dto;
     }
 
-    private String generaBannerCode(MediaDTO dto, Long mediaId, Long campaignId, Long channelID) {
+    public MediaDTO getByIdAndCampaignIDChannelIDTargetID(Long mediaId, Long campaignId, Long channelID, Long targetId) {
+        Media media = repository.findById(mediaId).orElseThrow(() -> new ElementCleveradException("Media", mediaId));
+        MediaDTO dto = MediaDTO.from(media);
+        dto.setBannerCode(generaBannerCode(dto, mediaId, campaignId, channelID, targetId));
+        return dto;
+    }
+
+    private String generaBannerCode(MediaDTO dto, Long mediaId, Long campaignId, Long channelID, Long targetId) {
         String bannerCode = dto.getBannerCode();
 
         if (StringUtils.isNotBlank(dto.getUrl())) bannerCode = bannerCode.replace("{{url}}", dto.getUrl());
-        if (StringUtils.isNotBlank(dto.getTarget())) bannerCode = bannerCode.replace("{{target}}", dto.getTarget());
 
         String url = dto.getUrl();
         if (StringUtils.isNotBlank(url)) bannerCode = bannerCode.replace("{{url}}", url);
 
-        String target = dto.getTarget();
-        if (StringUtils.isNotBlank(target)) bannerCode = bannerCode.replace("{{target}}", target);
+        //TODO : sae non c'è una lista ma solo uno ?
+        List<TargetDTO> lista = targetBusiness.getByMediaIdAll(mediaId).stream().collect(Collectors.toList());
+        if (lista.size() > 0) {
+            TargetDTO tt = new TargetDTO();
+            lista.forEach(targetDTO -> {
+                if (targetDTO.getId().equals(targetId)) {
+                    tt.setTarget(targetDTO.getTarget());
+                }
+            });
+
+            if (StringUtils.isNotBlank(tt.getTarget()))
+                bannerCode = bannerCode.replace("{{target}}", tt.getTarget());
+        }
 
         if (!jwtUserDetailsService.getRole().equals("Admin")) {
-            bannerCode = bannerCode.replace("{{refferalId}}", refferalService.creaEncoding(Long.toString(campaignId), Long.toString(mediaId), String.valueOf(jwtUserDetailsService.getAffiliateID()), Long.toString(channelID)));
+            bannerCode = bannerCode.replace("{{refferalId}}", refferalService.creaEncoding(Long.toString(campaignId), Long.toString(mediaId), String.valueOf(jwtUserDetailsService.getAffiliateID()), Long.toString(channelID), Long.toString(targetId)));
         }
 
         return bannerCode;

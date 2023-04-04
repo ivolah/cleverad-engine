@@ -95,6 +95,14 @@ public class TargetBusiness {
         return page.map(TargetDTO::from);
     }
 
+    public Page<TargetDTO> getByMediaIdAll(Long mediaId) {
+        Pageable pageable = PageRequest.of(0, 10000, Sort.by(Sort.Order.asc("id")));
+        Filter filter = new Filter();
+        filter.setMediaId(mediaId);
+        Page<Target> page = repository.findAll(getSpecification(filter), pageable);
+        return page.map(TargetDTO::from);
+    }
+
     /**
      * ============================================================================================================
      **/

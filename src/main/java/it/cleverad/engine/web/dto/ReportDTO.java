@@ -13,12 +13,14 @@ public class ReportDTO {
     private Long id;
     private String nome;
     private String descrizione;
+    private Long reportTypeId;
 
     public static ReportDTO from(Report report) {
         return new ReportDTO(
                 report.getId(),
                 report.getName(),
-                report.getDescription()
+                report.getDescription(),
+                report.getReportTypeId()
         );
     }
 

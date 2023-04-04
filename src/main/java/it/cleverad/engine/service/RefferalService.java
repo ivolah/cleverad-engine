@@ -27,6 +27,9 @@ public class RefferalService {
         if (tokens[3] != null) {
             refferal.setChannelId(Long.valueOf(decodifica(tokens[3])));
         }
+        if (tokens[4] != null) {
+            refferal.setTargetId(Long.valueOf(decodifica(tokens[4])));
+        }
         return refferal;
     }
 
@@ -35,14 +38,15 @@ public class RefferalService {
         return new String(decoder);
     }
 
-    public String creaEncoding(String campaignId, String mediaID, String affilaiteID, String channelID) {
+    public String creaEncoding(String campaignId, String mediaID, String affilaiteID, String channelID, String targetId) {
 
         campaignId = encode(campaignId);
         mediaID = encode(mediaID);
         affilaiteID = encode(affilaiteID);
         channelID = encode(channelID);
+        targetId = encode(targetId);
 
-        return StringUtils.stripEnd(campaignId, "=") + "-" + StringUtils.stripEnd(mediaID, "=") + "-" + StringUtils.stripEnd(affilaiteID, "=") + "-" + StringUtils.stripEnd(channelID, "=");
+        return StringUtils.stripEnd(campaignId, "=") + "-" + StringUtils.stripEnd(mediaID, "=") + "-" + StringUtils.stripEnd(affilaiteID, "=") + "-" + StringUtils.stripEnd(channelID, "=") + "-" + StringUtils.stripEnd(targetId, "=");
     }
 
     public String encode(String str) {

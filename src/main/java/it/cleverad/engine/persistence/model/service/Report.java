@@ -22,5 +22,7 @@ public class Report {
     private Long id;
     private String name;
     private String description;
+    @Column(name = "report_type_id")
+    private Long reportTypeId;
 
 }

@@ -2,18 +2,31 @@ package it.cleverad.engine.persistence.model.service;
 
 public interface TopCampaings {
 
-    Long getClickNumber();
+
     Long getCampaignId();
     String getCampaignName();
-    Long getCTR();
-    Long getLT();
     Long getDictionaryId();
+    String getDictionaryName();
+
+
+    Long getImpressionNumber();
+    Long getClickNumber();
+    Long getLeadNumber();
+
+    Long getCTR();
+    Long getLR();
+
     Double getCommission();
     Double getRevenue();
+
     Double getMargine();
     Double getMarginePC();
-    Double getEccpm();
+
+    Double getEcpm();
     Double getEcpc();
     Double getEcpl();
+
+    Double getBudget();
+    Double getBudgetPC();
 
 }

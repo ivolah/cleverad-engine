@@ -98,6 +98,7 @@ public class ReportBusiness {
     public static class Filter {
         private Long id;
         private String name;
+        private Long reportTypeId;
     }
 
     /**
@@ -111,6 +112,7 @@ public class ReportBusiness {
         private Long id;
         private String name;
         private String description;
+        private Long reportTypeId;
     }
 
     /**
