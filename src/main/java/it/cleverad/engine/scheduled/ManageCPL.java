@@ -46,7 +46,7 @@ public class ManageCPL {
     public void trasformaTrackingCPL() {
         try {
             // trovo uttti i tracking con read == false
-            cplBusiness.getUnread().stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
+            cplBusiness.getUnreadDayBefore().stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
 
                 // prendo reffereal e lo leggo
                 Refferal refferal = refferalService.decodificaRefferal(cplDTO.getRefferal());
@@ -99,13 +99,14 @@ public class ManageCPL {
                         // incemento valore
                         walletBusiness.incement(walletID, totale);
 
-                        // decremento budget Affiato
+                        // decremento budget Affiliato
                         BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
                         if (bb != null) {
-                            Double budgetCampagna = campaignDTO.getBudget() - totale;
-                            campaignBusiness.updateBudget(campaignDTO.getId(), budgetCampagna);
+                            Double totBudgetDecrementato = bb.getBudget() - totale;
+                            budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
+
                             // setto stato transazione a ovebudget editore se totale < 0
-                            if (budgetCampagna < 0) {
+                            if (totBudgetDecrementato < 0) {
                                 rr.setDictionaryId(47L);
                             }
                         }

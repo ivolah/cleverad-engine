@@ -53,7 +53,7 @@ public class ManageCPC {
 
             // trovo tutti i tracking con read == false
             Map<String, Integer> mappa = new HashMap<>();
-            Page<CpcDTO> last = cpcBusiness.getUnreadLastHour();
+            Page<CpcDTO> last = cpcBusiness.getUnreadDayBefore();
             last.stream().filter(cpcDTO -> cpcDTO.getRefferal() != null).forEach(cpcDTO -> {
                 // gestisco calcolatore
                 Integer num = mappa.get(cpcDTO.getRefferal());
@@ -75,7 +75,7 @@ public class ManageCPC {
                 rr.setAffiliateId(refferal.getAffiliateId());
                 rr.setCampaignId(refferal.getCampaignId());
                 rr.setChannelId(refferal.getChannelId());
-                rr.setDateTime(LocalDateTime.now());
+                rr.setDateTime(LocalDate.now().minusDays(1).atStartOfDay());
                 rr.setMediaId(refferal.getMediaId());
                 rr.setApproved(true);
                 rr.setMediaId(refferal.getMediaId());
@@ -113,16 +113,11 @@ public class ManageCPC {
                         // incemento valore
                         walletBusiness.incement(walletID, totale);
 
-                        // decremento budget Affiato
+                        // decremento budget Affiliato
                         BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
                         if (bb != null) {
                             Double totBudgetDecrementato = bb.getBudget() - totale;
-                            BudgetBusiness.Filter filter = new BudgetBusiness.Filter();
-                            filter.setBudget(totBudgetDecrementato);
-                            filter.setAffiliateId(refferal.getAffiliateId());
-                            filter.setCampaignId(refferal.getCampaignId());
-                            filter.setStatus(true);
-                            budgetBusiness.update(bb.getId(), filter);
+                            budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
 
                             // setto stato transazione a ovebudget editore se totale < 0
                             if (totBudgetDecrementato < 0) {

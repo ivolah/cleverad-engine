@@ -76,7 +76,7 @@ public class WalletTransactionBusiness {
     public Page<WalletTransactionDTO> findByIdAffilaite(Long id) {
         Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
-        WalletDTO dto =walletBusiness.findByIdAffilaite(id).stream().findFirst().get();
+        WalletDTO dto = walletBusiness.findByIdAffilaite(id).stream().findFirst().get();
         request.setWalletId(dto.getId());
         Page<WalletTransaction> page = repository.findAll(getSpecification(request), pageable);
         return page.map(WalletTransactionDTO::from);
@@ -125,6 +125,7 @@ public class WalletTransactionBusiness {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class BaseCreateRequest {
+        private Long id;
         private Double totalBefore;
         private Double payedBefore;
         private Double residualBefore;

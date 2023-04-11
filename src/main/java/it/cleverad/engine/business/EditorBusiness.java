@@ -89,14 +89,13 @@ public class EditorBusiness {
 
     // UPDATE
     public EditorDTO update(Long id, Filter filter) {
+
         Editor editor = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Editor", id));
         EditorDTO affiliateDTOfrom = EditorDTO.from(editor);
-
         mapper.map(filter, affiliateDTOfrom);
 
         Editor mappedEntity = mapper.map(editor, Editor.class);
         mappedEntity.setLastModificationDate(LocalDateTime.now());
-
         mapper.map(affiliateDTOfrom, mappedEntity);
 
         return EditorDTO.from(repository.save(mappedEntity));

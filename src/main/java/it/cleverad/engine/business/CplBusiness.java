@@ -90,10 +90,12 @@ public class CplBusiness {
         return CplDTO.from(repository.save(mappedEntity));
     }
 
-    public Page<CplDTO> getUnread() {
+    public Page<CplDTO> getUnreadDayBefore() {
         Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setRead(false);
+        request.setDateFrom(LocalDate.now().minusDays(1));
+        request.setDateTo(LocalDate.now().minusDays(1));
         Page<Cpl> page = repository.findAll(getSpecification(request), pageable);
         log.trace("UNREAD {}", page.getTotalElements());
         return page.map(CplDTO::from);

@@ -183,8 +183,8 @@ public class CampaignBusiness {
         return CampaignDTO.from(repository.save(mappedEntity));
     }
 
-    public CampaignDTO updateBudget(Long id, Double budget) {
-        Campaign campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
+    public CampaignDTO updateBudget(Long campaignId, Double budget) {
+        Campaign campaign = repository.findById(campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", campaignId));
         Campaign mappedEntity = mapper.map(campaign, Campaign.class);
         mappedEntity.setBudget(budget);
         return CampaignDTO.from(repository.save(mappedEntity));

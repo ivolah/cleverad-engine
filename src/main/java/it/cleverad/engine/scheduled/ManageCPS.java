@@ -58,7 +58,7 @@ public class ManageCPS {
                 rr.setCampaignId(refferal.getCampaignId());
                 rr.setChannelId(refferal.getChannelId());
                 rr.setMediaId(refferal.getMediaId());
-                //   rr.setDateTime(cpsDTO.getDate());
+                rr.setDateTime(cpsDTO.getDate());
                 rr.setApproved(true);
                 rr.setAgent(cpsDTO.getAgent());
                 rr.setIp(cpsDTO.getIp());
@@ -99,13 +99,11 @@ public class ManageCPS {
                         // incemento valore
                         walletBusiness.incement(walletID, totale);
 
-                        // decremento budget Affiato
+                        // decremento budget Affiliato
                         BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
                         if (bb != null) {
                             Double totBudgetDecrementato = bb.getBudget() - totale;
-                            BudgetBusiness.Filter filter = new BudgetBusiness.Filter();
-                            filter.setBudget(totBudgetDecrementato);
-                            budgetBusiness.update(bb.getId(), filter);
+                            budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
 
                             // setto stato transazione a ovebudget editore se totale < 0
                             if (totBudgetDecrementato < 0) {

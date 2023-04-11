@@ -113,7 +113,7 @@ public class WalletBusiness {
         req.setPayedAfter(wallet.getPayed());
         req.setResidualBefore(wallet.getResidual());
         req.setResidualAfter(residual);
-        req.setWalletId(id);
+        req.setWalletId(wallet.getId());
         walletTransactionBusiness.create(req);
 
         return WalletDTO.from(repository.save(wallet));
@@ -138,7 +138,7 @@ public class WalletBusiness {
         req.setPayedAfter(payed);
         req.setResidualBefore(wallet.getResidual());
         req.setResidualAfter(residual);
-        req.setWalletId(id);
+        req.setWalletId(wallet.getId());
         walletTransactionBusiness.create(req);
 
         return WalletDTO.from(repository.save(wallet));

@@ -115,13 +115,13 @@ public class CpmBusiness {
         repository.save(cpm);
     }
 
-    public Page<CpmDTO> getUnreadLastHour() {
+    public Page<CpmDTO> getUnreadDayBefore() {
         Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setRead(false);
         LocalDateTime now = LocalDateTime.now();
-//        request.setDateFrom(now.minusHours(1).toInstant(ZoneOffset.of("+02:00")));
-//        request.setDateTo(now.toInstant(ZoneOffset.of("+02:00")));
+        request.setDateFrom(LocalDate.now().minusDays(1));
+        request.setDateTo(LocalDate.now().minusDays(1));
         Page<Cpm> page = repository.findAll(getSpecification(request), pageable);
         log.trace("UNREAD {}", page.getTotalElements());
         return page.map(CpmDTO::from);

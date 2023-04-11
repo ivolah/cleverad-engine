@@ -65,6 +65,7 @@ public class UserBusiness {
     // CREATE
     public UserDTO create(BaseCreateRequest request) {
         User map = mapper.map(request, User.class);
+        map.setRole("User");
         map.setCreationDate(LocalDateTime.now());
         map.setPassword(bcryptEncoder.encode(request.getPassword()));
         map.setAffiliate(affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId)));

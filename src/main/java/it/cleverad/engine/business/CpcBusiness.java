@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -97,13 +98,12 @@ public class CpcBusiness {
         return page.map(CpcDTO::from);
     }
 
-    public Page<CpcDTO> getUnreadLastHour() {
+    public Page<CpcDTO> getUnreadDayBefore() {
         Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setRead(false);
-        LocalDateTime now = LocalDateTime.now();
-        //   request.setDateFrom(now.minusHours(1).toInstant(ZoneOffset.of("+02:00")));
-        //  request.setDateTo(now.toInstant(ZoneOffset.of("+02:00")));
+        request.setDateFrom(LocalDate.now().minusDays(1));
+        request.setDateTo(LocalDate.now());
         Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
         log.trace("UNREAD {}", page.getTotalElements());
         return page.map(CpcDTO::from);
