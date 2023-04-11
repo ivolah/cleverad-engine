@@ -496,7 +496,7 @@ public class TransactionBusiness {
         private Long walletId;
         private Long mediaId;
 
-        //private LocalDateTime dateTime;
+        private LocalDateTime dateTime;
         private Double value;
         private Boolean approved;
 

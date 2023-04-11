@@ -94,7 +94,7 @@ public class BudgetBusiness {
 
         Budget mappedEntity = mapper.map(budget, Budget.class);
         mappedEntity.setLastModificationDate(LocalDateTime.now());
-        mappedEntity.setAffiliate(affiliateRepository.findById(filter.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliat", filter.affiliateId)));
+        mappedEntity.setAffiliate(affiliateRepository.findById(filter.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", filter.affiliateId)));
         mappedEntity.setCampaign(campaignRepository.findById(filter.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", filter.campaignId)));
         mapper.map(budgetDTO, mappedEntity);
 

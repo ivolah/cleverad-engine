@@ -18,16 +18,16 @@ public class RefferalService {
         if (tokens[0] != null) {
             refferal.setCampaignId(Long.valueOf(decodifica(tokens[0])));
         }
-        if (tokens[1] != null) {
+        if (tokens.length > 1 && tokens[1] != null) {
             refferal.setMediaId(Long.valueOf(decodifica(tokens[1])));
         }
-        if (tokens[2] != null) {
+        if (tokens.length > 2 && tokens[2] != null) {
             refferal.setAffiliateId(Long.valueOf(decodifica(tokens[2])));
         }
-        if (tokens[3] != null) {
+        if (tokens.length > 3 && tokens[3] != null) {
             refferal.setChannelId(Long.valueOf(decodifica(tokens[3])));
         }
-        if (tokens[4] != null) {
+        if (tokens.length >= 4 && tokens[4] != null) {
             refferal.setTargetId(Long.valueOf(decodifica(tokens[4])));
         }
         return refferal;

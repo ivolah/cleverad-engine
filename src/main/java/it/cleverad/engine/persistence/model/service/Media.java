@@ -23,7 +23,9 @@ public class Media {
     private Long id;
     private String name;
     private String url;
-   // private String target;
+
+    private String target;
+
     @Column(name = "mail_subject")
     private String mailSubject;
     @Column(name = "banner_code")

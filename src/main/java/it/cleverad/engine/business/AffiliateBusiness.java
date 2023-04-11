@@ -3,7 +3,6 @@ package it.cleverad.engine.business;
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
-import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
 import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.web.dto.AffiliateDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
@@ -42,16 +41,12 @@ public class AffiliateBusiness {
 
     @Autowired
     private AffiliateRepository repository;
-
     @Autowired
     private WalletBusiness walletBusiness;
-    @Autowired
-    private DictionaryRepository dictionaryRepository;
     @Autowired
     private DictionaryBusiness dictionaryBusiness;
     @Autowired
     private UserBusiness userBusiness;
-
     @Autowired
     private MailService mailService;
 
@@ -61,6 +56,87 @@ public class AffiliateBusiness {
     /**
      * ============================================================================================================
      **/
+
+    // GET BY ID
+    public AffiliateDTO findById(Long id) {
+        Affiliate affiliate = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Affiliate", id));
+        return AffiliateDTO.from(affiliate);
+    }
+
+    // DELETE BY ID
+    public void delete(Long id) {
+        try {
+            Page<WalletDTO> dd = walletBusiness.findByIdAffilaite(id);
+            WalletDTO dto = dd.stream().findFirst().get();
+            if (dto.getTotal() > 0) {
+                // invio messaggio specifico su lfatto che c'è un wallet con contenuto
+                throw new PostgresCleveradException("Impossibile cancellare affiliato " + dto.getNome() + " perchè associato ad un wallet.");
+            } else {
+                walletBusiness.delete(dto.getId());
+                repository.deleteById(id);
+            }
+        } catch (ConstraintViolationException ex) {
+            throw ex;
+        } catch (Exception ee) {
+            throw new PostgresDeleteCleveradException(ee);
+        }
+    }
+
+    // SEARCH PAGINATED
+    public Page<AffiliateDTO> search(Filter request, Pageable pageableRequest) {
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Page<Affiliate> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(AffiliateDTO::from);
+    }
+
+    // UPDATE
+    public AffiliateDTO update(Long id, Filter filter) {
+        Affiliate affiliate = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Affiliate", id));
+        AffiliateDTO affiliateDTOfrom = AffiliateDTO.from(affiliate);
+
+        mapper.map(filter, affiliateDTOfrom);
+
+         Affiliate mappedEntity = mapper.map(affiliate, Affiliate.class);
+        mappedEntity.setLastModificationDate(LocalDateTime.now());
+
+        mapper.map(affiliateDTOfrom, mappedEntity);
+
+        //TODO mappedEntity.setDictionaryChannelType(dictionaryRepository.findById(Long.valueOf(filter.getCategorytypeId())).orElseThrow(() -> new ElementCleveradException("Dictionary Category Type", filter.getCategorytypeId())));
+        // NOTTODO mappedEntity.setDictionaryCompanyType(dictionaryRepository.findById(filter.getCompanytypeId()).orElseThrow(() -> new ElementCleveradException("Dictionary Company Type", filter.getCompanytypeId())));
+
+        Boolean status = affiliate.getStatus();
+        MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
+        if (!status && filter.status) {
+            // invio mail approvato
+            mailRequest.setTemplateId(7L);
+            mailRequest.setAffiliateId(id);
+            mailService.invio(mailRequest);
+        } else if (!status && !filter.status) {
+            // invio mail non approvato
+            mailRequest.setTemplateId(8L);
+            mailRequest.setAffiliateId(id);
+            mailService.invio(mailRequest);
+        }
+
+        return AffiliateDTO.from(repository.save(mappedEntity));
+    }
+
+    //  GET TIPI
+    public Page<DictionaryDTO> getTypeCompany() {
+        return dictionaryBusiness.getTypeCompany();
+    }
+
+    public Page<DictionaryDTO> getChannelTypeAffiliate() {
+        return dictionaryBusiness.getChannelTypeAffiliate();
+    }
+
+    public List<String> listEmails(Long affiliateId) {
+        List<String> lista = new ArrayList<>();
+        Affiliate affiliate = repository.findById(affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", affiliateId));
+        lista.add(affiliate.getPrimaryMail());
+        lista.add(affiliate.getSecondaryMail());
+        return lista;
+    }
 
     // CREATE
     public AffiliateDTO create(BaseCreateRequest request) {
@@ -110,89 +186,6 @@ public class AffiliateBusiness {
 
         return dto;
     }
-
-    // GET BY ID
-    public AffiliateDTO findById(Long id) {
-        Affiliate affiliate = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Affiliate", id));
-        return AffiliateDTO.from(affiliate);
-    }
-
-    // DELETE BY ID
-    public void delete(Long id) {
-        try {
-            Page<WalletDTO> dd = walletBusiness.findByIdAffilaite(id);
-            WalletDTO dto = dd.stream().findFirst().get();
-            if (dto.getTotal() > 0) {
-                // invio messaggio specifico su lfatto che c'è un wallet con contenuto
-                throw new PostgresCleveradException("Impossibile cancellare affiliato " + dto.getNome() + " perchè associato ad un wallet.");
-            } else {
-                walletBusiness.delete(dto.getId());
-                repository.deleteById(id);
-            }
-        } catch (ConstraintViolationException ex) {
-            throw ex;
-        } catch (Exception ee) {
-            throw new PostgresDeleteCleveradException(ee);
-        }
-    }
-
-    // SEARCH PAGINATED
-    public Page<AffiliateDTO> search(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-        Page<Affiliate> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(AffiliateDTO::from);
-    }
-
-    // UPDATE
-    public AffiliateDTO update(Long id, Filter filter) {
-        Affiliate affiliate = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Affiliate", id));
-        AffiliateDTO affiliateDTOfrom = AffiliateDTO.from(affiliate);
-
-        mapper.map(filter, affiliateDTOfrom);
-
-        Affiliate mappedEntity = mapper.map(affiliate, Affiliate.class);
-        mappedEntity.setLastModificationDate(LocalDateTime.now());
-
-        mapper.map(affiliateDTOfrom, mappedEntity);
-
-        //TODO mappedEntity.setDictionaryChannelType(dictionaryRepository.findById(Long.valueOf(filter.getCategorytypeId())).orElseThrow(() -> new ElementCleveradException("Dictionary Category Type", filter.getCategorytypeId())));
-        // NOTTODO mappedEntity.setDictionaryCompanyType(dictionaryRepository.findById(filter.getCompanytypeId()).orElseThrow(() -> new ElementCleveradException("Dictionary Company Type", filter.getCompanytypeId())));
-
-        Boolean status = affiliate.getStatus();
-        MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
-        if (!status && filter.status) {
-            // invio mail approvato
-            mailRequest.setTemplateId(7L);
-            mailRequest.setAffiliateId(id);
-            mailService.invio(mailRequest);
-        } else if (!status && !filter.status) {
-            // invio mail non approvato
-            mailRequest.setTemplateId(8L);
-            mailRequest.setAffiliateId(id);
-            mailService.invio(mailRequest);
-        }
-
-        return AffiliateDTO.from(repository.save(mappedEntity));
-    }
-
-    //  GET TIPI
-    public Page<DictionaryDTO> getTypeCompany() {
-        return dictionaryBusiness.getTypeCompany();
-    }
-
-    public Page<DictionaryDTO> getChannelTypeAffiliate() {
-        return dictionaryBusiness.getChannelTypeAffiliate();
-    }
-
-    public List<String> listEmails(Long affiliateId) {
-        List<String> lista = new ArrayList<>();
-        Affiliate affiliate = repository.findById(affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", affiliateId));
-        lista.add(affiliate.getPrimaryMail());
-        lista.add(affiliate.getSecondaryMail());
-        return lista;
-    }
-
-
 
     /**
      * ============================================================================================================

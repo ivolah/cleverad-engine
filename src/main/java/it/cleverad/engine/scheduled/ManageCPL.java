@@ -42,7 +42,7 @@ public class ManageCPL {
     private RefferalService refferalService;
 
     @Async
-    @Scheduled(cron = "0 0/9 * * * ?")
+    @Scheduled(cron = "0 0 1 * * ?")
     public void trasformaTrackingCPL() {
         try {
             // trovo uttti i tracking con read == false
@@ -58,7 +58,7 @@ public class ManageCPL {
                 rr.setCampaignId(refferal.getCampaignId());
                 rr.setChannelId(refferal.getChannelId());
                 rr.setMediaId(refferal.getMediaId());
-                //   rr.setDateTime(cplDTO.getDate());
+                rr.setDateTime(cplDTO.getDate());
                 rr.setApproved(true);
                 rr.setAgent(cplDTO.getAgent());
                 rr.setIp(cplDTO.getIp());
@@ -66,11 +66,11 @@ public class ManageCPL {
                 rr.setMediaId(refferal.getMediaId());
 
                 // controlla data scadneza camapgna
-                CampaignDTO campaignDTO = campaignBusiness.findById(refferal.getCampaignId());
+                CampaignDTO campaignDTO = campaignBusiness.findByIdAdmin(refferal.getCampaignId());
                 LocalDate endDate = campaignDTO.getEndDate();
                 if (endDate.isBefore(LocalDate.now())) {
                     // setto a campagna scaduta
-                    rr.setDictionaryId(42L);
+                    rr.setDictionaryId(49L);
                 } else {
                     rr.setDictionaryId(42L);
                 }
@@ -102,24 +102,19 @@ public class ManageCPL {
                         // decremento budget Affiato
                         BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
                         if (bb != null) {
-                            Double totBudgetDecrementato = bb.getBudget() - totale;
-                            BudgetBusiness.Filter filter = new BudgetBusiness.Filter();
-                            filter.setBudget(totBudgetDecrementato);
-                            budgetBusiness.update(bb.getId(), filter);
-
+                            Double budgetCampagna = campaignDTO.getBudget() - totale;
+                            campaignBusiness.updateBudget(campaignDTO.getId(), budgetCampagna);
                             // setto stato transazione a ovebudget editore se totale < 0
-                            if (totBudgetDecrementato < 0) {
+                            if (budgetCampagna < 0) {
                                 rr.setDictionaryId(47L);
                             }
                         }
 
                         // decremento budget Campagna
                         if (campaignDTO != null) {
-                            Double budgetCampagna = campaignDTO.getBudget() - totale;
 
-                            CampaignBusiness.Filter filter = new CampaignBusiness.Filter();
-                            filter.setBudget(budgetCampagna);
-                            campaignBusiness.update(bb.getId(), filter);
+                            Double budgetCampagna = campaignDTO.getBudget() - totale;
+                            campaignBusiness.updateBudget(campaignDTO.getId(), budgetCampagna);
 
                             // setto stato transazione a ovebudget editore se totale < 0
                             if (budgetCampagna < 0) {

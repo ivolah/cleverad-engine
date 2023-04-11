@@ -47,6 +47,9 @@ public class AdvertiserBusiness {
     // CREATE
     public AdvertiserDTO create(BaseCreateRequest request) {
         Advertiser map = mapper.map(request, Advertiser.class);
+        map.setCreationDate(LocalDateTime.now());
+        map.setLastModificationDate(LocalDateTime.now());
+        map.setStatus(true);
         return AdvertiserDTO.from(repository.save(map));
     }
 

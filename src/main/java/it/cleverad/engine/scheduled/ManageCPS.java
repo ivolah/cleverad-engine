@@ -42,7 +42,7 @@ public class ManageCPS {
     private RefferalService refferalService;
 
 
-    @Scheduled(cron = "0 0/10 * * * ?")
+    @Scheduled(cron = "0 0 4 * * ?")
     public void trasformaTrackingCPS() {
         try {
             // trovo uttti i tracking con read == false

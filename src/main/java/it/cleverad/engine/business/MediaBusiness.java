@@ -4,7 +4,6 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.Media;
-import it.cleverad.engine.persistence.model.service.Target;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.MediaRepository;
@@ -137,14 +136,19 @@ public class MediaBusiness {
         String url = mappedEntity.getUrl();
         if (StringUtils.isNotBlank(url)) bannerCode.replace("{{url}}", url);
 
-        List<Target> targets = (List<Target>) mappedEntity.getTargets();
-        targets.stream().filter(target -> StringUtils.isNotBlank(target.getTarget())).forEach(target -> {
-            bannerCode.replace("{{target}}", target.getTarget());
-            // TODO COME GESTIRE????? NON AGGIORNIAMO ma facciamo in logica target?
-            // multipli banner code??
-        });
-        mappedEntity.setBannerCode(bannerCode);
+        String target = mappedEntity.getTarget();
+        if (StringUtils.isNotBlank(target)) bannerCode.replace("{{target}}", target);
 
+
+//        List<Target> targets = (List<Target>) mappedEntity.getTargets();
+//        targets.stream().filter(target -> StringUtils.isNotBlank(target.getTarget())).forEach(target -> {
+//            bannerCode.replace("{{target}}", target.getTarget());
+//            // TODO COME GESTIRE????? NON AGGIORNIAMO ma facciamo in logica target?
+//            // multipli banner code??
+//        });
+
+        mappedEntity.setBannerCode(bannerCode);
+        mappedEntity.setStatus(true);
         Media saved = repository.save(mappedEntity);
 
         Campaign cc = campaignRepository.findById(filter.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", filter.getCampaignId()));

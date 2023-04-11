@@ -80,8 +80,7 @@ public class CampaignBusiness {
         CampaignDTO finalDto = dto;
         //Category
         if (StringUtils.isNotBlank(request.getCategories())) {
-            Arrays.stream(request.getCategories().split(","))
-                    .map(s -> campaignCategoryBusiness.create(new CampaignCategoryBusiness.BaseCreateRequest(finalDto.getId(), Long.valueOf(s)))).collect(Collectors.toList());
+            Arrays.stream(request.getCategories().split(",")).map(s -> campaignCategoryBusiness.create(new CampaignCategoryBusiness.BaseCreateRequest(finalDto.getId(), Long.valueOf(s)))).collect(Collectors.toList());
         }
         String encodedID = refferalService.encode(String.valueOf(dto.getId()));
 
@@ -107,11 +106,14 @@ public class CampaignBusiness {
             campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
         }
 
-        if (campaign != null)
-            return CampaignDTO.from(campaign);
-        else
-            return null;
+        if (campaign != null) return CampaignDTO.from(campaign);
+        else return null;
 
+    }
+
+    public CampaignDTO findByIdAdmin(Long id) {
+        Campaign campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
+        return CampaignDTO.from(campaign);
     }
 
     // DELETE BY ID
@@ -134,11 +136,9 @@ public class CampaignBusiness {
         Page<Campaign> page;
         if (jwtUserDetailsService.getRole().equals("Admin")) {
             page = repository.findAll(getSpecification(request), pageable);
-
             return page.map(CampaignDTO::from);
         } else {
             Affiliate cc = affiliateRepository.findById(jwtUserDetailsService.getAffiliateID()).orElseThrow(() -> new ElementCleveradException("Affiliate", jwtUserDetailsService.getAffiliateID()));
-
             List<Campaign> campaigns = new ArrayList<>();
             if (cc.getCampaignAffiliates() != null) {
                 campaigns = cc.getCampaignAffiliates().stream().map(campaignAffiliate -> {
@@ -146,7 +146,6 @@ public class CampaignBusiness {
                     return ccc;
                 }).collect(Collectors.toList());
             }
-
             page = new PageImpl<>(campaigns.stream().distinct().collect(Collectors.toList()));
             return page.map(CampaignDTO::from);
         }
@@ -162,8 +161,10 @@ public class CampaignBusiness {
 
         Campaign mappedEntity = mapper.map(campaign, Campaign.class);
         // SET
-        mappedEntity.setCookie(cookieRepository.findById(filter.getCookieId()).orElseThrow(() -> new ElementCleveradException("Cookie", filter.cookieId)));
-        mappedEntity.setAdvertiser(advertiserRepository.findById(filter.getCompanyId()).orElseThrow(() -> new ElementCleveradException("Advertiser", filter.companyId)));
+        if (filter.getCookieId() != null)
+            mappedEntity.setCookie(cookieRepository.findById(filter.getCookieId()).orElseThrow(() -> new ElementCleveradException("Cookie", filter.cookieId)));
+        if (filter.getCompanyId() != null)
+            mappedEntity.setAdvertiser(advertiserRepository.findById(filter.getCompanyId()).orElseThrow(() -> new ElementCleveradException("Advertiser", filter.companyId)));
         if (filter.getDealerId() != null)
             mappedEntity.setDealer(dealerRepository.findById(filter.getDealerId()).orElseThrow(() -> new ElementCleveradException("Dealer", filter.dealerId)));
         if (filter.getPlannerId() != null)
@@ -172,14 +173,20 @@ public class CampaignBusiness {
         // SET Category - cancello precedenti
         campaignCategoryBusiness.deleteByCampaignID(id);
         // setto nuvoi
-        if (!filter.getCategoryList().isEmpty()) {
-            Set<CampaignCategory> collect =
-                    filter.getCategoryList().stream().map(ss -> campaignCategoryBusiness.createEntity(new CampaignCategoryBusiness.BaseCreateRequest(id, ss))).collect(Collectors.toSet());
+        if (filter.getCategoryList() != null && !filter.getCategoryList().isEmpty()) {
+            Set<CampaignCategory> collect = filter.getCategoryList().stream().map(ss -> campaignCategoryBusiness.createEntity(new CampaignCategoryBusiness.BaseCreateRequest(id, ss))).collect(Collectors.toSet());
             mappedEntity.setCampaignCategories(collect);
         }
         mappedEntity.setLastModificationDate(LocalDateTime.now());
         mapper.map(campaignDTOfrom, mappedEntity);
 
+        return CampaignDTO.from(repository.save(mappedEntity));
+    }
+
+    public CampaignDTO updateBudget(Long id, Double budget) {
+        Campaign campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
+        Campaign mappedEntity = mapper.map(campaign, Campaign.class);
+        mappedEntity.setBudget(budget);
         return CampaignDTO.from(repository.save(mappedEntity));
     }
 

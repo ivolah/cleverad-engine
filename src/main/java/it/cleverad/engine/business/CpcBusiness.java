@@ -102,8 +102,8 @@ public class CpcBusiness {
         Filter request = new Filter();
         request.setRead(false);
         LocalDateTime now = LocalDateTime.now();
-        request.setDateFrom(now.minusHours(1).toInstant(ZoneOffset.of("+02:00")));
-        request.setDateTo(now.toInstant(ZoneOffset.of("+02:00")));
+     //   request.setDateFrom(now.minusHours(1).toInstant(ZoneOffset.of("+02:00")));
+      //  request.setDateTo(now.toInstant(ZoneOffset.of("+02:00")));
         Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
         log.trace("UNREAD {}", page.getTotalElements());
         return page.map(CpcDTO::from);

@@ -37,7 +37,11 @@ public class MediaDTO {
 
     private List<TargetDTO> targets;
 
-    public MediaDTO(long id, String name, String url, String mailSubject, String bannerCode, String note, String idFile, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long campaignId, String campaignName, Long typeId, String typeName, List<TargetDTO> targets) {
+    private String target;
+
+    public MediaDTO(long id, String name, String url, String mailSubject, String bannerCode, String note, String idFile, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long campaignId, String campaignName, Long typeId, String typeName,
+                   // List<TargetDTO> targets,
+                    String target) {
         this.id = id;
         this.name = name;
         this.url = url;
@@ -52,9 +56,9 @@ public class MediaDTO {
         this.campaignName = campaignName;
         this.typeId = typeId;
         this.typeName = typeName;
-        this.targets = targets;
+       // this.targets = targets;
+        this.target = target;
     }
-
 
     public static MediaDTO from(Media media) {
         Campaign campaign = media.getCampaigns().stream().findFirst().orElse(null);
@@ -73,7 +77,9 @@ public class MediaDTO {
                 campaign != null ? campaign.getId() : null,
                 campaign != null ? campaign.getName() : "NON ASSOCIATO A CAMPAGNA",
                 media.getMediaType().getId(),
-                media.getMediaType().getName(), targets);
+                media.getMediaType().getName(),
+                //targets,
+                media.getTarget());
     }
 
 }
