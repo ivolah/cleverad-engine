@@ -58,7 +58,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/authenticate",
                         "/target",
                         "/file/encoded",
-                        "/register","/register/user/*" ).permitAll().
+                        "/register",
+                        "/register/types/*",
+                        "/register/user/",
+                        "/register/user/*",
+                        "/register/user/confirm").permitAll().
 
                 // TUTTE LE ALTRE RICHIESTO SONO AUTENTICATE
                         anyRequest().authenticated().and().

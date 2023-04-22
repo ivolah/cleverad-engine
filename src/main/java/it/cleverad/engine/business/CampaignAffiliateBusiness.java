@@ -130,6 +130,7 @@ public class CampaignAffiliateBusiness {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setCampaignId(campaignId);
+
         Page<CampaignAffiliate> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CampaignAffiliateDTO::from);
         // List<CampaignAffiliate> page = repository.findByAffiliateId(affiliateId);
@@ -183,6 +184,8 @@ public class CampaignAffiliateBusiness {
                 predicates.add(cb.equal(root.get("campaign").get("id"), request.getCampaignId()));
             }
 
+            predicates.add(cb.isNotNull(root.get("followThrough")));
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 
             return completePredicate;
@@ -202,7 +205,6 @@ public class CampaignAffiliateBusiness {
         private String followThrough;
         private Long statusId;
     }
-
 
     @Data
     @NoArgsConstructor

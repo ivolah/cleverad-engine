@@ -50,7 +50,7 @@ public class ManageCPL {
 
                 // prendo reffereal e lo leggo
                 Refferal refferal = refferalService.decodificaRefferal(cplDTO.getRefferal());
-                log.info("CPL :: {} - {}", cplDTO, refferal);
+                log.info("CREO TRANSACTION CPL :: {} - {}", cplDTO, refferal);
 
                 // setta transazione
                 TransactionBusiness.BaseCreateRequest rr = new TransactionBusiness.BaseCreateRequest();

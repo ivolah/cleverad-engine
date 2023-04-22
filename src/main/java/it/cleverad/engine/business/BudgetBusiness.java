@@ -2,12 +2,10 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Budget;
-import it.cleverad.engine.persistence.model.service.Dictionary;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.BudgetRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.web.dto.BudgetDTO;
-import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -102,6 +100,13 @@ public class BudgetBusiness {
         mapper.map(budgetDTO, mappedEntity);
 
         return BudgetDTO.from(repository.save(mappedEntity));
+    }
+
+    public BudgetDTO disable(Long id) {
+        Budget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Budget", id));
+        budget.setLastModificationDate(LocalDateTime.now());
+        budget.setStatus(false);
+        return BudgetDTO.from(repository.save(budget));
     }
 
     public BudgetDTO updateBudget(Long id, Double budgetValue) {

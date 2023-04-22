@@ -173,7 +173,7 @@ public class MediaBusiness {
     // SEARCH PAGINATED
     public Page<MediaDTO> search(Filter request, Pageable pageableRequest) {
         if (jwtUserDetailsService.getRole().equals("Admin")) {
-            Page<Media> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id"))));
+            Page<Media> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id"))));
             return page.map(media -> MediaDTO.from(media));
         } else {
             Affiliate cc = affiliateRepository.findById(jwtUserDetailsService.getAffiliateID()).orElseThrow(() -> new ElementCleveradException("Affiliate", jwtUserDetailsService.getAffiliateID()));

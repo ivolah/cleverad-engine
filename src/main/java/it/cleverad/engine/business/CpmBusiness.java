@@ -119,11 +119,10 @@ public class CpmBusiness {
         Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setRead(false);
-        LocalDateTime now = LocalDateTime.now();
         request.setDateFrom(LocalDate.now().minusDays(1));
         request.setDateTo(LocalDate.now().minusDays(1));
         Page<Cpm> page = repository.findAll(getSpecification(request), pageable);
-        log.trace("UNREAD {}", page.getTotalElements());
+        log.info("UNREAD CPM {}", page.getTotalElements());
         return page.map(CpmDTO::from);
     }
 

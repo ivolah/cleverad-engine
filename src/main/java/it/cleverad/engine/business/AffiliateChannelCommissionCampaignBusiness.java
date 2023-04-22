@@ -112,7 +112,15 @@ public class AffiliateChannelCommissionCampaignBusiness {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Filter filter = new Filter();
         filter.setCampaignId(campaignId);
-        log.info(">>> " + campaignId);
+        Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
+        return page.map(AffiliateChannelCommissionCampaignDTO::from);
+    }
+
+    public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignIdAffiliateNotZero(Long campaignId, Pageable pageableRequest) {
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Filter filter = new Filter();
+        filter.setCampaignId(campaignId);
+        filter.setNotzero(true);
         Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
         return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
@@ -165,6 +173,9 @@ public class AffiliateChannelCommissionCampaignBusiness {
             if (request.getCommissionId() != null) {
                 predicates.add(cb.equal(root.get("commission").get("id"), request.getCommissionId()));
             }
+            if (request.getNotzero() != null) {
+                predicates.add(cb.notEqual(root.get("commission").get("value"), "0"));
+            }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 
@@ -184,6 +195,7 @@ public class AffiliateChannelCommissionCampaignBusiness {
         private Long affiliateId;
         private Long channelId;
         private Long commissionId;
+
     }
 
     @Data
@@ -195,6 +207,7 @@ public class AffiliateChannelCommissionCampaignBusiness {
         private Long affiliateId;
         private Long channelId;
         private Long commissionId;
+        private Boolean notzero;
     }
 
 }

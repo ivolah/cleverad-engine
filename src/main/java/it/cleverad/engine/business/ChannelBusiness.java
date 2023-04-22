@@ -2,6 +2,7 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Channel;
+import it.cleverad.engine.persistence.model.service.ChannelCategory;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.ChannelRepository;
 import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
@@ -16,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -29,7 +31,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -50,7 +54,9 @@ public class ChannelBusiness {
     @Autowired
     private DictionaryBusiness dictionaryBusiness;
     @Autowired
-    UserBusiness userBusiness;
+    private UserBusiness userBusiness;
+    @Autowired
+    private ChannelCategoryBusiness channelCategoryBusiness;
 
     @Autowired
     private AffiliateChannelCommissionCampaignBusiness accc;
@@ -67,10 +73,17 @@ public class ChannelBusiness {
 
     // CREATE
     public ChannelDTO create(BaseCreateRequest request) {
+
+        if (request.getRegistrazione() == null) {
+            request.setRegistrazione(false);
+        }
+
         request.setStatus(true);
+
         Channel map = mapper.map(request, Channel.class);
         map.setDictionary(dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
         map.setDictionaryType(dictionaryRepository.findById(request.typeId).orElseThrow(() -> new ElementCleveradException("Type", request.typeId)));
+        map.setDictionaryOwner(dictionaryRepository.findById(request.ownerId).orElseThrow(() -> new ElementCleveradException("Owner", request.ownerId)));
 
         if (request.affiliateId != null) {
             map.setAffiliate(affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId)));
@@ -80,19 +93,27 @@ public class ChannelBusiness {
 
         ChannelDTO channelDTO = ChannelDTO.from(repository.save(map));
 
-        MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
-        if (request.dictionaryId == 12) {
-            // mail pendig
-        } else if (request.dictionaryId == 13) {
-            // approvato
-            mailRequest.setTemplateId(9L);
-        } else if (request.dictionaryId == 14) {
-            // rigettato
-            mailRequest.setTemplateId(10L);
+        if (!request.getRegistrazione()) {
+            MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
+            if (request.dictionaryId == 12) {
+                // mail pendig
+                mailRequest.setTemplateId(17L);
+            } else if (request.dictionaryId == 13) {
+                // approvato
+                mailRequest.setTemplateId(9L);
+            } else if (request.dictionaryId == 14) {
+                // rigettato
+                mailRequest.setTemplateId(10L);
+            }
+            mailRequest.setChannelId(channelDTO.getId());
+            mailRequest.setAffiliateId(request.affiliateId);
+            mailService.invio(mailRequest);
         }
-        mailRequest.setChannelId(channelDTO.getId());
-        mailRequest.setAffiliateId(request.affiliateId);
-        mailService.invio(mailRequest);
+
+        // setto categories
+        if (StringUtils.isNotBlank(request.getCategories())) {
+            Arrays.stream(request.getCategories().split(",")).map(s -> channelCategoryBusiness.create(new ChannelCategoryBusiness.BaseCreateRequest(channelDTO.getId(), Long.valueOf(s)))).collect(Collectors.toList());
+        }
 
         return channelDTO;
     }
@@ -105,7 +126,11 @@ public class ChannelBusiness {
 
     // DELETE BY ID
     public void delete(Long id) {
+        Channel channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Channel", id));
         try {
+            if (channel != null) {
+                channel.getChannelCategories().stream().forEach(channelCategory -> channelCategoryBusiness.delete(channelCategory.getId()));
+            }
             repository.deleteById(id);
         } catch (ConstraintViolationException ex) {
             throw ex;
@@ -127,7 +152,7 @@ public class ChannelBusiness {
             searchACCC = accc.search(rr, pageableRequest);
         }
 
-        Page<Channel> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id"))));
+        Page<Channel> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id"))));
 
         if (searchACCC != null) {
 
@@ -156,6 +181,7 @@ public class ChannelBusiness {
         Channel mappedEntity = mapper.map(channel, Channel.class);
         mappedEntity.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.dictionaryId)));
         mappedEntity.setDictionaryType(dictionaryRepository.findById(filter.typeId).orElseThrow(() -> new ElementCleveradException("Type", filter.typeId)));
+        mappedEntity.setDictionaryOwner(dictionaryRepository.findById(filter.ownerId).orElseThrow(() -> new ElementCleveradException("Owner", filter.ownerId)));
 
         mappedEntity.setLastModificationDate(LocalDateTime.now());
         mapper.map(campaignDTOfrom, mappedEntity);
@@ -163,6 +189,7 @@ public class ChannelBusiness {
         MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
         mailRequest.setChannelId(filter.getId());
         mailRequest.setAffiliateId(channel.getAffiliate().getId());
+        mailRequest.setChannelId(id);
         if (filter.dictionaryId == 12) {
             // mail pendig
         } else if (filter.dictionaryId == 13) {
@@ -173,6 +200,17 @@ public class ChannelBusiness {
             // rigettato
             mailRequest.setTemplateId(10L);
             mailService.invio(mailRequest);
+        }
+
+        // SET Category - cancello precedenti
+        channelCategoryBusiness.deleteByChannelID(id);
+        log.info("" + filter.getCategoryList().isEmpty());
+        log.info(filter.getCategoryList().size() + "");
+
+        // setto nuvoi
+        if (filter.getCategoryList() != null && !filter.getCategoryList().isEmpty()) {
+            Set<ChannelCategory> collect = filter.getCategoryList().stream().map(ss -> channelCategoryBusiness.createEntity(new ChannelCategoryBusiness.BaseCreateRequest(id, ss))).collect(Collectors.toSet());
+            mappedEntity.setChannelCategories(collect);
         }
 
         return ChannelDTO.from(repository.save(mappedEntity));
@@ -194,7 +232,7 @@ public class ChannelBusiness {
     public Page<ChannelDTO> getbyIdAffiliateAll(Pageable pageableRequest) {
         if (jwtUserDetailsService.getRole().equals("Admin")) {
             Filter request = new Filter();
-            Page<Channel> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id"))));
+            Page<Channel> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id"))));
             return page.map(ChannelDTO::from);
         } else {
             Page<Channel> page = repository.findByAffiliateId(jwtUserDetailsService.getAffiliateID(), pageableRequest);
@@ -205,7 +243,7 @@ public class ChannelBusiness {
     public Page<ChannelDTO> getbyIdAffiliateAllActive(Pageable pageableRequest) {
         if (jwtUserDetailsService.getRole().equals("Admin")) {
             Filter request = new Filter();
-            Page<Channel> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id"))));
+            Page<Channel> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id"))));
             return page.map(ChannelDTO::from);
         } else {
             Page<Channel> page = repository.findByAffiliateIdAndStatus(jwtUserDetailsService.getAffiliateID(), true, pageableRequest);
@@ -314,13 +352,18 @@ public class ChannelBusiness {
 
         private String name;
         private String shortDescription;
-
+        private String approvazione;
         private String url;
-
+        private String dimension;
+        private String country;
+        private Long ownerId;
+        private String categories;
         private Long affiliateId;
         private Long dictionaryId;
         private Long typeId;
         private Boolean status;
+
+        private Boolean registrazione;
 
     }
 
@@ -334,7 +377,10 @@ public class ChannelBusiness {
         private String shortDescription;
         private String approvazione;
         private String url;
-
+        private String dimension;
+        private String country;
+        private List<Long> categoryList;
+        private Long ownerId;
         private Long affiliateId;
         private Long dictionaryId;
         private Long typeId;

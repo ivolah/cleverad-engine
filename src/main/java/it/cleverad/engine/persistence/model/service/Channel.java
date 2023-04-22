@@ -22,10 +22,13 @@ public class Channel {
     private Long id;
 
     private String name;
+    private String dimension;
+    private String country;
     @Column(name = "short_description")
     private String shortDescription;
 
     private String url;
+
 
     private Boolean status = true;
     @Column(name = "creation_date")
@@ -44,6 +47,10 @@ public class Channel {
     @ManyToOne
     @JoinColumn(name = "type_id")
     private Dictionary dictionaryType;
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private Dictionary dictionaryOwner;
 
 
 //    @ManyToMany

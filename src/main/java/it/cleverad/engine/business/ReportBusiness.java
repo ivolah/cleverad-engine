@@ -2,6 +2,7 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Report;
+import it.cleverad.engine.persistence.model.service.StatClickCpc;
 import it.cleverad.engine.persistence.model.service.TopAffiliates;
 import it.cleverad.engine.persistence.model.service.TopCampaings;
 import it.cleverad.engine.persistence.repository.service.ReportRepository;
@@ -126,6 +127,10 @@ public class ReportBusiness {
     public Page<TopAffiliates> searchTopAffilaites(TopFilter request, Pageable pageableRequest) {
         return transactionAllRepository.findAffiliatesGroupByCampaignId(pageableRequest, request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atStartOfDay(), request.getDictionaryIds());
     }
+
+//    public Page<StatClickCpc> getGroupedCpcClicks(TopFilter request, Pageable pageableRequest) {
+//        return transactionAllRepository.getGroupedCpcClicks(pageableRequest, request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atStartOfDay());
+//    }
 
     /**
      * ============================================================================================================

@@ -17,9 +17,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Slf4j
@@ -46,11 +46,9 @@ public class ManageCPM {
     private RefferalService refferalService;
 
     @Async
-    //@Scheduled(cron = "0 0 2 * * ?")
-    @Scheduled(cron = "0 0/2 * * * ?")
+    @Scheduled(cron = "1 1 1 * * ?")
     public void trasformaTrackingCPM() {
         try {
-
             // trovo tutti i tracking con read == false
             Map<String, Integer> mappa = new HashMap<>();
             Page<CpmDTO> last = CpmBusiness.getUnreadDayBefore();
@@ -65,7 +63,6 @@ public class ManageCPM {
 
             mappa.forEach((s, aLong) -> {
                 log.info("Gestisco trasformaTrackingCpm ID {}", aLong);
-
                 // prendo reffereal e lo leggo
                 Refferal refferal = refferalService.decodificaRefferal(s);
                 log.info("Cpm :: {} - {}", s, refferal);
@@ -100,16 +97,17 @@ public class ManageCPM {
                     walletID = null;
                 }
 
-                log.info("CHECK "+refferal.getAffiliateId() + "-" + refferal.getChannelId() + "-" + refferal.getCampaignId());
                 // gesione commisione
                 List<AffiliateChannelCommissionCampaign> accc = affiliateChannelCommissionCampaignRepository.findByAffiliateIdAndChannelIdAndCampaignId(refferal.getAffiliateId(), refferal.getChannelId(), refferal.getCampaignId());
                 accc.stream().forEach(affiliateChannelCommissionCampaign -> {
-                    if (affiliateChannelCommissionCampaign.getCommission().getDictionary().getName().equals("CPM")) {
-                        rr.setCommissionId(affiliateChannelCommissionCampaign.getCommission().getId());
-                        log.info(refferal.getAffiliateId() + "-" + refferal.getChannelId() + "-" + refferal.getCampaignId());
+                    if (affiliateChannelCommissionCampaign.getCommission().getDictionary().getName().toUpperCase(Locale.ROOT).equals("CPM")) {
+                        Long cid = affiliateChannelCommissionCampaign.getCommission().getId();
+                        log.info("CHECK >>>" + cid + "<<<" + refferal.getAffiliateId() + "-" + refferal.getChannelId() + "-" + refferal.getCampaignId());
+                        rr.setCommissionId(cid);
                         Double totale = Double.valueOf(affiliateChannelCommissionCampaign.getCommission().getValue()) * aLong;
                         rr.setValue(totale);
                         rr.setImpressionNumber(Long.valueOf(aLong));
+                        log.info("TOT " + totale + " - " + aLong);
 
                         // incemento valore
                         walletBusiness.incement(walletID, totale);
@@ -137,6 +135,7 @@ public class ManageCPM {
                             }
                         }
 
+                        log.info("Creo Trans CPM");
                         // creo la transazione
                         transactionBusiness.createCpm(rr);
                     }

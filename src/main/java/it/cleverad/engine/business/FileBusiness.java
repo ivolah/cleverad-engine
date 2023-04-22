@@ -14,11 +14,16 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -33,6 +38,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.http.ResponseEntity;
 
 @Slf4j
 @Component
@@ -121,6 +127,15 @@ public class FileBusiness {
 
         return fileDTOList.stream().distinct().collect(Collectors.toList());
     }
+
+    public ResponseEntity<Resource>  download(Long id) {
+        File fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File", id));
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(fil.getType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fil.getName() + "\"")
+                .body(new ByteArrayResource(fil.getData()));
+    }
+
 
     /**
      * ============================================================================================================

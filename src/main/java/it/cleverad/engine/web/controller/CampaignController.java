@@ -1,6 +1,7 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.CampaignBusiness;
+import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.CampaignDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,8 @@ public class CampaignController {
 
     @Autowired
     private CampaignBusiness business;
+    @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
 
     /**
      * ============================================================================================================
@@ -55,12 +58,20 @@ public class CampaignController {
     public Page<CampaignDTO> getCampaigns(@PathVariable Long affiliateId) {
         return business.getCampaigns(affiliateId);
     }
-    
     @GetMapping("/affiliate")
-    public Page<CampaignDTO> getCampaignAffilaite(Pageable pageable) {
-        return business.getCampaignsGuest(pageable);
+    public Page<CampaignDTO> getCampaigns() {
+        return business.getCampaigns(jwtUserDetailsService.getAffiliateID());
     }
-    
+    @GetMapping("/affiliate/not")
+    public Page<CampaignDTO> getCampaignsNot() {
+        return business.getCampaignsNot(jwtUserDetailsService.getAffiliateID());
+    }
+
+//    @GetMapping("/affiliate")
+//    public Page<CampaignDTO> getCampaignAffilaite(Pageable pageable) {
+//        return business.getCampaignsGuest(pageable);
+//    }
+//
     
     /**
      * ============================================================================================================

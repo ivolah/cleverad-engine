@@ -1,11 +1,13 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.AffiliateBusiness;
+import it.cleverad.engine.business.DictionaryBusiness;
 import it.cleverad.engine.web.dto.AffiliateDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +19,8 @@ public class AffiliateController {
 
     @Autowired
     private AffiliateBusiness business;
+    @Autowired
+    private DictionaryBusiness dictionaryBusiness;
 
     /**
      * ============================================================================================================
@@ -30,7 +34,7 @@ public class AffiliateController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<AffiliateDTO> search(AffiliateBusiness.Filter request, Pageable pageable) {
+    public Page<AffiliateDTO> search(AffiliateBusiness.Filter request, @PageableDefault(value = 500) Pageable pageable) {
         return business.search(request, pageable);
     }
 
@@ -70,6 +74,11 @@ public class AffiliateController {
         AffiliateBusiness.Filter request = new AffiliateBusiness.Filter();
         request.setStatus(true);
         return business.search(request, pageable);
+    }
+
+    @GetMapping("/types/status")
+    public Page<DictionaryDTO> getTypes() {
+        return dictionaryBusiness.getAffiliateStatusTypes();
     }
 
     /**

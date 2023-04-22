@@ -1,15 +1,15 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.ViewBusiness;
-import it.cleverad.engine.business.ReportBusiness;
-import it.cleverad.engine.persistence.model.service.*;
+import it.cleverad.engine.persistence.model.service.StatCampaignDayCpc;
+import it.cleverad.engine.persistence.model.service.StatCampaignDayCpl;
+import it.cleverad.engine.persistence.model.service.StatCampaignDayCpm;
+import it.cleverad.engine.persistence.model.service.StatCampaignDayCps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -19,59 +19,96 @@ public class StatisticsController {
     @Autowired
     private ViewBusiness business;
 
-    @Autowired
-    private ReportBusiness topCampagneBusiness;
+    /**
+     * ============================================================================================================
+     **/
+
+    @GetMapping(path = "/cpc/top")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<StatCampaignDayCpc> getStatTopCpc() {
+        return business.getTopCampaignsDayCpc();
+    }
+
+    @GetMapping(path = "/cpc/campaign/day")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<StatCampaignDayCpc> getStatCpcDay(ViewBusiness.Filter request, Pageable pageable) {
+        return business.getStatCampaignDayCpc(request, pageable);
+    }
+    @GetMapping(path = "/cpc/campaign/{id}/day")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<StatCampaignDayCpc> getStatCpcCampaignDay(@PathVariable Long id, Pageable pageable) {
+        ViewBusiness.Filter request = new ViewBusiness.Filter();
+        request.setCampaignId(id);
+        return business.getStatCampaignDayCpc(request, pageable);
+    }
 
     /**
      * ============================================================================================================
      **/
 
-    @GetMapping(path = "/cpc/click")
+    @GetMapping(path = "/cpm/top")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<StatCpcClickCampaignMedia> getStatCpcClickCampaign(ViewBusiness.Filter request, Pageable pageable) {
-        return business.searchStatCpcClickCampaign(request, pageable);
+    public Page<StatCampaignDayCpm> getStatTopCpm() {
+        return business.getTopCampaignsDayCpm();
     }
-
-    @GetMapping(path = "/cpc/click/day")
+    @GetMapping(path = "/cpm/campaign/day")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<StatCpcClickCampaignMediaDay> getStatCpcClickCampaignDay(ViewBusiness.Filter request, Pageable pageable) {
-        return business.searchStatCpcClickCampaignMediaDay(request, pageable);
+    public Page<StatCampaignDayCpm> getStatDayCpm(ViewBusiness.Filter request, Pageable pageable) {
+        return business.getStatCampaignDayCpm(request, pageable);
     }
-
-    @GetMapping(path = "/cpc/value")
+    @GetMapping(path = "/cpm/campaign/{id}/day")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<StatCpcValueCampaign> getTargetStatCpcValueCampaign(ViewBusiness.Filter request, Pageable pageable) {
-        return business.searchStatCpcValueCampaign(request, pageable);
+    public Page<StatCampaignDayCpm> getStatCampaignDayCpm(@PathVariable Long id, Pageable pageable) {
+        ViewBusiness.Filter request = new ViewBusiness.Filter();
+        request.setCampaignId(id);
+        return business.getStatCampaignDayCpm(request, pageable);
     }
-
-    @GetMapping(path = "/cpc/value/day")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<StatCpcValueCampaignWeek> getTargetStatCpcValueCampaignWeek(ViewBusiness.Filter request, Pageable pageable) {
-        return business.searchStatCpcValueCampaignWeek(request, pageable);
-    }
-
-    @GetMapping(path = "/cpc/transaction")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<StatCpcTransactionCampaignMedia> getStatCpcTransactionCampaign(ViewBusiness.Filter request, Pageable pageable) {
-        return business.searchStatCpcTransactionCampaign(request, pageable);
-    }
-
-
-    @GetMapping(path = "/cpl/value")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<StatCplValueCampaign> getStatCplValueCampaign(ViewBusiness.Filter request, Pageable pageable) {
-        return business.searchStatCplValueCampaign(request, pageable);
-    }
-
-    @GetMapping(path = "/cpl/value/week")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<StatCplValueCampaignWeek> getStatCplValueCampaignWeek(ViewBusiness.Filter request, Pageable pageable) {
-        return business.searchStatCplValueCampaignWeek(request, pageable);
-    }
-
 
     /**
      * ============================================================================================================
      **/
 
+    @GetMapping(path = "/cpl/top")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<StatCampaignDayCpl> getStatTopCpl() {
+        return business.getTopCampaignsDayCpl();
+    }
+    @GetMapping(path = "/cpl/campaign/day")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<StatCampaignDayCpl> getStatCplDay(ViewBusiness.Filter request, Pageable pageable) {
+        return business.getStatCampaignDayCpl(request, pageable);
+    }
+    @GetMapping(path = "/cpl/campaign/{id}/day")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<StatCampaignDayCpl> getStatCplCampaignDay(@PathVariable Long id, Pageable pageable) {
+        ViewBusiness.Filter request = new ViewBusiness.Filter();
+        request.setCampaignId(id);
+        return business.getStatCampaignDayCpl(request, pageable);
+    }
+
+    /**
+     * ============================================================================================================
+     **/
+
+    @GetMapping(path = "/cps/top")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<StatCampaignDayCps> getStatTopCps() {
+        return business.getTopCampaignsDayCps();
+    }
+    @GetMapping(path = "/cps/campaign/day")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<StatCampaignDayCps> getStatCpsCampaignDay(ViewBusiness.Filter request, Pageable pageable) {
+        return business.getStatCampaignDayCps(request, pageable);
+    }
+    @GetMapping(path = "/cps/campaign/{id}/day")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<StatCampaignDayCps> getStatCpsCampaignDay(@PathVariable Long id, Pageable pageable) {
+        ViewBusiness.Filter request = new ViewBusiness.Filter();
+        request.setCampaignId(id);
+        return business.getStatCampaignDayCps(request, pageable);
+    }
+
+    /**
+     * ============================================================================================================
+     **/
 }

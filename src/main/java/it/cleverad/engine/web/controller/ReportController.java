@@ -1,6 +1,7 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.ReportBusiness;
+import it.cleverad.engine.persistence.model.service.StatClickCpc;
 import it.cleverad.engine.persistence.model.service.TopAffiliates;
 import it.cleverad.engine.persistence.model.service.TopCampaings;
 import it.cleverad.engine.web.dto.ReportDTO;
@@ -60,6 +61,12 @@ public class ReportController {
     public Page<TopAffiliates> getAffiliatiTop(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
         return reportBusiness.searchTopAffilaites(request, pageable);
     }
+
+//    @GetMapping(path = "/cpc/click/grouped/day")
+//    @ResponseStatus(HttpStatus.ACCEPTED)
+//    public Page<StatClickCpc> getGroupedCpcClicks(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
+//        return reportBusiness.getGroupedCpcClicks(request, pageable);
+//    }
 
     /**
      * ============================================================================================================

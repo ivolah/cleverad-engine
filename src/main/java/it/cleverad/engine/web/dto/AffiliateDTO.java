@@ -1,12 +1,14 @@
 package it.cleverad.engine.web.dto;
 
 import it.cleverad.engine.persistence.model.service.Affiliate;
+import it.cleverad.engine.persistence.model.service.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Data
@@ -49,6 +51,8 @@ public class AffiliateDTO {
     private String contenutoSito;
 
     private Boolean status;
+    private Long statusId;
+    private String statusNome;
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
 
@@ -56,6 +60,7 @@ public class AffiliateDTO {
     private List<FileAffiliateDTO> fileAffiliates;
 
     private Boolean cb;
+
 
     public static AffiliateDTO from(Affiliate affiliate) {
 
@@ -89,7 +94,16 @@ public class AffiliateDTO {
             }).collect(Collectors.toList());
         }
 
-        return new AffiliateDTO(affiliate.getId(), affiliate.getName(), affiliate.getVatNumber(), affiliate.getStreet(), affiliate.getStreetNumber(), affiliate.getCity(), affiliate.getProvince(), affiliate.getZipCode(), affiliate.getPrimaryMail(), affiliate.getSecondaryMail(), affiliate.getCountry(), affiliate.getPhonePrefix(), affiliate.getPhoneNumber(), affiliate.getNote(), affiliate.getBank(), affiliate.getIban(), affiliate.getSwift(), affiliate.getPaypal(), affiliate.getFirstName(), affiliate.getLastName(), affiliate.getNomeSitoSocial(), affiliate.getUrlSitoSocial(), affiliate.getDictionaryCompanyType() != null ? affiliate.getDictionaryCompanyType().getId() : null, affiliate.getDictionaryCompanyType() != null ? affiliate.getDictionaryCompanyType().getName() : null, affiliate.getDictionaryChannelType() != null ? affiliate.getDictionaryChannelType().getId() : null, affiliate.getDictionaryChannelType() != null ? affiliate.getDictionaryChannelType().getName() : null, affiliate.getContenutoSito(), affiliate.getStatus(), affiliate.getCreationDate(), affiliate.getLastModificationDate(), listaCam, listaFile, affiliate.getCb());
+        return new AffiliateDTO(affiliate.getId(), affiliate.getName(), affiliate.getVatNumber(), affiliate.getStreet(), affiliate.getStreetNumber(), affiliate.getCity(), affiliate.getProvince(), affiliate.getZipCode(), affiliate.getPrimaryMail(), affiliate.getSecondaryMail(), affiliate.getCountry(), affiliate.getPhonePrefix(), affiliate.getPhoneNumber(), affiliate.getNote(), affiliate.getBank(), affiliate.getIban(), affiliate.getSwift(), affiliate.getPaypal(), affiliate.getFirstName(), affiliate.getLastName(), affiliate.getNomeSitoSocial(), affiliate.getUrlSitoSocial(),
+                affiliate.getDictionaryCompanyType() != null ? affiliate.getDictionaryCompanyType().getId() : null,
+                affiliate.getDictionaryCompanyType() != null ? affiliate.getDictionaryCompanyType().getName() : null,
+                affiliate.getDictionaryChannelType() != null ? affiliate.getDictionaryChannelType().getId() : null,
+                affiliate.getDictionaryChannelType() != null ? affiliate.getDictionaryChannelType().getName() : null,
+                affiliate.getContenutoSito(),
+                affiliate.getStatus(),
+                affiliate.getDictionaryStatusType() != null ? affiliate.getDictionaryStatusType().getId() : null,
+                affiliate.getDictionaryStatusType() != null ? affiliate.getDictionaryStatusType().getName() : null,
+                affiliate.getCreationDate(), affiliate.getLastModificationDate(), listaCam, listaFile, affiliate.getCb());
     }
 
 }

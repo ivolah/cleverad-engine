@@ -119,7 +119,7 @@ public class MailService {
 
         MimeMessage mimeMessage = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
-        helper.setFrom("attivazioni@cleverad.it");
+        helper.setFrom("info@cleverad.it");
         if (request.getEmail() != null)
             helper.setTo(request.getEmail());
         else

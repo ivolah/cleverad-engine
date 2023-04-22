@@ -6,7 +6,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Data
@@ -17,7 +19,10 @@ public class ChannelDTO {
     private Long id;
     private String name;
     private String shortDescription;
-
+    private String dimension;
+    private String country;
+    private Long ownerId;
+    private String ownerName;
     private Boolean status;
     private String url;
     private LocalDateTime creationDate;
@@ -29,16 +34,21 @@ public class ChannelDTO {
     private Long typeId;
     private String typeValue;
 
-    private List<CategoryDTO> categoryDTOS;
+    private List<Long> categoryList;
+    private List<CategoryDTO> categories;
     private String campaignID;
 
     private String affiliateName;
     private Long affiliateId;
 
-    public ChannelDTO(Long id, String name, String shortDescription, Boolean status, String url, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long dictionaryId, String dictionaryValue, Long typeId, String typeValue, List<CategoryDTO> categoryDTOS, String affiliateName, Long affiliateId) {
+    public ChannelDTO(Long id, String name, String shortDescription, String dimension, String country, Long ownerId, String ownerName, Boolean status, String url, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long dictionaryId, String dictionaryValue, Long typeId, String typeValue, List<Long> categoryList, List<CategoryDTO> categories, String affiliateName, Long affiliateId) {
         this.id = id;
         this.name = name;
         this.shortDescription = shortDescription;
+        this.dimension = dimension;
+        this.country = country;
+        this.ownerId = ownerId;
+        this.ownerName = ownerName;
         this.status = status;
         this.url = url;
         this.creationDate = creationDate;
@@ -47,7 +57,8 @@ public class ChannelDTO {
         this.dictionaryValue = dictionaryValue;
         this.typeId = typeId;
         this.typeValue = typeValue;
-        this.categoryDTOS = categoryDTOS;
+        this.categoryList = categoryList;
+        this.categories = categories;
         this.affiliateName = affiliateName;
         this.affiliateId = affiliateId;
     }
@@ -66,18 +77,30 @@ public class ChannelDTO {
             }).collect(Collectors.toList());
         }
 
+        List<Long> categoryList = new ArrayList<>();
+        //        String catergoryList = "";
+        if (categories != null && categories.size() > 0)
+            for (CategoryDTO basicCategoryDTO : Objects.requireNonNull(categories)) {
+                categoryList.add(basicCategoryDTO.getId());
+            }
+        return new ChannelDTO(channel.getId(), channel.getName(), channel.getShortDescription(), channel.getDimension(),
+                channel.getCountry(),
 
-        return new ChannelDTO(channel.getId(), channel.getName(), channel.getShortDescription(), channel.getStatus(),
+                channel.getDictionaryOwner() != null ? channel.getDictionaryOwner().getId() : null,
+                channel.getDictionaryOwner() != null ? channel.getDictionaryOwner().getName() : null,
+
+                channel.getStatus(),
                 channel.getUrl(), channel.getCreationDate(), channel.getLastModificationDate(),
                 channel.getDictionary() != null ? channel.getDictionary().getId() : null,
                 channel.getDictionary() != null ? channel.getDictionary().getName() : null,
 
                 channel.getDictionaryType() != null ? channel.getDictionaryType().getId() : null,
                 channel.getDictionaryType() != null ? channel.getDictionaryType().getName() : null,
+                categoryList,
                 categories,
                 channel.getAffiliate() != null ? channel.getAffiliate().getName() : null,
                 channel.getAffiliate() != null ? channel.getAffiliate().getId() : null
-                );
+        );
     }
 
 }

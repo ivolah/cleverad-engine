@@ -108,6 +108,13 @@ public class RevenueFactorBusiness {
         return RevenueFactorDTO.from(repository.save(mappedEntity));
     }
 
+    public RevenueFactorDTO disable(Long id) {
+        RevenueFactor ommission = repository.findById(id).orElseThrow(() -> new ElementCleveradException("RevenueFactor", id));
+        ommission.setLastModificationDate(LocalDateTime.now());
+        ommission.setStatus(false);
+        return RevenueFactorDTO.from(repository.save(ommission));
+    }
+
     public Page<RevenueFactorDTO> getbyIdCampaign(Long id, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();

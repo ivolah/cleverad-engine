@@ -16,6 +16,7 @@ public class CommissionDTO {
     private String value;
     private String description;
     private Boolean status;
+    private Boolean base;
     private LocalDate startDate;
     private LocalDate dueDate;
     private LocalDateTime creationDate;
@@ -25,7 +26,7 @@ public class CommissionDTO {
     private Long campaignId;
     private String typeName;
 
-    public CommissionDTO(long id, String name, String value, String description, Boolean status, Long dictionaryId, LocalDate startDate, LocalDate dueDate, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long campaignId, String typeName) {
+    public CommissionDTO(long id, String name, String value, String description, Boolean status, Long dictionaryId, LocalDate startDate, LocalDate dueDate, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long campaignId, String typeName, Boolean base) {
         this.id = id;
         this.name = name;
         this.value = value;
@@ -38,6 +39,7 @@ public class CommissionDTO {
         this.lastModificationDate = lastModificationDate;
         this.campaignId = campaignId;
         this.typeName = typeName;
+        this.base = base;
     }
 
     public static CommissionDTO from(Commission comission) {
@@ -47,7 +49,7 @@ public class CommissionDTO {
                 comission.getStartDate(), comission.getDueDate(), comission.getCreationDate(),
                 comission.getLastModificationDate(),
                 comission.getCampaign() != null ? comission.getCampaign().getId() : null,
-                comission.getDictionary() != null ? comission.getDictionary().getName() : null
-        );
+                comission.getDictionary() != null ? comission.getDictionary().getName() : null,
+                comission.getBase());
     }
 }

@@ -147,7 +147,6 @@ public class CommissionBusiness {
         return page.map(CommissionDTO::from).toList();
     }
 
-
     /**
      * ============================================================================================================
      **/
@@ -172,6 +171,9 @@ public class CommissionBusiness {
             }
             if (request.getStatus() != null) {
                 predicates.add(cb.equal(root.get("status"), request.getStatus()));
+            }
+            if (request.getBase() != null) {
+                predicates.add(cb.equal(root.get("base"), request.getBase()));
             }
 
             if (request.getCampaignId() != null) {
@@ -229,6 +231,7 @@ public class CommissionBusiness {
         private String value;
         private String description;
         private Boolean status;
+        private Boolean base;
 
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate startDate;
@@ -255,6 +258,7 @@ public class CommissionBusiness {
         private String value;
         private String description;
         private Boolean status;
+        private Boolean base;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dueDateFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")

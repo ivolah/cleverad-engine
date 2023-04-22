@@ -5,6 +5,7 @@ import it.cleverad.engine.web.dto.CategoryDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,7 @@ public class CategoryController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<CategoryDTO> search(CategoryBusiness.Filter request, Pageable pageable) {
+    public Page<CategoryDTO> search(CategoryBusiness.Filter request, @PageableDefault(value = 200) Pageable pageable) {
         return business.search(request, pageable);
     }
 

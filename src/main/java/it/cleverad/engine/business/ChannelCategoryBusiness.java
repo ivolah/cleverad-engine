@@ -4,7 +4,9 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Category;
 import it.cleverad.engine.persistence.model.service.Channel;
 import it.cleverad.engine.persistence.model.service.ChannelCategory;
+import it.cleverad.engine.persistence.repository.service.CategoryRepository;
 import it.cleverad.engine.persistence.repository.service.ChannelCategoryRepository;
+import it.cleverad.engine.persistence.repository.service.ChannelRepository;
 import it.cleverad.engine.web.dto.ChannelCategoryDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -19,13 +21,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -41,6 +41,11 @@ public class ChannelCategoryBusiness {
     private ChannelCategoryRepository repository;
 
     @Autowired
+    private ChannelRepository channelRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
     private Mapper mapper;
 
     /**
@@ -53,6 +58,29 @@ public class ChannelCategoryBusiness {
         map.setCreationDate(LocalDateTime.now());
         map.setLastModificationDate(LocalDateTime.now());
 
+        Category cat = categoryRepository.findById(request.getChannelId()).orElseGet(() -> {
+            Category ccc = new Category();
+            ccc.setId(request.getCategoryId());
+            return ccc;
+        });
+        map.setCategory(cat);
+
+        Channel channel = channelRepository.findById(request.getChannelId()).orElseGet(() -> {
+            Channel cc = new Channel();
+            cc.setId(request.getChannelId());
+            return cc;
+        });
+        map.setChannel(channel);
+
+        return ChannelCategoryDTO.from(repository.save(map));
+    }
+
+
+    public ChannelCategory createEntity(BaseCreateRequest request) {
+        ChannelCategory map = mapper.map(request, ChannelCategory.class);
+        map.setCreationDate(LocalDateTime.now());
+        map.setLastModificationDate(LocalDateTime.now());
+
         Category cat = new Category();
         cat.setId(request.getCategoryId());
         map.setCategory(cat);
@@ -61,7 +89,20 @@ public class ChannelCategoryBusiness {
         channel.setId(request.getChannelId());
         map.setChannel(channel);
 
-        return ChannelCategoryDTO.from(repository.save(map));
+        return repository.save(map);
+    }
+
+    public void deleteByChannelID(Long id) {
+        Filter request = new Filter();
+        request.setChannelId(id);
+        Page<ChannelCategory> page = repository.findAll(getSpecification(request), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id"))));
+        try {
+            page.stream().forEach(channelCategory -> repository.deleteById(channelCategory.getId()));
+        } catch (javax.validation.ConstraintViolationException ex) {
+            throw ex;
+        } catch (Exception ee) {
+            throw new PostgresDeleteCleveradException(ee);
+        }
     }
 
     // GET BY ID
@@ -92,17 +133,16 @@ public class ChannelCategoryBusiness {
     // UPDATE
     public ChannelCategoryDTO update(Long id, Filter filter) {
         ChannelCategory channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("ChannelCategory", id));
-        ChannelCategoryDTO campaignDTOfrom = ChannelCategoryDTO.from(channel);
+        ChannelCategoryDTO channelCategoryDTO = ChannelCategoryDTO.from(channel);
 
-        mapper.map(filter, campaignDTOfrom);
+        mapper.map(filter, channelCategoryDTO);
 
         ChannelCategory mappedEntity = mapper.map(channel, ChannelCategory.class);
         mappedEntity.setLastModificationDate(LocalDateTime.now());
-        mapper.map(campaignDTOfrom, mappedEntity);
+        mapper.map(channelCategoryDTO, mappedEntity);
 
         return ChannelCategoryDTO.from(repository.save(mappedEntity));
     }
-
 
     /**
      * ============================================================================================================
@@ -117,10 +157,10 @@ public class ChannelCategoryBusiness {
             }
 
             if (request.getCategoryId() != null) {
-                predicates.add(cb.equal(root.get("categoryId"), request.getCategoryId()));
+                predicates.add(cb.equal(root.get("category").get("id"), request.getCategoryId()));
             }
             if (request.getChannelId() != null) {
-                predicates.add(cb.equal(root.get("channelId"), request.getChannelId()));
+                predicates.add(cb.equal(root.get("channel").get("id"), request.getChannelId()));
             }
 
             if (request.getCreationDateFrom() != null) {
@@ -154,10 +194,6 @@ public class ChannelCategoryBusiness {
         private Long channelId;
         private Long categoryId;
 
-        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-        private LocalDate startDate;
-        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-        private LocalDate endDate;
     }
 
     @Data

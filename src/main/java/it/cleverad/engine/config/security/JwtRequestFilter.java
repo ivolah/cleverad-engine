@@ -32,7 +32,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
 
         final String requestTokenHeader = request.getHeader("Authorization");
-        log.info("> " + request.getMethod() + " > " + request.getRequestURI());
+        if (!request.getRequestURI().contains("encoded") || !request.getRequestURI().contains("target"))
+            log.info("> " + request.getMethod() + " > " + request.getRequestURI());
         //+ " >>>>>>>  " + requestTokenHeader);
 
         String username = null;
@@ -42,7 +43,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             jwtToken = requestTokenHeader.substring(7);
             try {
                 username = jwtTokenUtil.getUsernameFromToken(jwtToken);
-
                 log.trace(">>>> USERNAME " + username);
             } catch (IllegalArgumentException e) {
                 log.error("Unable to get JWT Token");

@@ -29,42 +29,33 @@ public class ScheduledActivities {
     @Autowired
     private RevenueFactorBusiness revenueFactorBusiness;
 
-    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "0 15 0 * * ?")
     public void aggiornaStato() {
         log.info("AGGIORNAMENTO QUOTIDIANO STATO");
-
-        // aggiorno Stato Campagne
-        List<CampaignDTO> listaCampagne = campaignBusiness.getCampaignsToDisable();
-        listaCampagne.stream().forEach(campaignDTO -> {
-            CampaignBusiness.Filter filter = new CampaignBusiness.Filter();
-            filter.setStatus(false);
-            campaignBusiness.update(campaignDTO.getId(), filter);
-        });
 
         // aggiorno Stato Budget
         List<BudgetDTO> listaBudget = budgetBusiness.getBudgetToDisable();
         listaBudget.stream().forEach(campaignDTO -> {
-            BudgetBusiness.Filter filter = new BudgetBusiness.Filter();
-            filter.setStatus(false);
-            budgetBusiness.update(campaignDTO.getId(), filter);
+            budgetBusiness.disable(campaignDTO.getId());
         });
 
         // aggiorao sato commission
         List<CommissionDTO> listaCommission = commissionBusiness.getCommissionToDisable();
-        listaCommission.stream().forEach(campaignDTO -> {
-            CommissionBusiness.Filter filter = new CommissionBusiness.Filter();
-            filter.setStatus(false);
-            commissionBusiness.update(campaignDTO.getId(), filter);
+        listaCommission.stream().forEach(comm -> {
+            commissionBusiness.disable(comm.getId());
         });
 
         // aggiorno stato revenue
         List<RevenueFactorDTO> listaRevenu = revenueFactorBusiness.getRevenueToDisable();
-        listaCommission.stream().forEach(campaignDTO -> {
-            RevenueFactorBusiness.Filter filter = new RevenueFactorBusiness.Filter();
-            filter.setStatus(false);
-            revenueFactorBusiness.update(campaignDTO.getId(), filter);
+        listaRevenu.stream().forEach(rr -> {
+            revenueFactorBusiness.disable(rr.getId());
         });
 
+        // aggiorno Stato Campagne
+        List<CampaignDTO> listaCampagne = campaignBusiness.getCampaignsToDisable();
+        listaCampagne.stream().forEach(campaignDTO -> {
+            campaignBusiness.disable(campaignDTO.getId());
+        });
 
     }
 

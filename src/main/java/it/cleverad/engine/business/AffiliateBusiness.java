@@ -3,6 +3,7 @@ package it.cleverad.engine.business;
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
+import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
 import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.web.dto.AffiliateDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
@@ -44,7 +45,11 @@ public class AffiliateBusiness {
     @Autowired
     private WalletBusiness walletBusiness;
     @Autowired
+    private ChannelBusiness channelBusiness;
+    @Autowired
     private DictionaryBusiness dictionaryBusiness;
+    @Autowired
+    private DictionaryRepository dictionaryRepository;
     @Autowired
     private UserBusiness userBusiness;
     @Autowired
@@ -84,7 +89,7 @@ public class AffiliateBusiness {
 
     // SEARCH PAGINATED
     public Page<AffiliateDTO> search(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Page<Affiliate> page = repository.findAll(getSpecification(request), pageable);
         return page.map(AffiliateDTO::from);
     }
@@ -92,26 +97,36 @@ public class AffiliateBusiness {
     // UPDATE
     public AffiliateDTO update(Long id, Filter filter) {
         Affiliate affiliate = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Affiliate", id));
-        AffiliateDTO affiliateDTOfrom = AffiliateDTO.from(affiliate);
 
+        AffiliateDTO affiliateDTOfrom = AffiliateDTO.from(affiliate);
         mapper.map(filter, affiliateDTOfrom);
 
-         Affiliate mappedEntity = mapper.map(affiliate, Affiliate.class);
+        Affiliate mappedEntity = mapper.map(affiliate, Affiliate.class);
         mappedEntity.setLastModificationDate(LocalDateTime.now());
-
+        mappedEntity.setDictionaryStatusType(dictionaryRepository.findById(filter.statusId).orElseThrow(() -> new ElementCleveradException("Status", filter.statusId)));
         mapper.map(affiliateDTOfrom, mappedEntity);
-
-        //TODO mappedEntity.setDictionaryChannelType(dictionaryRepository.findById(Long.valueOf(filter.getCategorytypeId())).orElseThrow(() -> new ElementCleveradException("Dictionary Category Type", filter.getCategorytypeId())));
-        // NOTTODO mappedEntity.setDictionaryCompanyType(dictionaryRepository.findById(filter.getCompanytypeId()).orElseThrow(() -> new ElementCleveradException("Dictionary Company Type", filter.getCompanytypeId())));
 
         Boolean status = affiliate.getStatus();
         MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
-        if (!status && filter.status) {
+//        if (!status && filter.status) {
+//            // invio mail approvato
+//            mailRequest.setTemplateId(7L);
+//            mailRequest.setAffiliateId(id);
+//            mailService.invio(mailRequest);
+//        } else if (!status && !filter.status) {
+//            // invio mail non approvato
+//            mailRequest.setTemplateId(8L);
+//            mailRequest.setAffiliateId(id);
+//            mailService.invio(mailRequest);
+//        }
+
+        Long statusID = filter.statusId;
+        if (statusID  == 6) {
             // invio mail approvato
             mailRequest.setTemplateId(7L);
             mailRequest.setAffiliateId(id);
             mailService.invio(mailRequest);
-        } else if (!status && !filter.status) {
+        } else  if (statusID  == 7) {
             // invio mail non approvato
             mailRequest.setTemplateId(8L);
             mailRequest.setAffiliateId(id);
@@ -141,18 +156,17 @@ public class AffiliateBusiness {
     // CREATE
     public AffiliateDTO create(BaseCreateRequest request) {
         Affiliate map = mapper.map(request, Affiliate.class);
-        //  map.setDictionaryChannelType(dictionaryRepository.findById(Long.valueOf(request.getCategorytypeId())).orElseThrow(() -> new ElementCleveradException("Dictionary Channel Type", request.getCategorytypeId())));
-        //        map.setDictionaryCompanyType(dictionaryRepository.findById(request.getCompanytypeId()).orElseThrow(() -> new ElementCleveradException("Dictionary Company Type", request.getCompanytypeId())));
-
+        request.statusId = 5L;
+        map.setDictionaryStatusType(dictionaryRepository.findById(request.statusId).orElseThrow(() -> new ElementCleveradException("Status", request.statusId)));
         AffiliateDTO dto = AffiliateDTO.from(repository.save(map));
 
         // invio mail Affiliate
         MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
-        mailRequest.setTemplateId(6L);
-        mailRequest.setAffiliateId(dto.getId());
-        mailRequest.setEmail(request.primaryMail);
-        //mailRequest.setUserId();
-        mailService.invio(mailRequest);
+//        mailRequest.setTemplateId(6L);
+//        mailRequest.setAffiliateId(dto.getId());
+//        mailRequest.setEmail(request.primaryMail);
+//        //mailRequest.setUserId();
+//        mailService.invio(mailRequest);
 
         // creo wallet associato
         WalletBusiness.BaseCreateRequest wal = new WalletBusiness.BaseCreateRequest();
@@ -163,6 +177,21 @@ public class AffiliateBusiness {
         wal.setTotal(0.0);
         wal.setStatus(true);
         walletBusiness.create(wal);
+
+        // creo channel
+        ChannelBusiness.BaseCreateRequest channelRequest = new ChannelBusiness.BaseCreateRequest();
+        channelRequest.setAffiliateId(dto.getId());
+        channelRequest.setName(request.channelName);
+        channelRequest.setUrl(request.channelUrl);
+        channelRequest.setDimension(request.channelDimension);
+        channelRequest.setCountry(request.channelCountry);
+        channelRequest.setOwnerId(request.channelOwnerId);
+        channelRequest.setCategories(request.channelCategories);
+        channelRequest.setDictionaryId(12L);
+        channelRequest.setTypeId(request.channelTypeId);
+        channelRequest.setStatus(true);
+        channelRequest.setRegistrazione(true);
+        channelBusiness.create(channelRequest);
 
         // creo user associato
         UserBusiness.BaseCreateRequest nuovoUser = new UserBusiness.BaseCreateRequest();
@@ -179,7 +208,7 @@ public class AffiliateBusiness {
 
         // invio mail USER
         mailRequest = new MailService.BaseCreateRequest();
-        mailRequest.setTemplateId(16L);
+        mailRequest.setTemplateId(2L);
         mailRequest.setAffiliateId(dto.getId());
         mailRequest.setUserId(userDto.getId());
         mailService.invio(mailRequest);
@@ -264,6 +293,7 @@ public class AffiliateBusiness {
         private String primaryMail;
         private String secondaryMail;
         private Boolean status;
+        private Long statusId;
         private String country;
         private String phonePrefix;
         private String phoneNumber;
@@ -284,6 +314,15 @@ public class AffiliateBusiness {
         private String contenutoSito;
 
         private Boolean cb;
+
+        private String channelName;
+        private String channelUrl;
+        private String channelDimension;
+        private String channelCountry;
+        private String channelCategories;
+        private Long channelOwnerId;
+        private Long channelTypeId;
+
     }
 
     @Data
@@ -301,6 +340,7 @@ public class AffiliateBusiness {
         private String primaryMail;
         private String secondaryMail;
         private Boolean status;
+        private Long statusId;
         private String phonePrefix;
         private String phoneNumber;
         private String note;

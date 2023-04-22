@@ -54,7 +54,7 @@ public class AffiliateChannelCommissionCampaignController {
     @GetMapping("/{id}/campaign/affiliate")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<AffiliateChannelCommissionCampaignDTO> getByIdCampaignAffiliate(@PathVariable Long id, Pageable pageable) {
-        return business.searchByCampaignId(id, pageable);
+        return business.searchByCampaignIdAffiliateNotZero(id, pageable);
     }
 
     /**

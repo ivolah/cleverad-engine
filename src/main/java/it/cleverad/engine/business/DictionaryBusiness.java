@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,14 +81,14 @@ public class DictionaryBusiness {
         return page.map(DictionaryDTO::from);
     }
 
-    public Page<DictionaryDTO> getTypeStatus(Filter request, Pageable pageableRequest) {
+    public Page<DictionaryDTO> getTypeStatus(Filter request, @PageableDefault(value = 200) Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         request.setType("STATUS");
         Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
         return page.map(DictionaryDTO::from);
     }
 
-    public Page<DictionaryDTO> getTypeRole(Filter request, Pageable pageableRequest) {
+    public Page<DictionaryDTO> getTypeRole(Filter request, @PageableDefault(value = 200) Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         request.setType("ROLE");
         Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
@@ -95,7 +96,7 @@ public class DictionaryBusiness {
     }
 
     public Page<DictionaryDTO> getTypeCommission() {
-        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, 200, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setType("COMMISSION");
         Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
@@ -103,7 +104,7 @@ public class DictionaryBusiness {
     }
 
     public Page<DictionaryDTO> getTypeChannel() {
-        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, 200, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setType("CHANNEL");
         Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
@@ -111,7 +112,7 @@ public class DictionaryBusiness {
     }
 
     public Page<DictionaryDTO> getTypePayout() {
-        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, 200, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setType("PAYOUT");
         Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
@@ -119,7 +120,7 @@ public class DictionaryBusiness {
     }
 
     public Page<DictionaryDTO> getTypeDocument() {
-        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, 200, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setType("DOCTYPE");
         Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
@@ -127,7 +128,7 @@ public class DictionaryBusiness {
     }
 
     public Page<DictionaryDTO> getTypeCompany() {
-        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, 200, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setType("COMPANYTYPE");
         Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
@@ -135,7 +136,7 @@ public class DictionaryBusiness {
     }
 
     public Page<DictionaryDTO> getChannelTypeAffiliate() {
-        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, 200, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setType("CHANNELTYPE");
         Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
@@ -143,7 +144,7 @@ public class DictionaryBusiness {
     }
 
     public Page<DictionaryDTO> getCampaignAffiliateStatus() {
-        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, 200, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setType("CAMPAIGNAFFILIATE");
         Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
@@ -151,7 +152,7 @@ public class DictionaryBusiness {
     }
 
     public Page<DictionaryDTO> getTransactionTypes() {
-        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, 200, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setType("TRANSACTIONS");
         Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
@@ -159,13 +160,20 @@ public class DictionaryBusiness {
     }
 
     public Page<DictionaryDTO> getFilePayoutTypes() {
-        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, 200, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setType("FILEPAYOUT");
         Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
         return page.map(DictionaryDTO::from);
     }
 
+    public Page<DictionaryDTO> getAffiliateStatusTypes() {
+        Pageable pageable = PageRequest.of(0, 200, Sort.by(Sort.Order.asc("id")));
+        Filter request = new Filter();
+        request.setType("AFFILIATESTATUS");
+        Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(DictionaryDTO::from);
+    }
     /**
      * ============================================================================================================
      **/

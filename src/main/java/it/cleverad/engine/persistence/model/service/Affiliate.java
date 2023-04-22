@@ -63,10 +63,12 @@ public class Affiliate {
     @ManyToOne
     @JoinColumn(name = "companytype_id")
     private Dictionary dictionaryCompanyType;
-
     @ManyToOne
     @JoinColumn(name = "channeltype_id")
     private Dictionary dictionaryChannelType;
+    @ManyToOne
+    @JoinColumn(name = "status_id")
+    private Dictionary dictionaryStatusType;
 
     @Column(name = "contenuto_sito")
     private String contenutoSito;
