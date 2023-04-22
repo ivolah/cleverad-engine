@@ -42,6 +42,7 @@ public class Campaign {
     @Column(name = "encoded_id")
     private String encodedId;
     private Double budget;
+    private Double intitialBudget;
     @Column(nullable = false)
     private Boolean status = true;
     @Column(name = "creation_date")

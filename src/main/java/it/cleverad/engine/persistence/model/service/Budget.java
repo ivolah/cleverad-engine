@@ -7,7 +7,6 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Table(name = "t_budget")
@@ -16,7 +15,7 @@ import java.util.Date;
 @Setter
 @NoArgsConstructor
 public class Budget {
-
+    // AFFILAITE BUDGET
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
