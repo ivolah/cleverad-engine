@@ -30,7 +30,7 @@ public class CampaignDTO {
     private String idFile;
     private String valuta;
     private Double budget;
-    private Double intitialBudget;
+    private Double initialBudget;
     private String trackingCode;
     private String encodedId;
 
@@ -169,7 +169,7 @@ public class CampaignDTO {
 
         return new CampaignDTO(campaign.getId(), campaign.getName(), campaign.getShortDescription(),
                 campaign.getLongDescription(), campaign.getStatus(), campaign.getCreationDate(), campaign.getLastModificationDate(),
-                campaign.getStartDate(), campaign.getEndDate(), campaign.getIdFile(), campaign.getValuta(), campaign.getBudget(), campaign.getIntitialBudget(),
+                campaign.getStartDate(), campaign.getEndDate(), campaign.getIdFile(), campaign.getValuta(), campaign.getBudget(), campaign.getInitialBudget(),
                 campaign.getTrackingCode(), campaign.getEncodedId(),
                 campaign.getCookie().getId(),
                 campaign.getCookie().getName(),
