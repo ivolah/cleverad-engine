@@ -5,9 +5,11 @@ import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.FileUserDTO;
 import it.cleverad.engine.web.exception.PostgresCleveradException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -65,6 +67,11 @@ public class FileUserController {
         this.business.delete(id);
     }
 
+    @GetMapping("/{id}/download")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseEntity<Resource> down(@PathVariable Long id) {
+        return business. download(id);
+    }
 
     /**
      * ============================================================================================================
