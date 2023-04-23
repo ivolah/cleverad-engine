@@ -32,9 +32,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
 
         final String requestTokenHeader = request.getHeader("Authorization");
-        if (!request.getRequestURI().contains("encoded") || !request.getRequestURI().contains("target"))
-            log.info("> " + request.getMethod() + " > " + request.getRequestURI());
-        //+ " >>>>>>>  " + requestTokenHeader);
+        if (!request.getRequestURI().contains("encoded"))
+            if (!request.getRequestURI().contains("target"))
+                log.info("> " + request.getMethod() + " > " + request.getRequestURI());
 
         String username = null;
         String jwtToken = null;

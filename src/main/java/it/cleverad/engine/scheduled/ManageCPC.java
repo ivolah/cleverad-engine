@@ -9,6 +9,7 @@ import it.cleverad.engine.service.RefferalService;
 import it.cleverad.engine.web.dto.BudgetDTO;
 import it.cleverad.engine.web.dto.CampaignDTO;
 import it.cleverad.engine.web.dto.CpcDTO;
+import it.cleverad.engine.web.dto.TransactionCPCDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Slf4j
@@ -102,7 +104,7 @@ public class ManageCPC {
                 // gesione commisione
                 List<AffiliateChannelCommissionCampaign> accc = affiliateChannelCommissionCampaignRepository.findByAffiliateIdAndChannelIdAndCampaignId(refferal.getAffiliateId(), refferal.getChannelId(), refferal.getCampaignId());
                 accc.stream().forEach(affiliateChannelCommissionCampaign -> {
-                    if (affiliateChannelCommissionCampaign.getCommission().getDictionary().getName().equals("CPC")) {
+                    if (affiliateChannelCommissionCampaign.getCommission().getDictionary().getName().toUpperCase(Locale.ROOT).equals("CPC")) {
                         rr.setCommissionId(affiliateChannelCommissionCampaign.getCommission().getId());
 
                         Double totale = Double.valueOf(affiliateChannelCommissionCampaign.getCommission().getValue()) * aLong;
@@ -136,7 +138,8 @@ public class ManageCPC {
                         }
 
                         // creo la transazione
-                        transactionBusiness.createCpc(rr);
+                        TransactionCPCDTO tcpc = transactionBusiness.createCpc(rr);
+                        log.info("CREATO TRANSAZIONE CPC " + tcpc.getId());
                     }
                 });
             });

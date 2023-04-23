@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 
 @Slf4j
 @Component
@@ -89,7 +90,7 @@ public class ManageCPS {
                 // gesione commisione
                 List<AffiliateChannelCommissionCampaign> accc = affiliateChannelCommissionCampaignRepository.findByAffiliateIdAndChannelIdAndCampaignId(refferal.getAffiliateId(), refferal.getChannelId(), refferal.getCampaignId());
                 accc.stream().forEach(affiliateChannelCommissionCampaign -> {
-                    if (affiliateChannelCommissionCampaign.getCommission().getDictionary().getName().equals("CPS")) {
+                    if (affiliateChannelCommissionCampaign.getCommission().getDictionary().getName().toUpperCase(Locale.ROOT).equals("CPS")) {
                         rr.setCommissionId(affiliateChannelCommissionCampaign.getCommission().getId());
 
                         Double totale = Double.valueOf(affiliateChannelCommissionCampaign.getCommission().getValue()) * 1;
