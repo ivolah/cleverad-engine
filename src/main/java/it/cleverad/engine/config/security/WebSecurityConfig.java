@@ -58,6 +58,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/authenticate",
                         "/target",
                         "/file/encoded",
+                        "/file/*/download",
                         "/register",
                         "/register/types/*",
                         "/register/user/",

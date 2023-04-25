@@ -31,7 +31,6 @@ public class Commission {
     private LocalDate startDate;
     @Column(nullable = false)
     private Boolean status = true;
-    @Column(nullable = false)
     private Boolean base = false;
 
     @Column(name = "creation_date")
