@@ -61,6 +61,8 @@ public class CampaignBusiness {
     private CampaignAffiliateBusiness campaignAffiliateBusiness;
     @Autowired
     private RefferalService refferalService;
+    @Autowired
+    private RevenueFactorBusiness revenueFactorBusiness;
 
     /**
      * ============================================================================================================
@@ -75,7 +77,11 @@ public class CampaignBusiness {
         map.setDealer(dealerRepository.findById(request.getDealerId()).orElseThrow(() -> new ElementCleveradException("Dealer", request.dealerId)));
         map.setPlanner(plannerRepository.findById(request.getPlannerId()).orElseThrow(() -> new ElementCleveradException("Planner", request.plannerId)));
 
+        map.setBudget(request.initialBudget);
+        map.setValuta("EUR");
+
         CampaignDTO dto = CampaignDTO.from(repository.save(map));
+
         CampaignDTO finalDto = dto;
         //Category
         if (StringUtils.isNotBlank(request.getCategories())) {
@@ -86,7 +92,24 @@ public class CampaignBusiness {
         Campaign campaign = repository.findById(dto.getId()).orElseThrow(() -> new ElementCleveradException("Campaign", finalDto.getId()));
         campaign.setEncodedId(encodedID);
 
-        dto = CampaignDTO.from(repository.save(map));
+        //Aggiungo revenue factor vuoti
+        RevenueFactorBusiness.BaseCreateRequest rfRequest = new RevenueFactorBusiness.BaseCreateRequest();
+        rfRequest.setCampaignId(dto.getId());
+        rfRequest.setStartDate(dto.getStartDate());
+        rfRequest.setDueDate(dto.getEndDate());
+        rfRequest.setStatus(true);
+        rfRequest.setRevenue(0D);
+
+        rfRequest.setDictionaryId(10L);
+        revenueFactorBusiness.create(rfRequest);
+        rfRequest.setDictionaryId(11L);
+        revenueFactorBusiness.create(rfRequest);
+        rfRequest.setDictionaryId(50L);
+        revenueFactorBusiness.create(rfRequest);
+        rfRequest.setDictionaryId(51L);
+        revenueFactorBusiness.create(rfRequest);
+
+        dto = CampaignDTO.from(repository.save(campaign));
 
         return dto;
     }
@@ -168,6 +191,7 @@ public class CampaignBusiness {
 
         // SET Category - cancello precedenti
         campaignCategoryBusiness.deleteByCampaignID(id);
+
         // setto nuvoi
         if (filter.getCategoryList() != null && !filter.getCategoryList().isEmpty()) {
             Set<CampaignCategory> collect = filter.getCategoryList().stream().map(ss -> campaignCategoryBusiness.createEntity(new CampaignCategoryBusiness.BaseCreateRequest(id, ss))).collect(Collectors.toSet());
@@ -332,6 +356,7 @@ public class CampaignBusiness {
         private Long dealerId;
         private String valuta;
         private Double budget;
+        private Double initialBudget;
         private String trackingCode;
         @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSz")
         private LocalDateTime startDate;
@@ -367,6 +392,8 @@ public class CampaignBusiness {
         private LocalDate endDateFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate endDateTo;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate endDate;
         private Long companyId;
         private Long plannerId;
         private Long dealerId;
