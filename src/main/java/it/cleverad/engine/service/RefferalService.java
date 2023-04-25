@@ -13,22 +13,24 @@ import java.util.Base64;
 public class RefferalService {
 
     public Refferal decodificaRefferal(String refferalString) {
-        String[] tokens = refferalString.split("-");
         Refferal refferal = new Refferal();
-        if (tokens[0] != null) {
-            refferal.setCampaignId(Long.valueOf(decodifica(tokens[0])));
-        }
-        if (tokens.length > 1 && tokens[1] != null) {
-            refferal.setMediaId(Long.valueOf(decodifica(tokens[1])));
-        }
-        if (tokens.length > 2 && tokens[2] != null) {
-            refferal.setAffiliateId(Long.valueOf(decodifica(tokens[2])));
-        }
-        if (tokens.length > 3 && tokens[3] != null) {
-            refferal.setChannelId(Long.valueOf(decodifica(tokens[3])));
-        }
-        if (tokens.length >= 4 && tokens[4] != null) {
-            refferal.setTargetId(Long.valueOf(decodifica(tokens[4])));
+        if (StringUtils.isNotBlank(refferalString)) {
+            String[] tokens = refferalString.split("-");
+            if (tokens[0] != null) {
+                refferal.setCampaignId(Long.valueOf(decodifica(tokens[0])));
+            }
+            if (tokens.length > 1 && tokens[1] != null) {
+                refferal.setMediaId(Long.valueOf(decodifica(tokens[1])));
+            }
+            if (tokens.length > 2 && tokens[2] != null) {
+                refferal.setAffiliateId(Long.valueOf(decodifica(tokens[2])));
+            }
+            if (tokens.length > 3 && tokens[3] != null) {
+                refferal.setChannelId(Long.valueOf(decodifica(tokens[3])));
+            }
+            if (tokens.length >= 4 && tokens[4] != null) {
+                refferal.setTargetId(Long.valueOf(decodifica(tokens[4])));
+            }
         }
         return refferal;
     }

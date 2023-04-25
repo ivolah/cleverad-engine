@@ -95,17 +95,14 @@ public class RevenueFactorBusiness {
 
     // UPDATE
     public RevenueFactorDTO update(Long id, Filter filter) {
-        RevenueFactor ommission = repository.findById(id).orElseThrow(() -> new ElementCleveradException("RevenueFactor", id));
-        RevenueFactorDTO campaignDTOfrom = RevenueFactorDTO.from(ommission);
-        mapper.map(filter, campaignDTOfrom);
+        RevenueFactor revenueFactor = repository.findById(id).orElseThrow(() -> new ElementCleveradException("RevenueFactor", id));
+        mapper.map(filter, revenueFactor);
 
-        RevenueFactor mappedEntity = mapper.map(ommission, RevenueFactor.class);
-        mappedEntity.setCampaign(campaignRepository.findById(filter.campaignId).orElseThrow());
-        mappedEntity.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow());
-        mappedEntity.setLastModificationDate(LocalDateTime.now());
-        mapper.map(campaignDTOfrom, mappedEntity);
+        revenueFactor.setCampaign(campaignRepository.findById(filter.campaignId).orElseThrow());
+        revenueFactor.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow());
+        revenueFactor.setLastModificationDate(LocalDateTime.now());
 
-        return RevenueFactorDTO.from(repository.save(mappedEntity));
+        return RevenueFactorDTO.from(repository.save(revenueFactor));
     }
 
     public RevenueFactorDTO disable(Long id) {
@@ -129,6 +126,16 @@ public class RevenueFactorBusiness {
         RevenueFactor revenueFactor = repository.findAll(getSpecification(request)).stream().findFirst().get();
         return revenueFactor;
     }
+
+    public RevenueFactor getbyIdCampaignAndDictionrayId(Long campId, Long dictId) {
+        Filter request = new Filter();
+        request.setCampaignId(campId);
+        request.setStatus(true);
+        request.setDictionaryId(dictId);
+        RevenueFactor revenueFactor = repository.findAll(getSpecification(request)).stream().findFirst().get();
+        return revenueFactor;
+    }
+
 
     //  GET TIPI
     public Page<DictionaryDTO> getTypes() {
@@ -199,6 +206,7 @@ public class RevenueFactorBusiness {
             return completePredicate;
         };
     }
+
 
     /**
      * ============================================================================================================
