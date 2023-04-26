@@ -3,6 +3,7 @@ package it.cleverad.engine.scheduled;
 import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.AffiliateChannelCommissionCampaign;
+import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.repository.service.AffiliateChannelCommissionCampaignRepository;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.service.RefferalService;
@@ -11,7 +12,6 @@ import it.cleverad.engine.web.dto.CampaignDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +35,8 @@ public class ManageCPS {
     private BudgetBusiness budgetBusiness;
     @Autowired
     private CampaignBusiness campaignBusiness;
-
+    @Autowired
+    private RevenueFactorBusiness revenueFactorBusiness;
     @Autowired
     private AffiliateChannelCommissionCampaignRepository affiliateChannelCommissionCampaignRepository;
 
@@ -86,6 +87,10 @@ public class ManageCPS {
                 } else {
                     walletID = null;
                 }
+
+                // trovo revenue
+                RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 51L);
+                rr.setRevenueId(rf.getId());
 
                 // gesione commisione
                 List<AffiliateChannelCommissionCampaign> accc = affiliateChannelCommissionCampaignRepository.findByAffiliateIdAndChannelIdAndCampaignId(refferal.getAffiliateId(), refferal.getChannelId(), refferal.getCampaignId());

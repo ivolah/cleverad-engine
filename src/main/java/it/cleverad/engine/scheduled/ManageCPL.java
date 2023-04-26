@@ -3,6 +3,7 @@ package it.cleverad.engine.scheduled;
 import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.AffiliateChannelCommissionCampaign;
+import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.repository.service.AffiliateChannelCommissionCampaignRepository;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.service.RefferalService;
@@ -35,7 +36,8 @@ public class ManageCPL {
     private BudgetBusiness budgetBusiness;
     @Autowired
     private CampaignBusiness campaignBusiness;
-
+    @Autowired
+    private RevenueFactorBusiness revenueFactorBusiness;
     @Autowired
     private AffiliateChannelCommissionCampaignRepository affiliateChannelCommissionCampaignRepository;
 
@@ -73,6 +75,7 @@ public class ManageCPL {
                     // setto a campagna scaduta
                     rr.setDictionaryId(49L);
                 } else {
+                    //setto pending
                     rr.setDictionaryId(42L);
                 }
 
@@ -87,13 +90,17 @@ public class ManageCPL {
                     walletID = null;
                 }
 
+                // trovo revenue
+                RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 11L);
+                rr.setRevenueId(rf.getId());
+
                 // gesione commisione
                 List<AffiliateChannelCommissionCampaign> accc = affiliateChannelCommissionCampaignRepository.findByAffiliateIdAndChannelIdAndCampaignId(refferal.getAffiliateId(), refferal.getChannelId(), refferal.getCampaignId());
                 accc.stream().forEach(affiliateChannelCommissionCampaign -> {
                     if (affiliateChannelCommissionCampaign.getCommission().getDictionary().getName().toUpperCase(Locale.ROOT).equals("CPL")) {
                         rr.setCommissionId(affiliateChannelCommissionCampaign.getCommission().getId());
 
-                        Double totale = Double.valueOf(affiliateChannelCommissionCampaign.getCommission().getValue()) * 1;
+                        Double totale = Double.valueOf(affiliateChannelCommissionCampaign.getCommission().getValue().replace(",", ".")) * 1;
                         rr.setValue(totale);
                         rr.setLeadNumber(Long.valueOf(1));
 

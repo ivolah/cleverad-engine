@@ -69,4 +69,7 @@ public class TransactionCPC {
     @JoinColumn(name = "dictionary_id")
     private Dictionary dictionary;
 
+    @Column(name = "revenue_id")
+    private Long revenueId;
+
 }

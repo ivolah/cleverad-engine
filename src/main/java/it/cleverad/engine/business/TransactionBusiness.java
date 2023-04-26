@@ -512,6 +512,7 @@ public class TransactionBusiness {
         private Long impressionNumber;
         private Long leadNumber;
         private Long clickNumber;
+        private Long revenueId;
     }
 
     @Data
@@ -536,6 +537,7 @@ public class TransactionBusiness {
         private Long impressionNumber;
         private Long leadNumber;
         private Long clickNumber;
+        private Long revenueId;
     }
 
 }

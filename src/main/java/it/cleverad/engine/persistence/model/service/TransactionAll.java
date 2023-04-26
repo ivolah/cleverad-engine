@@ -80,4 +80,7 @@ public class TransactionAll {
 
     private Double budget;
 
+    @Column(name = "revenue_id")
+    private Long revenueId;
+
 }

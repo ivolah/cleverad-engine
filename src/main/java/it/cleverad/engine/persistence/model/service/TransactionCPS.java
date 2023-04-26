@@ -33,6 +33,8 @@ public class TransactionCPS {
     @Column(name = "payout_reference")
     private String payoutReference;
     private String note;
+    @Column(name = "revenue_id")
+    private Long revenueId;
 
     @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();

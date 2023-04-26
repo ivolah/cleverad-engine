@@ -132,7 +132,7 @@ public class RevenueFactorBusiness {
         request.setCampaignId(campId);
         request.setStatus(true);
         request.setDictionaryId(dictId);
-        RevenueFactor revenueFactor = repository.findAll(getSpecification(request)).stream().findFirst().get();
+        RevenueFactor revenueFactor = repository.findAll(getSpecification(request)).stream().findFirst().orElse(null);
         return revenueFactor;
     }
 

@@ -3,6 +3,7 @@ package it.cleverad.engine.scheduled;
 import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.AffiliateChannelCommissionCampaign;
+import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.repository.service.AffiliateChannelCommissionCampaignRepository;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.service.RefferalService;
@@ -41,12 +42,14 @@ public class ManageCPM {
 
     @Autowired
     private AffiliateChannelCommissionCampaignRepository affiliateChannelCommissionCampaignRepository;
-
+    @Autowired
+    private RevenueFactorBusiness revenueFactorBusiness;
     @Autowired
     private RefferalService refferalService;
 
     @Async
-    @Scheduled(cron = "1 1 1 * * ?")
+      @Scheduled(cron = "1 1 1 * * ?")
+    //@Scheduled(cron = "1 0/1 * * * ?")
     public void trasformaTrackingCPM() {
         try {
             // trovo tutti i tracking con read == false
@@ -97,6 +100,12 @@ public class ManageCPM {
                     walletID = null;
                 }
 
+                // trovo revenue
+                if (refferal.getCampaignId() != null) {
+                    RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 50L);
+                    rr.setRevenueId(rf.getId());
+                }
+
                 // gesione commisione
                 List<AffiliateChannelCommissionCampaign> accc = affiliateChannelCommissionCampaignRepository.findByAffiliateIdAndChannelIdAndCampaignId(refferal.getAffiliateId(), refferal.getChannelId(), refferal.getCampaignId());
                 accc.stream().forEach(affiliateChannelCommissionCampaign -> {
@@ -104,7 +113,8 @@ public class ManageCPM {
                         Long cid = affiliateChannelCommissionCampaign.getCommission().getId();
                         log.info("CHECK >>>" + cid + "<<<" + refferal.getAffiliateId() + "-" + refferal.getChannelId() + "-" + refferal.getCampaignId());
                         rr.setCommissionId(cid);
-                        Double totale = Double.valueOf(affiliateChannelCommissionCampaign.getCommission().getValue()) * aLong;
+                        Double totale = Double.valueOf(affiliateChannelCommissionCampaign.getCommission().getValue().replace(",", ".")) * aLong;
+
                         rr.setValue(totale);
                         rr.setImpressionNumber(Long.valueOf(aLong));
                         log.info("TOT " + totale + " - " + aLong);

@@ -42,7 +42,7 @@ public interface TransactionAllRepository extends JpaRepository<TransactionAll, 
             " group by al.campaignId, al.campaignName,al.dictionaryName, al.dictionaryId, tr.revenue, al.budget")
     Page<TopCampaings> findGroupByCampaignId(Pageable pageableRequest, @Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList);
 
-    @Query("SELECT count(*),  " +
+    @Query("SELECT distinct count(*),  " +
             "       al.affiliateId                            as affiliateId,  " +
             "       al.affiliateName                          as affiliateName,  " +
             "       al.channelId                              as channelId,  " +

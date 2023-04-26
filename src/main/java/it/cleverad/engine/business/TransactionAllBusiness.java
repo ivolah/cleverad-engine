@@ -75,14 +75,14 @@ public class TransactionAllBusiness {
 
     // SEARCH PAGINATED
     public Page<TransactionAllDTO> search(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("dateTime")));
         request.setPayoutId(null);
         Page<TransactionAll> page = repository.findAll(getSpecification(request), pageable);
         return page.map(TransactionAllDTO::from);
     }
 
     public Page<TransactionAllDTO> searchPrefiltrato(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("dateTime")));
         request.setPayoutId(null);
         if (jwtUserDetailsService.getRole().equals("Admin")) {
             Page<TransactionAll> page = repository.findAll(getSpecification(request), pageable);
