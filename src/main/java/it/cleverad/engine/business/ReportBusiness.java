@@ -2,10 +2,10 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Report;
-import it.cleverad.engine.persistence.model.service.StatClickCpc;
 import it.cleverad.engine.persistence.model.service.TopAffiliates;
 import it.cleverad.engine.persistence.model.service.TopCampaings;
 import it.cleverad.engine.persistence.repository.service.ReportRepository;
+import it.cleverad.engine.persistence.repository.service.TopCampaignCPMRepository;
 import it.cleverad.engine.persistence.repository.service.TransactionAllRepository;
 import it.cleverad.engine.web.dto.ReportDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -16,10 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
@@ -40,6 +37,8 @@ public class ReportBusiness {
     private ReportRepository reportRepository;
     @Autowired
     private TransactionAllRepository transactionAllRepository;
+    @Autowired
+    private TopCampaignCPMRepository topCampaignCPMRepository;
     @Autowired
     private Mapper mapper;
 
@@ -120,17 +119,21 @@ public class ReportBusiness {
      * ============================================================================================================
      **/
 
+//    public Page<TopCampaings> searchTopCampaigns(TopFilter request, Pageable pageableRequest) {
+//        return transactionAllRepository.findGroupByCampaignId(pageableRequest, request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atStartOfDay(), request.getDictionaryIds());
+//    }
     public Page<TopCampaings> searchTopCampaigns(TopFilter request, Pageable pageableRequest) {
-        return transactionAllRepository.findGroupByCampaignId(pageableRequest, request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atStartOfDay(), request.getDictionaryIds());
+        List<TopCampaings> ll = topCampaignCPMRepository.findGroupByCampaignId(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atStartOfDay(), request.getDictionaryIds());
+        Page<TopCampaings> pages = new PageImpl<TopCampaings>(ll, pageableRequest, ll.size());
+        return pages;
     }
 
     public Page<TopAffiliates> searchTopAffilaites(TopFilter request, Pageable pageableRequest) {
-        return transactionAllRepository.findAffiliatesGroupByCampaignId(pageableRequest, request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atStartOfDay(), request.getDictionaryIds());
+        List<TopAffiliates> ll = topCampaignCPMRepository.findAffiliatesGroupByCampaignId(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atStartOfDay(), request.getDictionaryIds());
+        Page<TopAffiliates> pages = new PageImpl<TopAffiliates>(ll, pageableRequest, ll.size());
+        return pages;
     }
 
-//    public Page<StatClickCpc> getGroupedCpcClicks(TopFilter request, Pageable pageableRequest) {
-//        return transactionAllRepository.getGroupedCpcClicks(pageableRequest, request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atStartOfDay());
-//    }
 
     /**
      * ============================================================================================================
