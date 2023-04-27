@@ -28,6 +28,8 @@ public class Campaign {
     private String shortDescription;
     @Column(name = "long_description")
     private String longDescription;
+    @Column(name = "note")
+    private String note;
     @Column(name = "start_date")
     private LocalDate startDate;
     @Column(name = "end_date")

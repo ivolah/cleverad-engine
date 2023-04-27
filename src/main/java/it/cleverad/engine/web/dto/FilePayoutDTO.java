@@ -23,7 +23,7 @@ public class FilePayoutDTO {
     private Long payoutId;
 
     public static FilePayoutDTO from(FilePayout file) {
-        return new FilePayoutDTO(file.getId(), file.getName(), file.getType(), file.getData(), file.getCreationDate(),
+        return new FilePayoutDTO(file.getId(), file.getName(), file.getType(), null, file.getCreationDate(),
                 file.getDictionary().getId(), file.getDictionary().getName(), file.getPayout().getId());
     }
 

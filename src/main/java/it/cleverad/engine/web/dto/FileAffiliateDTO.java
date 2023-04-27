@@ -25,7 +25,7 @@ public class FileAffiliateDTO {
 
 
     public static FileAffiliateDTO from(FileAffiliate file) {
-        return new FileAffiliateDTO(file.getId(), file.getName(), file.getType(), file.getData(), file.getCreationDate(), file.getNote(),
+        return new FileAffiliateDTO(file.getId(), file.getName(), file.getType(), null, file.getCreationDate(), file.getNote(),
                 file.getDictionary().getId(), file.getDictionary().getName(), file.getAffiliate().getId(), file.getAffiliate().getName());
     }
 

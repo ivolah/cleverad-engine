@@ -1,7 +1,6 @@
 package it.cleverad.engine.web.dto;
 
 import it.cleverad.engine.persistence.model.service.Campaign;
-import it.cleverad.engine.persistence.model.service.Target;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,6 +21,7 @@ public class CampaignDTO {
     private String name;
     private String shortDescription;
     private String longDescription;
+    private String note;
     private Boolean status;
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
@@ -57,7 +57,6 @@ public class CampaignDTO {
     private List<AffiliateChannelCommissionCampaignDTO> affiliateChannelCommissionCampaigns;
     private List<Long> categoryList;
 
-
     public static CampaignDTO from(Campaign campaign) {
 
         List<BasicMediaDTO> medias = null;
@@ -67,7 +66,7 @@ public class CampaignDTO {
                 mediaDTO.setId(media.getId());
                 mediaDTO.setName(media.getName());
                 mediaDTO.setNote(media.getNote());
-             //   mediaDTO.setTarget((List<Target>) media.getTargets());
+                //   mediaDTO.setTarget((List<Target>) media.getTargets());
                 mediaDTO.setUrl(media.getUrl());
                 mediaDTO.setTypeId(String.valueOf(media.getMediaType().getId()));
                 return mediaDTO;
@@ -168,8 +167,10 @@ public class CampaignDTO {
         }
 
         return new CampaignDTO(campaign.getId(), campaign.getName(), campaign.getShortDescription(),
-                campaign.getLongDescription(), campaign.getStatus(), campaign.getCreationDate(), campaign.getLastModificationDate(),
-                campaign.getStartDate(), campaign.getEndDate(), campaign.getIdFile(), campaign.getValuta(), campaign.getBudget(), campaign.getInitialBudget(),
+                campaign.getLongDescription(), campaign.getNote(), campaign.getStatus(),
+                campaign.getCreationDate(), campaign.getLastModificationDate(),
+                campaign.getStartDate(), campaign.getEndDate(), campaign.getIdFile(),
+                campaign.getValuta(), campaign.getBudget(), campaign.getInitialBudget(),
                 campaign.getTrackingCode(), campaign.getEncodedId(),
                 campaign.getCookie().getId(),
                 campaign.getCookie().getName(),

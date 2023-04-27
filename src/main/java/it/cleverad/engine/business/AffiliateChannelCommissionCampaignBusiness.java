@@ -68,7 +68,8 @@ public class AffiliateChannelCommissionCampaignBusiness {
         Campaign campaign = campaignRepository.findById(request.getCampaignId()).orElseThrow(() -> new ElementCleveradException("Campaign", request.getCampaignId()));
         map.setCampaign(campaign);
 
-        campaignAffiliateBusiness.create(new CampaignAffiliateBusiness.BaseCreateRequest(campaign.getId(), affiliate.getId(), null, null));
+        if (campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(affiliate.getId(), campaign.getId()).getTotalElements() == 0)
+            campaignAffiliateBusiness.create(new CampaignAffiliateBusiness.BaseCreateRequest(campaign.getId(), affiliate.getId(), null, null));
 
         return AffiliateChannelCommissionCampaignDTO.from(repository.save(map));
     }
