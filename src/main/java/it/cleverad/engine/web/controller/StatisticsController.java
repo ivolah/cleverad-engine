@@ -42,6 +42,12 @@ public class StatisticsController {
         return business.getStatCampaignDayCpc(request, pageable);
     }
 
+    @GetMapping(path = "/cpc/campaign/day/widget")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public String getStatCpcDayWidget() {
+        return business.getWidgetCampaignsDayCpc();
+    }
+
     /**
      * ============================================================================================================
      **/
@@ -62,6 +68,12 @@ public class StatisticsController {
         ViewBusiness.Filter request = new ViewBusiness.Filter();
         request.setCampaignId(id);
         return business.getStatCampaignDayCpm(request, pageable);
+    }
+
+    @GetMapping(path = "/cpm/campaign/day/widget")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public String getStatCpmDayWidget() {
+        return business.getWidgetCampaignsDayCpm();
     }
 
     /**
@@ -86,6 +98,12 @@ public class StatisticsController {
         return business.getStatCampaignDayCpl(request, pageable);
     }
 
+    @GetMapping(path = "/cpl/campaign/day/widget")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public String getStatCplDayWidget() {
+        return business.getWidgetCampaignsDayCpl();
+    }
+
     /**
      * ============================================================================================================
      **/
@@ -106,6 +124,12 @@ public class StatisticsController {
         ViewBusiness.Filter request = new ViewBusiness.Filter();
         request.setCampaignId(id);
         return business.getStatCampaignDayCps(request, pageable);
+    }
+
+    @GetMapping(path = "/cps/campaign/day/widget")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public String getStatCpsDayWidget() {
+        return business.getWidgetCampaignsDayCps();
     }
 
     /**

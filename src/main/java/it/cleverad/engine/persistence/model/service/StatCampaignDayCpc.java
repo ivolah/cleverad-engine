@@ -28,5 +28,6 @@ public class StatCampaignDayCpc {
     private Long month;
     private Long day;
     private Long week;
+    private Long doy;
 
 }

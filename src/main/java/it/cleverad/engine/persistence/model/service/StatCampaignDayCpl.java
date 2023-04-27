@@ -27,5 +27,5 @@ public class StatCampaignDayCpl {
     private Long month;
     private Long day;
     private Long week;
-
+    private Long doy;
 }
