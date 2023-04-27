@@ -10,11 +10,11 @@ import javax.persistence.Table;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "v_top_campaign_cpm")
+@Table(name = "v_widget_cpm")
 @Getter
 @Setter
 @NoArgsConstructor
-public class TopCampaignCPM {
+public class WidgetCPM {
     @Id
     private Long campaignId;
     private String campaignName;
