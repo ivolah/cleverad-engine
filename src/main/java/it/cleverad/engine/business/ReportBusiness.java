@@ -5,7 +5,7 @@ import it.cleverad.engine.persistence.model.service.Report;
 import it.cleverad.engine.persistence.model.service.TopAffiliates;
 import it.cleverad.engine.persistence.model.service.TopCampaings;
 import it.cleverad.engine.persistence.repository.service.ReportRepository;
-import it.cleverad.engine.persistence.repository.service.WidgetCPMRepository;
+import it.cleverad.engine.persistence.repository.service.WidgetTopCPMRepository;
 import it.cleverad.engine.web.dto.ReportDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -36,7 +36,7 @@ public class ReportBusiness {
     private ReportRepository reportRepository;
 
     @Autowired
-    private WidgetCPMRepository topCampaignCPMRepository;
+    private WidgetTopCPMRepository topCampaignCPMRepository;
     @Autowired
     private Mapper mapper;
 

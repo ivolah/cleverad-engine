@@ -1,13 +1,13 @@
 package it.cleverad.engine.business;
 
-import it.cleverad.engine.persistence.model.service.StatCampaignDayCpc;
-import it.cleverad.engine.persistence.model.service.StatCampaignDayCpl;
-import it.cleverad.engine.persistence.model.service.StatCampaignDayCpm;
-import it.cleverad.engine.persistence.model.service.StatCampaignDayCps;
-import it.cleverad.engine.persistence.repository.service.StatCampaignDayCpcRepository;
-import it.cleverad.engine.persistence.repository.service.StatCampaignDayCplRepository;
-import it.cleverad.engine.persistence.repository.service.StatCampaignDayCpmRepository;
-import it.cleverad.engine.persistence.repository.service.StatCampaignDayCpsRepository;
+import it.cleverad.engine.persistence.model.service.WidgetCampaignDayCpc;
+import it.cleverad.engine.persistence.model.service.WidgetCampaignDayCpl;
+import it.cleverad.engine.persistence.model.service.WidgetCampaignDayCpm;
+import it.cleverad.engine.persistence.model.service.WidgetCampaignDayCps;
+import it.cleverad.engine.persistence.repository.service.WidgetCampaignDayCpcRepository;
+import it.cleverad.engine.persistence.repository.service.WidgetCampaignDayCplRepository;
+import it.cleverad.engine.persistence.repository.service.WidgetCampaignDayCpmRepository;
+import it.cleverad.engine.persistence.repository.service.WidgetCampaignDayCpsRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -38,27 +38,27 @@ import java.util.stream.Collectors;
 public class ViewBusiness {
 
     @Autowired
-    private StatCampaignDayCpcRepository statCampaignDayCpcRepository;
+    private WidgetCampaignDayCpcRepository widgetCampaignDayCpcRepository;
     @Autowired
-    private StatCampaignDayCpmRepository statCampaignDayCpmRepository;
+    private WidgetCampaignDayCpmRepository widgetCampaignDayCpmRepository;
     @Autowired
-    private StatCampaignDayCplRepository statCampaignDayCplRepository;
+    private WidgetCampaignDayCplRepository widgetCampaignDayCplRepository;
     @Autowired
-    private StatCampaignDayCpsRepository statCampaignDayCpsRepository;
+    private WidgetCampaignDayCpsRepository widgetCampaignDayCpsRepository;
 
     /**
      * ===========================================================================================================
      * >>> CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC <<<
-     * ===========================================================================================================
+     * =================================================================<==========================================
      **/
 
     /// CPC CAMPAIGN DAY
-    public Page<StatCampaignDayCpc> getStatCampaignDayCpc(Filter request, Pageable pageableRequest) {
+    public Page<WidgetCampaignDayCpc> getStatCampaignDayCpc(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
-        return statCampaignDayCpcRepository.findAll(getSpecificationCampaignDayCpc(request), pageable);
+        return widgetCampaignDayCpcRepository.findAll(getSpecificationCampaignDayCpc(request), pageable);
     }
 
-    public Page<StatCampaignDayCpc> getTopCampaignsDayCpc() {
+    public Page<WidgetCampaignDayCpc> getTopCampaignsDayCpc() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.desc("totale")));
 
         LocalDate oggi = LocalDate.now();
@@ -68,17 +68,17 @@ public class ViewBusiness {
         log.info("week :: " + week);
         request.setWeek(week);
         request.setWeekMeno(week - 1);
-        return statCampaignDayCpcRepository.findAll(getSpecificationCampaignDayCpc(request), pageable);
+        return widgetCampaignDayCpcRepository.findAll(getSpecificationCampaignDayCpc(request), pageable);
     }
 
     public String getWidgetCampaignsDayCpc() {
 
         Filter request = new Filter();
         request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 11);
-        Page<StatCampaignDayCpc> tutto = statCampaignDayCpcRepository.findAll(getSpecificationCampaignDayCpc(request), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy"))));
+        Page<WidgetCampaignDayCpc> tutto = widgetCampaignDayCpcRepository.findAll(getSpecificationCampaignDayCpc(request), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy"))));
 
-        Set<Long> doys = tutto.stream().map(StatCampaignDayCpc::getDoy).collect(Collectors.toSet());
-        Set<String> camps = tutto.stream().map(StatCampaignDayCpc::getCampaign).collect(Collectors.toSet());
+        Set<Long> doys = tutto.stream().map(WidgetCampaignDayCpc::getDoy).collect(Collectors.toSet());
+        Set<String> camps = tutto.stream().map(WidgetCampaignDayCpc::getCampaign).collect(Collectors.toSet());
 
         Set<Long> doysDaVerificare = new HashSet<>();
         for (Long i = doys.stream().min(Long::compareTo).get(); i <= doys.stream().max(Long::compareTo).get(); i++) {
@@ -98,7 +98,7 @@ public class ViewBusiness {
                 Filter filter = new Filter();
                 filter.setDoy(gg);
                 filter.setCampaign(campagna);
-                List<StatCampaignDayCpc> giornato = statCampaignDayCpcRepository.findAll(getSpecificationCampaignDayCpc(filter), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
+                List<WidgetCampaignDayCpc> giornato = widgetCampaignDayCpcRepository.findAll(getSpecificationCampaignDayCpc(filter), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
                 if (giornato.size() > 0) {
                     dd = giornato.get(0).getTotale();
                 }
@@ -139,7 +139,7 @@ public class ViewBusiness {
     }
 
 
-    private Specification<StatCampaignDayCpc> getSpecificationCampaignDayCpc(Filter request) {
+    private Specification<WidgetCampaignDayCpc> getSpecificationCampaignDayCpc(Filter request) {
         return (root, query, cb) -> {
             Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
@@ -178,12 +178,12 @@ public class ViewBusiness {
      * ===========================================================================================================
      **/
 
-    public Page<StatCampaignDayCpm> getStatCampaignDayCpm(Filter request, Pageable pageableRequest) {
+    public Page<WidgetCampaignDayCpm> getStatCampaignDayCpm(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
-        return statCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(request), pageable);
+        return widgetCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(request), pageable);
     }
 
-    public Page<StatCampaignDayCpm> getTopCampaignsDayCpm() {
+    public Page<WidgetCampaignDayCpm> getTopCampaignsDayCpm() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.desc("totale")));
 
         LocalDate oggi = LocalDate.now();
@@ -192,17 +192,17 @@ public class ViewBusiness {
         Filter request = new Filter();
         request.setWeek(week);
         request.setWeekMeno(week - 1);
-        return statCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(request), pageable);
+        return widgetCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(request), pageable);
     }
 
     public String getWidgetCampaignsDayCpm() {
 
         Filter request = new Filter();
         request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 11);
-        Page<StatCampaignDayCpm> tutto = statCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(request), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy"))));
+        Page<WidgetCampaignDayCpm> tutto = widgetCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(request), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy"))));
 
-        Set<Long> doys = tutto.stream().map(StatCampaignDayCpm::getDoy).collect(Collectors.toSet());
-        Set<String> camps = tutto.stream().map(StatCampaignDayCpm::getCampaign).collect(Collectors.toSet());
+        Set<Long> doys = tutto.stream().map(WidgetCampaignDayCpm::getDoy).collect(Collectors.toSet());
+        Set<String> camps = tutto.stream().map(WidgetCampaignDayCpm::getCampaign).collect(Collectors.toSet());
 
         Set<Long> doysDaVerificare = new HashSet<>();
         for (Long i = doys.stream().min(Long::compareTo).get(); i <= doys.stream().max(Long::compareTo).get(); i++) {
@@ -220,7 +220,7 @@ public class ViewBusiness {
                 Filter filter = new Filter();
                 filter.setDoy(gg);
                 filter.setCampaign(campagna);
-                List<StatCampaignDayCpm> giornato = statCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(filter), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
+                List<WidgetCampaignDayCpm> giornato = widgetCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(filter), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
                 if (giornato.size() > 0) {
                     dd = giornato.get(0).getTotale();
                 }
@@ -236,7 +236,7 @@ public class ViewBusiness {
         return mainObj.toString();
     }
 
-    private Specification<StatCampaignDayCpm> getSpecificationCampaignDayCpm(Filter request) {
+    private Specification<WidgetCampaignDayCpm> getSpecificationCampaignDayCpm(Filter request) {
         return (root, query, cb) -> {
             Predicate completePredicate = null;
             List<Predicate> predicates = new ArrayList<>();
@@ -272,12 +272,12 @@ public class ViewBusiness {
      * ===========================================================================================================
      **/
 
-    public Page<StatCampaignDayCpl> getStatCampaignDayCpl(Filter request, Pageable pageableRequest) {
+    public Page<WidgetCampaignDayCpl> getStatCampaignDayCpl(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
-        return statCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(request), pageable);
+        return widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(request), pageable);
     }
 
-    public Page<StatCampaignDayCpl> getTopCampaignsDayCpl() {
+    public Page<WidgetCampaignDayCpl> getTopCampaignsDayCpl() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.desc("valore")));
 
         LocalDate oggi = LocalDate.now();
@@ -286,16 +286,16 @@ public class ViewBusiness {
         Filter request = new Filter();
         request.setWeek(week);
         request.setWeekMeno(week - 1);
-        return statCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(request), pageable);
+        return widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(request), pageable);
     }
 
     public String getWidgetCampaignsDayCpl() {
         Filter request = new Filter();
         request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 11);
-        Page<StatCampaignDayCpl> tutto = statCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(request), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy"))));
+        Page<WidgetCampaignDayCpl> tutto = widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(request), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy"))));
 
-        Set<Long> doys = tutto.stream().map(StatCampaignDayCpl::getDoy).collect(Collectors.toSet());
-        Set<String> camps = tutto.stream().map(StatCampaignDayCpl::getCampaign).collect(Collectors.toSet());
+        Set<Long> doys = tutto.stream().map(WidgetCampaignDayCpl::getDoy).collect(Collectors.toSet());
+        Set<String> camps = tutto.stream().map(WidgetCampaignDayCpl::getCampaign).collect(Collectors.toSet());
 
         Set<Long> doysDaVerificare = new HashSet<>();
         for (Long i = doys.stream().min(Long::compareTo).get(); i <= doys.stream().max(Long::compareTo).get(); i++) {
@@ -315,7 +315,7 @@ public class ViewBusiness {
                 Filter filter = new Filter();
                 filter.setDoy(gg);
                 filter.setCampaign(campagna);
-                List<StatCampaignDayCpl> giornato = statCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(filter), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
+                List<WidgetCampaignDayCpl> giornato = widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(filter), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
                 if (giornato.size() > 0) {
                     dd = giornato.get(0).getValore();
                 }
@@ -332,7 +332,7 @@ public class ViewBusiness {
         return mainObj.toString();
     }
 
-    private Specification<StatCampaignDayCpl> getSpecificationCampaignDayCpl(Filter request) {
+    private Specification<WidgetCampaignDayCpl> getSpecificationCampaignDayCpl(Filter request) {
         return (root, query, cb) -> {
             Predicate completePredicate = null;
             List<Predicate> predicates = new ArrayList<>();
@@ -366,12 +366,12 @@ public class ViewBusiness {
      * ===========================================================================================================
      **/
 
-    public Page<StatCampaignDayCps> getStatCampaignDayCps(Filter request, Pageable pageableRequest) {
+    public Page<WidgetCampaignDayCps> getStatCampaignDayCps(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
-        return statCampaignDayCpsRepository.findAll(getSpecificationCampaignDayCps(request), pageable);
+        return widgetCampaignDayCpsRepository.findAll(getSpecificationCampaignDayCps(request), pageable);
     }
 
-    public Page<StatCampaignDayCps> getTopCampaignsDayCps() {
+    public Page<WidgetCampaignDayCps> getTopCampaignsDayCps() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.desc("valore")));
 
         LocalDate oggi = LocalDate.now();
@@ -380,16 +380,16 @@ public class ViewBusiness {
         Filter request = new Filter();
         request.setWeek(week);
         request.setWeekMeno(week - 1);
-        return statCampaignDayCpsRepository.findAll(getSpecificationCampaignDayCps(request), pageable);
+        return widgetCampaignDayCpsRepository.findAll(getSpecificationCampaignDayCps(request), pageable);
     }
 
     public String getWidgetCampaignsDayCps() {
         Filter request = new Filter();
         request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 11);
-        Page<StatCampaignDayCps> tutto = statCampaignDayCpsRepository.findAll(getSpecificationCampaignDayCps(request), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy"))));
+        Page<WidgetCampaignDayCps> tutto = widgetCampaignDayCpsRepository.findAll(getSpecificationCampaignDayCps(request), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy"))));
 
-        Set<Long> doys = tutto.stream().map(StatCampaignDayCps::getDoy).collect(Collectors.toSet());
-        Set<String> camps = tutto.stream().map(StatCampaignDayCps::getCampaign).collect(Collectors.toSet());
+        Set<Long> doys = tutto.stream().map(WidgetCampaignDayCps::getDoy).collect(Collectors.toSet());
+        Set<String> camps = tutto.stream().map(WidgetCampaignDayCps::getCampaign).collect(Collectors.toSet());
 
         Set<Long> doysDaVerificare = new HashSet<>();
         for (Long i = doys.stream().min(Long::compareTo).get(); i <= doys.stream().max(Long::compareTo).get(); i++) {
@@ -409,7 +409,7 @@ public class ViewBusiness {
                 Filter filter = new Filter();
                 filter.setDoy(gg);
                 filter.setCampaign(campagna);
-                List<StatCampaignDayCps> giornato = statCampaignDayCpsRepository.findAll(getSpecificationCampaignDayCps(filter), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
+                List<WidgetCampaignDayCps> giornato = widgetCampaignDayCpsRepository.findAll(getSpecificationCampaignDayCps(filter), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
                 if (giornato.size() > 0) {
                     dd = giornato.get(0).getValore();
                 }
@@ -426,7 +426,7 @@ public class ViewBusiness {
         return mainObj.toString();
     }
 
-    private Specification<StatCampaignDayCps> getSpecificationCampaignDayCps(Filter request) {
+    private Specification<WidgetCampaignDayCps> getSpecificationCampaignDayCps(Filter request) {
         return (root, query, cb) -> {
             Predicate completePredicate = null;
             List<Predicate> predicates = new ArrayList<>();

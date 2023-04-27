@@ -7,12 +7,12 @@ import lombok.Setter;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "v_cps_campaign_day")
+@Table(name = "v_widget_campaign_day_cpl")
 @Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
 @NoArgsConstructor
-public class StatCampaignDayCps {
+public class WidgetCampaignDayCpl {
 
     @Id
     @Column(name = "id", nullable = false)

@@ -7,26 +7,25 @@ import lombok.Setter;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "v_cpl_value_campaign_media_week")
+@Table(name = "v_widget_campaign_day_cps")
 @Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
 @NoArgsConstructor
-public class StatCplValueCampaignWeek {
+public class WidgetCampaignDayCps {
 
     @Id
+    @Column(name = "id", nullable = false)
     private Long id;
 
-    private Double value;
+    private Double valore;
     @Column(name = "campaign_id")
     private Long campaignId;
     private String campaign;
-    @Column(name = "media_id")
-    private Long mediaId;
-    private String media;
-    @Column(name = "file_id")
-    private Long fileId;
-    private Double year;
-    private Double week;
 
+    private Long year;
+    private Long month;
+    private Long day;
+    private Long week;
+    private Long doy;
 }

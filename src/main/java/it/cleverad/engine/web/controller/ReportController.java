@@ -1,7 +1,6 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.ReportBusiness;
-import it.cleverad.engine.persistence.model.service.StatClickCpc;
 import it.cleverad.engine.persistence.model.service.TopAffiliates;
 import it.cleverad.engine.persistence.model.service.TopCampaings;
 import it.cleverad.engine.web.dto.ReportDTO;
