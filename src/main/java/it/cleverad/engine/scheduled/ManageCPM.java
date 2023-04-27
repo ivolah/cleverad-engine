@@ -78,7 +78,6 @@ public class ManageCPM {
                 rr.setDateTime(LocalDate.now().minusDays(1).atStartOfDay());
                 rr.setMediaId(refferal.getMediaId());
                 rr.setApproved(true);
-                rr.setMediaId(refferal.getMediaId());
 
                 // controlla data scadneza camapgna
                 CampaignDTO campaignDTO = campaignBusiness.findByIdAdmin(refferal.getCampaignId());

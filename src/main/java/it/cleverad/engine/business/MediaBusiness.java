@@ -125,21 +125,15 @@ public class MediaBusiness {
     // UPDATE
     public MediaDTO update(Long id, Filter filter) {
         Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Media", id));
-        MediaDTO mediaDTOfrom = MediaDTO.from(media);
-        mapper.map(filter, mediaDTOfrom);
+        mapper.map(filter, media);
 
-        Media mappedEntity = mapper.map(media, Media.class);
-        mapper.map(mediaDTOfrom, mappedEntity);
-        mappedEntity.setLastModificationDate(LocalDateTime.now());
+        String bannerCode = media.getBannerCode();
 
-        String bannerCode = mappedEntity.getBannerCode();
-        String url = mappedEntity.getUrl();
-        if (StringUtils.isNotBlank(url)) bannerCode.replace("{{url}}", url);
+        String url = media.getUrl();
+        if (StringUtils.isNotBlank(url)) bannerCode = bannerCode.replace("{{url}}", url);
 
-        String target = mappedEntity.getTarget();
-        if (StringUtils.isNotBlank(target)) bannerCode.replace("{{target}}", target);
-
-
+        String target = media.getTarget();
+        if (StringUtils.isNotBlank(target)) bannerCode = bannerCode.replace("{{target}}", target);
 //        List<Target> targets = (List<Target>) mappedEntity.getTargets();
 //        targets.stream().filter(target -> StringUtils.isNotBlank(target.getTarget())).forEach(target -> {
 //            bannerCode.replace("{{target}}", target.getTarget());
@@ -147,9 +141,10 @@ public class MediaBusiness {
 //            // multipli banner code??
 //        });
 
-        mappedEntity.setBannerCode(bannerCode);
-        mappedEntity.setStatus(true);
-        Media saved = repository.save(mappedEntity);
+        media.setLastModificationDate(LocalDateTime.now());
+        media.setBannerCode(bannerCode);
+        media.setStatus(true);
+        Media saved = repository.save(media);
 
         Campaign cc = campaignRepository.findById(filter.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", filter.getCampaignId()));
         cc.addMedia(saved);

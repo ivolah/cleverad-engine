@@ -6,7 +6,6 @@ import it.cleverad.engine.persistence.model.service.TopAffiliates;
 import it.cleverad.engine.persistence.model.service.TopCampaings;
 import it.cleverad.engine.persistence.repository.service.ReportRepository;
 import it.cleverad.engine.persistence.repository.service.TopCampaignCPMRepository;
-import it.cleverad.engine.persistence.repository.service.TransactionAllRepository;
 import it.cleverad.engine.web.dto.ReportDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -35,8 +34,7 @@ public class ReportBusiness {
 
     @Autowired
     private ReportRepository reportRepository;
-    @Autowired
-    private TransactionAllRepository transactionAllRepository;
+
     @Autowired
     private TopCampaignCPMRepository topCampaignCPMRepository;
     @Autowired
@@ -119,9 +117,6 @@ public class ReportBusiness {
      * ============================================================================================================
      **/
 
-//    public Page<TopCampaings> searchTopCampaigns(TopFilter request, Pageable pageableRequest) {
-//        return transactionAllRepository.findGroupByCampaignId(pageableRequest, request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atStartOfDay(), request.getDictionaryIds());
-//    }
     public Page<TopCampaings> searchTopCampaigns(TopFilter request, Pageable pageableRequest) {
         List<TopCampaings> ll = topCampaignCPMRepository.findGroupByCampaignId(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atStartOfDay(), request.getDictionaryIds());
         Page<TopCampaings> pages = new PageImpl<TopCampaings>(ll, pageableRequest, ll.size());
