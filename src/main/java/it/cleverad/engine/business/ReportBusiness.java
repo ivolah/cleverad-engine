@@ -6,6 +6,7 @@ import it.cleverad.engine.persistence.model.service.TopAffiliates;
 import it.cleverad.engine.persistence.model.service.TopCampaings;
 import it.cleverad.engine.persistence.repository.service.ReportRepository;
 import it.cleverad.engine.persistence.repository.service.WidgetTopCPMRepository;
+import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.ReportDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -34,11 +35,12 @@ public class ReportBusiness {
 
     @Autowired
     private ReportRepository reportRepository;
-
     @Autowired
     private WidgetTopCPMRepository topCampaignCPMRepository;
     @Autowired
     private Mapper mapper;
+    @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
 
     /**
      * ============================================================================================================
@@ -118,13 +120,23 @@ public class ReportBusiness {
      **/
 
     public Page<TopCampaings> searchTopCampaigns(TopFilter request, Pageable pageableRequest) {
-        List<TopCampaings> ll = topCampaignCPMRepository.findGroupByCampaignId(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atStartOfDay(), request.getDictionaryIds());
+        List<TopCampaings> ll = new ArrayList<>();
+        if (!jwtUserDetailsService.isAdmin()) {
+            ll = topCampaignCPMRepository.findGroupByCampaignId(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atStartOfDay(), request.getDictionaryIds(), jwtUserDetailsService.getAffiliateID());
+        } else {
+            ll = topCampaignCPMRepository.findGroupByCampaignIdAdmin(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atStartOfDay(), request.getDictionaryIds());
+        }
         Page<TopCampaings> pages = new PageImpl<TopCampaings>(ll, pageableRequest, ll.size());
         return pages;
     }
 
     public Page<TopAffiliates> searchTopAffilaites(TopFilter request, Pageable pageableRequest) {
-        List<TopAffiliates> ll = topCampaignCPMRepository.findAffiliatesGroupByCampaignId(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atStartOfDay(), request.getDictionaryIds());
+        List<TopAffiliates> ll = new ArrayList<>();
+        if (!jwtUserDetailsService.isAdmin()) {
+            ll = topCampaignCPMRepository.findAffiliatesGroupByCampaignId(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atStartOfDay(), request.getDictionaryIds(), jwtUserDetailsService.getAffiliateID());
+        } else {
+           ll = topCampaignCPMRepository.findAffiliatesGroupByCampaignIdAdmin(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atStartOfDay(), request.getDictionaryIds());
+        }
         Page<TopAffiliates> pages = new PageImpl<TopAffiliates>(ll, pageableRequest, ll.size());
         return pages;
     }
@@ -147,6 +159,7 @@ public class ReportBusiness {
         private LocalDate dateTimeTo;
         @NotNull
         private List<Long> dictionaryIds;
+        private Long affiliateid;
     }
 
 }

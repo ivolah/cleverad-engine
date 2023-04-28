@@ -3,14 +3,16 @@ package it.cleverad.engine.scheduled;
 import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.AffiliateChannelCommissionCampaign;
+import it.cleverad.engine.persistence.model.service.Commission;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.repository.service.AffiliateChannelCommissionCampaignRepository;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.service.RefferalService;
-import it.cleverad.engine.web.dto.BudgetDTO;
-import it.cleverad.engine.web.dto.CampaignDTO;
-import it.cleverad.engine.web.dto.CpmDTO;
+import it.cleverad.engine.web.dto.*;
 import lombok.extern.slf4j.Slf4j;
+import nl.basjes.parse.useragent.UserAgent;
+import nl.basjes.parse.useragent.UserAgentAnalyzer;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.Async;
@@ -19,8 +21,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 @Slf4j
@@ -39,36 +39,49 @@ public class ManageCPM {
     private BudgetBusiness budgetBusiness;
     @Autowired
     private CampaignBusiness campaignBusiness;
-
     @Autowired
-    private AffiliateChannelCommissionCampaignRepository affiliateChannelCommissionCampaignRepository;
+    private AffiliateChannelCommissionCampaignBusiness affiliateChannelCommissionCampaignBusiness;
     @Autowired
     private RevenueFactorBusiness revenueFactorBusiness;
     @Autowired
     private RefferalService refferalService;
+    @Autowired
+    private AgentBusiness agentBusiness;
+    @Autowired
+    private CommissionBusiness commissionBusiness;
 
     @Async
-      @Scheduled(cron = "1 1 1 * * ?")
-    //@Scheduled(cron = "1 0/1 * * * ?")
+    //@Scheduled(cron = "0 30 0 * * ?")
+    @Scheduled(cron = "50 0/1 * * * ?")
     public void trasformaTrackingCPM() {
         try {
             // trovo tutti i tracking con read == false
             Map<String, Integer> mappa = new HashMap<>();
+            UserAgentAnalyzer uaa = UserAgentAnalyzer
+                    .newBuilder()
+                    .hideMatcherLoadStats()
+                    .withCache(10000)
+                    .build();
+
             Page<CpmDTO> last = CpmBusiness.getUnreadDayBefore();
-            last.stream().filter(CpmDTO -> CpmDTO.getRefferal() != null).forEach(CpmDTO -> {
+            last.stream().filter(CpmDTO -> CpmDTO.getRefferal() != null).forEach(cpm -> {
                 // gestisco calcolatore
-                Integer num = mappa.get(CpmDTO.getRefferal());
+                Integer num = mappa.get(cpm.getRefferal());
                 if (num == null) num = 0;
-                mappa.put(CpmDTO.getRefferal(), num + 1);
+                mappa.put(cpm.getRefferal(), num + 1);
                 // setto a gestito
-                CpmBusiness.setRead(CpmDTO.getId());
+                CpmBusiness.setRead(cpm.getId());
+                // valorizzo agent
+                log.info("AGENT ---- " + cpm.getAgent());
+                if (StringUtils.isNotBlank(cpm.getAgent()) )
+                    this.generaAgent(uaa.parse(cpm.getAgent()), cpm.getRefferal());
             });
 
-            mappa.forEach((s, aLong) -> {
+            mappa.forEach((x, aLong) -> {
                 log.info("Gestisco trasformaTrackingCpm ID {}", aLong);
                 // prendo reffereal e lo leggo
-                Refferal refferal = refferalService.decodificaRefferal(s);
-                log.info("Cpm :: {} - {}", s, refferal);
+                Refferal refferal = refferalService.decodificaRefferal(x);
+                log.info("Cpm :: {} - {}", x, refferal);
 
                 // setta transazione
                 TransactionBusiness.BaseCreateRequest rr = new TransactionBusiness.BaseCreateRequest();
@@ -106,49 +119,66 @@ public class ManageCPM {
                 }
 
                 // gesione commisione
-                List<AffiliateChannelCommissionCampaign> accc = affiliateChannelCommissionCampaignRepository.findByAffiliateIdAndChannelIdAndCampaignId(refferal.getAffiliateId(), refferal.getChannelId(), refferal.getCampaignId());
-                accc.stream().forEach(affiliateChannelCommissionCampaign -> {
-                    if (affiliateChannelCommissionCampaign.getCommission().getDictionary().getName().toUpperCase(Locale.ROOT).equals("CPM")) {
-                        Long cid = affiliateChannelCommissionCampaign.getCommission().getId();
-                        log.info("CHECK >>>" + cid + "<<<" + refferal.getAffiliateId() + "-" + refferal.getChannelId() + "-" + refferal.getCampaignId());
-                        rr.setCommissionId(cid);
-                        Double totale = Double.valueOf(affiliateChannelCommissionCampaign.getCommission().getValue().replace(",", ".")) * aLong;
+                Long commId = null;
+                Double commVal = 0D;
 
-                        rr.setValue(totale);
-                        rr.setImpressionNumber(Long.valueOf(aLong));
-                        log.info("TOT " + totale + " - " + aLong);
+                AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
+                req.setAffiliateId(refferal.getAffiliateId());
+                req.setChannelId(refferal.getChannelId());
+                req.setCampaignId(refferal.getCampaignId());
+                req.setCommissionDicId(50L);
+                AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
 
-                        // incemento valore
-                        walletBusiness.incement(walletID, totale);
+                if (acccFirst != null) {
+                    commId = acccFirst.getCommissionId();
+                    commVal = Double.valueOf(acccFirst.getCommissionValue().replace(",", "."));
+                } else {
+                    log.info("ACCCC VUOTO");
+                    Commission commission = commissionBusiness.getByIdCampaignDictionary(campaignDTO.getId(), 50L);
+                    commId = commission.getId();
+                    commVal = Double.valueOf(commission.getValue());
+                }
 
-                        // decremento budget Affiliato
-                        BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
-                        if (bb != null) {
-                            Double totBudgetDecrementato = bb.getBudget() - totale;
-                            budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
+                //TODO se vuoto prendo quelle di default
+                log.info("CHECK >>>" + commId + "<<<" + refferal.getAffiliateId() + "-" + refferal.getChannelId() + "-" + refferal.getCampaignId());
+                rr.setCommissionId(commId);
+                Double totale = commVal * aLong;
 
-                            // setto stato transazione a ovebudget editore se totale < 0
-                            if (totBudgetDecrementato < 0) {
-                                rr.setDictionaryId(47L);
-                            }
-                        }
+                rr.setValue(totale);
+                rr.setImpressionNumber(Long.valueOf(aLong));
+                log.info("TOT " + totale + " - " + aLong);
 
-                        // decremento budget Campagna
-                        if (campaignDTO != null) {
-                            Double budgetCampagna = campaignDTO.getBudget() - totale;
-                            campaignBusiness.updateBudget(campaignDTO.getId(), budgetCampagna);
+                // incemento valore
+                walletBusiness.incement(walletID, totale);
 
-                            // setto stato transazione a ovebudget editore se totale < 0
-                            if (budgetCampagna < 0) {
-                                rr.setDictionaryId(48L);
-                            }
-                        }
+                // decremento budget Affiliato
+                BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
+                if (bb != null) {
+                    Double totBudgetDecrementato = bb.getBudget() - totale;
+                    budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
 
-                        log.info("Creo Trans CPM");
-                        // creo la transazione
-                        transactionBusiness.createCpm(rr);
+                    // setto stato transazione a ovebudget editore se totale < 0
+                    if (totBudgetDecrementato < 0) {
+                        rr.setDictionaryId(47L);
                     }
-                });
+                }
+
+                // decremento budget Campagna
+                if (campaignDTO != null) {
+                    Double totaleDaDecurtare = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 50L).getRevenue() * aLong;
+                    Double budgetCampagna = campaignDTO.getBudget() - totaleDaDecurtare;
+                    campaignBusiness.updateBudget(campaignDTO.getId(), budgetCampagna);
+
+                    // setto stato transazione a ovebudget editore se totale < 0
+                    if (budgetCampagna < 0) {
+                        rr.setDictionaryId(48L);
+                    }
+                }
+
+                log.info("Creo Trans CPM");
+                // creo la transazione
+                transactionBusiness.createCpm(rr);
+
             });
 
         } catch (Exception e) {
@@ -156,5 +186,30 @@ public class ManageCPM {
         }
 
     }//trasformaTrackingCpm
+
+    private void generaAgent(UserAgent a, String refferal) {
+        AgentBusiness.BaseCreateRequest request = new AgentBusiness.BaseCreateRequest();
+
+        request.setAgentClass(a.get("AgentClass").getValue());
+        request.setAgentVersion(a.get("AgentVersion").getValue());
+        request.setAgentName(a.get("AgentName").getValue());
+        request.setDeviceBrand(a.get("DeviceBrand").getValue());
+        request.setDeviceCpu(a.get("DeviceCpu").getValue());
+        request.setDeviceCpuBits(a.get("DeviceCpuBits").getValue());
+        request.setDeviceVersion(a.get("DeviceVersion").getValue());
+        request.setDeviceName(a.get("DeviceName").getValue());
+        request.setLayoutEngineClass(a.get("LayoutEngineClass").getValue());
+        request.setLayoutEngineVersion(a.get("LayoutEngineVersion").getValue());
+        request.setLayoutEngineName(a.get("LayoutEngineName").getValue());
+        request.setOperatingSystemVersion(a.get("OperatingSystemVersion").getValue());
+        request.setOperatingSystemClass(a.get("OperatingSystemClass").getValue());
+        request.setOperatingSystemName(a.get("OperatingSystemName").getValue());
+
+        Refferal reff = refferalService.decodificaRefferal(refferal);
+        request.setTipo("CPM");
+        request.setCampaignId(reff.getCampaignId().toString());
+        request.setAffiliateId(reff.getAffiliateId().toString());
+        agentBusiness.create(request);
+    }
 
 }

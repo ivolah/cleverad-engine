@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-public class TransactionAll {
+public class ViewTransactionAll {
 
     @Id
     @Column(name = "id", nullable = false)

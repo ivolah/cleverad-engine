@@ -1,8 +1,8 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.service.TransactionAll;
-import it.cleverad.engine.persistence.repository.service.TransactionAllRepository;
+import it.cleverad.engine.persistence.model.service.ViewTransactionAll;
+import it.cleverad.engine.persistence.repository.service.ViewTransactionAllRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.TransactionAllDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -38,7 +38,7 @@ public class TransactionAllBusiness {
     private JwtUserDetailsService jwtUserDetailsService;
 
     @Autowired
-    private TransactionAllRepository repository;
+    private ViewTransactionAllRepository repository;
 
     @Autowired
     private Mapper mapper;
@@ -49,13 +49,13 @@ public class TransactionAllBusiness {
 
     // CREATE
     public TransactionAllDTO create(BaseCreateRequest request) {
-        TransactionAll map = mapper.map(request, TransactionAll.class);
+        ViewTransactionAll map = mapper.map(request, ViewTransactionAll.class);
         return TransactionAllDTO.from(repository.save(map));
     }
 
     // GET BY ID
     public TransactionAllDTO findById(Long id) {
-        TransactionAll transaction = null;
+        ViewTransactionAll transaction = null;
         if (jwtUserDetailsService.getRole().equals("Admin")) {
             transaction = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction ALL", id));
         }
@@ -77,7 +77,7 @@ public class TransactionAllBusiness {
     public Page<TransactionAllDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("dateTime")));
         request.setPayoutId(null);
-        Page<TransactionAll> page = repository.findAll(getSpecification(request), pageable);
+        Page<ViewTransactionAll> page = repository.findAll(getSpecification(request), pageable);
         return page.map(TransactionAllDTO::from);
     }
 
@@ -85,11 +85,11 @@ public class TransactionAllBusiness {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("dateTime")));
         request.setPayoutId(null);
         if (jwtUserDetailsService.getRole().equals("Admin")) {
-            Page<TransactionAll> page = repository.findAll(getSpecification(request), pageable);
+            Page<ViewTransactionAll> page = repository.findAll(getSpecification(request), pageable);
             return page.map(TransactionAllDTO::from);
         } else {
             request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-            Page<TransactionAll> page = repository.findAll(getSpecification(request), pageable);
+            Page<ViewTransactionAll> page = repository.findAll(getSpecification(request), pageable);
             return page.map(TransactionAllDTO::from);
         }
     }
@@ -112,7 +112,7 @@ public class TransactionAllBusiness {
      * ============================================================================================================
      **/
 
-    private Specification<TransactionAll> getSpecification(Filter request) {
+    private Specification<ViewTransactionAll> getSpecification(Filter request) {
         return (root, query, cb) -> {
             Predicate completePredicate = null;
             List<Predicate> predicates = new ArrayList<>();

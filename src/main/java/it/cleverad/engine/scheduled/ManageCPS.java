@@ -3,12 +3,15 @@ package it.cleverad.engine.scheduled;
 import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.AffiliateChannelCommissionCampaign;
+import it.cleverad.engine.persistence.model.service.Commission;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.repository.service.AffiliateChannelCommissionCampaignRepository;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.service.RefferalService;
+import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.dto.BudgetDTO;
 import it.cleverad.engine.web.dto.CampaignDTO;
+import it.cleverad.engine.web.dto.CommissionDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +19,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Locale;
 
 @Slf4j
 @Component
@@ -38,11 +39,11 @@ public class ManageCPS {
     @Autowired
     private RevenueFactorBusiness revenueFactorBusiness;
     @Autowired
-    private AffiliateChannelCommissionCampaignRepository affiliateChannelCommissionCampaignRepository;
-
+    private AffiliateChannelCommissionCampaignBusiness affiliateChannelCommissionCampaignBusiness;
     @Autowired
     private RefferalService refferalService;
-
+    @Autowired
+    private CommissionBusiness commissionBusiness;
 
     @Scheduled(cron = "0 0 4 * * ?")
     public void trasformaTrackingCPS() {
@@ -93,48 +94,63 @@ public class ManageCPS {
                 rr.setRevenueId(rf.getId());
 
                 // gesione commisione
-                List<AffiliateChannelCommissionCampaign> accc = affiliateChannelCommissionCampaignRepository.findByAffiliateIdAndChannelIdAndCampaignId(refferal.getAffiliateId(), refferal.getChannelId(), refferal.getCampaignId());
-                accc.stream().forEach(affiliateChannelCommissionCampaign -> {
-                    if (affiliateChannelCommissionCampaign.getCommission().getDictionary().getName().toUpperCase(Locale.ROOT).equals("CPS")) {
-                        rr.setCommissionId(affiliateChannelCommissionCampaign.getCommission().getId());
+                Long commId = null;
+                Double commVal = 0D;
 
-                        Double totale = Double.valueOf(affiliateChannelCommissionCampaign.getCommission().getValue()) * 1;
-                        rr.setValue(totale);
-                        rr.setClickNumber(Long.valueOf(1));
+                AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
+                req.setAffiliateId(refferal.getAffiliateId());
+                req.setChannelId(refferal.getChannelId());
+                req.setCampaignId(refferal.getCampaignId());
+                req.setCommissionDicId(50L);
+                AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().get();
 
-                        // incemento valore
-                        walletBusiness.incement(walletID, totale);
+                if (acccFirst != null) {
+                    commId = acccFirst.getCommissionId();
+                    commVal = Double.valueOf(acccFirst.getCommissionValue().replace(",", "."));
+                } else {
+                    log.info("ACCCC VUOTO");
+                    Commission commission = commissionBusiness.getByIdCampaignDictionary(campaignDTO.getId(), 50L);
+                    commId = commission.getId();
+                    commVal = Double.valueOf(commission.getValue());
+                }
 
-                        // decremento budget Affiliato
-                        BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
-                        if (bb != null) {
-                            Double totBudgetDecrementato = bb.getBudget() - totale;
-                            budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
+                Double totale = commVal * 1;
+                rr.setValue(totale);
 
-                            // setto stato transazione a ovebudget editore se totale < 0
-                            if (totBudgetDecrementato < 0) {
-                                rr.setDictionaryId(47L);
-                            }
-                        }
+                rr.setCommissionId(commId);
+                rr.setClickNumber(Long.valueOf(1));
 
-                        // decremento budget Campagna
-                        if (campaignDTO != null) {
-                            Double budgetCampagna = campaignDTO.getBudget() - totale;
+                // incemento valore
+                walletBusiness.incement(walletID, totale);
 
-                            CampaignBusiness.Filter filter = new CampaignBusiness.Filter();
-                            filter.setBudget(budgetCampagna);
-                            campaignBusiness.update(bb.getId(), filter);
+                // decremento budget Affiliato
+                BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
+                if (bb != null) {
+                    Double totBudgetDecrementato = bb.getBudget() - totale;
+                    budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
 
-                            // setto stato transazione a ovebudget editore se totale < 0
-                            if (budgetCampagna < 0) {
-                                rr.setDictionaryId(48L);
-                            }
-                        }
-
-                        // creo la transazione
-                        transactionBusiness.createCps(rr);
+                    // setto stato transazione a ovebudget editore se totale < 0
+                    if (totBudgetDecrementato < 0) {
+                        rr.setDictionaryId(47L);
                     }
-                });
+                }
+
+                // decremento budget Campagna
+                if (campaignDTO != null) {
+                    Double budgetCampagna = campaignDTO.getBudget() - totale;
+
+                    CampaignBusiness.Filter filter = new CampaignBusiness.Filter();
+                    filter.setBudget(budgetCampagna);
+                    campaignBusiness.update(bb.getId(), filter);
+
+                    // setto stato transazione a ovebudget editore se totale < 0
+                    if (budgetCampagna < 0) {
+                        rr.setDictionaryId(48L);
+                    }
+                }
+
+                // creo la transazione
+                transactionBusiness.createCps(rr);
 
                 // setto a gestito
                 cpsBusiness.setRead(cpsDTO.getId());

@@ -75,3 +75,127 @@ where al.tipo = 'CPL'
 group by al.campaign_name, al.campaign_id, tr.revenue, al.value, al.lead_number, al.affiliate_id, al.affiliate_name,
          al.channel_id, al.channel_name, al.dictionary_id, al.date_time, al.media_name, al.media_id
 order by al.campaign_id;
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+
+create or replace view public.v_widget_campaign_day_cpc as
+SELECT row_number() OVER ()                   AS id,
+       tt.click_number                        AS totale,
+       tt.value                               AS valore,
+       tt.campaign_id,
+       tc.name                                AS campaign,
+       tt.affiliate_id,
+       date_part('year'::text, tt.date_time)  AS year,
+       date_part('month'::text, tt.date_time) AS month,
+       date_part('day'::text, tt.date_time)   AS day,
+       date_part('week'::text, tt.date_time)  AS week,
+       date_part('doy'::text, tt.date_time)   AS doy,
+       tt.date_time
+FROM t_transaction_cpc tt
+         LEFT JOIN t_campaign tc ON tt.campaign_id = tc.id
+GROUP BY tt.click_number, tt.value, tc.name, tt.campaign_id, (date_part('year'::text, tt.date_time)),
+         (date_part('month'::text, tt.date_time)), (date_part('day'::text, tt.date_time)),
+         (date_part('doy'::text, tt.date_time)), (date_part('week'::text, tt.date_time)), tt.date_time, tt.affiliate_id
+ORDER BY tt.campaign_id;
+
+alter table public.v_widget_campaign_day_cpc
+    owner to postgres;
+
+-----------------------------------------------
+-----------------------------------------------
+-----------------------------------------------
+-----------------------------------------------
+-----------------------------------------------
+
+create view public.v_widget_campaign_day_cpm as
+SELECT row_number() OVER ()                   AS id,
+       tt.impression_number                   AS totale,
+       tt.value                               AS valore,
+       tt.campaign_id,
+       tc.name                                AS campaign,
+       tt.affiliate_id,
+       date_part('year'::text, tt.date_time)  AS year,
+       date_part('month'::text, tt.date_time) AS month,
+       date_part('day'::text, tt.date_time)   AS day,
+       date_part('doy'::text, tt.date_time)   AS doy,
+       date_part('week'::text, tt.date_time)  AS week
+FROM t_transaction_cpm tt
+         LEFT JOIN t_campaign tc ON tt.campaign_id = tc.id
+         LEFT JOIN t_media tm ON tt.media_id = tm.id
+GROUP BY tt.impression_number, tt.value, tc.name, tt.campaign_id, tm.name, (date_part('year'::text, tt.date_time)),
+         (date_part('month'::text, tt.date_time)), (date_part('day'::text, tt.date_time)),
+         (date_part('week'::text, tt.date_time)), (date_part('doy'::text, tt.date_time)), tt.affiliate_id
+ORDER BY tt.campaign_id;
+
+alter table public.v_widget_campaign_day_cpm
+    owner to postgres;
+
+-----------------------------------------------
+-----------------------------------------------
+-----------------------------------------------
+-----------------------------------------------
+-----------------------------------------------
+
+create view public.v_widget_campaign_day_cpl as
+SELECT row_number() OVER ()                   AS id,
+       tt.value                               AS valore,
+       tt.campaign_id,
+       tc.name                                AS campaign,
+       tt.affiliate_id,
+       date_part('year'::text, tt.date_time)  AS year,
+       date_part('month'::text, tt.date_time) AS month,
+       date_part('day'::text, tt.date_time)   AS day,
+       date_part('doy'::text, tt.date_time)   AS doy,
+       date_part('week'::text, tt.date_time)  AS week
+FROM t_transaction_cpl tt
+         LEFT JOIN t_campaign tc ON tt.campaign_id = tc.id
+         LEFT JOIN t_media tm ON tt.media_id = tm.id
+GROUP BY tt.value, tc.name, tt.campaign_id, tm.name, (date_part('year'::text, tt.date_time)),
+         (date_part('month'::text, tt.date_time)), (date_part('day'::text, tt.date_time)),
+         (date_part('week'::text, tt.date_time)), (date_part('doy'::text, tt.date_time)), tt.affiliate_id
+ORDER BY tt.campaign_id;
+
+alter table public.v_widget_campaign_day_cpl
+    owner to postgres;
+
+-----------------------------------------------
+-----------------------------------------------
+-----------------------------------------------
+-----------------------------------------------
+-----------------------------------------------
+
+create view public.v_widget_campaign_day_cps as
+SELECT row_number() OVER ()                   AS id,
+       tt.value                               AS valore,
+       tt.campaign_id,
+       tc.name                                AS campaign,
+       tt.affiliate_id,
+       date_part('year'::text, tt.date_time)  AS year,
+       date_part('month'::text, tt.date_time) AS month,
+       date_part('day'::text, tt.date_time)   AS day,
+       date_part('doy'::text, tt.date_time)   AS doy,
+       date_part('week'::text, tt.date_time)  AS week
+FROM t_transaction_cps tt
+         LEFT JOIN t_campaign tc ON tt.campaign_id = tc.id
+         LEFT JOIN t_media tm ON tt.media_id = tm.id
+GROUP BY tt.value, tc.name, tt.campaign_id, tm.name, (date_part('year'::text, tt.date_time)),
+         (date_part('month'::text, tt.date_time)), (date_part('day'::text, tt.date_time)),
+         (date_part('week'::text, tt.date_time)), (date_part('doy'::text, tt.date_time)), tt.affiliate_id
+ORDER BY tt.campaign_id;
+
+alter table public.v_widget_campaign_day_cps
+    owner to postgres;
+

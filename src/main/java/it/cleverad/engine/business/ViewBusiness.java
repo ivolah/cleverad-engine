@@ -8,9 +8,11 @@ import it.cleverad.engine.persistence.repository.service.WidgetCampaignDayCpcRep
 import it.cleverad.engine.persistence.repository.service.WidgetCampaignDayCplRepository;
 import it.cleverad.engine.persistence.repository.service.WidgetCampaignDayCpmRepository;
 import it.cleverad.engine.persistence.repository.service.WidgetCampaignDayCpsRepository;
+import it.cleverad.engine.service.JwtUserDetailsService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -46,6 +48,9 @@ public class ViewBusiness {
     @Autowired
     private WidgetCampaignDayCpsRepository widgetCampaignDayCpsRepository;
 
+    @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
+
     /**
      * ===========================================================================================================
      * >>> CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC CPC <<<
@@ -54,20 +59,18 @@ public class ViewBusiness {
 
     /// CPC CAMPAIGN DAY
     public Page<WidgetCampaignDayCpc> getStatCampaignDayCpc(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("doy")));
+        if (!jwtUserDetailsService.isAdmin())
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         return widgetCampaignDayCpcRepository.findAll(getSpecificationCampaignDayCpc(request), pageable);
     }
 
-    public Page<WidgetCampaignDayCpc> getTopCampaignsDayCpc() {
-        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.desc("totale")));
-
-        LocalDate oggi = LocalDate.now();
-        Integer week = YearWeek.from(LocalDate.of(oggi.getYear(), oggi.getMonth(), oggi.getDayOfMonth())).getWeek();
-
+    public Page<WidgetCampaignDayCpc> getTopCampaignsDayCpc(Integer giorni) {
+        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("doy")));
         Filter request = new Filter();
-        log.info("week :: " + week);
-        request.setWeek(week);
-        request.setWeekMeno(week - 1);
+        request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - giorni);
+        if (!jwtUserDetailsService.isAdmin())
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         return widgetCampaignDayCpcRepository.findAll(getSpecificationCampaignDayCpc(request), pageable);
     }
 
@@ -75,6 +78,8 @@ public class ViewBusiness {
 
         Filter request = new Filter();
         request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 11);
+        if (!jwtUserDetailsService.isAdmin())
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         Page<WidgetCampaignDayCpc> tutto = widgetCampaignDayCpcRepository.findAll(getSpecificationCampaignDayCpc(request), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy"))));
 
         Set<Long> doys = tutto.stream().map(WidgetCampaignDayCpc::getDoy).collect(Collectors.toSet());
@@ -98,6 +103,8 @@ public class ViewBusiness {
                 Filter filter = new Filter();
                 filter.setDoy(gg);
                 filter.setCampaign(campagna);
+                if (!jwtUserDetailsService.isAdmin())
+                    request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
                 List<WidgetCampaignDayCpc> giornato = widgetCampaignDayCpcRepository.findAll(getSpecificationCampaignDayCpc(filter), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
                 if (giornato.size() > 0) {
                     dd = giornato.get(0).getTotale();
@@ -113,31 +120,7 @@ public class ViewBusiness {
 
         mainObj.put("series", arr);
         return mainObj.toString();
-
-//        doys.stream().forEach(doy -> {
-//            log.info("D0Y {} :: {}", doy, multiValue.get(doy).size());
-//            multiValue.get(doy).stream().filter(s -> s.getDoy().equals(doy)).forEach(s -> log.info(s.getCampaign() + " " + s.getTotale()));
-//        });
-
-//        MultiValuedMap<String, Double> valori = new ArrayListValuedHashMap<>();
-//        statCampaignDayCpcRepository.findAll(getSpecificationCampaignDayCpc(request), pageable).forEach(statCampaignDayCpc -> {
-//            valori.put(statCampaignDayCpc.getCampaign(), statCampaignDayCpc.getTotale());
-//        });
-//
-//        JSONObject mainObj = new JSONObject();
-//        JSONArray arr = new JSONArray();
-//        valori.keys().stream().distinct().forEach(s -> {
-//            JSONObject ele = new JSONObject();
-//            ele.put("name", s);
-//            JSONArray ja = new JSONArray();
-//            valori.get(s).forEach(aDouble -> ja.put(aDouble));
-//            ele.put("data", ja);
-//            arr.put(ele);
-//        });
-
-
     }
-
 
     private Specification<WidgetCampaignDayCpc> getSpecificationCampaignDayCpc(Filter request) {
         return (root, query, cb) -> {
@@ -153,15 +136,15 @@ public class ViewBusiness {
             if (request.getCampaign() != null) {
                 predicates.add(cb.equal(root.get("campaign"), request.getCampaign()));
             }
-
+            if (request.getAffiliateId() != null) {
+                predicates.add(cb.equal(root.get("affiliateId"), request.getAffiliateId()));
+            }
             if (request.getWeekMeno() != null) {
                 predicates.add(cb.or(cb.equal(root.get("week"), request.getWeek()), cb.equal(root.get("week"), request.getWeekMeno())));
             }
-
             if (request.getDoy() != null) {
                 predicates.add(cb.equal(root.get("doy"), request.getDoy()));
             }
-
             if (request.getDoyMenoDieci() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("doy"), request.getDoyMenoDieci()));
             }
@@ -180,6 +163,8 @@ public class ViewBusiness {
 
     public Page<WidgetCampaignDayCpm> getStatCampaignDayCpm(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+        if (!jwtUserDetailsService.isAdmin())
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         return widgetCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(request), pageable);
     }
 
@@ -192,6 +177,8 @@ public class ViewBusiness {
         Filter request = new Filter();
         request.setWeek(week);
         request.setWeekMeno(week - 1);
+        if (!jwtUserDetailsService.isAdmin())
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         return widgetCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(request), pageable);
     }
 
@@ -199,6 +186,8 @@ public class ViewBusiness {
 
         Filter request = new Filter();
         request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 11);
+        if (!jwtUserDetailsService.isAdmin())
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         Page<WidgetCampaignDayCpm> tutto = widgetCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(request), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy"))));
 
         Set<Long> doys = tutto.stream().map(WidgetCampaignDayCpm::getDoy).collect(Collectors.toSet());
@@ -220,11 +209,13 @@ public class ViewBusiness {
                 Filter filter = new Filter();
                 filter.setDoy(gg);
                 filter.setCampaign(campagna);
+                if (!jwtUserDetailsService.isAdmin())
+                    request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
                 List<WidgetCampaignDayCpm> giornato = widgetCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(filter), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
                 if (giornato.size() > 0) {
                     dd = giornato.get(0).getTotale();
                 }
-                log.info("campagna :: {} :: {} :: {}", campagna, gg, dd);
+                log.trace("campagna :: {} :: {} :: {}", campagna, gg, dd);
                 arrray.put(dd);
             });
 
@@ -247,6 +238,12 @@ public class ViewBusiness {
             if (request.getCampaignId() != null) {
                 predicates.add(cb.equal(root.get("campaignId"), request.getCampaignId()));
             }
+            if (request.getCampaign() != null) {
+                predicates.add(cb.equal(root.get("campaign"), request.getCampaign()));
+            }
+            if (request.getAffiliateId() != null) {
+                predicates.add(cb.equal(root.get("affiliateId"), request.getAffiliateId()));
+            }
             if (request.getWeekMeno() != null) {
                 predicates.add(cb.or(cb.equal(root.get("week"), request.getWeek()), cb.equal(root.get("week"), request.getWeekMeno())));
             }
@@ -255,9 +252,6 @@ public class ViewBusiness {
             }
             if (request.getDoyMenoDieci() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("doy"), request.getDoyMenoDieci()));
-            }
-            if (request.getCampaign() != null) {
-                predicates.add(cb.equal(root.get("campaign"), request.getCampaign()));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -274,6 +268,8 @@ public class ViewBusiness {
 
     public Page<WidgetCampaignDayCpl> getStatCampaignDayCpl(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+        if (!jwtUserDetailsService.isAdmin())
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         return widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(request), pageable);
     }
 
@@ -286,12 +282,16 @@ public class ViewBusiness {
         Filter request = new Filter();
         request.setWeek(week);
         request.setWeekMeno(week - 1);
+        if (!jwtUserDetailsService.isAdmin())
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         return widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(request), pageable);
     }
 
     public String getWidgetCampaignsDayCpl() {
         Filter request = new Filter();
         request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 11);
+        if (!jwtUserDetailsService.isAdmin())
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         Page<WidgetCampaignDayCpl> tutto = widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(request), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy"))));
 
         Set<Long> doys = tutto.stream().map(WidgetCampaignDayCpl::getDoy).collect(Collectors.toSet());
@@ -315,6 +315,8 @@ public class ViewBusiness {
                 Filter filter = new Filter();
                 filter.setDoy(gg);
                 filter.setCampaign(campagna);
+                if (!jwtUserDetailsService.isAdmin())
+                    request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
                 List<WidgetCampaignDayCpl> giornato = widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(filter), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
                 if (giornato.size() > 0) {
                     dd = giornato.get(0).getValore();
@@ -343,15 +345,19 @@ public class ViewBusiness {
             if (request.getCampaignId() != null) {
                 predicates.add(cb.equal(root.get("campaignId"), request.getCampaignId()));
             }
-            if (request.getWeekMeno() != null) {
-                predicates.add(cb.or(cb.equal(root.get("week"), request.getWeek()), cb.equal(root.get("week"), request.getWeekMeno())));
-            }
             if (request.getCampaign() != null) {
                 predicates.add(cb.equal(root.get("campaign"), request.getCampaign()));
             }
+            if (request.getAffiliateId() != null) {
+                predicates.add(cb.equal(root.get("affiliateId"), request.getAffiliateId()));
+            }
+            if (request.getWeekMeno() != null) {
+                predicates.add(cb.or(cb.equal(root.get("week"), request.getWeek()), cb.equal(root.get("week"), request.getWeekMeno())));
+            }
             if (request.getDoy() != null) {
                 predicates.add(cb.equal(root.get("doy"), request.getDoy()));
-            }            if (request.getDoyMenoDieci() != null) {
+            }
+            if (request.getDoyMenoDieci() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("doy"), request.getDoyMenoDieci()));
             }
 
@@ -368,6 +374,8 @@ public class ViewBusiness {
 
     public Page<WidgetCampaignDayCps> getStatCampaignDayCps(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+        if (!jwtUserDetailsService.isAdmin())
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         return widgetCampaignDayCpsRepository.findAll(getSpecificationCampaignDayCps(request), pageable);
     }
 
@@ -380,12 +388,16 @@ public class ViewBusiness {
         Filter request = new Filter();
         request.setWeek(week);
         request.setWeekMeno(week - 1);
+        if (!jwtUserDetailsService.isAdmin())
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         return widgetCampaignDayCpsRepository.findAll(getSpecificationCampaignDayCps(request), pageable);
     }
 
     public String getWidgetCampaignsDayCps() {
         Filter request = new Filter();
         request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 11);
+        if (!jwtUserDetailsService.isAdmin())
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         Page<WidgetCampaignDayCps> tutto = widgetCampaignDayCpsRepository.findAll(getSpecificationCampaignDayCps(request), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy"))));
 
         Set<Long> doys = tutto.stream().map(WidgetCampaignDayCps::getDoy).collect(Collectors.toSet());
@@ -409,6 +421,8 @@ public class ViewBusiness {
                 Filter filter = new Filter();
                 filter.setDoy(gg);
                 filter.setCampaign(campagna);
+                if (!jwtUserDetailsService.isAdmin())
+                    request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
                 List<WidgetCampaignDayCps> giornato = widgetCampaignDayCpsRepository.findAll(getSpecificationCampaignDayCps(filter), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
                 if (giornato.size() > 0) {
                     dd = giornato.get(0).getValore();
@@ -437,11 +451,14 @@ public class ViewBusiness {
             if (request.getCampaignId() != null) {
                 predicates.add(cb.equal(root.get("campaignId"), request.getCampaignId()));
             }
-            if (request.getWeekMeno() != null) {
-                predicates.add(cb.or(cb.equal(root.get("week"), request.getWeek()), cb.equal(root.get("week"), request.getWeekMeno())));
-            }
             if (request.getCampaign() != null) {
                 predicates.add(cb.equal(root.get("campaign"), request.getCampaign()));
+            }
+            if (request.getAffiliateId() != null) {
+                predicates.add(cb.equal(root.get("affiliateId"), request.getAffiliateId()));
+            }
+            if (request.getWeekMeno() != null) {
+                predicates.add(cb.or(cb.equal(root.get("week"), request.getWeek()), cb.equal(root.get("week"), request.getWeekMeno())));
             }
             if (request.getDoy() != null) {
                 predicates.add(cb.equal(root.get("doy"), request.getDoy()));
@@ -594,8 +611,10 @@ public class ViewBusiness {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @ToString
     public static class Filter {
         private Long id;
+        private Long affiliateId;
         private String name;
         private String description;
 

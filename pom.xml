@@ -137,10 +137,11 @@
             <version>1.7.2</version>
         </dependency>
 
+        <!--        USER AGENT ANALIZER-->
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
-            <version>4.4</version>
+            <groupId>nl.basjes.parse.useragent</groupId>
+            <artifactId>yauaa</artifactId>
+            <version>7.19.1</version>
         </dependency>
 
     </dependencies>

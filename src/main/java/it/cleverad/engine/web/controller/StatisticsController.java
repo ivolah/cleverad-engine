@@ -25,8 +25,8 @@ public class StatisticsController {
 
     @GetMapping(path = "/cpc/top")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<WidgetCampaignDayCpc> getStatTopCpc() {
-        return business.getTopCampaignsDayCpc();
+    public Page<WidgetCampaignDayCpc> getStatTopCpc(@PathVariable(value = "6") Integer giorni) {
+        return business.getTopCampaignsDayCpc(giorni);
     }
 
     @GetMapping(path = "/cpc/campaign/day")

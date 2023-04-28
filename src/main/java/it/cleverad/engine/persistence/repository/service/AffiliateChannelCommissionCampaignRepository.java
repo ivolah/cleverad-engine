@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import java.util.List;
 
 public interface AffiliateChannelCommissionCampaignRepository extends JpaRepository<AffiliateChannelCommissionCampaign, Long>, JpaSpecificationExecutor<AffiliateChannelCommissionCampaign> {
-    List<AffiliateChannelCommissionCampaign> findByAffiliateIdAndChannelIdAndCampaignId(Long affiliateId, Long channelId, Long campaignId);
+   AffiliateChannelCommissionCampaign findFirstByAffiliateIdAndChannelIdAndCampaignId(Long affiliateId, Long channelId, Long campaignId);
 }

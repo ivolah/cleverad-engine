@@ -17,16 +17,17 @@ public class WidgetCampaignDayCpm {
     @Id
     @Column(name = "id", nullable = false)
     private Long id;
-
-    private Double totale;
-    private Double valore;
     @Column(name = "campaign_id")
     private Long campaignId;
     private String campaign;
-
+    @Column(name = "affiliate_id")
+    private Long affiliateId;
+    private Double totale;
+    private Double valore;
     private Long year;
     private Long month;
     private Long day;
     private Long week;
     private Long doy;
+
 }

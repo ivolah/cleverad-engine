@@ -128,6 +128,15 @@ public class CommissionBusiness {
         return page.map(CommissionDTO::from);
     }
 
+    public Commission getByIdCampaignDictionary(Long idC,Long idD) {
+        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Filter request = new Filter();
+        request.setCampaignId(idC);
+        request.setDictionaryId(idD);
+        Page<Commission> page = repository.findAll(getSpecification(request), pageable);
+        return page.stream().findFirst().orElse(null);
+    }
+
     public Page<CommissionDTO> getByIdCampaignAttive(Long id) {
         Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();

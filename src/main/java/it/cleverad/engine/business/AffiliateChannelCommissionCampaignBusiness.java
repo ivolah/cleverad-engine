@@ -151,6 +151,12 @@ public class AffiliateChannelCommissionCampaignBusiness {
         return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
 
+    public Page<AffiliateChannelCommissionCampaignDTO> search(Filter request) {
+        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(AffiliateChannelCommissionCampaignDTO::from);
+    }
+
     /**
      * ============================================================================================================
      **/
@@ -172,7 +178,10 @@ public class AffiliateChannelCommissionCampaignBusiness {
                 predicates.add(cb.equal(root.get("channel").get("id"), request.getChannelId()));
             }
             if (request.getCommissionId() != null) {
-                predicates.add(cb.equal(root.get("commission").get("id"), request.getCommissionId()));
+                predicates.add(cb.equal(root.get("commission").get("dictionary").get("id"), request.getCommissionId()));
+            }
+            if (request.getCommissionDicId() != null) {
+                predicates.add(cb.equal(root.get("commission").get("id"), request.getCommissionDicId()));
             }
             if (request.getNotzero() != null) {
                 predicates.add(cb.notEqual(root.get("commission").get("value"), "0"));
@@ -209,6 +218,7 @@ public class AffiliateChannelCommissionCampaignBusiness {
         private Long channelId;
         private Long commissionId;
         private Boolean notzero;
+        private Long commissionDicId;
     }
 
 }

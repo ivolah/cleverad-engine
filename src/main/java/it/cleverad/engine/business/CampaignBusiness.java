@@ -58,11 +58,11 @@ public class CampaignBusiness {
     @Autowired
     private AffiliateRepository affiliateRepository;
     @Autowired
-    private CampaignAffiliateBusiness campaignAffiliateBusiness;
-    @Autowired
     private RefferalService refferalService;
     @Autowired
     private RevenueFactorBusiness revenueFactorBusiness;
+    @Autowired
+    private CommissionBusiness commissionBusiness;
 
     /**
      * ============================================================================================================
@@ -83,6 +83,7 @@ public class CampaignBusiness {
         CampaignDTO dto = CampaignDTO.from(repository.save(map));
 
         CampaignDTO finalDto = dto;
+
         //Category
         if (StringUtils.isNotBlank(request.getCategories())) {
             Arrays.stream(request.getCategories().split(",")).map(s -> campaignCategoryBusiness.create(new CampaignCategoryBusiness.BaseCreateRequest(finalDto.getId(), Long.valueOf(s)))).collect(Collectors.toList());
@@ -106,8 +107,34 @@ public class CampaignBusiness {
         revenueFactorBusiness.create(rfRequest);
         rfRequest.setDictionaryId(50L);
         revenueFactorBusiness.create(rfRequest);
-        rfRequest.setDictionaryId(51L);
-        revenueFactorBusiness.create(rfRequest);
+        //rfRequest.setDictionaryId(51L);
+        //revenueFactorBusiness.create(rfRequest);
+
+        //Aggiungio Commissioni di default altrimenti non funziona
+        CommissionBusiness.BaseCreateRequest comReq = new CommissionBusiness.BaseCreateRequest();
+        comReq.setCampaignId(dto.getId());
+        comReq.setBase(true);
+        comReq.setStatus(true);
+        comReq.setValue("0");
+        comReq.setStartDate(dto.getStartDate());
+        comReq.setDueDate(dto.getEndDate());
+
+        comReq.setDescription("Commissione CPC di Default");
+        comReq.setName("CPC @0 Default");
+        comReq.setDictionaryId(10L);
+        commissionBusiness.create(comReq);
+        comReq.setDescription("Commissione CPM di Default");
+        comReq.setName("CPM @0 Default");
+        comReq.setDictionaryId(50L);
+        commissionBusiness.create(comReq);
+        comReq.setDescription("Commissione CPL di Default");
+        comReq.setName("CPL @0 Default");
+        comReq.setDictionaryId(11L);
+        commissionBusiness.create(comReq);
+//        comReq.setDescription("Commissione CPS di Default");
+//        comReq.setName("CPS @0 Default");
+//        comReq.setDictionaryId(51L);
+//        commissionBusiness.create(comReq);
 
         dto = CampaignDTO.from(repository.save(campaign));
 

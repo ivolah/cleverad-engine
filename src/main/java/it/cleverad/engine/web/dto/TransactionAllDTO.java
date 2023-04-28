@@ -1,6 +1,6 @@
 package it.cleverad.engine.web.dto;
 
-import it.cleverad.engine.persistence.model.service.TransactionAll;
+import it.cleverad.engine.persistence.model.service.ViewTransactionAll;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -43,7 +43,7 @@ public class TransactionAllDTO {
     private Long dictionaryId;
     private String dictionaryName;
 
-    public static TransactionAllDTO from(TransactionAll transaction) {
+    public static TransactionAllDTO from(ViewTransactionAll transaction) {
         return new TransactionAllDTO(
                 transaction.getId(),
                 transaction.getAgent(),

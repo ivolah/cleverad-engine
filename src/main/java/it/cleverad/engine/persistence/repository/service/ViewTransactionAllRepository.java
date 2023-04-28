@@ -2,7 +2,7 @@ package it.cleverad.engine.persistence.repository.service;
 
 import it.cleverad.engine.persistence.model.service.TopAffiliates;
 import it.cleverad.engine.persistence.model.service.TopCampaings;
-import it.cleverad.engine.persistence.model.service.TransactionAll;
+import it.cleverad.engine.persistence.model.service.ViewTransactionAll;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface TransactionAllRepository extends JpaRepository<TransactionAll, Long>, JpaSpecificationExecutor<TransactionAll> {
+public interface ViewTransactionAllRepository extends JpaRepository<ViewTransactionAll, Long>, JpaSpecificationExecutor<ViewTransactionAll> {
 
     @Query("SELECT count(*)," +
             "       al.campaignId as campaignId," +
@@ -34,7 +34,7 @@ public interface TransactionAllRepository extends JpaRepository<TransactionAll, 
             "       sum(al.value) / sum(al.clickNumber)          as ecpc," +
             "       al.dictionaryId as dictionaryId, " +
             "       al.dictionaryName as dictionaryName " +
-            " from TransactionAll al" +
+            " from ViewTransactionAll al" +
             " left join RevenueFactor tr on al.campaignId = tr.campaign.id" +
             " where (:dateFrom < al.dateTime) " +
             " and (:dateTo > al.dateTime) " +
@@ -62,7 +62,7 @@ public interface TransactionAllRepository extends JpaRepository<TransactionAll, 
             "       sum(al.value) / sum(al.clickNumber)          as ecpc," +
             "       al.dictionaryId as dictionaryId, " +
             "       al.dictionaryName as dictionaryName " +
-            " from TransactionAll al" +
+            " from ViewTransactionAll al" +
             " left join RevenueFactor tr on al.campaignId = tr.campaign.id" +
             " where (:dateFrom < al.dateTime) " +
             " and (:dateTo > al.dateTime) " +
