@@ -1,15 +1,16 @@
 package it.cleverad.engine.web.controller;
 
+import it.cleverad.engine.business.AgentBusiness;
 import it.cleverad.engine.business.ViewBusiness;
-import it.cleverad.engine.persistence.model.service.WidgetCampaignDayCpc;
-import it.cleverad.engine.persistence.model.service.WidgetCampaignDayCpl;
-import it.cleverad.engine.persistence.model.service.WidgetCampaignDayCpm;
-import it.cleverad.engine.persistence.model.service.WidgetCampaignDayCps;
+import it.cleverad.engine.persistence.model.service.*;
+import it.cleverad.engine.web.dto.AgentDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -18,6 +19,9 @@ public class StatisticsController {
 
     @Autowired
     private ViewBusiness business;
+
+    @Autowired
+    private AgentBusiness agentBusiness;
 
     /**
      * ============================================================================================================
@@ -135,4 +139,23 @@ public class StatisticsController {
     /**
      * ============================================================================================================
      **/
+
+    @GetMapping(path = "/agent/os")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public List<WidgetAgent> searchOS(AgentBusiness.Filter request) {
+        return agentBusiness.searchOS(request);
+    }
+
+    @GetMapping(path = "/agent/device")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public List<WidgetAgent> searchDevic(AgentBusiness.Filter request) {
+        return agentBusiness.searchDevic(request);
+    }
+
+    @GetMapping(path = "/agent/data")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public List<WidgetAgent> searchAgent(AgentBusiness.Filter request) {
+        return agentBusiness.searchAgent(request);
+    }
+
 }

@@ -2,6 +2,7 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Agent;
+import it.cleverad.engine.persistence.model.service.WidgetAgent;
 import it.cleverad.engine.persistence.repository.service.AgentRepository;
 import it.cleverad.engine.web.dto.AgentDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -70,17 +71,26 @@ public class AgentBusiness {
         return page.map(AgentDTO::from);
     }
 
-    public Page<AgentDTO> searchAll(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-        Page<Agent> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(AgentDTO::from);
-    }
-
     // UPDATE
     public AgentDTO update(Long id, Filter filter) {
         Agent agent = repository.findById(id).orElseThrow(() -> new ElementCleveradException(" Agent", id));
         mapper.map(filter, agent);
         return AgentDTO.from(repository.save(agent));
+    }
+
+    public List<WidgetAgent> searchOS(Filter request) {
+        List<WidgetAgent> page = repository.geOs(request.getCampaignId(), request.getAffiliateId());
+        return page;
+    }
+
+    public List<WidgetAgent> searchDevic(Filter request) {
+        List<WidgetAgent> page = repository.getDevice(request.getCampaignId(), request.getAffiliateId());
+        return page;
+    }
+
+    public List<WidgetAgent> searchAgent(Filter request) {
+        List<WidgetAgent> page = repository.getAgent(request.getCampaignId(), request.getAffiliateId());
+        return page;
     }
 
     /**
@@ -93,6 +103,12 @@ public class AgentBusiness {
 
             if (request.getId() != null) {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
+            }
+            if (request.getCampaignId() != null) {
+                predicates.add(cb.equal(root.get("campaignId"), request.getCampaignId()));
+            }
+            if (request.getAffiliateId() != null) {
+                predicates.add(cb.equal(root.get("affiliateId"), request.getAffiliateId()));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));

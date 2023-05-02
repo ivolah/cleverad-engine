@@ -2,10 +2,7 @@ package it.cleverad.engine.scheduled;
 
 import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
-import it.cleverad.engine.persistence.model.service.AffiliateChannelCommissionCampaign;
-import it.cleverad.engine.persistence.model.service.Commission;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
-import it.cleverad.engine.persistence.repository.service.AffiliateChannelCommissionCampaignRepository;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.service.RefferalService;
 import it.cleverad.engine.web.dto.*;
@@ -72,8 +69,8 @@ public class ManageCPM {
                 // setto a gestito
                 CpmBusiness.setRead(cpm.getId());
                 // valorizzo agent
-                log.info("AGENT ---- " + cpm.getAgent());
-                if (StringUtils.isNotBlank(cpm.getAgent()) )
+                log.trace("AGENT ---- " + cpm.getAgent());
+                if (StringUtils.isNotBlank(cpm.getAgent()))
                     this.generaAgent(uaa.parse(cpm.getAgent()), cpm.getRefferal());
             });
 
@@ -115,7 +112,8 @@ public class ManageCPM {
                 // trovo revenue
                 if (refferal.getCampaignId() != null) {
                     RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 50L);
-                    rr.setRevenueId(rf.getId());
+                    if (rf != null && rf.getId() != null)
+                        rr.setRevenueId(rf.getId());
                 }
 
                 // gesione commisione
@@ -134,13 +132,14 @@ public class ManageCPM {
                     commVal = Double.valueOf(acccFirst.getCommissionValue().replace(",", "."));
                 } else {
                     log.info("ACCCC VUOTO");
-                    Commission commission = commissionBusiness.getByIdCampaignDictionary(campaignDTO.getId(), 50L);
-                    commId = commission.getId();
-                    commVal = Double.valueOf(commission.getValue());
+                    CommissionBusiness.Filter filt = new CommissionBusiness.Filter();
+                    filt.setCampaignId(campaignDTO.getId());
+                    filt.setDictionaryId(50L);
+                    CommissionDTO commission = commissionBusiness.search(filt).stream().findFirst().orElse(null);
+                    commId = commission != null ? commission.getId() : null;
+                    commVal = commission != null ? Double.valueOf(commission.getValue()) : 0;
                 }
 
-                //TODO se vuoto prendo quelle di default
-                log.info("CHECK >>>" + commId + "<<<" + refferal.getAffiliateId() + "-" + refferal.getChannelId() + "-" + refferal.getCampaignId());
                 rr.setCommissionId(commId);
                 Double totale = commVal * aLong;
 
@@ -165,13 +164,16 @@ public class ManageCPM {
 
                 // decremento budget Campagna
                 if (campaignDTO != null) {
-                    Double totaleDaDecurtare = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 50L).getRevenue() * aLong;
-                    Double budgetCampagna = campaignDTO.getBudget() - totaleDaDecurtare;
-                    campaignBusiness.updateBudget(campaignDTO.getId(), budgetCampagna);
+                    RevenueFactor rff = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 50L);
+                    if (rff != null && rff.getRevenue() != null) {
+                        Double totaleDaDecurtare = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 50L).getRevenue() * aLong;
+                        Double budgetCampagna = campaignDTO.getBudget() - totaleDaDecurtare;
+                        campaignBusiness.updateBudget(campaignDTO.getId(), budgetCampagna);
 
-                    // setto stato transazione a ovebudget editore se totale < 0
-                    if (budgetCampagna < 0) {
-                        rr.setDictionaryId(48L);
+                        // setto stato transazione a ovebudget editore se totale < 0
+                        if (budgetCampagna < 0) {
+                            rr.setDictionaryId(48L);
+                        }
                     }
                 }
 

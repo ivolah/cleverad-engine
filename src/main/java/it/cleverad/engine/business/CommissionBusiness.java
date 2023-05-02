@@ -81,7 +81,11 @@ public class CommissionBusiness {
     public Page<CommissionDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Page<Commission> page = repository.findAll(getSpecification(request), pageable);
-
+        return page.map(CommissionDTO::from);
+    }
+    public Page<CommissionDTO> search(Filter request) {
+        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Page<Commission> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CommissionDTO::from);
     }
 

@@ -113,9 +113,12 @@ public class ManageCPL {
                     commVal = Double.valueOf(acccFirst.getCommissionValue().replace(",", "."));
                 } else {
                     log.info("ACCCC VUOTO");
-                    Commission commission = commissionBusiness.getByIdCampaignDictionary(campaignDTO.getId(), 50L);
-                    commId = commission.getId();
-                    commVal = Double.valueOf(commission.getValue());
+                    CommissionBusiness.Filter filt = new CommissionBusiness.Filter();
+                    filt.setCampaignId(campaignDTO.getId());
+                    filt.setDictionaryId(11L);
+                    CommissionDTO commission = commissionBusiness.search(filt).stream().findFirst().orElse(null);
+                    commId = commission != null ? commission.getId() : null;
+                    commVal = commission != null ? Double.valueOf(commission.getValue()) : 0;
                 }
 
                 Double totale = commVal * 1;

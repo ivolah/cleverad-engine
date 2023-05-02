@@ -177,11 +177,11 @@ public class AffiliateChannelCommissionCampaignBusiness {
             if (request.getChannelId() != null) {
                 predicates.add(cb.equal(root.get("channel").get("id"), request.getChannelId()));
             }
-            if (request.getCommissionId() != null) {
-                predicates.add(cb.equal(root.get("commission").get("dictionary").get("id"), request.getCommissionId()));
-            }
             if (request.getCommissionDicId() != null) {
-                predicates.add(cb.equal(root.get("commission").get("id"), request.getCommissionDicId()));
+                predicates.add(cb.equal(root.get("commission").get("dictionary").get("id"), request.getCommissionDicId()));
+            }
+            if (request.getCommissionId() != null) {
+                predicates.add(cb.equal(root.get("commission").get("id"), request.getCommissionId()));
             }
             if (request.getNotzero() != null) {
                 predicates.add(cb.notEqual(root.get("commission").get("value"), "0"));

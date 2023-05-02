@@ -2,7 +2,6 @@ package it.cleverad.engine.scheduled;
 
 import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
-import it.cleverad.engine.persistence.model.service.Commission;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.service.RefferalService;
@@ -49,7 +48,7 @@ public class ManageCPC {
     private CommissionBusiness commissionBusiness;
 
     @Scheduled(cron = "* */1 * * * ?")
-   // @Scheduled(cron = "0 5 0 * * ?")
+    //  @Scheduled(cron = "0 5 0 * * ?")
     @Async
     public void trasformaTrackingCPC() {
         //   log.info("trasformaTrackingCPC");
@@ -72,13 +71,13 @@ public class ManageCPC {
                 // setto a gestito
                 cpcBusiness.setRead(dto.getId());
                 // valorizzo agent
-                log.info("AGENT ---- " + dto.getAgent());
+                log.trace("AGENT ---- " + dto.getAgent());
                 if (StringUtils.isNotBlank(dto.getAgent()))
                     this.generaAgent(uaa.parse(dto.getAgent()), dto.getRefferal());
             });
 
             mappa.forEach((s, aLong) -> {
-                log.info("Gestisco trasformaTrackingCPC ID {}", aLong);
+                log.info("Gestisco trasformaTrackingCPC :: {}", aLong);
 
                 // prendo reffereal e lo leggo
                 Refferal refferal = refferalService.decodificaRefferal(s);
@@ -116,7 +115,8 @@ public class ManageCPC {
 
                     // trovo revenue
                     RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 10L);
-                    rr.setRevenueId(rf.getId());
+                    if (rf != null && rf.getId() != null)
+                        rr.setRevenueId(rf.getId());
 
                     // gesione commisione
                     Long commId = null;
@@ -133,10 +133,13 @@ public class ManageCPC {
                         commId = acccFirst.getCommissionId();
                         commVal = Double.valueOf(acccFirst.getCommissionValue().replace(",", "."));
                     } else {
-                        log.info("ACCCC VUOTO");
-                        Commission commission = commissionBusiness.getByIdCampaignDictionary(campaignDTO.getId(), 50L);
-                        commId = commission.getId();
-                        commVal = Double.valueOf(commission.getValue());
+                        log.info("ACCC VUOTO");
+                        CommissionBusiness.Filter filt = new CommissionBusiness.Filter();
+                        filt.setCampaignId(campaignDTO.getId());
+                        filt.setDictionaryId(10L);
+                        CommissionDTO commission = commissionBusiness.search(filt).stream().findFirst().orElse(null);
+                        commId = commission != null ? commission.getId() : null;
+                        commVal = commission != null ? Double.valueOf(commission.getValue()) : 0;
                     }
 
                     rr.setCommissionId(commId);
@@ -187,7 +190,6 @@ public class ManageCPC {
         }
 
     }//trasformaTrackingCPC
-
 
     private void generaAgent(UserAgent a, String refferal) {
         AgentBusiness.BaseCreateRequest request = new AgentBusiness.BaseCreateRequest();

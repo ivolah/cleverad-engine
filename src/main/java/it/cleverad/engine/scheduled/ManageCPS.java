@@ -101,7 +101,7 @@ public class ManageCPS {
                 req.setAffiliateId(refferal.getAffiliateId());
                 req.setChannelId(refferal.getChannelId());
                 req.setCampaignId(refferal.getCampaignId());
-                req.setCommissionDicId(50L);
+                req.setCommissionDicId(51L);
                 AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().get();
 
                 if (acccFirst != null) {
@@ -109,9 +109,12 @@ public class ManageCPS {
                     commVal = Double.valueOf(acccFirst.getCommissionValue().replace(",", "."));
                 } else {
                     log.info("ACCCC VUOTO");
-                    Commission commission = commissionBusiness.getByIdCampaignDictionary(campaignDTO.getId(), 50L);
-                    commId = commission.getId();
-                    commVal = Double.valueOf(commission.getValue());
+                    CommissionBusiness.Filter filt = new CommissionBusiness.Filter();
+                    filt.setCampaignId(campaignDTO.getId());
+                    filt.setDictionaryId(51L);
+                    CommissionDTO commission = commissionBusiness.search(filt).stream().findFirst().orElse(null);
+                    commId = commission != null ? commission.getId() : null;
+                    commVal = commission != null ? Double.valueOf(commission.getValue()) : 0;
                 }
 
                 Double totale = commVal * 1;
