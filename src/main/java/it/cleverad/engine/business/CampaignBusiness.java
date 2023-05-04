@@ -115,7 +115,7 @@ public class CampaignBusiness {
         comReq.setCampaignId(dto.getId());
         comReq.setBase(true);
         comReq.setStatus(true);
-        comReq.setValue("0");
+        comReq.setValue(0D);
         comReq.setStartDate(dto.getStartDate());
         comReq.setDueDate(dto.getEndDate());
 
@@ -172,6 +172,8 @@ public class CampaignBusiness {
             if (campaign != null) {
                 //   campaign.getMediaCampaignList().stream().forEach(mediaCampaign -> mediaCampaignBusiness.delete(mediaCampaign.getId()));
                 campaign.getCampaignCategories().stream().forEach(campaignCategory -> campaignCategoryBusiness.delete(campaignCategory.getId()));
+                campaign.getRevenueFactors().stream().forEach(revenueFactor -> revenueFactorBusiness.delete(revenueFactor.getId()));
+                campaign.getCommissionCampaigns().stream().forEach(commission -> commissionBusiness.delete(campaign.getId(), commission.getId()));
             }
             repository.deleteById(id);
         } catch (Exception ee) {
@@ -385,6 +387,7 @@ public class CampaignBusiness {
         private Double budget;
         private Double initialBudget;
         private String trackingCode;
+        private String note;
         @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSz")
         private LocalDateTime startDate;
         @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSz")
@@ -403,10 +406,12 @@ public class CampaignBusiness {
         private String idFile;
         private String valuta;
         private Double budget;
+        private Double initialBudget;
         private Long cookieId;
         private String comissions;
         private List<Long> categoryList;
         private String trackingCode;
+        private String note;
         private Instant creationDateFrom;
         private Instant creationDateTo;
         private Instant lastModificationDateFrom;
@@ -419,6 +424,8 @@ public class CampaignBusiness {
         private LocalDate endDateFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate endDateTo;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate startDate;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate endDate;
         private Long companyId;
