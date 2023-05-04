@@ -157,5 +157,10 @@ public class StatisticsController {
     public List<WidgetAgent> searchAgent(AgentBusiness.Filter request) {
         return agentBusiness.searchAgent(request);
     }
+    @GetMapping(path = "/agent/data/detailed")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public List<WidgetAgent> searchAgentDetailed(AgentBusiness.Filter request) {
+        return agentBusiness.searchAgentDetailed(request);
+    }
 
 }

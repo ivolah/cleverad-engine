@@ -4,7 +4,7 @@ public interface WidgetAgent {
 
     Long getCount();
 
-    String getDeviceNam();
+    String getDeviceName();
 
     String getOsName();
 

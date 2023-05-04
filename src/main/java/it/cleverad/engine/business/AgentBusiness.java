@@ -88,10 +88,19 @@ public class AgentBusiness {
         return page;
     }
 
+    //  SEARCH AGENT DATA
+
+    public List<WidgetAgent> searchAgentDetailed(Filter request) {
+        List<WidgetAgent> page = repository.searchAgentDetailed(request.getCampaignId(), request.getAffiliateId());
+        return page;
+    }
+
     public List<WidgetAgent> searchAgent(Filter request) {
         List<WidgetAgent> page = repository.getAgent(request.getCampaignId(), request.getAffiliateId());
         return page;
     }
+
+
 
     /**
      * ============================================================================================================
