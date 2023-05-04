@@ -347,6 +347,7 @@ public class MediaBusiness {
         private String idFile;
         private Long campaignId;
         private String mailSubject;
+        private String sender;
     }
 
     @Data
@@ -370,6 +371,7 @@ public class MediaBusiness {
         private Instant creationDateTo;
         private Instant lastModificationDateFrom;
         private Instant lastModificationDateTo;
+        private String sender;
     }
 
 }

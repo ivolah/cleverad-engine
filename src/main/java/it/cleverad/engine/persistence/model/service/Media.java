@@ -31,6 +31,7 @@ public class Media {
     @Column(name = "banner_code")
     private String bannerCode;
     private String note;
+    private String sender;
     @Column(name = "id_file")
     private String idFile;
 

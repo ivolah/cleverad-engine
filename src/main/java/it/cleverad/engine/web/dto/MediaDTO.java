@@ -22,7 +22,7 @@ public class MediaDTO {
     private String bannerCode;
     private String note;
     private String idFile;
-
+    private String sender;
     private Boolean status;
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
@@ -39,8 +39,10 @@ public class MediaDTO {
 
     private String target;
 
-    public MediaDTO(long id, String name, String url, String mailSubject, String bannerCode, String note, String idFile, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long campaignId, String campaignName, Long typeId, String typeName,
+    public MediaDTO(long id, String name, String url, String mailSubject, String bannerCode, String note, String idFile, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long campaignId, String campaignName, Long typeId,
+                    String typeName,
                    // List<TargetDTO> targets,
+                    String sender,
                     String target) {
         this.id = id;
         this.name = name;
@@ -57,6 +59,7 @@ public class MediaDTO {
         this.typeId = typeId;
         this.typeName = typeName;
        // this.targets = targets;
+        this.sender = sender;
         this.target = target;
     }
 
@@ -79,6 +82,7 @@ public class MediaDTO {
                 media.getMediaType().getId(),
                 media.getMediaType().getName(),
                 //targets,
+                media.getSender(),
                 media.getTarget());
     }
 
