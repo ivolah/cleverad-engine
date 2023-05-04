@@ -110,7 +110,7 @@ public class ManageCPL {
 
                 if (acccFirst != null) {
                     commId = acccFirst.getCommissionId();
-                    commVal = Double.valueOf(acccFirst.getCommissionValue().replace(",", "."));
+                    commVal = acccFirst.getCommissionValue();
                 } else {
                     log.info("ACCCC VUOTO");
                     CommissionBusiness.Filter filt = new CommissionBusiness.Filter();
@@ -123,7 +123,6 @@ public class ManageCPL {
 
                 Double totale = commVal * 1;
                 rr.setValue(totale);
-
                 rr.setCommissionId(commId);
                 rr.setLeadNumber(Long.valueOf(1));
 

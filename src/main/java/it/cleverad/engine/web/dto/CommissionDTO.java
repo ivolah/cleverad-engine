@@ -13,7 +13,7 @@ public class CommissionDTO {
 
     private long id;
     private String name;
-    private String value;
+    private Double value;
     private String description;
     private Boolean status;
     private Boolean base;
@@ -26,7 +26,7 @@ public class CommissionDTO {
     private Long campaignId;
     private String typeName;
 
-    public CommissionDTO(long id, String name, String value, String description, Boolean status, Long dictionaryId, LocalDate startDate, LocalDate dueDate, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long campaignId, String typeName, Boolean base) {
+    public CommissionDTO(long id, String name, Double value, String description, Boolean status, Long dictionaryId, LocalDate startDate, LocalDate dueDate, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long campaignId, String typeName, Boolean base) {
         this.id = id;
         this.name = name;
         this.value = value;

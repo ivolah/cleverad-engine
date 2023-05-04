@@ -48,8 +48,8 @@ public class ManageCPM {
     private CommissionBusiness commissionBusiness;
 
     @Async
-    //@Scheduled(cron = "0 30 0 * * ?")
-    @Scheduled(cron = "50 0/1 * * * ?")
+    @Scheduled(cron = "0 30 0 * * ?")
+    //@Scheduled(cron = "50 0/1 * * * ?")
     public void trasformaTrackingCPM() {
         try {
             // trovo tutti i tracking con read == false
@@ -129,7 +129,7 @@ public class ManageCPM {
 
                 if (acccFirst != null) {
                     commId = acccFirst.getCommissionId();
-                    commVal = Double.valueOf(acccFirst.getCommissionValue().replace(",", "."));
+                    commVal = acccFirst.getCommissionValue();
                 } else {
                     log.info("ACCCC VUOTO");
                     CommissionBusiness.Filter filt = new CommissionBusiness.Filter();

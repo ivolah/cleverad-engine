@@ -3,6 +3,8 @@ package it.cleverad.engine.business;
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.*;
 import it.cleverad.engine.persistence.repository.service.*;
+import it.cleverad.engine.service.JwtUserDetailsService;
+import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -32,7 +34,8 @@ public class AffiliateChannelCommissionCampaignBusiness {
 
     @Autowired
     private AffiliateChannelCommissionCampaignRepository repository;
-
+    @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
     @Autowired
     private AffiliateRepository affiliateRepository;
     @Autowired
@@ -41,9 +44,10 @@ public class AffiliateChannelCommissionCampaignBusiness {
     private ChannelRepository channelRepository;
     @Autowired
     private CommissionRepository commissionRepository;
-
     @Autowired
     private CampaignAffiliateBusiness campaignAffiliateBusiness;
+    @Autowired
+    private MailService mailService;
 
     @Autowired
     private Mapper mapper;
@@ -68,8 +72,16 @@ public class AffiliateChannelCommissionCampaignBusiness {
         Campaign campaign = campaignRepository.findById(request.getCampaignId()).orElseThrow(() -> new ElementCleveradException("Campaign", request.getCampaignId()));
         map.setCampaign(campaign);
 
-        if (campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(affiliate.getId(), campaign.getId()).getTotalElements() == 0)
+        if (campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(affiliate.getId(), campaign.getId()).getTotalElements() == 0) {
+            // assicio affiliate a campagna
             campaignAffiliateBusiness.create(new CampaignAffiliateBusiness.BaseCreateRequest(campaign.getId(), affiliate.getId(), null, null));
+            // inoltro mail di invito a  camapgna
+            MailService.BaseCreateRequest reqMail = new MailService.BaseCreateRequest();
+            reqMail.setAffiliateId(affiliate.getId());
+            reqMail.setCampaignId(campaign.getId());
+            mailService.invitoCampagna(reqMail);
+        }
+
 
         return AffiliateChannelCommissionCampaignDTO.from(repository.save(map));
     }
@@ -121,6 +133,7 @@ public class AffiliateChannelCommissionCampaignBusiness {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Filter filter = new Filter();
         filter.setCampaignId(campaignId);
+        filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         filter.setNotzero(true);
         Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
         return page.map(AffiliateChannelCommissionCampaignDTO::from);

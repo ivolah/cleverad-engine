@@ -138,6 +138,7 @@ public class MailService {
 
     public MailDTO invitoCampagna(BaseCreateRequest request) {
         request.setTemplateId(11L);
+        request.setPlannerId(campaignBusiness.findById(request.campaignId).getPlannerId());
         this.invio(request);
         return null;
     }

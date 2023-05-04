@@ -23,7 +23,7 @@ public class Commission {
     private Long id;
 
     private String name;
-    private String value;
+    private Double value;
     private String description;
     @Column(name = "due_date")
     private LocalDate dueDate;

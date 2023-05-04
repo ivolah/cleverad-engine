@@ -19,14 +19,14 @@ public class AffiliateChannelCommissionCampaignDTO {
     private String channelName;
     private Long commissionId;
     private String commissionName;
-    private String commissionValue;
+    private Double commissionValue;
     private String commissionType;
     private LocalDate commissionDueDate;
     
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
     
-    public AffiliateChannelCommissionCampaignDTO(long id, Long campaignId, Long affiliateId, String affilateName, Long channelId, String channelName, Long commissionId, String commissionName, String commissionValue, String commissionType, LocalDate commissionDate, LocalDateTime creationDate, LocalDateTime lastModificationDate) {
+    public AffiliateChannelCommissionCampaignDTO(long id, Long campaignId, Long affiliateId, String affilateName, Long channelId, String channelName, Long commissionId, String commissionName, Double commissionValue, String commissionType, LocalDate commissionDate, LocalDateTime creationDate, LocalDateTime lastModificationDate) {
         this.id                   = id;
         this.campaignId           = campaignId;
         this.affiliateId          = affiliateId;

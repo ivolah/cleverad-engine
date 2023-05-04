@@ -106,7 +106,7 @@ public class ManageCPS {
 
                 if (acccFirst != null) {
                     commId = acccFirst.getCommissionId();
-                    commVal = Double.valueOf(acccFirst.getCommissionValue().replace(",", "."));
+                    commVal = acccFirst.getCommissionValue();
                 } else {
                     log.info("ACCCC VUOTO");
                     CommissionBusiness.Filter filt = new CommissionBusiness.Filter();

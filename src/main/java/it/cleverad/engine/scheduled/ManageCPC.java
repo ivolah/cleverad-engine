@@ -47,8 +47,8 @@ public class ManageCPC {
     @Autowired
     private CommissionBusiness commissionBusiness;
 
-    @Scheduled(cron = "* */1 * * * ?")
-    //  @Scheduled(cron = "0 5 0 * * ?")
+    //@Scheduled(cron = "* */1 * * * ?")
+    @Scheduled(cron = "0 5 0 * * ?")
     @Async
     public void trasformaTrackingCPC() {
         //   log.info("trasformaTrackingCPC");
@@ -56,11 +56,7 @@ public class ManageCPC {
 
             // trovo tutti i tracking con read == false
             Map<String, Integer> mappa = new HashMap<>();
-            UserAgentAnalyzer uaa = UserAgentAnalyzer
-                    .newBuilder()
-                    .hideMatcherLoadStats()
-                    .withCache(10000)
-                    .build();
+            UserAgentAnalyzer uaa = UserAgentAnalyzer.newBuilder().hideMatcherLoadStats().withCache(10000).build();
 
             Page<CpcDTO> last = cpcBusiness.getUnreadDayBefore();
             last.stream().filter(dto -> dto.getRefferal() != null).forEach(dto -> {
@@ -115,8 +111,7 @@ public class ManageCPC {
 
                     // trovo revenue
                     RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 10L);
-                    if (rf != null && rf.getId() != null)
-                        rr.setRevenueId(rf.getId());
+                    if (rf != null && rf.getId() != null) rr.setRevenueId(rf.getId());
 
                     // gesione commisione
                     Long commId = null;
@@ -131,7 +126,7 @@ public class ManageCPC {
 
                     if (acccFirst != null) {
                         commId = acccFirst.getCommissionId();
-                        commVal = Double.valueOf(acccFirst.getCommissionValue().replace(",", "."));
+                        commVal = acccFirst.getCommissionValue();
                     } else {
                         log.info("ACCC VUOTO");
                         CommissionBusiness.Filter filt = new CommissionBusiness.Filter();

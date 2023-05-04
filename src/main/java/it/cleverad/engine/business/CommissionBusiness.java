@@ -241,7 +241,7 @@ public class CommissionBusiness {
     public static class BaseCreateRequest {
 
         private String name;
-        private String value;
+        private Double value;
         private String description;
         private Boolean status;
         private Boolean base;
@@ -268,7 +268,7 @@ public class CommissionBusiness {
         private LocalDate dueDate;
 
         private String name;
-        private String value;
+        private Double value;
         private String description;
         private Boolean status;
         private Boolean base;
