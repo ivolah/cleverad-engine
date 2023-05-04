@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "*",maxAge = 3600)
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping(value = "/cpm")
 public class CpmController {
@@ -31,6 +31,12 @@ public class CpmController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<CpmDTO> search(CpmBusiness.Filter request, Pageable pageable) {
         return business.search(request, pageable);
+    }
+
+    @GetMapping(path = "/refferal")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<CpmDTO> searchWithRefferal(CpmBusiness.Filter request, Pageable pageable) {
+        return business.searchWithRefferal(request, pageable);
     }
 
     @PatchMapping(path = "/{id}")

@@ -33,6 +33,12 @@ public class CpcController {
         return business.search(request, pageable);
     }
 
+    @GetMapping(path = "/refferal")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<CpcDTO> searchWithRefferal(CpcBusiness.Filter request, Pageable pageable) {
+        return business.searchWithRefferal(request, pageable);
+    }
+
     @PatchMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public CpcDTO update(@PathVariable Long id, @RequestBody CpcBusiness.Filter request) {

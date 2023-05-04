@@ -16,6 +16,12 @@ public class CpcDTO {
     private String agent;
     private LocalDateTime date;
     private Boolean read;
+    private Long campaignId;
+    private String campaignName;
+    private Long affiliateId;
+    private String affiliateName;
+    private Long channelId;
+    private String channelName;
 
     public CpcDTO(long id, String refferal, String ip, String agent, LocalDateTime date, Boolean read) {
         this.id = id;

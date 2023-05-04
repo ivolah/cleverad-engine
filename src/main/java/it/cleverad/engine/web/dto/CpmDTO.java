@@ -12,16 +12,19 @@ public class CpmDTO {
 
     private long id;
 
-
     private Long imageId;
     private Long mediaId;
-
     private String refferal;
     private String ip;
     private String agent;
-
     private LocalDateTime date;
     private Boolean read;
+    private Long campaignId;
+    private String campaignName;
+    private Long affiliateId;
+    private String affiliateName;
+    private Long channelId;
+    private String channelName;
 
     public CpmDTO(long id, Long imageId, Long mediaId, String refferal, String ip, String agent, LocalDateTime date, Boolean read) {
         this.id = id;
