@@ -3,6 +3,7 @@ package it.cleverad.engine.business;
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.Campaign;
+import it.cleverad.engine.persistence.model.service.CampaignAffiliate;
 import it.cleverad.engine.persistence.model.service.CampaignCategory;
 import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.service.JwtUserDetailsService;
@@ -261,12 +262,25 @@ public class CampaignBusiness {
         return page.map(CampaignDTO::from);
     }
 
+    public Page<CampaignDTO> getCampaignsActive(Long affiliateId) {
+        Affiliate cc = affiliateRepository.findById(affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", affiliateId));
+
+        List<Campaign> campaigns = new ArrayList<>();
+        if (cc.getCampaignAffiliates() != null) {
+            List<CampaignAffiliate> cf = cc.getCampaignAffiliates().stream().filter(ca -> ca.getCampaign().getStatus()).collect(Collectors.toList());
+            campaigns = cf.stream().map(campaignAffiliate -> campaignAffiliate.getCampaign()).collect(Collectors.toList());
+        }
+
+        Page<Campaign> page = new PageImpl<>(campaigns.stream().distinct().collect(Collectors.toList()));
+        return page.map(CampaignDTO::from);
+    }
+
     public Page<CampaignDTO> getCampaignsNot(Long affiliateId) {
 
         Pageable pageable = PageRequest.of(0, 200, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
+        request.setStatus(true);
         Page<Campaign> page = repository.findAll(getSpecification(request), pageable);
-
 
         Affiliate cc = affiliateRepository.findById(affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", affiliateId));
 

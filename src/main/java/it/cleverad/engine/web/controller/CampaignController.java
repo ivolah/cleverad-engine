@@ -60,7 +60,7 @@ public class CampaignController {
     }
     @GetMapping("/affiliate")
     public Page<CampaignDTO> getCampaigns() {
-        return business.getCampaigns(jwtUserDetailsService.getAffiliateID());
+        return business.getCampaignsActive(jwtUserDetailsService.getAffiliateID());
     }
     @GetMapping("/affiliate/not")
     public Page<CampaignDTO> getCampaignsNot() {

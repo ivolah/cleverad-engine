@@ -1,5 +1,6 @@
 package it.cleverad.engine.web.controller;
 
+import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.web.dto.MailDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,8 @@ public class MailController {
 
     @Autowired
     private MailService business;
-
+    @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
 
     /**
      * ============================================================================================================
@@ -37,6 +39,7 @@ public class MailController {
     public MailDTO inviaCanaleApprovato(@ModelAttribute MailService.BaseCreateRequest request) {
         return business.confermaCanale(request);
     }
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "/rifiuto/canale")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public MailDTO inviaCanaleRifiutato(@ModelAttribute MailService.BaseCreateRequest request) {
@@ -48,6 +51,7 @@ public class MailController {
     public MailDTO inviaAffiliatoApprovato(@ModelAttribute MailService.BaseCreateRequest request) {
         return business.confermaAffiliato(request);
     }
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "/rifiuto/affiliato")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public MailDTO inviaAffiliatoRifiutato(@ModelAttribute MailService.BaseCreateRequest request) {
@@ -60,10 +64,23 @@ public class MailController {
         return business.invitoCampagna(request);
     }
 
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "/campagna/affiliate")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public MailDTO inviaInvitoCampagnaAffiliate(@ModelAttribute MailService.BaseCreateRequest request) {
+        request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+        return business.invitoCampagna(request);
+    }
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "/template")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public MailDTO inviaTemplate(@ModelAttribute MailService.BaseCreateRequest request) {
         return business.invioTemplate(request);
+    }
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "/richiesta/invito")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void inviaRichiesta(@ModelAttribute MailService.BaseCreateRequest request) {
+        business.invioRichiesta(request);
     }
 
 

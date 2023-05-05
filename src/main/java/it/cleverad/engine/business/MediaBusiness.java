@@ -167,6 +167,7 @@ public class MediaBusiness {
 
     // SEARCH PAGINATED
     public Page<MediaDTO> search(Filter request, Pageable pageableRequest) {
+
         if (jwtUserDetailsService.getRole().equals("Admin")) {
             Page<Media> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id"))));
             return page.map(media -> MediaDTO.from(media));
@@ -175,7 +176,7 @@ public class MediaBusiness {
 
             List<Campaign> campaigns = new ArrayList<>();
             if (cc.getCampaignAffiliates() != null) {
-                campaigns = cc.getCampaignAffiliates().stream().map(campaignAffiliate -> {
+                campaigns = cc.getCampaignAffiliates().stream().filter(campaignAffiliate -> campaignAffiliate.getCampaign().getStatus()).map(campaignAffiliate -> {
                     Campaign ccc = campaignAffiliate.getCampaign();
                     return ccc;
                 }).collect(Collectors.toList());

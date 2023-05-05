@@ -1,7 +1,6 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.FileUserBusiness;
-import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.FileUserDTO;
 import it.cleverad.engine.web.exception.PostgresCleveradException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +69,13 @@ public class FileUserController {
     @GetMapping("/{id}/download")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<Resource> down(@PathVariable Long id) {
-        return business. download(id);
+        return business.download(id);
+    }
+
+    @GetMapping("/avatar")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public FileUserDTO getAvaTar() {
+        return business.getAvatar();
     }
 
     /**

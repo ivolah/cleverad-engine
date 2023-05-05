@@ -72,6 +72,8 @@ public class ReportBusiness {
     // SEARCH PAGINATED
     public Page<ReportDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+
+
         Page<Report> page = reportRepository.findAll(getSpecification(request), pageable);
         return page.map(ReportDTO::from);
     }

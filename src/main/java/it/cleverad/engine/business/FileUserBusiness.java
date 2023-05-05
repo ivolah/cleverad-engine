@@ -1,11 +1,11 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.service.FileAffiliate;
 import it.cleverad.engine.persistence.model.service.FileUser;
 import it.cleverad.engine.persistence.model.service.User;
 import it.cleverad.engine.persistence.repository.service.FileUserRepository;
 import it.cleverad.engine.persistence.repository.service.UserRepository;
+import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.FileUserDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -48,7 +48,8 @@ public class FileUserBusiness {
     private FileUserRepository repository;
     @Autowired
     private UserRepository userRepository;
-
+    @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
     @Autowired
     private Mapper mapper;
 
@@ -88,6 +89,7 @@ public class FileUserBusiness {
     // SEARCH PAGINATED
     public Page<FileUserDTO> search(FileUserBusiness.Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        request.setAvatar(false);
         Page<FileUser> page = repository.findAll(getSpecification(request), pageable);
         return page.map(FileUserDTO::from);
     }
@@ -109,6 +111,18 @@ public class FileUserBusiness {
                 .contentType(MediaType.parseMediaType(fil.getType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fil.getName() + "\"")
                 .body(new ByteArrayResource(fil.getData()));
+    }
+
+
+    public FileUserDTO getAvatar() {
+        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Filter request = new Filter();
+        request.setAvatar(true);
+        request.setUserId(jwtUserDetailsService.getUserID());
+        FileUser fu = repository.findAll(getSpecification(request), pageable).stream().findFirst().orElse(null);
+        if (fu != null)
+            return FileUserDTO.from(fu);
+        else return null;
     }
 
 

@@ -118,13 +118,12 @@ public class CpmBusiness {
                     cpm.setChannelName(channel.getName());
                     cpm.setChannelId(refferal.getChannelId());
                 }
-            }
-            {
+            } else {
                 cpm.setRefferal("");
             }
             exp.add(cpm);
         });
-        Page<CpmDTO> pages = new PageImpl<CpmDTO>(exp, pageable, exp.size());
+        Page<CpmDTO> pages = new PageImpl<CpmDTO>(exp, pageable, page.getTotalElements());
         return pages;
     }
 

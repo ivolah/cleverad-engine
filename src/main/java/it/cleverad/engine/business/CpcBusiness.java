@@ -123,7 +123,7 @@ public class CpcBusiness {
 
             exp.add(cpc);
         });
-        Page<CpcDTO> pages = new PageImpl<CpcDTO>(exp, pageable, exp.size());
+        Page<CpcDTO> pages = new PageImpl<CpcDTO>(exp, pageable, page.getTotalElements());
         return pages;
     }
 
@@ -151,7 +151,7 @@ public class CpcBusiness {
         Filter request = new Filter();
         request.setRead(false);
         request.setDateFrom(LocalDate.now().minusDays(1));
-        request.setDateTo(LocalDate.now());
+        request.setDateTo(LocalDate.now().minusDays(1));
         Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
         log.trace("UNREAD {}", page.getTotalElements());
         return page.map(CpcDTO::from);

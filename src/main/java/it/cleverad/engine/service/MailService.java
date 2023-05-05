@@ -39,12 +39,11 @@ public class MailService {
     ChannelBusiness channelBusiness;
     @Autowired
     PlannerBusiness plannerBusiness;
-
+    @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
     @Autowired
     private JavaMailSender emailSender;
 
-    @Autowired
-    private Configuration configuration;
 
     /**
      * ============================================================================================================
@@ -120,10 +119,8 @@ public class MailService {
         MimeMessage mimeMessage = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
         helper.setFrom("info@cleverad.it");
-        if (request.getEmail() != null)
-            helper.setTo(request.getEmail());
-        else
-            helper.setTo(affiliate.getPrimaryMail());
+        if (request.getEmail() != null) helper.setTo(request.getEmail());
+        else helper.setTo(affiliate.getPrimaryMail());
         helper.setSubject(mailTemplate.getSubject());
         String emailContent = stringWriter.toString();
         helper.setText(emailContent, true);
@@ -132,8 +129,8 @@ public class MailService {
         return null;
     }
 
-    public MailDTO invioTemplate(BaseCreateRequest request){
-       return this.invio(request);
+    public MailDTO invioTemplate(BaseCreateRequest request) {
+        return this.invio(request);
     }
 
     public MailDTO invitoCampagna(BaseCreateRequest request) {
@@ -172,6 +169,17 @@ public class MailService {
         request.setTemplateId(8L);
         this.invio(request);
         return null;
+    }
+
+    public void invioRichiesta(BaseCreateRequest request) {
+        AffiliateDTO affiliato = affiliateBusiness.findById(jwtUserDetailsService.getAffiliateID());
+        CampaignDTO campaign = campaignBusiness.findById(request.getCampaignId());
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("info@cleverad.it");
+        message.setTo(campaign.getPlannerMail());
+        message.setSubject("Richiesta partecipazione campagna " + campaign.getName());
+        message.setText("L'affiliato " + affiliato.getName() + " ha richiesto di partecipare alla campagmna " + campaign.getName() + ".");
+        emailSender.send(message);
     }
 
     /**

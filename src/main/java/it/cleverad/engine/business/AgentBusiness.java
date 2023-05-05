@@ -4,6 +4,7 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Agent;
 import it.cleverad.engine.persistence.model.service.WidgetAgent;
 import it.cleverad.engine.persistence.repository.service.AgentRepository;
+import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.AgentDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -32,7 +33,8 @@ public class AgentBusiness {
 
     @Autowired
     private AgentRepository repository;
-
+    @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
     @Autowired
     private Mapper mapper;
 
@@ -79,28 +81,37 @@ public class AgentBusiness {
     }
 
     public List<WidgetAgent> searchOS(Filter request) {
-        List<WidgetAgent> page = repository.geOs(request.getCampaignId(), request.getAffiliateId());
-        return page;
+        if (jwtUserDetailsService.isAdmin()) {
+            return repository.geOs(request.getCampaignId(), request.getAffiliateId());
+        } else {
+            return repository.geOs(request.getCampaignId(), String.valueOf(jwtUserDetailsService.getAffiliateID()));
+        }
     }
 
     public List<WidgetAgent> searchDevic(Filter request) {
-        List<WidgetAgent> page = repository.getDevice(request.getCampaignId(), request.getAffiliateId());
-        return page;
+        if (jwtUserDetailsService.isAdmin()) {
+            return repository.getDevice(request.getCampaignId(), request.getAffiliateId());
+        } else {
+            return repository.getDevice(request.getCampaignId(), String.valueOf(jwtUserDetailsService.getAffiliateID()));
+        }
     }
 
     //  SEARCH AGENT DATA
-
     public List<WidgetAgent> searchAgentDetailed(Filter request) {
-        List<WidgetAgent> page = repository.searchAgentDetailed(request.getCampaignId(), request.getAffiliateId());
-        return page;
+        if (jwtUserDetailsService.isAdmin()) {
+            return repository.searchAgentDetailed(request.getCampaignId(), request.getAffiliateId());
+        } else {
+            return repository.searchAgentDetailed(request.getCampaignId(), String.valueOf(jwtUserDetailsService.getAffiliateID()));
+        }
     }
 
     public List<WidgetAgent> searchAgent(Filter request) {
-        List<WidgetAgent> page = repository.getAgent(request.getCampaignId(), request.getAffiliateId());
-        return page;
+        if (jwtUserDetailsService.isAdmin()) {
+            return repository.getAgent(request.getCampaignId(), request.getAffiliateId());
+        } else {
+            return repository.getAgent(request.getCampaignId(), String.valueOf(jwtUserDetailsService.getAffiliateID()));
+        }
     }
-
-
 
     /**
      * ============================================================================================================
@@ -125,7 +136,6 @@ public class AgentBusiness {
             return completePredicate;
         };
     }
-
 
     /**
      * ============================================================================================================

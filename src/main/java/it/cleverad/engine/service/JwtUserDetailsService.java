@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -48,6 +49,13 @@ public class JwtUserDetailsService implements UserDetailsService {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         if (userBusiness.findByUsername(username).getAffiliateId() != null)
             return userBusiness.findByUsername(username).getAffiliateId();
+        else return 0L;
+    }
+
+    public Long getUserID() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (!Objects.isNull(userBusiness.findByUsername(username).getId()))
+            return userBusiness.findByUsername(username).getId();
         else return 0L;
     }
 

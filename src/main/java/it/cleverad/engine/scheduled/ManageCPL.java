@@ -2,10 +2,7 @@ package it.cleverad.engine.scheduled;
 
 import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
-import it.cleverad.engine.persistence.model.service.AffiliateChannelCommissionCampaign;
-import it.cleverad.engine.persistence.model.service.Commission;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
-import it.cleverad.engine.persistence.repository.service.AffiliateChannelCommissionCampaignRepository;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.service.RefferalService;
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
@@ -84,12 +81,11 @@ public class ManageCPL {
                 // associo a wallet
                 Long affiliateID = refferal.getAffiliateId();
                 log.info("AFFILIATE >>>> {}", affiliateID);
-                Long walletID;
+
+                Long walletID = null;
                 if (affiliateID != null) {
                     walletID = walletRepository.findByAffiliateId(affiliateID).getId();
                     rr.setWalletId(walletID);
-                } else {
-                    walletID = null;
                 }
 
                 // trovo revenue
@@ -127,7 +123,8 @@ public class ManageCPL {
                 rr.setLeadNumber(Long.valueOf(1));
 
                 // incemento valore
-                walletBusiness.incement(walletID, totale);
+                if (walletID != null)
+                    walletBusiness.incement(walletID, totale);
 
                 // decremento budget Affiliato
                 BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);

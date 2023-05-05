@@ -24,8 +24,10 @@ public interface WidgetTopCPMRepository extends JpaRepository<WidgetTopCPM, Long
                     "                round(CAST(SUM(vall.commssion) AS numeric), 2)                                  as commission, " +
                     "                round(CAST(SUM(vall.revenue) AS numeric), 2)                                    as revenue, " +
                     "                round(CAST((SUM(vall.revenue) - SUM(vall.commssion)) AS numeric), 2)            as margine, " +
-                    "                round(CAST((SUM(vall.revenue) - SUM(vall.commssion)) / SUM(vall.revenue) * 100 " +
-                    "                          AS numeric), 2)                                                       as marginePC, " +
+                    "                case" +
+                    "                    when SUM(vall.revenue) > 0 then" +
+                    "                        round(CAST((SUM(vall.revenue) - SUM(vall.commssion)) / SUM(vall.revenue) * 100 AS numeric), 2)" +
+                    "                    else 0 end                                                                  as marginePC," +
                     "                round(CAST(SUM(vall.ecpm) AS numeric), 2)                                       as ecpm, " +
                     "                round(CAST(SUM(vall.ecpc) AS numeric), 2)                                       as ecpc, " +
                     "                round(CAST(SUM(vall.ecpl) AS numeric), 2)                                       as ecpl " +
@@ -51,8 +53,10 @@ public interface WidgetTopCPMRepository extends JpaRepository<WidgetTopCPM, Long
                     "                round(CAST(SUM(vall.commssion) AS numeric), 2)                                  as commission, " +
                     "                round(CAST(SUM(vall.revenue) AS numeric), 2)                                    as revenue, " +
                     "                round(CAST((SUM(vall.revenue) - SUM(vall.commssion)) AS numeric), 2)            as margine, " +
-                    "                round(CAST((SUM(vall.revenue) - SUM(vall.commssion)) / SUM(vall.revenue) * 100 " +
-                    "                          AS numeric), 2)                                                       as marginePC, " +
+                    "                case" +
+                    "                    when SUM(vall.revenue) > 0 then" +
+                    "                        round(CAST((SUM(vall.revenue) - SUM(vall.commssion)) / SUM(vall.revenue) * 100 AS numeric), 2)" +
+                    "                    else 0 end                                                                  as marginePC," +
                     "                round(CAST(SUM(vall.ecpm) AS numeric), 2)                                       as ecpm, " +
                     "                round(CAST(SUM(vall.ecpc) AS numeric), 2)                                       as ecpc, " +
                     "                round(CAST(SUM(vall.ecpl) AS numeric), 2)                                       as ecpl " +
