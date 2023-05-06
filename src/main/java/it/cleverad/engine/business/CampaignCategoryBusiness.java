@@ -37,7 +37,6 @@ public class CampaignCategoryBusiness {
 
     @Autowired
     private CampaignCategoryRepository repository;
-
     @Autowired
     private Mapper mapper;
 

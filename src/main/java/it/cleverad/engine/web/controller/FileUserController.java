@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 @CrossOrigin
 @RestController
 @RequestMapping(value = "/fileuser")
@@ -70,6 +72,13 @@ public class FileUserController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<Resource> down(@PathVariable Long id) {
         return business.download(id);
+    }
+
+
+    @PostMapping("/avatar")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Long storeAvatar(@RequestParam("file") MultipartFile file, FileUserBusiness.BaseCreateRequest request) throws IOException {
+        return business.storeAvatar(file, request);
     }
 
     @GetMapping("/avatar")

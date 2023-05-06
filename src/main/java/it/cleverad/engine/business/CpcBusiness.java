@@ -10,6 +10,7 @@ import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.ChannelRepository;
 import it.cleverad.engine.persistence.repository.tracking.CpcRepository;
+import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.service.RefferalService;
 import it.cleverad.engine.web.dto.CpcDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -39,6 +40,8 @@ import java.util.List;
 @Transactional
 public class CpcBusiness {
 
+    @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
     @Autowired
     private CpcRepository repository;
     @Autowired
@@ -121,7 +124,12 @@ public class CpcBusiness {
                 cpc.setRefferal("");
             }
 
-            exp.add(cpc);
+            if (jwtUserDetailsService.isAdmin()) {
+                exp.add(cpc);
+            } else if (!cpc.getRefferal().equals("") && cpc.getAffiliateId().equals(jwtUserDetailsService.getAffiliateID())) {
+                exp.add(cpc);
+            }
+
         });
         Page<CpcDTO> pages = new PageImpl<CpcDTO>(exp, pageable, page.getTotalElements());
         return pages;
@@ -138,7 +146,7 @@ public class CpcBusiness {
     }
 
     public Page<CpcDTO> getUnread() {
-        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id")));
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal")));
         Filter request = new Filter();
         request.setRead(false);
         Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
@@ -147,13 +155,13 @@ public class CpcBusiness {
     }
 
     public Page<CpcDTO> getUnreadDayBefore() {
-        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id")));
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE , Sort.by(Sort.Order.desc("refferal")));
         Filter request = new Filter();
         request.setRead(false);
         request.setDateFrom(LocalDate.now().minusDays(1));
         request.setDateTo(LocalDate.now().minusDays(1));
         Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
-        log.trace("UNREAD {}", page.getTotalElements());
+        log.info("UNREAD :: {}", page.getTotalElements());
         return page.map(CpcDTO::from);
     }
 

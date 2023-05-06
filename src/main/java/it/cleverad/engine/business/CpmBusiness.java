@@ -10,6 +10,7 @@ import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.ChannelRepository;
 import it.cleverad.engine.persistence.repository.tracking.CpmRepository;
+import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.service.RefferalService;
 import it.cleverad.engine.web.dto.CpmDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -38,6 +39,8 @@ import java.util.List;
 @Transactional
 public class CpmBusiness {
 
+    @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
     @Autowired
     private CpmRepository repository;
     @Autowired
@@ -121,7 +124,12 @@ public class CpmBusiness {
             } else {
                 cpm.setRefferal("");
             }
-            exp.add(cpm);
+
+            if (jwtUserDetailsService.isAdmin()) {
+                exp.add(cpm);
+            } else if (!cpm.getRefferal().equals("") && cpm.getAffiliateId().equals(jwtUserDetailsService.getAffiliateID())) {
+                exp.add(cpm);
+            }
         });
         Page<CpmDTO> pages = new PageImpl<CpmDTO>(exp, pageable, page.getTotalElements());
         return pages;
@@ -156,13 +164,12 @@ public class CpmBusiness {
     }
 
     public Page<CpmDTO> getUnreadDayBefore() {
-        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setRead(false);
         request.setDateFrom(LocalDate.now().minusDays(1));
         request.setDateTo(LocalDate.now().minusDays(1));
-        Page<Cpm> page = repository.findAll(getSpecification(request), pageable);
-        log.info("UNREAD CPM {}", page.getTotalElements());
+        Page<Cpm> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal"))));
+        log.info("UNREAD CPM :: {}", page.getTotalElements());
         return page.map(CpmDTO::from);
     }
 

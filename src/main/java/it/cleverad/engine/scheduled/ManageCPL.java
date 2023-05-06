@@ -45,6 +45,7 @@ public class ManageCPL {
 
     @Async
     @Scheduled(cron = "0 0 1 * * ?")
+    //@Scheduled(cron = "*/15 * * * * ?")
     public void trasformaTrackingCPL() {
         try {
             // trovo uttti i tracking con read == false
@@ -102,7 +103,7 @@ public class ManageCPL {
                 req.setChannelId(refferal.getChannelId());
                 req.setCampaignId(refferal.getCampaignId());
                 req.setCommissionDicId(50L);
-                AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().get();
+                AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
 
                 if (acccFirst != null) {
                     commId = acccFirst.getCommissionId();
@@ -117,9 +118,13 @@ public class ManageCPL {
                     commVal = commission != null ? Double.valueOf(commission.getValue()) : 0;
                 }
 
+                if (commId != null) {
+                    rr.setCommissionId(commId);
+                    log.info("setto commissione :: " + commId);
+                }
+
                 Double totale = commVal * 1;
                 rr.setValue(totale);
-                rr.setCommissionId(commId);
                 rr.setLeadNumber(Long.valueOf(1));
 
                 // incemento valore

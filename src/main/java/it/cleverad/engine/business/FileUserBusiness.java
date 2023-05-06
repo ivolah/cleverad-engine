@@ -107,10 +107,24 @@ public class FileUserBusiness {
 
     public ResponseEntity<Resource> download(Long id) {
         FileUser fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("FileUser", id));
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(fil.getType()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fil.getName() + "\"")
-                .body(new ByteArrayResource(fil.getData()));
+        return ResponseEntity.ok().contentType(MediaType.parseMediaType(fil.getType())).header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fil.getName() + "\"").body(new ByteArrayResource(fil.getData()));
+    }
+
+
+    public Long storeAvatar(MultipartFile file, BaseCreateRequest request) throws IOException {
+        // cancello tutti gli avatar
+        Filter rr = new Filter();
+        rr.setAvatar(true);
+        rr.setUserId(jwtUserDetailsService.getUserID());
+        Page<FileUser> page = repository.findAll(getSpecification(rr), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id"))));
+        page.stream().forEach(fileUser -> repository.delete(fileUser));
+
+        // salvo avatar
+        request.setAvatar(true);
+        request.setUserId(jwtUserDetailsService.getUserID());
+        User user = userRepository.findById(jwtUserDetailsService.getUserID()).orElseThrow(() -> new ElementCleveradException("User", jwtUserDetailsService.getUserID()));
+        FileUser fileDB = new FileUser(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), file.getBytes(), user, request.note, request.avatar);
+        return repository.save(fileDB).getId();
     }
 
 
@@ -120,8 +134,7 @@ public class FileUserBusiness {
         request.setAvatar(true);
         request.setUserId(jwtUserDetailsService.getUserID());
         FileUser fu = repository.findAll(getSpecification(request), pageable).stream().findFirst().orElse(null);
-        if (fu != null)
-            return FileUserDTO.from(fu);
+        if (fu != null) return FileUserDTO.from(fu);
         else return null;
     }
 

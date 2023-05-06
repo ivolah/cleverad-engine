@@ -45,9 +45,9 @@ public class AgentBusiness {
     // CREATE
     public AgentDTO create(BaseCreateRequest request) {
         Agent map = mapper.map(request, Agent.class);
-
         return AgentDTO.from(repository.save(map));
     }
+
 
     // GET BY ID
     public AgentDTO findById(Long id) {

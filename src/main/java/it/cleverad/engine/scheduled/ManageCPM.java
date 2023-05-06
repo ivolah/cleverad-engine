@@ -49,7 +49,7 @@ public class ManageCPM {
 
     @Async
     @Scheduled(cron = "0 30 0 * * ?")
-//    @Scheduled(cron = "50 0/1 * * * ?")
+    //     @Scheduled(cron = "*/15 * * * * ?")
     public void trasformaTrackingCPM() {
         try {
             // trovo tutti i tracking con read == false
@@ -140,9 +140,12 @@ public class ManageCPM {
                         commVal = commission != null ? Double.valueOf(commission.getValue()) : 0;
                     }
 
-                    rr.setCommissionId(commId);
-                    Double totale = commVal * aLong;
+                    if (commId != null) {
+                        rr.setCommissionId(commId);
+                        log.info("setto commissione :: " + commId);
+                    }
 
+                    Double totale = commVal * aLong;
                     rr.setValue(totale);
                     rr.setImpressionNumber(Long.valueOf(aLong));
                     log.info("TOT " + totale + " - " + aLong);

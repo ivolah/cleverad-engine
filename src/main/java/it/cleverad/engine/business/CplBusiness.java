@@ -91,13 +91,13 @@ public class CplBusiness {
     }
 
     public Page<CplDTO> getUnreadDayBefore() {
-        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id")));
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setRead(false);
         request.setDateFrom(LocalDate.now().minusDays(1));
         request.setDateTo(LocalDate.now().minusDays(1));
         Page<Cpl> page = repository.findAll(getSpecification(request), pageable);
-        log.trace("UNREAD {}", page.getTotalElements());
+        log.info("UNREAD CPL :: {}", page.getTotalElements());
         return page.map(CplDTO::from);
     }
 
