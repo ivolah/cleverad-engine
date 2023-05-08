@@ -121,12 +121,12 @@ public class AffiliateBusiness {
 //        }
 
         Long statusID = filter.statusId;
-        if (statusID  == 6) {
+        if (statusID == 6) {
             // invio mail approvato
             mailRequest.setTemplateId(7L);
             mailRequest.setAffiliateId(id);
             mailService.invio(mailRequest);
-        } else  if (statusID  == 7) {
+        } else if (statusID == 7) {
             // invio mail non approvato
             mailRequest.setTemplateId(8L);
             mailRequest.setAffiliateId(id);
@@ -205,6 +205,18 @@ public class AffiliateBusiness {
         nuovoUser.setUsername(uuid);
         nuovoUser.setPassword("piciulin");
         UserDTO userDto = userBusiness.create(nuovoUser);
+
+        //cre utente shadow
+        UserBusiness.BaseCreateRequest uenteOmbra = new UserBusiness.BaseCreateRequest();
+        uenteOmbra.setAffiliateId(dto.getId());
+        uenteOmbra.setStatus(true);
+        uenteOmbra.setName("Cleverad "+ dto.getId());
+        uenteOmbra.setEmail(dto.getId() + "_ombra@cleverad.it");
+        uenteOmbra.setSurname("Ombra");
+        uenteOmbra.setRoleId(4L);
+        uenteOmbra.setUsername("cleverad" + dto.getId());
+        uenteOmbra.setPassword("2!3_ClEvEr_2!3");
+
 
         // invio mail USER
         mailRequest = new MailService.BaseCreateRequest();

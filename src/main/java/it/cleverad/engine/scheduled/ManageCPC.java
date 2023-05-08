@@ -48,8 +48,8 @@ public class ManageCPC {
     @Autowired
     private CommissionBusiness commissionBusiness;
 
-        @Scheduled(cron = "*/15 * * * * ?")
-    //@Scheduled(cron = "0 5 0 * * ?")
+    //    @Scheduled(cron = "*/15 * * * * ?")
+    @Scheduled(cron = "0 5 0 * * ?")
     @Async
     public void trasformaTrackingCPC() {
         //   log.info("trasformaTrackingCPC");

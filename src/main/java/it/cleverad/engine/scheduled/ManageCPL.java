@@ -44,7 +44,7 @@ public class ManageCPL {
     private CommissionBusiness commissionBusiness;
 
     @Async
-    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "0 30 2 * * ?")
     //@Scheduled(cron = "*/15 * * * * ?")
     public void trasformaTrackingCPL() {
         try {

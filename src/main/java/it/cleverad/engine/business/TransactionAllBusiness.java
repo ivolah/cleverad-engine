@@ -77,6 +77,7 @@ public class TransactionAllBusiness {
     public Page<TransactionAllDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("dateTime")));
         request.setPayoutId(null);
+        request.setValueNotZero(true);
         Page<ViewTransactionAll> page = repository.findAll(getSpecification(request), pageable);
         return page.map(TransactionAllDTO::from);
     }
@@ -86,9 +87,11 @@ public class TransactionAllBusiness {
         request.setPayoutId(null);
         if (jwtUserDetailsService.getRole().equals("Admin")) {
             Page<ViewTransactionAll> page = repository.findAll(getSpecification(request), pageable);
+            request.setValueNotZero(true);
             return page.map(TransactionAllDTO::from);
         } else {
             request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+            request.setValueNotZero(true);
             Page<ViewTransactionAll> page = repository.findAll(getSpecification(request), pageable);
             return page.map(TransactionAllDTO::from);
         }
@@ -196,6 +199,10 @@ public class TransactionAllBusiness {
                 predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), request.getDateTimeTo().plus(1, ChronoUnit.DAYS).atStartOfDay()));
             }
 
+            if (request.getValueNotZero() != null && request.getValueNotZero()) {
+                predicates.add(cb.notEqual(root.get("value"), "0"));
+            }
+
             predicates.add(cb.isNull(root.get("payoutId")));
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -271,6 +278,7 @@ public class TransactionAllBusiness {
         private String data;
         private String tipo;
         private Long dictionaryId;
+        private Boolean valueNotZero;
     }
 
 }

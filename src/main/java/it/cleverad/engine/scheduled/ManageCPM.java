@@ -49,7 +49,7 @@ public class ManageCPM {
 
     @Async
     @Scheduled(cron = "0 30 0 * * ?")
-    //     @Scheduled(cron = "*/15 * * * * ?")
+    //     @Scheduled(cron = "*/18 * * * * ?")
     public void trasformaTrackingCPM() {
         try {
             // trovo tutti i tracking con read == false

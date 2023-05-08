@@ -161,7 +161,7 @@ public class CpcBusiness {
         request.setDateFrom(LocalDate.now().minusDays(1));
         request.setDateTo(LocalDate.now().minusDays(1));
         Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
-        log.info("UNREAD :: {}", page.getTotalElements());
+        log.info("UNREAD CPC :: {}", page.getTotalElements());
         return page.map(CpcDTO::from);
     }
 
