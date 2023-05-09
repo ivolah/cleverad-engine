@@ -9,7 +9,7 @@ import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.MediaRepository;
 import it.cleverad.engine.persistence.repository.service.MediaTypeRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
-import it.cleverad.engine.service.RefferalService;
+import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.MediaDTO;
 import it.cleverad.engine.web.dto.MediaTypeDTO;
 import it.cleverad.engine.web.dto.TargetDTO;
@@ -63,7 +63,7 @@ public class MediaBusiness {
     private CampaignRepository campaignRepository;
 
     @Autowired
-    private RefferalService refferalService;
+    private ReferralService referralService;
     @Autowired
     private TargetBusiness targetBusiness;
 
@@ -262,7 +262,7 @@ public class MediaBusiness {
         }
 
         if (!jwtUserDetailsService.getRole().equals("Admin")) {
-            bannerCode = bannerCode.replace("{{refferalId}}", refferalService.creaEncoding(Long.toString(campaignId), Long.toString(mediaId), String.valueOf(jwtUserDetailsService.getAffiliateID()), Long.toString(channelID), Long.toString(targetId)));
+            bannerCode = bannerCode.replace("{{refferalId}}", referralService.creaEncoding(Long.toString(campaignId), Long.toString(mediaId), String.valueOf(jwtUserDetailsService.getAffiliateID()), Long.toString(channelID), Long.toString(targetId)));
         }
 
         return bannerCode;

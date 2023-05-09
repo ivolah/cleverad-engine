@@ -7,7 +7,7 @@ import it.cleverad.engine.persistence.model.service.CampaignAffiliate;
 import it.cleverad.engine.persistence.model.service.CampaignCategory;
 import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.service.JwtUserDetailsService;
-import it.cleverad.engine.service.RefferalService;
+import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.CampaignDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -59,7 +59,7 @@ public class CampaignBusiness {
     @Autowired
     private AffiliateRepository affiliateRepository;
     @Autowired
-    private RefferalService refferalService;
+    private ReferralService referralService;
     @Autowired
     private RevenueFactorBusiness revenueFactorBusiness;
     @Autowired
@@ -89,7 +89,7 @@ public class CampaignBusiness {
         if (StringUtils.isNotBlank(request.getCategories())) {
             Arrays.stream(request.getCategories().split(",")).map(s -> campaignCategoryBusiness.create(new CampaignCategoryBusiness.BaseCreateRequest(finalDto.getId(), Long.valueOf(s)))).collect(Collectors.toList());
         }
-        String encodedID = refferalService.encode(String.valueOf(dto.getId()));
+        String encodedID = referralService.encode(String.valueOf(dto.getId()));
 
         Campaign campaign = repository.findById(dto.getId()).orElseThrow(() -> new ElementCleveradException("Campaign", finalDto.getId()));
         campaign.setEncodedId(encodedID);
@@ -164,6 +164,13 @@ public class CampaignBusiness {
     public CampaignDTO findByIdAdmin(Long id) {
         Campaign campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
         return CampaignDTO.from(campaign);
+    }
+
+    public CampaignDTO findByIdAdminNull(Long id) {
+        Campaign campaign = repository.findById(id).orElse(null);
+        if (campaign == null)
+            return null;
+        else return CampaignDTO.from(campaign);
     }
 
     // DELETE BY ID
