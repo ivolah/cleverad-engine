@@ -81,12 +81,9 @@ public class CpsBusiness {
     public CpsDTO update(Long id, Filter filter) {
         Cps channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cps", id));
         CpsDTO campaignDTOfrom = CpsDTO.from(channel);
-
         mapper.map(filter, campaignDTOfrom);
-
         Cps mappedEntity = mapper.map(channel, Cps.class);
         mapper.map(campaignDTOfrom, mappedEntity);
-
         return CpsDTO.from(repository.save(mappedEntity));
     }
 
@@ -94,6 +91,16 @@ public class CpsBusiness {
         Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setRead(false);
+        request.setDateFrom(LocalDate.now().minusDays(1));
+        request.setDateTo(LocalDate.now().minusDays(1));
+        Page<Cps> page = repository.findAll(getSpecification(request), pageable);
+        log.trace("UNREAD {}", page.getTotalElements());
+        return page.map(CpsDTO::from);
+    }
+
+    public Page<CpsDTO> getAllDayBefore() {
+        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id")));
+        Filter request = new Filter();
         request.setDateFrom(LocalDate.now().minusDays(1));
         request.setDateTo(LocalDate.now().minusDays(1));
         Page<Cps> page = repository.findAll(getSpecification(request), pageable);

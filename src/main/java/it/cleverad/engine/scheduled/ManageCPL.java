@@ -4,7 +4,7 @@ import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
-import it.cleverad.engine.service.RefferalService;
+import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.dto.BudgetDTO;
 import it.cleverad.engine.web.dto.CampaignDTO;
@@ -39,7 +39,7 @@ public class ManageCPL {
     @Autowired
     private AffiliateChannelCommissionCampaignBusiness affiliateChannelCommissionCampaignBusiness;
     @Autowired
-    private RefferalService refferalService;
+    private ReferralService referralService;
     @Autowired
     private CommissionBusiness commissionBusiness;
 
@@ -52,7 +52,7 @@ public class ManageCPL {
             cplBusiness.getUnreadDayBefore().stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
 
                 // prendo reffereal e lo leggo
-                Refferal refferal = refferalService.decodificaRefferal(cplDTO.getRefferal());
+                Refferal refferal = referralService.decodificaReferral(cplDTO.getRefferal());
                 log.info("CREO TRANSACTION CPL :: {} - {}", cplDTO, refferal);
 
                 // setta transazione

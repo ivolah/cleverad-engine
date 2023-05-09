@@ -10,9 +10,9 @@ import java.util.Base64;
 
 @Service
 @Slf4j
-public class RefferalService {
+public class ReferralService {
 
-    public Refferal decodificaRefferal(String refferalString) {
+    public Refferal decodificaReferral(String refferalString) {
         if (StringUtils.isNotBlank(refferalString) && !refferalString.contains("{{refferalId}}")) {
             Refferal refferal = new Refferal();
             if (StringUtils.isNotBlank(refferalString)) {

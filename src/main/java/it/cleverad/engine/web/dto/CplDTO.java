@@ -16,9 +16,16 @@ public class CplDTO {
     private String ip;
     private String agent;
     private String data;
-
     private LocalDateTime date;
     private Boolean read;
+
+    private Long campaignId;
+    private String campaignName;
+    private Long affiliateId;
+    private String affiliateName;
+    private Long channelId;
+    private String channelName;
+
 
     public CplDTO(long id, String refferal, String ip, String agent, String data, LocalDateTime date, Boolean read) {
         this.id = id;

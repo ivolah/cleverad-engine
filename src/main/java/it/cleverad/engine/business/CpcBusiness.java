@@ -11,7 +11,7 @@ import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.ChannelRepository;
 import it.cleverad.engine.persistence.repository.tracking.CpcRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
-import it.cleverad.engine.service.RefferalService;
+import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.CpcDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -45,7 +45,7 @@ public class CpcBusiness {
     @Autowired
     private CpcRepository repository;
     @Autowired
-    private RefferalService refferalService;
+    private ReferralService referralService;
     @Autowired
     private CampaignRepository campaignRepository;
     @Autowired
@@ -92,42 +92,42 @@ public class CpcBusiness {
     }
 
     // SEARCH PAGINATED
-    public Page<CpcDTO> searchWithRefferal(Filter request, Pageable pageableRequest) {
+    public Page<CpcDTO> searchWithReferral(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
         Page<CpcDTO> res = page.map(CpcDTO::from);
         List<CpcDTO> exp = new ArrayList<>();
-        res.stream().forEach(cpc -> {
-            if (StringUtils.isNotBlank(cpc.getRefferal()) && !cpc.getRefferal().contains("{{refferalId}}")) {
-                Refferal refferal = refferalService.decodificaRefferal(cpc.getRefferal());
+        res.stream().forEach(cpcDTO -> {
+            if (StringUtils.isNotBlank(cpcDTO.getRefferal()) && !cpcDTO.getRefferal().contains("{{refferalId}}")) {
+                Refferal refferal = referralService.decodificaReferral(cpcDTO.getRefferal());
 
                 Campaign campaign = campaignRepository.findById(refferal.getCampaignId()).orElse(null);
                 if (refferal.getCampaignId() != null && campaign != null && campaign.getName() != null) {
-                    cpc.setCampaignName(campaign.getName());
-                    cpc.setCampaignId(refferal.getCampaignId());
+                    cpcDTO.setCampaignName(campaign.getName());
+                    cpcDTO.setCampaignId(refferal.getCampaignId());
                 }
 
-                if (cpc.getRefferal().length() > 3) {
+                if (cpcDTO.getRefferal().length() > 3) {
                     Affiliate affiliate = affiliateRepository.findById(refferal.getAffiliateId()).orElse(null);
                     if (refferal.getAffiliateId() != null && affiliate != null && affiliate.getName() != null) {
-                        cpc.setAffiliateName(affiliate.getName());
-                        cpc.setAffiliateId(refferal.getAffiliateId());
+                        cpcDTO.setAffiliateName(affiliate.getName());
+                        cpcDTO.setAffiliateId(refferal.getAffiliateId());
                     }
 
                     Channel channel = channelRepository.findById(refferal.getChannelId()).orElse(null);
                     if (refferal.getChannelId() != null && channel != null && channel.getName() != null) {
-                        cpc.setChannelName(channel.getName());
-                        cpc.setChannelId(refferal.getChannelId());
+                        cpcDTO.setChannelName(channel.getName());
+                        cpcDTO.setChannelId(refferal.getChannelId());
                     }
                 }
             } else {
-                cpc.setRefferal("");
+                cpcDTO.setRefferal("");
             }
 
             if (jwtUserDetailsService.isAdmin()) {
-                exp.add(cpc);
-            } else if (!cpc.getRefferal().equals("") && cpc.getAffiliateId().equals(jwtUserDetailsService.getAffiliateID())) {
-                exp.add(cpc);
+                exp.add(cpcDTO);
+            } else if (!cpcDTO.getRefferal().equals("") && cpcDTO.getAffiliateId().equals(jwtUserDetailsService.getAffiliateID())) {
+                exp.add(cpcDTO);
             }
 
         });
@@ -164,6 +164,17 @@ public class CpcBusiness {
         log.info("UNREAD CPC :: {}", page.getTotalElements());
         return page.map(CpcDTO::from);
     }
+
+    public Page<CpcDTO> getAllDayBefore() {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE , Sort.by(Sort.Order.desc("refferal")));
+        Filter request = new Filter();
+        request.setDateFrom(LocalDate.now().minusDays(1));
+        request.setDateTo(LocalDate.now().minusDays(1));
+        Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
+        log.info("UNREAD CPC :: {}", page.getTotalElements());
+        return page.map(CpcDTO::from);
+    }
+
 
     public void setRead(long id) {
         Cpc cpc = repository.findById(id).get();

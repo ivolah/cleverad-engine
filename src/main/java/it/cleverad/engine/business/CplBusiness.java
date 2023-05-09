@@ -1,8 +1,19 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
+import it.cleverad.engine.config.model.Refferal;
+import it.cleverad.engine.persistence.model.service.Affiliate;
+import it.cleverad.engine.persistence.model.service.Campaign;
+import it.cleverad.engine.persistence.model.service.Channel;
 import it.cleverad.engine.persistence.model.tracking.Cpl;
+import it.cleverad.engine.persistence.model.tracking.Cpl;
+import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
+import it.cleverad.engine.persistence.repository.service.CampaignRepository;
+import it.cleverad.engine.persistence.repository.service.ChannelRepository;
 import it.cleverad.engine.persistence.repository.tracking.CplRepository;
+import it.cleverad.engine.service.JwtUserDetailsService;
+import it.cleverad.engine.service.ReferralService;
+import it.cleverad.engine.web.dto.CplDTO;
 import it.cleverad.engine.web.dto.CplDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -10,22 +21,18 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +44,16 @@ public class CplBusiness {
 
     @Autowired
     private CplRepository repository;
-
+    @Autowired
+    private ReferralService referralService;
+    @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
+    @Autowired
+    private CampaignRepository campaignRepository;
+    @Autowired
+    private AffiliateRepository affiliateRepository;
+    @Autowired
+    private ChannelRepository channelRepository;
     @Autowired
     private Mapper mapper;
 
@@ -77,6 +93,51 @@ public class CplBusiness {
         return page.map(CplDTO::from);
     }
 
+
+    public Page<CplDTO> searchWithReferral(CplBusiness.Filter request, Pageable pageableRequest) {
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+        Page<Cpl> page = repository.findAll(getSpecification(request), pageable);
+        Page<CplDTO> res = page.map(CplDTO::from);
+        List<CplDTO> exp = new ArrayList<>();
+        res.stream().forEach(cplDTO -> {
+            if (StringUtils.isNotBlank(cplDTO.getRefferal()) && !cplDTO.getRefferal().contains("{{refferalId}}")) {
+                Refferal refferal = referralService.decodificaReferral(cplDTO.getRefferal());
+
+                Campaign campaign = campaignRepository.findById(refferal.getCampaignId()).orElse(null);
+                if (refferal.getCampaignId() != null && campaign != null && campaign.getName() != null) {
+                    cplDTO.setCampaignName(campaign.getName());
+                    cplDTO.setCampaignId(refferal.getCampaignId());
+                }
+
+                if (cplDTO.getRefferal().length() > 3) {
+                    Affiliate affiliate = affiliateRepository.findById(refferal.getAffiliateId()).orElse(null);
+                    if (refferal.getAffiliateId() != null && affiliate != null && affiliate.getName() != null) {
+                        cplDTO.setAffiliateName(affiliate.getName());
+                        cplDTO.setAffiliateId(refferal.getAffiliateId());
+                    }
+
+                    Channel channel = channelRepository.findById(refferal.getChannelId()).orElse(null);
+                    if (refferal.getChannelId() != null && channel != null && channel.getName() != null) {
+                        cplDTO.setChannelName(channel.getName());
+                        cplDTO.setChannelId(refferal.getChannelId());
+                    }
+                }
+            } else {
+                cplDTO.setRefferal("");
+            }
+
+            if (jwtUserDetailsService.isAdmin()) {
+                exp.add(cplDTO);
+            } else if (!cplDTO.getRefferal().equals("") && cplDTO.getAffiliateId().equals(jwtUserDetailsService.getAffiliateID())) {
+                exp.add(cplDTO);
+            }
+
+        });
+        Page<CplDTO> pages = new PageImpl<CplDTO>(exp, pageable, page.getTotalElements());
+        return pages;
+    }
+
+
     // UPDATE
     public CplDTO update(Long id, Filter filter) {
         Cpl channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cpl", id));
@@ -94,6 +155,16 @@ public class CplBusiness {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setRead(false);
+        request.setDateFrom(LocalDate.now().minusDays(1));
+        request.setDateTo(LocalDate.now().minusDays(1));
+        Page<Cpl> page = repository.findAll(getSpecification(request), pageable);
+        log.info("UNREAD CPL :: {}", page.getTotalElements());
+        return page.map(CplDTO::from);
+    }
+
+    public Page<CplDTO> getAllDayBefore() {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
+        Filter request = new Filter();
         request.setDateFrom(LocalDate.now().minusDays(1));
         request.setDateTo(LocalDate.now().minusDays(1));
         Page<Cpl> page = repository.findAll(getSpecification(request), pageable);

@@ -11,7 +11,7 @@ import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.ChannelRepository;
 import it.cleverad.engine.persistence.repository.tracking.CpmRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
-import it.cleverad.engine.service.RefferalService;
+import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.CpmDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -52,7 +52,7 @@ public class CpmBusiness {
     @Autowired
     private ChannelRepository channelRepository;
     @Autowired
-    private RefferalService refferalService;
+    private ReferralService referralService;
 
     /**
      * ============================================================================================================
@@ -64,7 +64,7 @@ public class CpmBusiness {
         map.setRead(false);
         map.setDate(LocalDateTime.now());
         if (request.getRefferal() != null) {
-            Refferal refferal = refferalService.decodificaRefferal(request.getRefferal());
+            Refferal refferal = referralService.decodificaReferral(request.getRefferal());
             map.setImageId(refferal.getCampaignId());
             map.setMediaId(refferal.getMediaId());
         }
@@ -95,14 +95,14 @@ public class CpmBusiness {
         return page.map(CpmDTO::from);
     }
 
-    public Page<CpmDTO> searchWithRefferal(Filter request, Pageable pageableRequest) {
+    public Page<CpmDTO> searchWithReferral(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Page<Cpm> page = repository.findAll(getSpecification(request), pageable);
         Page<CpmDTO> res = page.map(CpmDTO::from);
         List<CpmDTO> exp = new ArrayList<>();
         res.stream().forEach(cpm -> {
             if (!cpm.getRefferal().contains("{{refferalId}}")) {
-                Refferal refferal = refferalService.decodificaRefferal(cpm.getRefferal());
+                Refferal refferal = referralService.decodificaReferral(cpm.getRefferal());
 
                 Affiliate affiliate = affiliateRepository.findById(refferal.getAffiliateId()).orElse(null);
                 if (refferal.getAffiliateId() != null && affiliate != null && affiliate.getName() != null) {
@@ -172,6 +172,16 @@ public class CpmBusiness {
         log.info("UNREAD CPM :: {}", page.getTotalElements());
         return page.map(CpmDTO::from);
     }
+
+    public Page<CpmDTO> getAllDayBefore() {
+        Filter request = new Filter();
+        request.setDateFrom(LocalDate.now().minusDays(1));
+        request.setDateTo(LocalDate.now().minusDays(1));
+        Page<Cpm> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal"))));
+        log.info("UNREAD CPM :: {}", page.getTotalElements());
+        return page.map(CpmDTO::from);
+    }
+
 
     /**
      * ============================================================================================================

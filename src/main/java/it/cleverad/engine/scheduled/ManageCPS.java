@@ -2,12 +2,9 @@ package it.cleverad.engine.scheduled;
 
 import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
-import it.cleverad.engine.persistence.model.service.AffiliateChannelCommissionCampaign;
-import it.cleverad.engine.persistence.model.service.Commission;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
-import it.cleverad.engine.persistence.repository.service.AffiliateChannelCommissionCampaignRepository;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
-import it.cleverad.engine.service.RefferalService;
+import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.dto.BudgetDTO;
 import it.cleverad.engine.web.dto.CampaignDTO;
@@ -41,7 +38,7 @@ public class ManageCPS {
     @Autowired
     private AffiliateChannelCommissionCampaignBusiness affiliateChannelCommissionCampaignBusiness;
     @Autowired
-    private RefferalService refferalService;
+    private ReferralService referralService;
     @Autowired
     private CommissionBusiness commissionBusiness;
 
@@ -52,7 +49,7 @@ public class ManageCPS {
             cpsBusiness.getUnread().stream().filter(cpsDTO -> StringUtils.isNotBlank(cpsDTO.getRefferal())).forEach(cpsDTO -> {
 
                 // prendo reffereal e lo leggo
-                Refferal refferal = refferalService.decodificaRefferal(cpsDTO.getRefferal());
+                Refferal refferal = referralService.decodificaReferral(cpsDTO.getRefferal());
                 log.info("CPS :: {} - {}", cpsDTO, refferal);
 
                 // setta transazione

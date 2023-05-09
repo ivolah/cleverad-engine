@@ -4,7 +4,7 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.tracking.Tracking;
 import it.cleverad.engine.persistence.repository.tracking.TrackingRepository;
-import it.cleverad.engine.service.RefferalService;
+import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.MediaDTO;
 import it.cleverad.engine.web.dto.TargetDTO;
 import it.cleverad.engine.web.dto.TrackingDTO;
@@ -50,7 +50,7 @@ public class TrackingBusiness {
     private CampaignAffiliateBusiness campaignAffiliateBusiness;
 
     @Autowired
-    private RefferalService refferalService;
+    private ReferralService referralService;
 
     /**
      * ============================================================================================================
@@ -59,7 +59,7 @@ public class TrackingBusiness {
     // GET BY ID
     public TargetDTO getTarget(BaseCreateRequest request) {
         TargetDTO targetDTO = new TargetDTO();
-        Refferal refferal = refferalService.decodificaRefferal(request.getRefferalId());
+        Refferal refferal = referralService.decodificaReferral(request.getRefferalId());
         log.trace("REFFERAL :: {} - {}", request.getRefferalId(), refferal.toString());
 
         if (refferal.getMediaId() != null) {
