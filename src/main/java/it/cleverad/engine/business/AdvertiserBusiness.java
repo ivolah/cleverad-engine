@@ -78,7 +78,6 @@ public class AdvertiserBusiness {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         request.setStatus(true);
         Page<Advertiser> page = repository.findAll(getSpecification(request), pageable);
-
         return page.map(AdvertiserDTO::from);
     }
 
@@ -92,13 +91,10 @@ public class AdvertiserBusiness {
     public AdvertiserDTO update(Long id, Filter filter) {
         Advertiser Advertiser = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Advertiser", id));
         AdvertiserDTO AdvertiserDTOfrom = AdvertiserDTO.from(Advertiser);
-
         mapper.map(filter, AdvertiserDTOfrom);
-
         Advertiser mappedEntity = mapper.map(Advertiser, Advertiser.class);
         mappedEntity.setLastModificationDate(LocalDateTime.now());
         mapper.map(AdvertiserDTOfrom, mappedEntity);
-
         return AdvertiserDTO.from(repository.save(mappedEntity));
     }
 

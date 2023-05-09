@@ -216,7 +216,7 @@ public class AffiliateBusiness {
         uenteOmbra.setRoleId(4L);
         uenteOmbra.setUsername("cleverad" + dto.getId());
         uenteOmbra.setPassword("2!3_ClEvEr_2!3");
-
+        userBusiness.create(uenteOmbra);
 
         // invio mail USER
         mailRequest = new MailService.BaseCreateRequest();

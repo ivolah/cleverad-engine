@@ -87,9 +87,10 @@ public class ViewBusiness {
         Set<String> camps = tutto.stream().map(WidgetCampaignDayCpc::getCampaign).collect(Collectors.toSet());
 
         Set<Long> doysDaVerificare = new HashSet<>();
-        for (Long i = doys.stream().min(Long::compareTo).get(); i <= doys.stream().max(Long::compareTo).get(); i++) {
-            doysDaVerificare.add(i);
-        }
+        if (!doys.isEmpty() && doys.size() > 0)
+            for (Long i = doys.stream().min(Long::compareTo).get(); i <= doys.stream().max(Long::compareTo).get(); i++) {
+                doysDaVerificare.add(i);
+            }
 
         JSONObject mainObj = new JSONObject();
         JSONArray arr = new JSONArray();
@@ -192,9 +193,10 @@ public class ViewBusiness {
         Set<Long> camps = tutto.stream().map(WidgetCampaignDayCpm::getCampaignId).collect(Collectors.toSet());
 
         Set<Long> doysDaVerificare = new HashSet<>();
-        for (Long i = doys.stream().min(Long::compareTo).get(); i <= doys.stream().max(Long::compareTo).get(); i++) {
-            doysDaVerificare.add(i);
-        }
+        if (!doys.isEmpty() && doys.size() > 0)
+            for (Long i = doys.stream().min(Long::compareTo).get(); i <= doys.stream().max(Long::compareTo).get(); i++) {
+                doysDaVerificare.add(i);
+            }
 
         JSONObject mainObj = new JSONObject();
         JSONArray tutti = new JSONArray();
@@ -297,9 +299,10 @@ public class ViewBusiness {
         Set<String> camps = tutto.stream().map(WidgetCampaignDayCpl::getCampaign).collect(Collectors.toSet());
 
         Set<Long> doysDaVerificare = new HashSet<>();
-        for (Long i = doys.stream().min(Long::compareTo).get(); i <= doys.stream().max(Long::compareTo).get(); i++) {
-            doysDaVerificare.add(i);
-        }
+        if (!doys.isEmpty() && doys.size() > 0)
+            for (Long i = doys.stream().min(Long::compareTo).get(); i <= doys.stream().max(Long::compareTo).get(); i++) {
+                doysDaVerificare.add(i);
+            }
 
         JSONObject mainObj = new JSONObject();
         JSONArray arr = new JSONArray();
