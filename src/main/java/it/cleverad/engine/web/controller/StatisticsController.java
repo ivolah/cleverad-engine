@@ -33,9 +33,15 @@ public class StatisticsController {
         return business.getTopCampaignsDayCpc(giorni);
     }
 
+    @GetMapping(path = "/cpc/campaign/day/total")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public String getStatTotaleDayCpc(ViewBusiness.Filter request, Pageable pageable) {
+        return business.getStatTotaleDayCpc(request, pageable);
+    }
+
     @GetMapping(path = "/cpc/campaign/day")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<WidgetCampaignDayCpc> getStatCpcDay(ViewBusiness.Filter request, Pageable pageable) {
+    public Page<WidgetCampaignDayCpc> getStatCpcCampaignDay(ViewBusiness.Filter request, Pageable pageable) {
         return business.getStatCampaignDayCpc(request, pageable);
     }
     @GetMapping(path = "/cpc/campaign/{id}/day")
@@ -61,6 +67,13 @@ public class StatisticsController {
     public Page<WidgetCampaignDayCpm> getStatTopCpm() {
         return business.getTopCampaignsDayCpm();
     }
+
+    @GetMapping(path = "/cpm/campaign/day/total")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public String getStatTotaleDayCpm(ViewBusiness.Filter request, Pageable pageable) {
+        return business.getStatTotaleDayCpm(request, pageable);
+    }
+
     @GetMapping(path = "/cpm/campaign/day")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<WidgetCampaignDayCpm> getStatDayCpm(ViewBusiness.Filter request, Pageable pageable) {
@@ -89,6 +102,13 @@ public class StatisticsController {
     public Page<WidgetCampaignDayCpl> getStatTopCpl() {
         return business.getTopCampaignsDayCpl();
     }
+
+    @GetMapping(path = "/cpl/campaign/day/total")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public String getStatTotaleDayCpl(ViewBusiness.Filter request, Pageable pageable) {
+        return business.getStatTotaleDayCpl(request, pageable);
+    }
+
     @GetMapping(path = "/cpl/campaign/day")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<WidgetCampaignDayCpl> getStatCplDay(ViewBusiness.Filter request, Pageable pageable) {

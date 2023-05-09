@@ -58,6 +58,49 @@ public class ViewBusiness {
      * =================================================================<==========================================
      **/
 
+    public String getStatTotaleDayCpc(Filter request, Pageable pageableRequest) {
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+        request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 6);
+        if (!jwtUserDetailsService.isAdmin())
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+        List<WidgetCampaignDayCpc> tutto = widgetCampaignDayCpcRepository.findAll(getSpecificationCampaignDayCpc(request), pageable).stream().collect(Collectors.toList());
+
+        Set<Long> doys = tutto.stream().map(WidgetCampaignDayCpc::getDoy).collect(Collectors.toSet());
+        Set<Long> doysDaVerificare = new HashSet<>();
+        if (!doys.isEmpty() && doys.size() > 0)
+            for (Long i = doys.stream().min(Long::compareTo).get(); i <= doys.stream().max(Long::compareTo).get(); i++)
+                doysDaVerificare.add(i);
+
+        JSONObject mainObj = new JSONObject();
+
+        Double totale = 0D;
+        for (WidgetCampaignDayCpc cpc : tutto)
+            totale = totale + cpc.getTotale();
+        mainObj.put("totale", totale);
+
+        JSONArray harej = new JSONArray();
+        doysDaVerificare.stream().sorted().forEach(gg -> {
+            Double dd = 0D;
+
+            Filter filter = new Filter();
+            filter.setDoy(gg);
+            if (!jwtUserDetailsService.isAdmin())
+                request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+
+            List<WidgetCampaignDayCpc> giornato = widgetCampaignDayCpcRepository.findAll(getSpecificationCampaignDayCpc(filter), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
+            for (WidgetCampaignDayCpc w : giornato)
+                dd = dd + w.getTotale();
+
+            log.trace("campagna :: {}  ({})",  gg, dd);
+            harej.put(dd);
+        });
+
+        mainObj.put("data", harej);
+
+        return mainObj.toString();
+    }
+
+
     /// CPC CAMPAIGN DAY
     public Page<WidgetCampaignDayCpc> getStatCampaignDayCpc(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("doy")));
@@ -76,7 +119,6 @@ public class ViewBusiness {
     }
 
     public String getWidgetCampaignsDayCpc() {
-
         Filter request = new Filter();
         request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 11);
         if (!jwtUserDetailsService.isAdmin())
@@ -153,15 +195,55 @@ public class ViewBusiness {
         };
     }
 
-
     /**
      * ===========================================================================================================
      * >>> CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM <<<
      * ===========================================================================================================
      **/
 
-    public Page<WidgetCampaignDayCpm> getStatCampaignDayCpm(Filter request, Pageable pageableRequest) {
+    public String getStatTotaleDayCpm(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+        request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 6);
+        if (!jwtUserDetailsService.isAdmin())
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+        List<WidgetCampaignDayCpm> tutto = widgetCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(request), pageable).stream().collect(Collectors.toList());
+
+        Set<Long> doys = tutto.stream().map(WidgetCampaignDayCpm::getDoy).collect(Collectors.toSet());
+        Set<Long> doysDaVerificare = new HashSet<>();
+        if (!doys.isEmpty() && doys.size() > 0)
+            for (Long i = doys.stream().min(Long::compareTo).get(); i <= doys.stream().max(Long::compareTo).get(); i++)
+                doysDaVerificare.add(i);
+
+        JSONObject mainObj = new JSONObject();
+
+        Double totale = 0D;
+        for (WidgetCampaignDayCpm cpm : tutto)
+            totale = totale + cpm.getTotale();
+        mainObj.put("totale", totale);
+
+        JSONArray harej = new JSONArray();
+        doysDaVerificare.stream().sorted().forEach(gg -> {
+            Double dd = 0D;
+
+            Filter filter = new Filter();
+            filter.setDoy(gg);
+            if (!jwtUserDetailsService.isAdmin())
+                request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+
+            List<WidgetCampaignDayCpm> giornato = widgetCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(filter), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
+            for (WidgetCampaignDayCpm w : giornato)
+                dd = dd + w.getTotale();
+
+            harej.put(dd);
+        });
+        mainObj.put("data", harej);
+
+        return mainObj.toString();
+    }
+
+
+    public Page<WidgetCampaignDayCpm> getStatCampaignDayCpm(Filter request, Pageable pageableRequest) {
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("doy")));
         if (!jwtUserDetailsService.isAdmin())
             request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         return widgetCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(request), pageable);
@@ -266,6 +348,46 @@ public class ViewBusiness {
      * >>> CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL <<<
      * ===========================================================================================================
      **/
+
+    public String getStatTotaleDayCpl(Filter request, Pageable pageableRequest) {
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+        request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 6);
+        if (!jwtUserDetailsService.isAdmin())
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+        List<WidgetCampaignDayCpl> tutto = widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(request), pageable).stream().collect(Collectors.toList());
+
+        Set<Long> doys = tutto.stream().map(WidgetCampaignDayCpl::getDoy).collect(Collectors.toSet());
+        Set<Long> doysDaVerificare = new HashSet<>();
+        if (!doys.isEmpty() && doys.size() > 0)
+            for (Long i = doys.stream().min(Long::compareTo).get(); i <= doys.stream().max(Long::compareTo).get(); i++)
+                doysDaVerificare.add(i);
+
+        JSONObject mainObj = new JSONObject();
+
+        Double totale = 0D;
+        for (WidgetCampaignDayCpl cpm : tutto)
+            totale = totale + cpm.getValore();
+        mainObj.put("totale", totale);
+
+        JSONArray harej = new JSONArray();
+        doysDaVerificare.stream().sorted().forEach(gg -> {
+            Double dd = 0D;
+
+            Filter filter = new Filter();
+            filter.setDoy(gg);
+            if (!jwtUserDetailsService.isAdmin())
+                request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+
+            List<WidgetCampaignDayCpl> giornato = widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(filter), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
+            for (WidgetCampaignDayCpl w : giornato)
+                dd = dd + w.getValore();
+
+            harej.put(dd);
+        });
+        mainObj.put("data", harej);
+
+        return mainObj.toString();
+    }
 
     public Page<WidgetCampaignDayCpl> getStatCampaignDayCpl(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
