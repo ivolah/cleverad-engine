@@ -134,8 +134,12 @@ public class FileUserBusiness {
         request.setAvatar(true);
         request.setUserId(jwtUserDetailsService.getUserID());
         FileUser fu = repository.findAll(getSpecification(request), pageable).stream().findFirst().orElse(null);
-        if (fu != null) return FileUserDTO.from(fu);
-        else return null;
+
+        if (fu != null) {
+            FileUserDTO f = FileUserDTO.from(fu);
+            f.setData(fu.getData());
+            return f;
+        } else return null;
     }
 
 

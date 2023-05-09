@@ -4,7 +4,7 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.File;
 import it.cleverad.engine.persistence.model.service.Media;
 import it.cleverad.engine.persistence.repository.service.FileRepository;
-import it.cleverad.engine.service.RefferalService;
+import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.FileDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -52,7 +51,7 @@ public class FileBusiness {
     private Mapper mapper;
 
     @Autowired
-    private RefferalService refferalService;
+    private ReferralService referralService;
 
     @Autowired
     private MediaBusiness mediaBusiness;
@@ -116,7 +115,7 @@ public class FileBusiness {
                 Long mediaId = mm.getId();
                 // trovo campaignID
                 Long campaignId = mediaBusiness.findById(mediaId).getCampaignId();
-                String stringa = refferalService.encode(String.valueOf(campaignId)) + "-" + refferalService.encode(String.valueOf(mediaId));
+                String stringa = referralService.encode(String.valueOf(campaignId)) + "-" + referralService.encode(String.valueOf(mediaId));
                 FileDTO dto = FileDTO.from(ele);
                 dto.setNomeCodificato(stringa);
                 return dto;
