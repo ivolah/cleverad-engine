@@ -5,10 +5,7 @@ import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.service.ReferralService;
-import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
-import it.cleverad.engine.web.dto.BudgetDTO;
-import it.cleverad.engine.web.dto.CampaignDTO;
-import it.cleverad.engine.web.dto.CommissionDTO;
+import it.cleverad.engine.web.dto.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +14,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -42,6 +41,8 @@ public class ManageCPL {
     private ReferralService referralService;
     @Autowired
     private CommissionBusiness commissionBusiness;
+    @Autowired
+    private CpcBusiness cpcBusiness;
 
     @Async
     @Scheduled(cron = "0 30 2 * * ?")
@@ -50,6 +51,18 @@ public class ManageCPL {
         try {
             // trovo uttti i tracking con read == false
             cplBusiness.getUnreadDayBefore().stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
+
+                if (cplDTO.getRefferal().length() < 5) {
+                    log.warn("Referral on solo Campaign Id :: {}", cplDTO.getRefferal());
+                    // cerco da cpc
+                    List<CpcDTO> ips = cpcBusiness.findByIp24HoursBefore(cplDTO.getIp(), cplDTO.getDate()).stream().collect(Collectors.toList());
+
+                    // prendo ultimo   isp
+                    for (CpcDTO dto : ips)
+                        if (StringUtils.isNotBlank(dto.getRefferal())) dto.setRefferal(dto.getRefferal());
+
+                    log.warn("Nuovo refferal :: {} ", cplDTO.getRefferal());
+                }
 
                 // prendo reffereal e lo leggo
                 Refferal refferal = referralService.decodificaReferral(cplDTO.getRefferal());
@@ -128,8 +141,7 @@ public class ManageCPL {
                 rr.setLeadNumber(Long.valueOf(1));
 
                 // incemento valore
-                if (walletID != null)
-                    walletBusiness.incement(walletID, totale);
+                if (walletID != null) walletBusiness.incement(walletID, totale);
 
                 // decremento budget Affiliato
                 BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);

@@ -7,6 +7,7 @@ import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.Channel;
 import it.cleverad.engine.persistence.model.tracking.Cpl;
 import it.cleverad.engine.persistence.model.tracking.Cpl;
+import it.cleverad.engine.persistence.model.tracking.Cpm;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.ChannelRepository;
@@ -15,6 +16,7 @@ import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.CplDTO;
 import it.cleverad.engine.web.dto.CplDTO;
+import it.cleverad.engine.web.dto.CpmDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -151,6 +153,13 @@ public class CplBusiness {
         return CplDTO.from(repository.save(mappedEntity));
     }
 
+    public void setRead(long id) {
+        Cpl media = repository.findById(id).get();
+        media.setRead(true);
+        repository.save(media);
+    }
+
+
     public Page<CplDTO> getUnreadDayBefore() {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
@@ -172,10 +181,15 @@ public class CplBusiness {
         return page.map(CplDTO::from);
     }
 
-    public void setRead(long id) {
-        Cpl media = repository.findById(id).get();
-        media.setRead(true);
-        repository.save(media);
+    public Page<CplDTO> findByIp24HoursBefore(String ip, LocalDateTime dateTime) {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE , Sort.by(Sort.Order.desc("refferal")));
+        Filter request = new Filter();
+        request.setIp(ip);
+        request.setDatetimeFrom(dateTime.minusDays(1));
+        request.setDatetimeTo(dateTime);
+        Page<Cpl> page = repository.findAll(getSpecification(request), pageable);
+        log.info("FIND IP CPL :: {}", page.getTotalElements());
+        return page.map(CplDTO::from);
     }
 
     /**
@@ -203,6 +217,13 @@ public class CplBusiness {
             }
             if (request.getDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("date"), request.getDateTo().plus(1, ChronoUnit.DAYS).atStartOfDay()));
+            }
+
+            if (request.getDatetimeFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("date"), request.getDatetimeFrom()));
+            }
+            if (request.getDatetimeTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("date"), request.getDatetimeTo()));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -239,6 +260,8 @@ public class CplBusiness {
         private LocalDate dateFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dateTo;
+        private LocalDateTime datetimeFrom;
+        private LocalDateTime datetimeTo;
     }
 
 }

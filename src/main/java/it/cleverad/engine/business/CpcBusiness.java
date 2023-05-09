@@ -165,6 +165,17 @@ public class CpcBusiness {
         return page.map(CpcDTO::from);
     }
 
+    public Page<CpcDTO> findByIp24HoursBefore(String ip, LocalDateTime dateTime) {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE , Sort.by(Sort.Order.desc("refferal")));
+        Filter request = new Filter();
+        request.setIp(ip);
+        request.setDatetimeFrom(dateTime.minusDays(1));
+        request.setDatetimeTo(dateTime);
+        Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
+        log.info("FIND IP CPC :: {}", page.getTotalElements());
+        return page.map(CpcDTO::from);
+    }
+
     public Page<CpcDTO> getAllDayBefore() {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE , Sort.by(Sort.Order.desc("refferal")));
         Filter request = new Filter();
@@ -209,6 +220,14 @@ public class CpcBusiness {
                 predicates.add(cb.lessThanOrEqualTo(root.get("date"), request.getDateTo().plus(1, ChronoUnit.DAYS).atStartOfDay()));
             }
 
+            if (request.getDatetimeFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("date"), request.getDatetimeFrom()));
+            }
+            if (request.getDatetimeTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("date"), request.getDatetimeTo()));
+            }
+
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
@@ -240,6 +259,8 @@ public class CpcBusiness {
         private LocalDate dateFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dateTo;
+        private LocalDateTime datetimeFrom;
+        private LocalDateTime datetimeTo;
     }
 
 }

@@ -7,7 +7,7 @@ import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.*;
 import lombok.extern.slf4j.Slf4j;
-import nl.basjes.parse.useragent.UserAgentAnalyzer;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.Async;
@@ -16,8 +16,10 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -44,7 +46,7 @@ public class ManageCPC {
     @Autowired
     private CommissionBusiness commissionBusiness;
 
-    //    @Scheduled(cron = "*/15 * * * * ?")
+    //@Scheduled(cron = "*/15 * * * * ?")
     @Scheduled(cron = "0 5 0 * * ?")
     @Async
     public void trasformaTrackingCPC() {
@@ -55,9 +57,23 @@ public class ManageCPC {
             Map<String, Integer> mappa = new HashMap<>();
             Page<CpcDTO> last = cpcBusiness.getUnreadDayBefore();
             last.stream().filter(dto -> dto.getRefferal() != null).forEach(dto -> {
+
                 // gestisco calcolatore
                 Integer num = mappa.get(dto.getRefferal());
                 if (num == null) num = 0;
+
+                if (dto.getRefferal().length() < 5) {
+                    log.warn("Referral on solo Campaign Id :: {}", dto.getRefferal());
+                    // cerco da cpc
+                    List<CpcDTO> ips = cpcBusiness.findByIp24HoursBefore(dto.getIp(), dto.getDate()).stream().collect(Collectors.toList());
+
+                    // prendo ultimo   isp
+                    for (CpcDTO cpcDTO : ips)
+                        if (StringUtils.isNotBlank(cpcDTO.getRefferal())) dto.setRefferal(cpcDTO.getRefferal());
+
+                    log.warn("Nuovo refferal :: {} ", dto.getRefferal());
+                }
+
                 mappa.put(dto.getRefferal(), num + 1);
                 // setto a gestito
                 cpcBusiness.setRead(dto.getId());
@@ -65,25 +81,21 @@ public class ManageCPC {
 
             mappa.forEach((s, aLong) -> {
                 log.info("Gestisco trasformaTrackingCPC :: {}", aLong);
-
                 // prendo reffereal e lo leggo
                 Refferal refferal = referralService.decodificaReferral(s);
                 log.info("CPC :: {} - {}", s, refferal);
-                Long campaignId = refferal.getCampaignId();
-                if (campaignId != null && !Objects.isNull(refferal.getAffiliateId())) {
+                if (refferal != null && refferal.getCampaignId() != null && !Objects.isNull(refferal.getAffiliateId())) {
+                    Long campaignId = refferal.getCampaignId();
                     // setta transazione
                     TransactionBusiness.BaseCreateRequest transaction = new TransactionBusiness.BaseCreateRequest();
                     transaction.setCampaignId(campaignId);
 
                     Long affiliateId = refferal.getAffiliateId();
-                    if (!Objects.isNull(affiliateId))
-                        transaction.setAffiliateId(affiliateId);
+                    if (!Objects.isNull(affiliateId)) transaction.setAffiliateId(affiliateId);
                     Long channelId = refferal.getChannelId();
-                    if (channelId != null)
-                        transaction.setChannelId(channelId);
+                    if (channelId != null) transaction.setChannelId(channelId);
                     Long mediaId = refferal.getMediaId();
-                    if (mediaId != null)
-                        transaction.setMediaId(mediaId);
+                    if (mediaId != null) transaction.setMediaId(mediaId);
 
                     transaction.setDateTime(LocalDate.now().minusDays(1).atStartOfDay());
                     transaction.setApproved(true);

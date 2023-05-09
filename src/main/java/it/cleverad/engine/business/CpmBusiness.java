@@ -5,6 +5,7 @@ import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.Channel;
+import it.cleverad.engine.persistence.model.tracking.Cpc;
 import it.cleverad.engine.persistence.model.tracking.Cpm;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
@@ -12,6 +13,7 @@ import it.cleverad.engine.persistence.repository.service.ChannelRepository;
 import it.cleverad.engine.persistence.repository.tracking.CpmRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.service.ReferralService;
+import it.cleverad.engine.web.dto.CpcDTO;
 import it.cleverad.engine.web.dto.CpmDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -182,6 +184,16 @@ public class CpmBusiness {
         return page.map(CpmDTO::from);
     }
 
+    public Page<CpmDTO> findByIp24HoursBefore(String ip, LocalDateTime dateTime) {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE , Sort.by(Sort.Order.desc("refferal")));
+        Filter request = new Filter();
+        request.setIp(ip);
+        request.setDatetimeFrom(dateTime.minusDays(1));
+        request.setDatetimeTo(dateTime);
+        Page<Cpm> page = repository.findAll(getSpecification(request), pageable);
+        log.info("FIND IP CPM :: {}", page.getTotalElements());
+        return page.map(CpmDTO::from);
+    }
 
     /**
      * ============================================================================================================
@@ -209,6 +221,14 @@ public class CpmBusiness {
             if (request.getDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("date"), request.getDateTo().plus(1, ChronoUnit.DAYS).atStartOfDay()));
             }
+
+            if (request.getDatetimeFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("date"), request.getDatetimeFrom()));
+            }
+            if (request.getDatetimeTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("date"), request.getDatetimeTo()));
+            }
+
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
@@ -249,6 +269,9 @@ public class CpmBusiness {
         private LocalDate dateFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dateTo;
+
+        private LocalDateTime datetimeFrom;
+        private LocalDateTime datetimeTo;
     }
 
 }
