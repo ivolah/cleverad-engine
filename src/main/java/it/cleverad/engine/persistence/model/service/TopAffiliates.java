@@ -2,7 +2,6 @@ package it.cleverad.engine.persistence.model.service;
 
 public interface TopAffiliates {
 
-
     String getAffiliateName();
     String getAffiliateId();
     Long getChannelId();
@@ -26,7 +25,8 @@ public interface TopAffiliates {
     Long getClickNumber();
     Long getLeadNumber();
 
-    Long getCTR();
+    Double getCTR();
+    Double getLR();
 
     Double getBudget();
     Double getBudgetPC();

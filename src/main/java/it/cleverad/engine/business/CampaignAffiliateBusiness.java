@@ -95,9 +95,12 @@ public class CampaignAffiliateBusiness {
     public void deleteByCampaignID(Long id) {
         Filter request = new Filter();
         request.setCampaignId(id);
+        request.setFollowNull(false);
         Page<CampaignAffiliate> page = repository.findAll(getSpecification(request), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id"))));
         try {
-            page.stream().forEach(campaignAffiliate -> repository.deleteById(campaignAffiliate.getId()));
+            page.stream().forEach(campaignAffiliate -> {
+                repository.deleteById(campaignAffiliate.getId());
+            });
         } catch (javax.validation.ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
@@ -184,7 +187,8 @@ public class CampaignAffiliateBusiness {
                 predicates.add(cb.equal(root.get("campaign").get("id"), request.getCampaignId()));
             }
 
-            predicates.add(cb.isNotNull(root.get("followThrough")));
+            if (request.getFollowNull())
+                predicates.add(cb.isNotNull(root.get("followThrough")));
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 
@@ -215,6 +219,7 @@ public class CampaignAffiliateBusiness {
         private Long campaignId;
         private Long affiliateId;
         private Long statusId;
+        private Boolean followNull = true;
     }
 
 }

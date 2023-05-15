@@ -35,8 +35,8 @@ public class StatisticsController {
 
     @GetMapping(path = "/cpc/campaign/day/total")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public String getStatTotaleDayCpc(ViewBusiness.Filter request, Pageable pageable) {
-        return business.getStatTotaleDayCpc(request, pageable);
+    public String getStatTotaleDayCpc(ViewBusiness.Filter request) {
+        return business.getStatTotaleDayCpc(request);
     }
 
     @GetMapping(path = "/cpc/campaign/day")
@@ -70,8 +70,8 @@ public class StatisticsController {
 
     @GetMapping(path = "/cpm/campaign/day/total")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public String getStatTotaleDayCpm(ViewBusiness.Filter request, Pageable pageable) {
-        return business.getStatTotaleDayCpm(request, pageable);
+    public String getStatTotaleDayCpm(ViewBusiness.Filter request) {
+        return business.getStatTotaleDayCpm(request);
     }
 
     @GetMapping(path = "/cpm/campaign/day")
@@ -105,8 +105,8 @@ public class StatisticsController {
 
     @GetMapping(path = "/cpl/campaign/day/total")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public String getStatTotaleDayCpl(ViewBusiness.Filter request, Pageable pageable) {
-        return business.getStatTotaleDayCpl(request, pageable);
+    public String getStatTotaleDayCpl(ViewBusiness.Filter request) {
+        return business.getStatTotaleDayCpl(request);
     }
 
     @GetMapping(path = "/cpl/campaign/day")

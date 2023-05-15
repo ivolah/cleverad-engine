@@ -128,9 +128,15 @@ public class ChannelBusiness {
     public void delete(Long id) {
         Channel channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Channel", id));
         try {
-            if (channel != null) {
-                channel.getChannelCategories().stream().forEach(channelCategory -> channelCategoryBusiness.delete(channelCategory.getId()));
-            }
+            // canello rif categorie canale
+            channel.getChannelCategories().stream().forEach(channelCategory -> channelCategoryBusiness.delete(channelCategory.getId()));
+
+            // cancello riferimento
+            AffiliateChannelCommissionCampaignBusiness.Filter rr = new AffiliateChannelCommissionCampaignBusiness.Filter();
+            rr.setChannelId(id);
+            accc.search(rr, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")))).stream().forEach(affiliateChannelCommissionCampaignDTO -> accc.delete(affiliateChannelCommissionCampaignDTO.getId()));
+
+            // cancello Canale
             repository.deleteById(id);
         } catch (ConstraintViolationException ex) {
             throw ex;
@@ -140,10 +146,22 @@ public class ChannelBusiness {
 
     }
 
+    public void deleteByIdAffiliate(Long idAffilaite) {
+        if (jwtUserDetailsService.isAdmin()) {
+            Page<Channel> page = repository.findByAffiliateId(idAffilaite, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id"))));
+            page.stream().forEach(channel -> {
+                //cancello canale
+                //log.info("Cancello canale {}", channel.getId());
+                this.delete(channel.getId());
+            });
+        }
+    }
+
     // SEARCH PAGINATED
     public Page<ChannelDTO> search(Filter request, Pageable pageableRequest) {
+
         Page<AffiliateChannelCommissionCampaignDTO> searchACCC = null;
-        if (!jwtUserDetailsService.getRole().equals("Admin")) {
+        if (!jwtUserDetailsService.isAdmin()) {
             request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
             request.setDictionaryId(13L);
 
@@ -155,9 +173,7 @@ public class ChannelBusiness {
         Page<Channel> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id"))));
 
         if (searchACCC != null) {
-
             List<Long> channelsACCC = searchACCC.stream().map(dtos -> repository.findById(dtos.getChannelId()).get().getId()).collect(Collectors.toList());
-
             List<Channel> channels = new ArrayList<>();
             page.stream().forEach(channel -> {
                 Long id = channel.getId();
@@ -251,7 +267,6 @@ public class ChannelBusiness {
         }
     }
 
-
     public Page<ChannelDTO> getbyIdUser(Long id, Pageable pageableRequest) {
         AffiliateChannelCommissionCampaignBusiness.Filter rr = new AffiliateChannelCommissionCampaignBusiness.Filter();
         rr.setAffiliateId(userBusiness.findById(id).getAffiliateId());
@@ -309,16 +324,25 @@ public class ChannelBusiness {
                 predicates.add(cb.like(root.get("name"), "%" + request.getName() + "%"));
             }
             if (request.getShortDescription() != null) {
-                predicates.add(cb.equal(root.get("shortDescription"), request.getShortDescription()));
+                predicates.add(cb.like(root.get("shortDescription"), "%" + request.getShortDescription() + "%"));
             }
             if (request.getTypeId() != null) {
-                predicates.add(cb.equal(root.get("dictionary").get("id"), request.getTypeId()));
+                predicates.add(cb.equal(root.get("dictionaryType").get("id"), request.getTypeId()));
+            }
+            if (request.getDictionaryId() != null) {
+                predicates.add(cb.equal(root.get("dictionary").get("id"), request.getDictionaryId()));
+            }
+            if (request.getOwnerId() != null) {
+                predicates.add(cb.equal(root.get("dictionaryOwner").get("id"), request.getOwnerId()));
             }
             if (request.getStatus() != null) {
                 predicates.add(cb.equal(root.get("status"), request.getStatus()));
             }
             if (request.getAffiliateId() != null) {
                 predicates.add(cb.equal(root.get("affiliate").get("id"), request.getAffiliateId()));
+            }
+            if (request.getCountry() != null) {
+                predicates.add(cb.equal(root.get("country"), request.getCountry()));
             }
 
             if (request.getCreationDateFrom() != null) {

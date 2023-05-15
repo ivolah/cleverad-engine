@@ -18,8 +18,7 @@ public class WalletTransactionController {
     @Autowired
     private WalletTransactionBusiness business;
 
-    @Autowired
-    private JwtUserDetailsService jwtUserDetailsService;
+
 
     /**
      * ============================================================================================================
@@ -64,7 +63,7 @@ public class WalletTransactionController {
     @GetMapping("/affiliate")
     @ResponseStatus(HttpStatus.OK)
     public Page<WalletTransactionDTO> findByAffilaite() {
-        return business.findByIdAffilaite(jwtUserDetailsService.getAffiliateID());
+        return business.findByIdAffilaite(null);
     }
 
     /**

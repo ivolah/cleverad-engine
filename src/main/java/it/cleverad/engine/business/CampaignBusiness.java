@@ -1,10 +1,7 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.service.Affiliate;
-import it.cleverad.engine.persistence.model.service.Campaign;
-import it.cleverad.engine.persistence.model.service.CampaignAffiliate;
-import it.cleverad.engine.persistence.model.service.CampaignCategory;
+import it.cleverad.engine.persistence.model.service.*;
 import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.service.ReferralService;
@@ -64,6 +61,10 @@ public class CampaignBusiness {
     private RevenueFactorBusiness revenueFactorBusiness;
     @Autowired
     private CommissionBusiness commissionBusiness;
+    @Autowired
+    private CampaignAffiliateBusiness campaignAffiliateBusiness;
+    @Autowired
+    private MediaBusiness mediaBusiness;
 
     /**
      * ============================================================================================================
@@ -178,12 +179,16 @@ public class CampaignBusiness {
         Campaign campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
         try {
             if (campaign != null) {
-                //   campaign.getMediaCampaignList().stream().forEach(mediaCampaign -> mediaCampaignBusiness.delete(mediaCampaign.getId()));
+                campaignAffiliateBusiness.deleteByCampaignID(id);
+                Set<Media> mm = campaign.getMedias();
+                List<Media> listaMedia = mm.stream().collect(Collectors.toList());
+                listaMedia.forEach(media -> mediaBusiness.delete(media.getId()));
                 campaign.getCampaignCategories().stream().forEach(campaignCategory -> campaignCategoryBusiness.delete(campaignCategory.getId()));
                 campaign.getRevenueFactors().stream().forEach(revenueFactor -> revenueFactorBusiness.delete(revenueFactor.getId()));
                 campaign.getCommissionCampaigns().stream().forEach(commission -> commissionBusiness.delete(campaign.getId(), commission.getId()));
+
+                repository.deleteById(id);
             }
-            repository.deleteById(id);
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
         }

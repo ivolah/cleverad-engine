@@ -97,50 +97,51 @@ public class WalletBusiness {
     public WalletDTO incement(Long id, Double value) {
         Wallet wallet = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Wallet", id));
 
-        Double totale = wallet.getTotal();
-        totale = totale + value;
-        wallet.setTotal(totale);
-
-        Double residual = wallet.getResidual();
-        residual = residual + value;
-        wallet.setResidual(residual);
+        log.info("Increment {} by :: {}", id, value);
 
         // savo storicizzazione wallet
         WalletTransactionBusiness.BaseCreateRequest req = new WalletTransactionBusiness.BaseCreateRequest();
+        req.setWalletId(id);
         req.setTotalBefore(wallet.getTotal());
-        req.setTotalAfter(totale);
         req.setPayedBefore(wallet.getPayed());
-        req.setPayedAfter(wallet.getPayed());
         req.setResidualBefore(wallet.getResidual());
-        req.setResidualAfter(residual);
-        req.setWalletId(wallet.getId());
-        walletTransactionBusiness.create(req);
+        req.setPayedAfter(wallet.getPayed());
 
+        Double totale = wallet.getTotal() + value;
+        Double residual = wallet.getResidual() + value;
+      //  if ((!wallet.getTotal().equals(totale)) || (!wallet.getResidual().equals(residual))) {
+            req.setTotalAfter(totale);
+            req.setResidualAfter(residual);
+            walletTransactionBusiness.create(req);
+      //  }
+
+        wallet.setResidual(residual);
+        wallet.setTotal(totale);
         return WalletDTO.from(repository.save(wallet));
     }
 
     public WalletDTO decrement(Long id, Double value) {
         Wallet wallet = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Wallet", id));
 
-        Double residual = wallet.getResidual();
-        residual = residual - value;
-        wallet.setTotal(residual);
+        log.info("Decrement by :: {}", value);
 
-        Double payed = wallet.getPayed();
-        payed = payed + value;
-        wallet.setPayed(payed);
-
-        // savo storicizzazione wallet
         WalletTransactionBusiness.BaseCreateRequest req = new WalletTransactionBusiness.BaseCreateRequest();
+        req.setWalletId(id);
         req.setTotalBefore(wallet.getTotal());
-        req.setTotalAfter(wallet.getTotal() - value);
-        req.setPayedBefore(wallet.getPayed());
-        req.setPayedAfter(payed);
         req.setResidualBefore(wallet.getResidual());
-        req.setResidualAfter(residual);
-        req.setWalletId(wallet.getId());
-        walletTransactionBusiness.create(req);
+        req.setPayedBefore(wallet.getPayed());
 
+        Double residual = wallet.getResidual() - value;
+        Double payed = wallet.getPayed() + value;
+       // if (!wallet.getPayed().equals(payed) || !wallet.getResidual().equals(residual)) {
+            req.setPayedAfter(payed);
+            req.setTotalAfter(wallet.getTotal() - value);
+            req.setResidualAfter(residual);
+            walletTransactionBusiness.create(req);
+     //   }
+
+        wallet.setPayed(payed);
+        wallet.setTotal(residual);
         return WalletDTO.from(repository.save(wallet));
     }
 

@@ -15,6 +15,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +48,7 @@ public class ManageCPC {
     private CommissionBusiness commissionBusiness;
 
     //@Scheduled(cron = "*/15 * * * * ?")
-    @Scheduled(cron = "0 5 0 * * ?")
+    @Scheduled(cron = "3 3 0/1 * * ?")
     @Async
     public void trasformaTrackingCPC() {
         //   log.info("trasformaTrackingCPC");
@@ -55,7 +56,7 @@ public class ManageCPC {
 
             // trovo tutti i tracking con read == false
             Map<String, Integer> mappa = new HashMap<>();
-            Page<CpcDTO> last = cpcBusiness.getUnreadDayBefore();
+            Page<CpcDTO> last = cpcBusiness.getUnreadOneHourBefore();
             last.stream().filter(dto -> dto.getRefferal() != null).forEach(dto -> {
 
                 // gestisco calcolatore
@@ -63,15 +64,14 @@ public class ManageCPC {
                 if (num == null) num = 0;
 
                 if (dto.getRefferal().length() < 5) {
-                    log.warn("Referral on solo Campaign Id :: {}", dto.getRefferal());
+                    log.trace("Referral on solo Campaign Id :: {}", dto.getRefferal());
                     // cerco da cpc
                     List<CpcDTO> ips = cpcBusiness.findByIp24HoursBefore(dto.getIp(), dto.getDate()).stream().collect(Collectors.toList());
 
-                    // prendo ultimo   isp
+                    // prendo ultimo ipp
                     for (CpcDTO cpcDTO : ips)
                         if (StringUtils.isNotBlank(cpcDTO.getRefferal())) dto.setRefferal(cpcDTO.getRefferal());
-
-                    log.warn("Nuovo refferal :: {} ", dto.getRefferal());
+                    log.info("Nuovo refferal :: {} ", dto.getRefferal());
                 }
 
                 mappa.put(dto.getRefferal(), num + 1);
@@ -80,10 +80,9 @@ public class ManageCPC {
             });
 
             mappa.forEach((s, aLong) -> {
-                log.info("Gestisco trasformaTrackingCPC :: {}", aLong);
                 // prendo reffereal e lo leggo
                 Refferal refferal = referralService.decodificaReferral(s);
-                log.info("CPC :: {} - {}", s, refferal);
+                log.info(">>>> T-CPC :: {} -> {} - {}", aLong, s, refferal);
                 if (refferal != null && refferal.getCampaignId() != null && !Objects.isNull(refferal.getAffiliateId())) {
                     Long campaignId = refferal.getCampaignId();
                     // setta transazione
@@ -97,7 +96,7 @@ public class ManageCPC {
                     Long mediaId = refferal.getMediaId();
                     if (mediaId != null) transaction.setMediaId(mediaId);
 
-                    transaction.setDateTime(LocalDate.now().minusDays(1).atStartOfDay());
+                    transaction.setDateTime(LocalDateTime.now().withMinute(0).withSecond(0).withNano(0));
                     transaction.setApproved(true);
 
                     // controlla data scadneza camapgna
@@ -129,13 +128,12 @@ public class ManageCPC {
                     req.setChannelId(channelId);
                     req.setCampaignId(campaignId);
                     req.setCommissionDicId(50L);
-                    AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
+                    AffiliateChannelCommissionCampaignDTO accc = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
 
-                    if (acccFirst != null) {
-                        commId = acccFirst.getCommissionId();
-                        commVal = acccFirst.getCommissionValue();
+                    if (accc != null) {
+                        commId = accc.getCommissionId();
+                        commVal = accc.getCommissionValue();
                     } else {
-                        log.info("ACCC VUOTO");
                         CommissionBusiness.Filter filt = new CommissionBusiness.Filter();
                         filt.setCampaignId(campaignDTO.getId());
                         filt.setDictionaryId(10L);
@@ -144,10 +142,8 @@ public class ManageCPC {
                         commVal = commission != null ? Double.valueOf(commission.getValue()) : 0;
                     }
 
-                    if (commId != null) {
+                    if (commId != null)
                         transaction.setCommissionId(commId);
-                        log.info("setto commissione :: " + commId);
-                    }
 
                     // calcolo valore
                     Double totale = commVal * aLong;
@@ -180,14 +176,16 @@ public class ManageCPC {
                         }
                     }
 
-                    //if (affiliateChannelCommissionCampaign.getCommission().getDueDate().isBefore(LocalDate.now())) {
-                    // commissione scaduta
-                    //rr.setDictionaryId(49L);
-                    //}
+                    if (accc != null && accc.getCommissionDueDate() != null) {
+                        // commissione scaduta
+                        if (accc.getCommissionDueDate().isBefore(LocalDate.now())) {
+                            transaction.setDictionaryId(49L);
+                        }
+                    }
 
                     // creo la transazione
                     TransactionCPCDTO tcpc = transactionBusiness.createCpc(transaction);
-                    log.info("CREATO TRANSAZIONE CPC " + tcpc.getId());
+                    log.info("CREATO TRANSAZIONE :::: CPC :::: {} \n", tcpc.getId());
                 }
             });
 

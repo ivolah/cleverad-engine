@@ -30,7 +30,7 @@ public class ManageAgent {
 
     @Scheduled(cron = "0 0 4 * * ?")
     public void aggiornaStato() {
-        log.info("AGGIORNAMENTO QUOTIDIANO STATO");
+        log.info("AGGIORNAMENTO QUOTIDIANO -- AGENT");
         UserAgentAnalyzer uaa = UserAgentAnalyzer.newBuilder().hideMatcherLoadStats().withCache(10000).build();
 
         // inserisco info Agent CPC
@@ -54,7 +54,7 @@ public class ManageAgent {
                 this.generaAgent(uaa.parse(dto.getAgent()), dto.getRefferal(), "CPL");
         });
 
-        // inserisco info Agent CPL
+        // inserisco info Agent CPS
         cpsBusiness.getAllDayBefore().stream().filter(dto -> dto.getRefferal() != null).forEach(dto -> {
             // valorizzo agent
             if (StringUtils.isNotBlank(dto.getAgent()))
@@ -86,7 +86,7 @@ public class ManageAgent {
         if (StringUtils.isNotBlank(refferal) && !refferal.contains("{{refferalId}}")) {
             Refferal reff = referralService.decodificaReferral(refferal);
             request.setCampaignId(reff.getCampaignId().toString());
-            if (refferal.length() > 3) request.setAffiliateId(reff.getAffiliateId().toString());
+            if (refferal.length() > 5) request.setAffiliateId(reff.getAffiliateId().toString());
         }
         agentBusiness.create(request);
     }

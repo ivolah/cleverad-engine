@@ -2,7 +2,9 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.WalletTransaction;
+import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.persistence.repository.service.WalletTransactionRepository;
+import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.WalletDTO;
 import it.cleverad.engine.web.dto.WalletTransactionDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -10,6 +12,7 @@ import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +41,11 @@ public class WalletTransactionBusiness {
     @Autowired
     private WalletBusiness walletBusiness;
     @Autowired
+    private WalletRepository walletRepository;
+    @Autowired
     private Mapper mapper;
+    @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
 
     /**
      * ============================================================================================================
@@ -46,6 +54,7 @@ public class WalletTransactionBusiness {
     // CREATE
     public WalletTransactionDTO create(BaseCreateRequest request) {
         WalletTransaction map = mapper.map(request, WalletTransaction.class);
+        map.setWallet(walletRepository.findById(request.getWalletId()).orElse(null));
         return WalletTransactionDTO.from(repository.save(map));
     }
 
@@ -69,13 +78,15 @@ public class WalletTransactionBusiness {
     // SEARCH PAGINATED
     public Page<WalletTransactionDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        if (!jwtUserDetailsService.isAdmin()) request.setWalletId(jwtUserDetailsService.getAffiliateID());
         Page<WalletTransaction> page = repository.findAll(getSpecification(request), pageable);
         return page.map(WalletTransactionDTO::from);
     }
 
     public Page<WalletTransactionDTO> findByIdAffilaite(Long id) {
-        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
+        if (!jwtUserDetailsService.isAdmin() && id == null) id = jwtUserDetailsService.getAffiliateID();
         WalletDTO dto = walletBusiness.findByIdAffilaite(id).stream().findFirst().get();
         request.setWalletId(dto.getId());
         Page<WalletTransaction> page = repository.findAll(getSpecification(request), pageable);
@@ -85,15 +96,17 @@ public class WalletTransactionBusiness {
     // UPDATE
     public WalletTransactionDTO update(Long id, Filter filter) {
         WalletTransaction channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("WalletTransaction", id));
-        WalletTransactionDTO campaignDTOfrom = WalletTransactionDTO.from(channel);
-
-        mapper.map(filter, campaignDTOfrom);
-
-        WalletTransaction mappedEntity = mapper.map(channel, WalletTransaction.class);
-        mapper.map(campaignDTOfrom, mappedEntity);
-
-        return WalletTransactionDTO.from(repository.save(mappedEntity));
+        mapper.map(filter, channel);
+        return WalletTransactionDTO.from(repository.save(channel));
     }
+
+    public Page<WalletTransactionDTO> searchLast7Days(Filter request) {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")));
+        if (!jwtUserDetailsService.isAdmin()) request.setWalletId(jwtUserDetailsService.getAffiliateID());
+        Page<WalletTransaction> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(WalletTransactionDTO::from);
+    }
+
 
     /**
      * ============================================================================================================
@@ -102,20 +115,24 @@ public class WalletTransactionBusiness {
         return (root, query, cb) -> {
             Predicate completePredicate = null;
             List<Predicate> predicates = new ArrayList<>();
-
             if (request.getId() != null) {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
-
             if (request.getWalletId() != null) {
                 predicates.add(cb.equal(root.get("wallet").get("id"), request.getWalletId()));
+            }
+
+            if (request.getDateFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("date"), request.getDateFrom()));
+            }
+            if (request.getDateTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("date"), request.getDateTo().plus(1, ChronoUnit.DAYS)));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
     }
-
 
     /**
      * ============================================================================================================
@@ -124,14 +141,15 @@ public class WalletTransactionBusiness {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @ToString
     public static class BaseCreateRequest {
         private Long id;
         private Double totalBefore;
-        private Double payedBefore;
-        private Double residualBefore;
         private Double totalAfter;
-        private Double payedAfter;
+        private Double residualBefore;
         private Double residualAfter;
+        private Double payedBefore;
+        private Double payedAfter;
         private Long walletId;
     }
 
@@ -140,16 +158,13 @@ public class WalletTransactionBusiness {
     @AllArgsConstructor
     public static class Filter {
         private Long id;
-
         private Double totalBefore;
         private Double payedBefore;
         private Double residualBefore;
         private Double totalAfter;
         private Double payedAfter;
         private Double residualAfter;
-
         private Long walletId;
-
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dateFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")

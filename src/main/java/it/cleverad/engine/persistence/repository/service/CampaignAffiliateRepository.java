@@ -11,5 +11,5 @@ public interface CampaignAffiliateRepository extends JpaRepository<CampaignAffil
     List<CampaignAffiliate> findByAffiliateId(Long affiliateId);
 
     List<CampaignAffiliate> findByAffiliateIdAndCampaignId(Long affiliateId, Long campaignId);
-    
+
 }

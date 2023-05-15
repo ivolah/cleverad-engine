@@ -124,6 +124,20 @@ public class UserBusiness {
         }
     }
 
+    public void deleteByIdAffiliate(Long affiliateId) {
+        try {
+            Page<UserDTO> page = this.searchByAffiliateID(affiliateId, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id"))));
+            page.stream().forEach(userDTO -> {
+                repository.deleteById(userDTO.getId());
+            });
+        } catch (ConstraintViolationException ex) {
+            throw ex;
+        } catch (Exception ee) {
+            throw new PostgresDeleteCleveradException(ee);
+        }
+    }
+
+
     // SEARCH PAGINATED
     public Page<UserDTO> search(Filter request, Pageable pageableRequest) {
         Page<User> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id"))));

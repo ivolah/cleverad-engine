@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -99,25 +99,26 @@ public class CpcBusiness {
         List<CpcDTO> exp = new ArrayList<>();
         res.stream().forEach(cpcDTO -> {
             if (StringUtils.isNotBlank(cpcDTO.getRefferal()) && !cpcDTO.getRefferal().contains("{{refferalId}}")) {
-                Refferal refferal = referralService.decodificaReferral(cpcDTO.getRefferal());
+                Refferal referral = referralService.decodificaReferral(cpcDTO.getRefferal());
 
-                Campaign campaign = campaignRepository.findById(refferal.getCampaignId()).orElse(null);
-                if (refferal.getCampaignId() != null && campaign != null && campaign.getName() != null) {
+                Campaign campaign = campaignRepository.findById(referral.getCampaignId()).orElse(null);
+                if (referral.getCampaignId() != null && campaign != null && campaign.getName() != null) {
                     cpcDTO.setCampaignName(campaign.getName());
-                    cpcDTO.setCampaignId(refferal.getCampaignId());
+                    cpcDTO.setCampaignId(referral.getCampaignId());
                 }
 
-                if (cpcDTO.getRefferal().length() > 3) {
-                    Affiliate affiliate = affiliateRepository.findById(refferal.getAffiliateId()).orElse(null);
-                    if (refferal.getAffiliateId() != null && affiliate != null && affiliate.getName() != null) {
+                if (referral.getAffiliateId() != null) {
+                    Affiliate affiliate = affiliateRepository.findById(referral.getAffiliateId()).orElse(null);
+                    if (referral.getAffiliateId() != null && affiliate != null && affiliate.getName() != null) {
                         cpcDTO.setAffiliateName(affiliate.getName());
-                        cpcDTO.setAffiliateId(refferal.getAffiliateId());
+                        cpcDTO.setAffiliateId(referral.getAffiliateId());
                     }
-
-                    Channel channel = channelRepository.findById(refferal.getChannelId()).orElse(null);
-                    if (refferal.getChannelId() != null && channel != null && channel.getName() != null) {
+                }
+                if (referral.getChannelId() != null) {
+                    Channel channel = channelRepository.findById(referral.getChannelId()).orElse(null);
+                    if (referral.getChannelId() != null && channel != null && channel.getName() != null) {
                         cpcDTO.setChannelName(channel.getName());
-                        cpcDTO.setChannelId(refferal.getChannelId());
+                        cpcDTO.setChannelId(referral.getChannelId());
                     }
                 }
             } else {
@@ -155,7 +156,7 @@ public class CpcBusiness {
     }
 
     public Page<CpcDTO> getUnreadDayBefore() {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE , Sort.by(Sort.Order.desc("refferal")));
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal")));
         Filter request = new Filter();
         request.setRead(false);
         request.setDateFrom(LocalDate.now().minusDays(1));
@@ -165,19 +166,40 @@ public class CpcBusiness {
         return page.map(CpcDTO::from);
     }
 
+    public Page<CpcDTO> getUnreadOneHourBefore() {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal")));
+        Filter request = new Filter();
+        request.setRead(false);
+        LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
+        request.setDatetimeFrom(oraSpaccata.minusHours(1));
+        request.setDatetimeTo(oraSpaccata);
+        Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
+        log.info("\n\n\n >>>>>>>>>>>>>>>>>>>>>> UNREAD CPC HOUR BEFORE :: {}", page.getTotalElements());
+        return page.map(CpcDTO::from);
+    }
+
     public Page<CpcDTO> findByIp24HoursBefore(String ip, LocalDateTime dateTime) {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE , Sort.by(Sort.Order.desc("refferal")));
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal")));
         Filter request = new Filter();
         request.setIp(ip);
         request.setDatetimeFrom(dateTime.minusDays(1));
         request.setDatetimeTo(dateTime);
         Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
-        log.info("FIND IP CPC :: {}", page.getTotalElements());
+        return page.map(CpcDTO::from);
+    }
+    public Page<CpcDTO> findByIpTwoHoursBefore(String ip, LocalDateTime dateTime) {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal")));
+        Filter request = new Filter();
+        request.setIp(ip);
+        request.setDatetimeFrom(dateTime.minusHours(2));
+        request.setDatetimeTo(dateTime);
+        Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
+        log.trace("FIND IP CPC :: {}", page.getTotalElements());
         return page.map(CpcDTO::from);
     }
 
     public Page<CpcDTO> getAllDayBefore() {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE , Sort.by(Sort.Order.desc("refferal")));
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal")));
         Filter request = new Filter();
         request.setDateFrom(LocalDate.now().minusDays(1));
         request.setDateTo(LocalDate.now().minusDays(1));
@@ -217,7 +239,7 @@ public class CpcBusiness {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("date"), request.getDateFrom().atStartOfDay()));
             }
             if (request.getDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("date"), request.getDateTo().plus(1, ChronoUnit.DAYS).atStartOfDay()));
+                predicates.add(cb.lessThanOrEqualTo(root.get("date"), request.getDateTo().atTime(LocalTime.MAX)));
             }
 
             if (request.getDatetimeFrom() != null) {

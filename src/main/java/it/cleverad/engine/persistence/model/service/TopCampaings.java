@@ -13,8 +13,8 @@ public interface TopCampaings {
     Long getClickNumber();
     Long getLeadNumber();
 
-    Long getCTR();
-    Long getLR();
+    Double getCTR();
+    Double getLR();
 
     Double getCommission();
     Double getRevenue();

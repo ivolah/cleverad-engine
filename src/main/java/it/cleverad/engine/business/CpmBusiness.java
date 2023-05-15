@@ -170,8 +170,18 @@ public class CpmBusiness {
         request.setRead(false);
         request.setDateFrom(LocalDate.now().minusDays(1));
         request.setDateTo(LocalDate.now().minusDays(1));
-        Page<Cpm> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal"))));
+        Page<Cpm> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id"))));
         log.info("UNREAD CPM :: {}", page.getTotalElements());
+        return page.map(CpmDTO::from);
+    }
+    public Page<CpmDTO> getUnreadHourBefore() {
+        Filter request = new Filter();
+        request.setRead(false);
+        LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
+        request.setDatetimeFrom(oraSpaccata.minusHours(36));
+        request.setDatetimeTo(oraSpaccata);
+        Page<Cpm> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id"))));
+        log.info("\n\n\n >>>>>>>>>>>>>>>>>>>>>> UNREAD CPM HOUR BEFORE :: {}", page.getTotalElements());
         return page.map(CpmDTO::from);
     }
 
@@ -179,7 +189,7 @@ public class CpmBusiness {
         Filter request = new Filter();
         request.setDateFrom(LocalDate.now().minusDays(1));
         request.setDateTo(LocalDate.now().minusDays(1));
-        Page<Cpm> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal"))));
+        Page<Cpm> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id"))));
         log.info("UNREAD CPM :: {}", page.getTotalElements());
         return page.map(CpmDTO::from);
     }

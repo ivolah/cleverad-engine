@@ -72,12 +72,14 @@ public class AffiliateBusiness {
     public void delete(Long id) {
         try {
             Page<WalletDTO> dd = walletBusiness.findByIdAffilaite(id);
-            WalletDTO dto = dd.stream().findFirst().get();
-            if (dto.getTotal() > 0) {
+            WalletDTO walletDTO = dd.stream().findFirst().get();
+            if (walletDTO.getTotal() > 0) {
                 // invio messaggio specifico su lfatto che c'è un wallet con contenuto
-                throw new PostgresCleveradException("Impossibile cancellare affiliato " + dto.getNome() + " perchè associato ad un wallet.");
+                throw new PostgresCleveradException("Impossibile cancellare affiliato " + walletDTO.getNome() + " perchè associato ad un wallet.");
             } else {
-                walletBusiness.delete(dto.getId());
+                channelBusiness.deleteByIdAffiliate(id);
+                walletBusiness.delete(walletDTO.getId());
+                userBusiness.deleteByIdAffiliate(id);
                 repository.deleteById(id);
             }
         } catch (ConstraintViolationException ex) {
@@ -210,7 +212,7 @@ public class AffiliateBusiness {
         UserBusiness.BaseCreateRequest uenteOmbra = new UserBusiness.BaseCreateRequest();
         uenteOmbra.setAffiliateId(dto.getId());
         uenteOmbra.setStatus(true);
-        uenteOmbra.setName("Cleverad "+ dto.getId());
+        uenteOmbra.setName("Cleverad " + dto.getId());
         uenteOmbra.setEmail(dto.getId() + "_ombra@cleverad.it");
         uenteOmbra.setSurname("Ombra");
         uenteOmbra.setRoleId(4L);
@@ -240,29 +242,32 @@ public class AffiliateBusiness {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
             if (request.getName() != null) {
-                predicates.add(cb.like(root.get("name"), request.getName()));
+                predicates.add(cb.like(root.get("name"), "%" + request.getName() + "%"));
             }
             if (request.getVatNumber() != null) {
-                predicates.add(cb.like(root.get("vatNumber"), request.getVatNumber()));
+                predicates.add(cb.like(root.get("vatNumber"), "%" + request.getVatNumber() + "%"));
             }
             if (request.getStreet() != null) {
-                predicates.add(cb.like(root.get("street"), request.getStreet()));
+                predicates.add(cb.like(root.get("street"), "%" + request.getStreet() + "%"));
             }
             if (request.getStreetNumber() != null) {
-                predicates.add(cb.like(root.get("streetNumber"), request.getStreetNumber()));
+                predicates.add(cb.like(root.get("streetNumber"), "%" + request.getStreetNumber() + "%"));
             }
 
             if (request.getCity() != null) {
-                predicates.add(cb.like(root.get("city"), request.getCity()));
+                predicates.add(cb.like(root.get("city"), "%" + request.getCity() + "%"));
             }
             if (request.getZipCode() != null) {
-                predicates.add(cb.equal(root.get("zipCode"), request.getZipCode()));
+                predicates.add(cb.equal(root.get("zipCode"), request.getZipCode() + "%"));
             }
             if (request.getPrimaryMail() != null) {
-                predicates.add(cb.like(root.get("primaryMail"), request.getPrimaryMail()));
+                predicates.add(cb.like(root.get("primaryMail"), "%" + request.getPrimaryMail() + "%"));
             }
             if (request.getSecondaryMail() != null) {
-                predicates.add(cb.like(root.get("secondaryMail"), request.getSecondaryMail()));
+                predicates.add(cb.like(root.get("secondaryMail"), "%" + request.getSecondaryMail() + "%"));
+            }
+            if (request.getStatusId() != null) {
+                predicates.add(cb.equal(root.get("dictionaryStatusType").get("id"), request.getStatusId()));
             }
             if (request.getStatus() != null) {
                 predicates.add(cb.equal(root.get("status"), request.getStatus()));

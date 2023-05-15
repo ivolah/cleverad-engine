@@ -6,8 +6,6 @@ import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.Channel;
 import it.cleverad.engine.persistence.model.tracking.Cpl;
-import it.cleverad.engine.persistence.model.tracking.Cpl;
-import it.cleverad.engine.persistence.model.tracking.Cpm;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.ChannelRepository;
@@ -15,8 +13,6 @@ import it.cleverad.engine.persistence.repository.tracking.CplRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.CplDTO;
-import it.cleverad.engine.web.dto.CplDTO;
-import it.cleverad.engine.web.dto.CpmDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -111,11 +107,13 @@ public class CplBusiness {
                     cplDTO.setCampaignId(refferal.getCampaignId());
                 }
 
-                if (cplDTO.getRefferal().length() > 3) {
-                    Affiliate affiliate = affiliateRepository.findById(refferal.getAffiliateId()).orElse(null);
-                    if (refferal.getAffiliateId() != null && affiliate != null && affiliate.getName() != null) {
-                        cplDTO.setAffiliateName(affiliate.getName());
-                        cplDTO.setAffiliateId(refferal.getAffiliateId());
+                if (cplDTO.getRefferal().length() > 5) {
+                    if (refferal.getAffiliateId() != null) {
+                        Affiliate affiliate = affiliateRepository.findById(refferal.getAffiliateId()).orElse(null);
+                        if (affiliate != null && affiliate.getName() != null) {
+                            cplDTO.setAffiliateName(affiliate.getName());
+                            cplDTO.setAffiliateId(refferal.getAffiliateId());
+                        }
                     }
 
                     Channel channel = channelRepository.findById(refferal.getChannelId()).orElse(null);
@@ -159,6 +157,17 @@ public class CplBusiness {
         repository.save(media);
     }
 
+    public Page<CplDTO> getUnreadOneHourBefore() {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
+        Filter request = new Filter();
+        request.setRead(false);
+        LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
+        request.setDatetimeFrom(oraSpaccata.minusHours(24));
+        request.setDatetimeTo(oraSpaccata);
+        Page<Cpl> page = repository.findAll(getSpecification(request), pageable);
+        log.info("\n\n\n >>>>>>>>>>>>>>>>>>>>>> UNREAD CPL HOUR BEFORE :: {}", page.getTotalElements());
+        return page.map(CplDTO::from);
+    }
 
     public Page<CplDTO> getUnreadDayBefore() {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
@@ -182,7 +191,7 @@ public class CplBusiness {
     }
 
     public Page<CplDTO> findByIp24HoursBefore(String ip, LocalDateTime dateTime) {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE , Sort.by(Sort.Order.desc("refferal")));
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setIp(ip);
         request.setDatetimeFrom(dateTime.minusDays(1));

@@ -58,8 +58,8 @@ public class ViewBusiness {
      * =================================================================<==========================================
      **/
 
-    public String getStatTotaleDayCpc(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+    public String getStatTotaleDayCpc(Filter request) {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
         request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 6);
         if (!jwtUserDetailsService.isAdmin())
             request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
@@ -72,12 +72,6 @@ public class ViewBusiness {
                 doysDaVerificare.add(i);
 
         JSONObject mainObj = new JSONObject();
-
-        Double totale = 0D;
-        for (WidgetCampaignDayCpc cpc : tutto)
-            totale = totale + cpc.getTotale();
-        mainObj.put("totale", totale);
-
         JSONArray harej = new JSONArray();
         doysDaVerificare.stream().sorted().forEach(gg -> {
             Double dd = 0D;
@@ -91,10 +85,17 @@ public class ViewBusiness {
             for (WidgetCampaignDayCpc w : giornato)
                 dd = dd + w.getTotale();
 
+
             log.trace("campagna :: {}  ({})",  gg, dd);
             harej.put(dd);
         });
 
+        Double totale = 0D;
+        for (Object o : harej) {
+            totale += (Double) o;
+        }
+
+        mainObj.put("totale", totale);
         mainObj.put("data", harej);
 
         return mainObj.toString();
@@ -201,8 +202,8 @@ public class ViewBusiness {
      * ===========================================================================================================
      **/
 
-    public String getStatTotaleDayCpm(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+    public String getStatTotaleDayCpm(Filter request) {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
         request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 6);
         if (!jwtUserDetailsService.isAdmin())
             request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
@@ -215,12 +216,6 @@ public class ViewBusiness {
                 doysDaVerificare.add(i);
 
         JSONObject mainObj = new JSONObject();
-
-        Double totale = 0D;
-        for (WidgetCampaignDayCpm cpm : tutto)
-            totale = totale + cpm.getTotale();
-        mainObj.put("totale", totale);
-
         JSONArray harej = new JSONArray();
         doysDaVerificare.stream().sorted().forEach(gg -> {
             Double dd = 0D;
@@ -236,6 +231,12 @@ public class ViewBusiness {
 
             harej.put(dd);
         });
+
+        Double totale = 0D;
+        for (Object o : harej) {
+            totale += (Double) o;
+        }
+        mainObj.put("totale", totale);
         mainObj.put("data", harej);
 
         return mainObj.toString();
@@ -349,8 +350,8 @@ public class ViewBusiness {
      * ===========================================================================================================
      **/
 
-    public String getStatTotaleDayCpl(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+    public String getStatTotaleDayCpl(Filter request) {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
         request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 6);
         if (!jwtUserDetailsService.isAdmin())
             request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
@@ -363,12 +364,6 @@ public class ViewBusiness {
                 doysDaVerificare.add(i);
 
         JSONObject mainObj = new JSONObject();
-
-        Double totale = 0D;
-        for (WidgetCampaignDayCpl cpm : tutto)
-            totale = totale + cpm.getValore();
-        mainObj.put("totale", totale);
-
         JSONArray harej = new JSONArray();
         doysDaVerificare.stream().sorted().forEach(gg -> {
             Double dd = 0D;
@@ -384,6 +379,12 @@ public class ViewBusiness {
 
             harej.put(dd);
         });
+
+        Double totale = 0D;
+        for (Object o : harej) {
+            totale += (Double) o;
+        }
+        mainObj.put("totale", totale);
         mainObj.put("data", harej);
 
         return mainObj.toString();

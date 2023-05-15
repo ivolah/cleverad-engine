@@ -15,6 +15,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,34 +48,29 @@ public class ManageCPM {
     private CommissionBusiness commissionBusiness;
 
     @Async
-    @Scheduled(cron = "0 30 0 * * ?")
-    //@Scheduled(cron = "*/18 * * * * ?")
+    @Scheduled(cron = "2 2 0/1 * * ?")
+    //@Scheduled(cron = "*/8 * * * * ?")
     public void trasformaTrackingCPM() {
         try {
 
             // trovo tutti i tracking con read == false
             Map<String, Integer> mappa = new HashMap<>();
-            Page<CpmDTO> last = CpmBusiness.getUnreadDayBefore();
+            Page<CpmDTO> last = CpmBusiness.getUnreadHourBefore();
             last.stream().filter(CpmDTO -> CpmDTO.getRefferal() != null).forEach(cpm -> {
 
                 // gestisco calcolatore
                 Integer num = mappa.get(cpm.getRefferal());
                 if (num == null) num = 0;
 
-
                 if (cpm.getRefferal().length() < 5) {
-                    log.warn("Referral on solo Campaign Id :: {}", cpm.getRefferal());
+                    log.trace("Referral on solo Campaign Id :: {}", cpm.getRefferal());
                     // cerco da cpc
                     List<CpmDTO> ips = CpmBusiness.findByIp24HoursBefore(cpm.getIp(), cpm.getDate()).stream().collect(Collectors.toList());
-
                     // prendo ultimo   isp
                     for (CpmDTO dto : ips)
                         if (StringUtils.isNotBlank(dto.getRefferal())) dto.setRefferal(dto.getRefferal());
-
                     log.warn("Nuovo refferal :: {} ", cpm.getRefferal());
                 }
-
-
                 mappa.put(cpm.getRefferal(), num + 1);
 
                 // setto a gestito
@@ -82,21 +78,19 @@ public class ManageCPM {
             });
 
             mappa.forEach((x, aLong) -> {
-                log.info("Gestisco trasformaTrackingCpm ID {}", aLong);
-
                 // prendo reffereal e lo leggo
                 Refferal refferal = referralService.decodificaReferral(x);
-                log.info("Cpm :: {} - {}", x, refferal);
+                log.info(">>>> T-CPC :: {} -> {} - {}", aLong, x, refferal);
                 if (refferal != null && refferal.getCampaignId() != null && !Objects.isNull(refferal.getAffiliateId())) {
 
                     // setta transazione
-                    TransactionBusiness.BaseCreateRequest rr = new TransactionBusiness.BaseCreateRequest();
-                    rr.setAffiliateId(refferal.getAffiliateId());
-                    rr.setCampaignId(refferal.getCampaignId());
-                    rr.setChannelId(refferal.getChannelId());
-                    rr.setDateTime(LocalDate.now().minusDays(1).atStartOfDay());
-                    rr.setMediaId(refferal.getMediaId());
-                    rr.setApproved(true);
+                    TransactionBusiness.BaseCreateRequest transaction = new TransactionBusiness.BaseCreateRequest();
+                    transaction.setAffiliateId(refferal.getAffiliateId());
+                    transaction.setCampaignId(refferal.getCampaignId());
+                    transaction.setChannelId(refferal.getChannelId());
+                    transaction.setDateTime(LocalDateTime.now().withMinute(0).withSecond(0).withNano(0));
+                    transaction.setMediaId(refferal.getMediaId());
+                    transaction.setApproved(true);
 
                     // controlla data scadneza camapgna
                     CampaignDTO campaignDTO = campaignBusiness.findByIdAdminNull(refferal.getCampaignId());
@@ -104,11 +98,10 @@ public class ManageCPM {
                         LocalDate endDate = campaignDTO.getEndDate();
                         if (endDate.isBefore(LocalDate.now())) {
                             // setto a campagna scaduta
-                            rr.setDictionaryId(42L);
+                            transaction.setDictionaryId(42L);
                         } else {
-                            rr.setDictionaryId(49L);
+                            transaction.setDictionaryId(49L);
                         }
-
 
                         // associo a wallet
                         Long affiliateID = refferal.getAffiliateId();
@@ -116,13 +109,13 @@ public class ManageCPM {
                         Long walletID = null;
                         if (affiliateID != null) {
                             walletID = walletRepository.findByAffiliateId(affiliateID).getId();
-                            rr.setWalletId(walletID);
+                            transaction.setWalletId(walletID);
                         }
 
                         // trovo revenue
                         if (refferal.getCampaignId() != null) {
                             RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 50L);
-                            if (rf != null && rf.getId() != null) rr.setRevenueId(rf.getId());
+                            if (rf != null && rf.getId() != null) transaction.setRevenueId(rf.getId());
                         }
 
                         // gesione commisione
@@ -140,7 +133,6 @@ public class ManageCPM {
                             commId = acccFirst.getCommissionId();
                             commVal = acccFirst.getCommissionValue();
                         } else {
-                            log.info("ACCCC VUOTO");
                             CommissionBusiness.Filter filt = new CommissionBusiness.Filter();
                             filt.setCampaignId(campaignDTO.getId());
                             filt.setDictionaryId(50L);
@@ -149,15 +141,12 @@ public class ManageCPM {
                             commVal = commission != null ? Double.valueOf(commission.getValue()) : 0;
                         }
 
-                        if (commId != null) {
-                            rr.setCommissionId(commId);
-                            log.info("setto commissione :: " + commId);
-                        }
+                        if (commId != null)
+                            transaction.setCommissionId(commId);
 
                         Double totale = commVal * aLong;
-                        rr.setValue(totale);
-                        rr.setImpressionNumber(Long.valueOf(aLong));
-                        log.info("TOT " + totale + " - " + aLong);
+                        transaction.setValue(totale);
+                        transaction.setImpressionNumber(Long.valueOf(aLong));
 
                         // incemento valore
                         if (walletID != null) walletBusiness.incement(walletID, totale);
@@ -170,7 +159,7 @@ public class ManageCPM {
 
                             // setto stato transazione a ovebudget editore se totale < 0
                             if (totBudgetDecrementato < 0) {
-                                rr.setDictionaryId(47L);
+                                transaction.setDictionaryId(47L);
                             }
                         }
 
@@ -183,14 +172,13 @@ public class ManageCPM {
 
                             // setto stato transazione a ovebudget editore se totale < 0
                             if (budgetCampagna < 0) {
-                                rr.setDictionaryId(48L);
+                                transaction.setDictionaryId(48L);
                             }
                         }
 
-
-                        log.info("Creo Trans CPM");
                         // creo la transazione
-                        transactionBusiness.createCpm(rr);
+                        TransactionCPMDTO tcpm = transactionBusiness.createCpm(transaction);
+                        log.info("CREATO TRANSAZIONE :::: CPM :::: {} \n", tcpm.getId());
                     }
 
                 }// refferal not null
