@@ -163,6 +163,7 @@ public class ReportBusiness {
         @NotNull
         private List<Long> dictionaryIds;
         private Long affiliateid;
+        private Long campaignid;
     }
 
 }

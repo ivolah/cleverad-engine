@@ -38,6 +38,7 @@ public interface WidgetTopCPMRepository extends JpaRepository<WidgetTopCPM, Long
                     "where ((:dateFrom <= vall.date) AND (:dateTo >= vall.date)) " +
                     "  AND (vall.dictionaryId in (:dictionaryList)) " +
                     "  AND (vall.affiliateid = (:affiliateId)) " +
+                    "  AND (vall.campaignid = (:campaignid)) " +
                     " " +
                     "group by vall.campaignid, vall.campaignname" +
                     " ORDER BY impressionNumber DESC;")
@@ -67,7 +68,8 @@ public interface WidgetTopCPMRepository extends JpaRepository<WidgetTopCPM, Long
                     " " +
                     "where ((:dateFrom <= vall.date) AND (:dateTo >= vall.date)) " +
                     "  AND (vall.dictionaryId in (:dictionaryList)) " +
-                    " " +
+                    "  AND (vall.affiliateid = (:affiliateId)) " +
+                    "  AND (vall.campaignid = (:campaignid)) " +
                     "group by vall.campaignid, vall.campaignname" +
                     " ORDER BY impressionNumber DESC;")
     List<TopCampaings> findGroupByCampaignIdAdmin(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList);
@@ -105,7 +107,7 @@ public interface WidgetTopCPMRepository extends JpaRepository<WidgetTopCPM, Long
             "where ((:dateFrom <= vall.date) AND (:dateTo >= vall.date)) " +
             "  AND (vall.dictionaryId in (:dictionaryList)) " +
             "  AND (vall.affiliateid = (:affiliateId)) " +
-            " " +
+            "  AND (vall.campaignid = (:campaignid)) " +
             "group by vall.affiliateName, vall.affiliateId, vall.channelid, vall.channelName" +
             " ORDER BY impressionNumber DESC;")
     List<TopAffiliates> findAffiliatesGroupByCampaignId(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList, @Param("affiliateId") Long affiliateId);
@@ -134,7 +136,8 @@ public interface WidgetTopCPMRepository extends JpaRepository<WidgetTopCPM, Long
             " " +
             "where ((:dateFrom <= vall.date) AND (:dateTo >= vall.date)) " +
             "  AND (vall.dictionaryId in (:dictionaryList)) " +
-            " " +
+            "  AND (vall.affiliateid = (:affiliateId)) " +
+            "  AND (vall.campaignid = (:campaignid)) " +
             "group by vall.affiliateName, vall.affiliateId, vall.channelid, vall.channelName" +
             " ORDER BY impressionNumber DESC;")
     List<TopAffiliates> findAffiliatesGroupByCampaignIdAdmin(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList);
