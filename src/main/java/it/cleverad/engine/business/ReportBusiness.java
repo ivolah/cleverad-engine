@@ -125,9 +125,9 @@ public class ReportBusiness {
     public Page<TopCampaings> searchTopCampaigns(TopFilter request, Pageable pageableRequest) {
         List<TopCampaings> ll = new ArrayList<>();
         if (!jwtUserDetailsService.isAdmin()) {
-            ll = topCampaignCPMRepository.findGroupByCampaignId(request.getDateTimeFrom().atStartOfDay(),  request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds(), jwtUserDetailsService.getAffiliateID());
+            ll = topCampaignCPMRepository.findGroupByCampaignId(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds(), jwtUserDetailsService.getAffiliateID(), request.getCampaignid());
         } else {
-            ll = topCampaignCPMRepository.findGroupByCampaignIdAdmin(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds());
+            ll = topCampaignCPMRepository.findGroupByCampaignIdAdmin(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds(), request.getAffiliateid(), request.getCampaignid());
         }
         Page<TopCampaings> pages = new PageImpl<TopCampaings>(ll, pageableRequest, ll.size());
         return pages;
@@ -136,9 +136,9 @@ public class ReportBusiness {
     public Page<TopAffiliates> searchTopAffilaites(TopFilter request, Pageable pageableRequest) {
         List<TopAffiliates> ll = new ArrayList<>();
         if (!jwtUserDetailsService.isAdmin()) {
-            ll = topCampaignCPMRepository.findAffiliatesGroupByCampaignId(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds(), jwtUserDetailsService.getAffiliateID());
+            ll = topCampaignCPMRepository.findAffiliatesGroupByCampaignId(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds(), jwtUserDetailsService.getAffiliateID(), request.getCampaignid());
         } else {
-           ll = topCampaignCPMRepository.findAffiliatesGroupByCampaignIdAdmin(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds());
+            ll = topCampaignCPMRepository.findAffiliatesGroupByCampaignIdAdmin(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds(), request.getAffiliateid(), request.getCampaignid());
         }
         Page<TopAffiliates> pages = new PageImpl<TopAffiliates>(ll, pageableRequest, ll.size());
         return pages;
