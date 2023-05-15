@@ -7,6 +7,7 @@ public interface TopCampaings {
     String getCampaignName();
     Long getDictionaryId();
     String getDictionaryName();
+    String getDictionaryname();
     Long getFileid();
 
     Long getImpressionNumber();
