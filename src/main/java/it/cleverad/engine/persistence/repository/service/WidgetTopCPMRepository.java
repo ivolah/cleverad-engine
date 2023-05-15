@@ -42,7 +42,7 @@ public interface WidgetTopCPMRepository extends JpaRepository<WidgetTopCPM, Long
                     " " +
                     "group by vall.campaignid, vall.campaignname" +
                     " ORDER BY impressionNumber DESC;")
-    List<TopCampaings> findGroupByCampaignId(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList, @Param("affiliateId") Long affiliateId);
+    List<TopCampaings> findGroupByCampaignId(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid );
 
     @Query(nativeQuery = true, value =
             "Select distinct vall.campaignid, " +
@@ -72,7 +72,7 @@ public interface WidgetTopCPMRepository extends JpaRepository<WidgetTopCPM, Long
                     "  AND (vall.campaignid = (:campaignid)) " +
                     "group by vall.campaignid, vall.campaignname" +
                     " ORDER BY impressionNumber DESC;")
-    List<TopCampaings> findGroupByCampaignIdAdmin(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList);
+    List<TopCampaings> findGroupByCampaignIdAdmin(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid );
 
 
     //===========================================================================================
@@ -110,7 +110,7 @@ public interface WidgetTopCPMRepository extends JpaRepository<WidgetTopCPM, Long
             "  AND (vall.campaignid = (:campaignid)) " +
             "group by vall.affiliateName, vall.affiliateId, vall.channelid, vall.channelName" +
             " ORDER BY impressionNumber DESC;")
-    List<TopAffiliates> findAffiliatesGroupByCampaignId(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList, @Param("affiliateId") Long affiliateId);
+    List<TopAffiliates> findAffiliatesGroupByCampaignId(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid );
 
     @Query(nativeQuery = true, value = "Select distinct vall.affiliateId                                                                as affiliateId, " +
             "                vall.affiliateName                                                              as affiliateName, " +
@@ -140,7 +140,8 @@ public interface WidgetTopCPMRepository extends JpaRepository<WidgetTopCPM, Long
             "  AND (vall.campaignid = (:campaignid)) " +
             "group by vall.affiliateName, vall.affiliateId, vall.channelid, vall.channelName" +
             " ORDER BY impressionNumber DESC;")
-    List<TopAffiliates> findAffiliatesGroupByCampaignIdAdmin(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList);
+    List<TopAffiliates> findAffiliatesGroupByCampaignIdAdmin(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid );
 
 }
+
 
