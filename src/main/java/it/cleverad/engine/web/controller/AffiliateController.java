@@ -44,6 +44,12 @@ public class AffiliateController {
         return business.update(id, request);
     }
 
+    @PatchMapping("/affiliate/update")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public AffiliateDTO updatebyAffiliate(@RequestBody AffiliateBusiness.Filter request) {
+        return business.update(request);
+    }
+
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public AffiliateDTO getByUuid(@PathVariable Long id) {

@@ -173,14 +173,14 @@ public class CommissionBusiness {
             }
 
             if (request.getName() != null) {
-                predicates.add(cb.like(root.get("name"), "%" + request.getName() + "%"));
+                predicates.add(cb.like(cb.upper(root.get("name")), "%" + request.getName().toUpperCase() + "%"));
             }
 
             if (request.getValue() != null) {
                 predicates.add(cb.equal(root.get("value"), request.getValue()));
             }
             if (request.getDescription() != null) {
-                predicates.add(cb.like(root.get("description"), "%" + request.getDescription() + "%"));
+                predicates.add(cb.like(cb.upper(root.get("description")), "%" + request.getDescription().toUpperCase() + "%"));
             }
             if (request.getStatus() != null) {
                 predicates.add(cb.equal(root.get("status"), request.getStatus()));

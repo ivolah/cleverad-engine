@@ -344,13 +344,13 @@ public class CampaignBusiness {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
             if (request.getName() != null) {
-                predicates.add(cb.like(root.get("name"), "%" + request.getName() + "%"));
+                predicates.add(cb.like(cb.upper(root.get("name")), "%" + request.getName().toUpperCase() + "%"));
             }
             if (request.getShortDescription() != null) {
-                predicates.add(cb.like(root.get("shortDescription"), "%" + request.getShortDescription() + "%"));
+                predicates.add(cb.like(cb.upper(root.get("shortDescription")), "%" + request.getShortDescription().toUpperCase() + "%"));
             }
             if (request.getLongDescription() != null) {
-                predicates.add(cb.like(root.get("longDescription"), "%" + request.getLongDescription() + "%"));
+                predicates.add(cb.like(cb.upper(root.get("longDescription")), "%" + request.getLongDescription().toUpperCase() + "%"));
             }
             if (request.getStatus() != null) {
                 predicates.add(cb.equal(root.get("status"), request.getStatus()));

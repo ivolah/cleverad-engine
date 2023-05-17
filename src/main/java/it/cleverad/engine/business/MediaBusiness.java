@@ -141,6 +141,7 @@ public class MediaBusiness {
 //            // multipli banner code??
 //        });
 
+        media.setMediaType(mediaTypeRepository.findById(filter.typeId).orElseThrow(() -> new ElementCleveradException("Media Type", filter.typeId)));
         media.setLastModificationDate(LocalDateTime.now());
         media.setBannerCode(bannerCode);
         media.setStatus(true);
@@ -169,8 +170,20 @@ public class MediaBusiness {
     public Page<MediaDTO> search(Filter request, Pageable pageableRequest) {
 
         if (jwtUserDetailsService.getRole().equals("Admin")) {
-            Page<Media> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id"))));
-            return page.map(media -> MediaDTO.from(media));
+            if (request.getCampaignId() != null) {
+                Campaign cc = campaignRepository.findById(request.getCampaignId()).orElseThrow(() -> new ElementCleveradException("Campaign", request.getCampaignId()));
+                Set<Media> list = cc.getMedias();
+                if (request.getTypeId() != null)
+                    list = list.stream().filter(media -> media.getMediaType().getId().equals(request.getTypeId())).collect(Collectors.toSet());
+
+                final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), list.size());
+                Page<Media> page = new PageImpl<>(list.stream().distinct().collect(Collectors.toList()).subList(pageableRequest.getPageNumber(), end), pageableRequest, list.size());
+                // Page<Media> page = new PageImpl<>(list.stream().distinct().collect(Collectors.toList()).subList(pageableRequest.getPageNumber(), pageableRequest.getPageSize()), pageableRequest, list.size());
+                return page.map(media -> MediaDTO.from(media));
+            } else {
+                Page<Media> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id"))));
+                return page.map(media -> MediaDTO.from(media));
+            }
         } else {
             Affiliate cc = affiliateRepository.findById(jwtUserDetailsService.getAffiliateID()).orElseThrow(() -> new ElementCleveradException("Affiliate", jwtUserDetailsService.getAffiliateID()));
 
@@ -210,7 +223,6 @@ public class MediaBusiness {
             list = cc.getMedias().stream().filter(media -> media.getStatus().booleanValue()).collect(Collectors.toSet());
         }
         Page<Media> page = new PageImpl<>(list.stream().distinct().collect(Collectors.toList()));
-
         return page.map(media -> {
             MediaDTO dto = MediaDTO.from(media);
             dto.setBannerCode(generaBannerCode(dto, media.getId(), campaignId, 0L, 0L));
@@ -257,8 +269,7 @@ public class MediaBusiness {
                 }
             });
 
-            if (StringUtils.isNotBlank(tt.getTarget()))
-                bannerCode = bannerCode.replace("{{target}}", tt.getTarget());
+            if (StringUtils.isNotBlank(tt.getTarget())) bannerCode = bannerCode.replace("{{target}}", tt.getTarget());
         }
 
         if (!jwtUserDetailsService.getRole().equals("Admin")) {
@@ -281,7 +292,7 @@ public class MediaBusiness {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
             if (request.getName() != null) {
-                predicates.add(cb.equal(root.get("name"), "%" + request.getName() + "%"));
+                predicates.add(cb.equal(cb.upper(root.get("name")), "%" + request.getName().toUpperCase() + "%"));
             }
 
             if (request.getStatus() != null) {
@@ -301,7 +312,7 @@ public class MediaBusiness {
             }
 
             if (request.getTarget() != null) {
-                predicates.add(cb.like(root.get("target"), request.getTarget()));
+                predicates.add(cb.like(cb.upper(root.get("target")), "%"+ request.getTarget().toUpperCase() + "%"));
             }
             if (request.getBannerCode() != null) {
                 predicates.add(cb.equal(root.get("bannerCode"), request.getBannerCode()));

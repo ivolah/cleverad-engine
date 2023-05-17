@@ -76,7 +76,9 @@ public class MediaDTO {
             }).collect(Collectors.toList());
         }
 
-        return new MediaDTO(media.getId(), media.getName(), media.getUrl(), media.getMailSubject(), media.getBannerCode(), media.getNote(), media.getIdFile(), media.getStatus(), media.getCreationDate(), media.getLastModificationDate(),
+        return new MediaDTO(media.getId(), media.getName(), media.getUrl(), media.getMailSubject(),
+                media.getBannerCode(), media.getNote(), media.getIdFile(), media.getStatus(),
+                media.getCreationDate(), media.getLastModificationDate(),
                 campaign != null ? campaign.getId() : null,
                 campaign != null ? campaign.getName() : "NON ASSOCIATO A CAMPAGNA",
                 media.getMediaType().getId(),
