@@ -22,6 +22,8 @@ public class Budget {
     private Long id;
 
     private Double budget;
+    @Column(name = "initial_budget")
+    private Double initialBudget;
     @Column(name = "due_date")
     private LocalDate dueDate;
     @Column(name = "start_date")

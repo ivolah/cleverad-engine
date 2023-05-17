@@ -57,6 +57,7 @@ public class BudgetBusiness {
     public BudgetDTO create(BaseCreateRequest request) {
         Budget map = mapper.map(request, Budget.class);
         map.setStatus(true);
+        map.setInitialBudget(request.getBudget());
         map.setAffiliate(affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliat", request.affiliateId)));
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
         return BudgetDTO.from(repository.save(map));
