@@ -60,7 +60,6 @@ public class TrackingBusiness {
     public TargetDTO getTarget(BaseCreateRequest request) {
         TargetDTO targetDTO = new TargetDTO();
         Refferal refferal = referralService.decodificaReferral(request.getRefferalId());
-        log.trace("REFFERAL :: {} - {}", request.getRefferalId(), refferal.toString());
 
         if (refferal.getMediaId() != null) {
             MediaDTO mediaDTO = mediaBusiness.findById(refferal.getMediaId());
@@ -79,7 +78,6 @@ public class TrackingBusiness {
             campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(refferal.getAffiliateId(), refferal.getCampaignId()).stream().findFirst().ifPresent(campaignAffiliateDTO -> targetDTO.setFollowThorugh(campaignAffiliateDTO.getFollowThrough()));
 
         return targetDTO;
-
     }
 
     // CREATE
