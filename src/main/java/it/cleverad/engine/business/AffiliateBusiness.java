@@ -127,6 +127,7 @@ public class AffiliateBusiness {
         Affiliate mappedEntity = mapper.map(affiliate, Affiliate.class);
         mappedEntity.setLastModificationDate(LocalDateTime.now());
         mappedEntity.setDictionaryStatusType(dictionaryRepository.findById(filter.statusId).orElseThrow(() -> new ElementCleveradException("Status", filter.statusId)));
+        mappedEntity.setDictionaryCompanyType(dictionaryRepository.findById(filter.companytypeId).orElseThrow(() -> new ElementCleveradException("Company Type", filter.companytypeId)));
 
         MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
         Long statusID = filter.statusId;
@@ -180,6 +181,8 @@ public class AffiliateBusiness {
         Affiliate map = mapper.map(request, Affiliate.class);
         request.statusId = 5L;
         map.setDictionaryStatusType(dictionaryRepository.findById(request.statusId).orElseThrow(() -> new ElementCleveradException("Status", request.statusId)));
+        map.setDictionaryCompanyType(dictionaryRepository.findById(request.companytypeId).orElseThrow(() -> new ElementCleveradException("Company Type", request.companytypeId)));
+
         AffiliateDTO dto = AffiliateDTO.from(repository.save(map));
 
         // invio mail Affiliate
