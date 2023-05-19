@@ -169,8 +169,7 @@ public class CampaignBusiness {
 
     public CampaignDTO findByIdAdminNull(Long id) {
         Campaign campaign = repository.findById(id).orElse(null);
-        if (campaign == null)
-            return null;
+        if (campaign == null) return null;
         else return CampaignDTO.from(campaign);
     }
 
@@ -418,6 +417,7 @@ public class CampaignBusiness {
         private LocalDateTime startDate;
         @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSz")
         private LocalDateTime endDate;
+        private String cap;
     }
 
     @Data
@@ -457,6 +457,7 @@ public class CampaignBusiness {
         private Long companyId;
         private Long plannerId;
         private Long dealerId;
+        private String cap;
     }
 
 }

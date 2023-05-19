@@ -31,6 +31,7 @@ public class CampaignDTO {
     private String valuta;
     private Double budget;
     private Double initialBudget;
+    private String cap;
     private String trackingCode;
     private String encodedId;
 
@@ -170,7 +171,7 @@ public class CampaignDTO {
                 campaign.getLongDescription(), campaign.getNote(), campaign.getStatus(),
                 campaign.getCreationDate(), campaign.getLastModificationDate(),
                 campaign.getStartDate(), campaign.getEndDate(), campaign.getIdFile(),
-                campaign.getValuta(), campaign.getBudget(), campaign.getInitialBudget(),
+                campaign.getValuta(), campaign.getBudget(), campaign.getInitialBudget(), campaign.getCap(),
                 campaign.getTrackingCode(), campaign.getEncodedId(),
                 campaign.getCookie().getId(),
                 campaign.getCookie().getName(),
