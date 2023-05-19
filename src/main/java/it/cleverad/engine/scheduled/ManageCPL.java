@@ -75,7 +75,12 @@ public class ManageCPL {
                     transaction.setMediaId(refferal.getMediaId());
                     transaction.setDateTime(cplDTO.getDate());
                     transaction.setApproved(true);
-                    transaction.setAgent(cplDTO.getAgent());
+
+                    if (StringUtils.isNotBlank(cplDTO.getAgent()))
+                        transaction.setAgent(cplDTO.getAgent());
+                    else
+                        transaction.setAgent("");
+
                     transaction.setIp(cplDTO.getIp());
                     transaction.setData(cplDTO.getData());
                     transaction.setMediaId(refferal.getMediaId());
@@ -102,7 +107,11 @@ public class ManageCPL {
 
                     // trovo revenue
                     RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 11L);
-                    if (rf != null) transaction.setRevenueId(rf.getId());
+                    if (rf != null) {
+                        transaction.setRevenueId(rf.getId());
+                    } else {
+                        log.warn("Non trovato revenue factor di tipo 11 per campagna {}", refferal.getCampaignId());
+                    }
 
                     // gesione commisione
                     Long commId = null;

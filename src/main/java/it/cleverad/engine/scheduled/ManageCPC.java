@@ -117,7 +117,12 @@ public class ManageCPC {
 
                     // trovo revenue
                     RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(campaignId, 10L);
-                    if (rf != null && rf.getId() != null) transaction.setRevenueId(rf.getId());
+                    if (rf != null && rf.getId() != null) {
+                        transaction.setRevenueId(rf.getId());
+                    }
+                    else {
+                        log.warn("Non trovato revenue factor di tipo 10 per campagna {}", campaignId);
+                    }
 
                     // gesione commisione
                     Long commId = null;
@@ -182,6 +187,8 @@ public class ManageCPC {
                             transaction.setDictionaryId(49L);
                         }
                     }
+
+                    transaction.setAgent(" ");
 
                     // creo la transazione
                     TransactionCPCDTO tcpc = transactionBusiness.createCpc(transaction);

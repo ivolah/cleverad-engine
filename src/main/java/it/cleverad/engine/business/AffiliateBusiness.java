@@ -181,7 +181,8 @@ public class AffiliateBusiness {
         Affiliate map = mapper.map(request, Affiliate.class);
         request.statusId = 5L;
         map.setDictionaryStatusType(dictionaryRepository.findById(request.statusId).orElseThrow(() -> new ElementCleveradException("Status", request.statusId)));
-        map.setDictionaryCompanyType(dictionaryRepository.findById(request.companytypeId).orElseThrow(() -> new ElementCleveradException("Company Type", request.companytypeId)));
+        if (request.companytypeId != null)
+            map.setDictionaryCompanyType(dictionaryRepository.findById(request.companytypeId).orElseThrow(() -> new ElementCleveradException("Company Type", request.companytypeId)));
 
         AffiliateDTO dto = AffiliateDTO.from(repository.save(map));
 

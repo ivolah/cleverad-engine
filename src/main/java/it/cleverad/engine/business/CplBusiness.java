@@ -98,7 +98,8 @@ public class CplBusiness {
         Page<CplDTO> res = page.map(CplDTO::from);
         List<CplDTO> exp = new ArrayList<>();
         res.stream().forEach(cplDTO -> {
-            if (StringUtils.isNotBlank(cplDTO.getRefferal()) && !cplDTO.getRefferal().contains("{{refferalId}}")) {
+            if (StringUtils.isNotBlank(cplDTO.getRefferal()) && !cplDTO.getRefferal().contains("{")) {
+
                 Refferal refferal = referralService.decodificaReferral(cplDTO.getRefferal());
 
                 Campaign campaign = campaignRepository.findById(refferal.getCampaignId()).orElse(null);
@@ -115,13 +116,13 @@ public class CplBusiness {
                             cplDTO.setAffiliateId(refferal.getAffiliateId());
                         }
                     }
-
                     Channel channel = channelRepository.findById(refferal.getChannelId()).orElse(null);
                     if (refferal.getChannelId() != null && channel != null && channel.getName() != null) {
                         cplDTO.setChannelName(channel.getName());
                         cplDTO.setChannelId(refferal.getChannelId());
                     }
                 }
+
             } else {
                 cplDTO.setRefferal("");
             }

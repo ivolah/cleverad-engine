@@ -111,7 +111,7 @@ public class ChannelBusiness {
         }
 
         // setto categories
-        if (StringUtils.isNotBlank(request.getCategories())) {
+        if (StringUtils.isNotBlank(request.getCategories()) && !request.getCategories().equals("null")) {
             Arrays.stream(request.getCategories().split(",")).map(s -> channelCategoryBusiness.create(new ChannelCategoryBusiness.BaseCreateRequest(channelDTO.getId(), Long.valueOf(s)))).collect(Collectors.toList());
         }
 

@@ -86,8 +86,8 @@ public class TransactionAllBusiness {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("dateTime")));
         request.setPayoutId(null);
         if (jwtUserDetailsService.getRole().equals("Admin")) {
-            Page<ViewTransactionAll> page = repository.findAll(getSpecification(request), pageable);
             request.setValueNotZero(true);
+            Page<ViewTransactionAll> page = repository.findAll(getSpecification(request), pageable);
             return page.map(TransactionAllDTO::from);
         } else {
             request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
