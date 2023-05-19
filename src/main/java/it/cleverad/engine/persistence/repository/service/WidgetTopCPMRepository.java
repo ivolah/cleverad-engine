@@ -29,19 +29,25 @@ public interface WidgetTopCPMRepository extends JpaRepository<WidgetTopCPM, Long
                     "                case" +
                     "                    when SUM(vall.revenue) > 0 then" +
                     "                        round(CAST((SUM(vall.revenue) - SUM(vall.commssion)) / SUM(vall.revenue) * 100 AS numeric), 2)" +
-                    "                    else 0 end                                                                  as marginePC," +
+                    "                    else 0 end                                                              as marginePC," +
                     "                COALESCE(round(SUM(vall.commssion) / SUM(vall.impression) * 1000, 2), 0)    as ecpm, " +
-                    "                COALESCE(round(SUM(vall.commssion) / SUM(vall.clicknumber), 2), 0)   as ecpc, " +
-                    "                COALESCE(round(SUM(vall.commssion) / SUM(vall.leadnumber), 2), 0)           as ecpl" +
-                    " " +
-                    "from v_widget_all vall " +
-                    "where ((:dateFrom <= vall.date) AND (:dateTo >= vall.date)) " +
+                    "                COALESCE(round(SUM(vall.commssion) / SUM(vall.clicknumber), 2), 0)          as ecpc, " +
+                    "                COALESCE(round(SUM(vall.commssion) / SUM(vall.leadnumber), 2), 0)           as ecpl, " +
+                    "                COALESCE(tc.initial_budget, 0)                                              as initialBudget, " +
+                    "                COALESCE(tc.budget, 0)                                                      as budget, " +
+                    "                case" +
+                    "                    when tc.initial_budget > 0 then\n" +
+                    "                        round(CAST((tc.initial_budget - tc.budget) / tc.initial_budget * 100 AS numeric), 2) " +
+                    "                    else 0 end                                                              as budgetPC " +
+                    "  from v_widget_all vall " +
+                    "          left join t_campaign tc on vall.campaignid = tc.id " +
+                    "  where ((:dateFrom <= vall.date) AND (:dateTo >= vall.date)) " +
                     "  AND ((:dictionaryList)IS NULL OR (vall.dictionaryId in (:dictionaryList))) " +
                     "  AND ( (:affiliateId)IS NULL OR (vall.affiliateid = (:affiliateId)))  " +
                     "  AND ((:campaignid) IS NULL OR (vall.campaignid = (:campaignid)))  "+
-                    "group by vall.fileid, vall.campaignname, vall.campaignid" +
+                    " group by vall.fileid, vall.campaignname, vall.campaignid, tc.initial_budget, tc.budget " +
                     " ORDER BY impressionNumber DESC;")
-    List<TopCampaings> findGroupByCampaignId(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid );
+    List<TopCampaings> searchTopCampaigns(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid );
 
     @Query(nativeQuery = true, value =
             "Select distinct vall.campaignid, " +
@@ -69,7 +75,7 @@ public interface WidgetTopCPMRepository extends JpaRepository<WidgetTopCPM, Long
                     "  AND ((:dictionaryList)IS NULL OR (vall.dictionaryId in (:dictionaryList))) " +
                     "  AND ( (:affiliateId)IS NULL OR (vall.affiliateid = (:affiliateId)))  " +
                     "  AND ((:campaignid) IS NULL OR (vall.campaignid = (:campaignid)))  "+
-                    "group by vall.fileid, vall.campaignname, vall.campaignid" +
+                    " group by vall.fileid, vall.campaignname, vall.campaignid" +
                     " ORDER BY impressionNumber DESC;")
     List<TopCampaings> findGroupByCampaignIdAdmin(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid );
 
@@ -100,14 +106,12 @@ public interface WidgetTopCPMRepository extends JpaRepository<WidgetTopCPM, Long
             "                COALESCE(round(SUM(vall.commssion) / SUM(vall.impression) * 1000, 2), 0)    as ecpm, " +
             "                COALESCE(round(SUM(vall.commssion) / SUM(vall.clicknumber), 2), 0)   as ecpc, " +
             "                COALESCE(round(SUM(vall.commssion) / SUM(vall.leadnumber), 2), 0)           as ecpl" +
-            " " +
-            "from v_widget_all vall " +
-            " " +
-            "where ((:dateFrom <= vall.date) AND (:dateTo >= vall.date)) " +
+            " from v_widget_all vall " +
+            " where ((:dateFrom <= vall.date) AND (:dateTo >= vall.date)) " +
             "  AND ((:dictionaryList)IS NULL OR (vall.dictionaryId in (:dictionaryList))) " +
             "  AND ( (:affiliateId)IS NULL OR (vall.affiliateid = (:affiliateId)))  " +
             "  AND ((:campaignid) IS NULL OR (vall.campaignid = (:campaignid)))  "+
-            "group by vall.affiliateName, vall.affiliateId, vall.channelid, vall.channelName" +
+            " group by vall.affiliateName, vall.affiliateId, vall.channelid, vall.channelName" +
             " ORDER BY impressionNumber DESC;")
     List<TopAffiliates> findAffiliatesGroupByCampaignId(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid );
 
@@ -130,14 +134,12 @@ public interface WidgetTopCPMRepository extends JpaRepository<WidgetTopCPM, Long
             "                COALESCE(round(SUM(vall.commssion) / SUM(vall.impression) * 1000, 2), 0)    as ecpm, " +
             "                COALESCE(round(SUM(vall.commssion) / SUM(vall.clicknumber), 2), 0)   as ecpc, " +
             "                COALESCE(round(SUM(vall.commssion) / SUM(vall.leadnumber), 2), 0)           as ecpl" +
-            " " +
-            "from v_widget_all vall " +
-            " " +
-            "where ((:dateFrom <= vall.date) AND (:dateTo >= vall.date)) " +
+            " from v_widget_all vall " +
+            " where ((:dateFrom <= vall.date) AND (:dateTo >= vall.date)) " +
             "  AND ((:dictionaryList)IS NULL OR (vall.dictionaryId in (:dictionaryList))) " +
             "  AND ( (:affiliateId)IS NULL OR (vall.affiliateid = (:affiliateId)))  " +
             "  AND ((:campaignid) IS NULL OR (vall.campaignid = (:campaignid)))  "+
-            "group by vall.affiliateName, vall.affiliateId, vall.channelid, vall.channelName" +
+            " group by vall.affiliateName, vall.affiliateId, vall.channelid, vall.channelName" +
             " ORDER BY impressionNumber DESC;")
     List<TopAffiliates> findAffiliatesGroupByCampaignIdAdmin(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid );
 
