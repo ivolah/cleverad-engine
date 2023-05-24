@@ -36,15 +36,19 @@ public interface WidgetTopCPMRepository extends JpaRepository<WidgetTopCPM, Long
                     "                COALESCE(tc.initial_budget, 0)                                              as initialBudget, " +
                     "                COALESCE(tc.budget, 0)                                                      as budget, " +
                     "                case" +
-                    "                    when tc.initial_budget > 0 then\n" +
+                    "                    when tc.initial_budget > 0 then " +
                     "                        round(CAST((tc.initial_budget - tc.budget) / tc.initial_budget * 100 AS numeric), 2) " +
+                    "                    else 0 end                                                              as budgetGivenPC, " +
+                    "                case" +
+                    "                    when tc.initial_budget > 0 then " +
+                    "                        round(CAST(tc.budget / tc.initial_budget * 100 AS numeric), 2) " +
                     "                    else 0 end                                                              as budgetPC " +
                     "  from v_widget_all vall " +
                     "          left join t_campaign tc on vall.campaignid = tc.id " +
                     "  where ((:dateFrom <= vall.date) AND (:dateTo >= vall.date)) " +
                     "  AND ((:dictionaryList)IS NULL OR (vall.dictionaryId in (:dictionaryList))) " +
                     "  AND ( (:affiliateId)IS NULL OR (vall.affiliateid = (:affiliateId)))  " +
-                    "  AND ((:campaignid) IS NULL OR (vall.campaignid = (:campaignid)))  "+
+                    "  AND ((:campaignid) IS NULL OR (vall.campaignid = (:campaignid)))  " +
                     " group by vall.fileid, vall.campaignname, vall.campaignid, tc.initial_budget, tc.budget " +
                     " ORDER BY impressionNumber DESC;")
     List<TopCampaings> searchTopCampaigns(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid );

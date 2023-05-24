@@ -29,6 +29,7 @@ public interface TopCampaings {
 
     Double getBudget();
     Double getBudgetPC();
+    Double getBudgetGivenPC();
     Double getInitialBudget();
 
 
