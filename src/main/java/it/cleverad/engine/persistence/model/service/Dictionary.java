@@ -46,6 +46,9 @@ public class Dictionary {
     @OneToMany
     @JoinColumn(name = "owner_id")
     private Set<Channel> channelsOwners;
+    @OneToMany
+    @JoinColumn(name = "business_type_id")
+    private Set<Channel> channelsBusinessType;
 
     @OneToMany
     @JoinColumn(name = "dictionary_id")

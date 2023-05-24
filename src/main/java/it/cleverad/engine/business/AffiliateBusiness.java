@@ -215,6 +215,7 @@ public class AffiliateBusiness {
         channelRequest.setCategories(request.channelCategories);
         channelRequest.setDictionaryId(12L);
         channelRequest.setTypeId(request.channelTypeId);
+        channelRequest.setBusinessTypeId(request.businessTypeId);
         channelRequest.setStatus(true);
         channelRequest.setRegistrazione(true);
         channelBusiness.create(channelRequest);
@@ -363,6 +364,7 @@ public class AffiliateBusiness {
         private String channelCategories;
         private Long channelOwnerId;
         private Long channelTypeId;
+        private Long businessTypeId;
 
     }
 

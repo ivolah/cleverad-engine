@@ -83,6 +83,7 @@ public class ChannelBusiness {
         Channel map = mapper.map(request, Channel.class);
         map.setDictionary(dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
         map.setDictionaryType(dictionaryRepository.findById(request.typeId).orElseThrow(() -> new ElementCleveradException("Type", request.typeId)));
+        map.setDictionaryBusinessType(dictionaryRepository.findById(request.businessTypeId).orElseThrow(() -> new ElementCleveradException("Business Type", request.businessTypeId)));
         map.setDictionaryOwner(dictionaryRepository.findById(request.ownerId).orElseThrow(() -> new ElementCleveradException("Owner", request.ownerId)));
 
         if (request.affiliateId != null) {
@@ -198,6 +199,7 @@ public class ChannelBusiness {
         mappedEntity.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.dictionaryId)));
         mappedEntity.setDictionaryType(dictionaryRepository.findById(filter.typeId).orElseThrow(() -> new ElementCleveradException("Type", filter.typeId)));
         mappedEntity.setDictionaryOwner(dictionaryRepository.findById(filter.ownerId).orElseThrow(() -> new ElementCleveradException("Owner", filter.ownerId)));
+        mappedEntity.setDictionaryBusinessType(dictionaryRepository.findById(filter.businessTypeId).orElseThrow(() -> new ElementCleveradException("Business Type", filter.businessTypeId)));
 
         mappedEntity.setLastModificationDate(LocalDateTime.now());
         mapper.map(campaignDTOfrom, mappedEntity);
@@ -296,6 +298,9 @@ public class ChannelBusiness {
     public Page<DictionaryDTO> getTypes() {
         return dictionaryBusiness.getTypeChannel();
     }
+    public Page<DictionaryDTO> getBusinessTypes() {
+        return dictionaryBusiness.getBusinessTypeChannel();
+    }
 
     public ChannelDTO disable(Long id) {
         Channel channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Channel", id));
@@ -332,6 +337,9 @@ public class ChannelBusiness {
             if (request.getDictionaryId() != null) {
                 predicates.add(cb.equal(root.get("dictionary").get("id"), request.getDictionaryId()));
             }
+            if (request.getBusinessTypeId() != null) {
+                predicates.add(cb.equal(root.get("dictionaryBusinessType").get("id"), request.getBusinessTypeId()));
+            }
             if (request.getOwnerId() != null) {
                 predicates.add(cb.equal(root.get("dictionaryOwner").get("id"), request.getOwnerId()));
             }
@@ -360,6 +368,8 @@ public class ChannelBusiness {
             }
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 
+
+
             return completePredicate;
         };
     }
@@ -386,7 +396,7 @@ public class ChannelBusiness {
         private Long dictionaryId;
         private Long typeId;
         private Boolean status;
-
+        private Long businessTypeId;
         private Boolean registrazione;
 
     }
@@ -409,6 +419,7 @@ public class ChannelBusiness {
         private Long dictionaryId;
         private Long typeId;
         private Boolean status;
+        private Long businessTypeId;
 
         private Instant creationDateFrom;
         private Instant creationDateTo;

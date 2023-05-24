@@ -34,6 +34,9 @@ public class ChannelDTO {
     private Long typeId;
     private String typeValue;
 
+    private Long businessTypeId;
+    private String businessTypeValue;
+
     private List<Long> categoryList;
     private List<CategoryDTO> categories;
     private String campaignID;
@@ -41,7 +44,7 @@ public class ChannelDTO {
     private String affiliateName;
     private Long affiliateId;
 
-    public ChannelDTO(Long id, String name, String shortDescription, String dimension, String country, Long ownerId, String ownerName, Boolean status, String url, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long dictionaryId, String dictionaryValue, Long typeId, String typeValue, List<Long> categoryList, List<CategoryDTO> categories, String affiliateName, Long affiliateId) {
+    public ChannelDTO(Long id, String name, String shortDescription, String dimension, String country, Long ownerId, String ownerName, Boolean status, String url, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long dictionaryId, String dictionaryValue, Long typeId, String typeValue, Long businessTypeId, String businessTypeValue, List<Long> categoryList, List<CategoryDTO> categories, String affiliateName, Long affiliateId) {
         this.id = id;
         this.name = name;
         this.shortDescription = shortDescription;
@@ -55,6 +58,8 @@ public class ChannelDTO {
         this.lastModificationDate = lastModificationDate;
         this.dictionaryId = dictionaryId;
         this.dictionaryValue = dictionaryValue;
+        this.businessTypeId = businessTypeId;
+        this.businessTypeValue = businessTypeValue;
         this.typeId = typeId;
         this.typeValue = typeValue;
         this.categoryList = categoryList;
@@ -96,6 +101,10 @@ public class ChannelDTO {
 
                 channel.getDictionaryType() != null ? channel.getDictionaryType().getId() : null,
                 channel.getDictionaryType() != null ? channel.getDictionaryType().getName() : null,
+
+                channel.getDictionaryBusinessType() != null ? channel.getDictionaryBusinessType().getId() : null,
+                channel.getDictionaryBusinessType() != null ? channel.getDictionaryBusinessType().getName() : null,
+
                 categoryList,
                 categories,
                 channel.getAffiliate() != null ? channel.getAffiliate().getName() : null,

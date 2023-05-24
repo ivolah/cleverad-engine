@@ -41,6 +41,10 @@ public class Channel {
     private Dictionary dictionary;
 
     @ManyToOne
+    @JoinColumn(name = "business_type_id")
+    private Dictionary dictionaryBusinessType;
+
+    @ManyToOne
     @JoinColumn(name = "affiliate_id")
     private Affiliate affiliate;
 
