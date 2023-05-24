@@ -88,7 +88,12 @@ public class ManageCPS {
 
                 // trovo revenue
                 RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 51L);
-                rr.setRevenueId(rf.getId());
+                if (rf != null) {
+                    rr.setRevenueId(rf.getId());
+                } else {
+                    log.warn("Non trovato revenue factor di tipo 11 per campagna {} , setto default", refferal.getCampaignId());
+                    rr.setRevenueId(4L);
+                }
 
                 // gesione commisione
                 Long commId = null;

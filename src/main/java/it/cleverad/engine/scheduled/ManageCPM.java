@@ -115,7 +115,14 @@ public class ManageCPM {
                         // trovo revenue
                         if (refferal.getCampaignId() != null) {
                             RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 50L);
-                            if (rf != null && rf.getId() != null) transaction.setRevenueId(rf.getId());
+                            if (rf != null && rf.getId() != null) {
+                                transaction.setRevenueId(rf.getId());
+                            }
+                            else
+                            {
+                                log.warn("Non trovato revenue factor di tipo 10 per campagna {}, setto default", refferal.getCampaignId());
+                                transaction.setRevenueId(3L);
+                            }
                         }
 
                         // gesione commisione

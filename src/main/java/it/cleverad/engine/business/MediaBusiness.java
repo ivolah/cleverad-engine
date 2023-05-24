@@ -259,7 +259,6 @@ public class MediaBusiness {
         String url = dto.getUrl();
         if (StringUtils.isNotBlank(url)) bannerCode = bannerCode.replace("{{url}}", url);
 
-        //TODO : sae non c'è una lista ma solo uno ?
         List<TargetDTO> lista = targetBusiness.getByMediaIdAll(mediaId).stream().collect(Collectors.toList());
         if (lista.size() > 0) {
             TargetDTO tt = new TargetDTO();

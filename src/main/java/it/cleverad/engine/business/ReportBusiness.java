@@ -129,22 +129,27 @@ public class ReportBusiness {
             listaCampaigns = topCampaignCPMRepository.searchTopCampaigns(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds(), jwtUserDetailsService.getAffiliateID(), request.getCampaignid());
         } else {
             listaCampaigns = topCampaignCPMRepository.searchTopCampaigns(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds(), request.getAffiliateid(), request.getCampaignid());
-          //  listaCampaigns = topCampaignCPMRepository.findGroupByCampaignIdAdmin(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds(), request.getAffiliateid(), request.getCampaignid());
         }
         final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), listaCampaigns.size());
-        Page<TopCampaings> pages = new PageImpl<>(listaCampaigns.stream().distinct().collect(Collectors.toList()).subList(pageableRequest.getPageNumber(), end), pageableRequest, listaCampaigns.size());
+        Page<TopCampaings> pages =
+                new PageImpl<>(
+                        listaCampaigns.stream()
+                                .distinct()
+                                .collect(Collectors.toList())
+                                .subList((int) pageableRequest.getOffset(), end), pageableRequest, listaCampaigns.size()
+                );
         return pages;
     }
 
     public Page<TopAffiliates> searchTopAffilaites(TopFilter request, Pageable pageableRequest) {
         List<TopAffiliates> listaAffiliates = new ArrayList<>();
         if (!jwtUserDetailsService.isAdmin()) {
-            listaAffiliates = topCampaignCPMRepository.findAffiliatesGroupByCampaignId(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds(), jwtUserDetailsService.getAffiliateID(), request.getCampaignid());
+            listaAffiliates = topCampaignCPMRepository.searchTopAffilaites(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds(), jwtUserDetailsService.getAffiliateID(), request.getCampaignid());
         } else {
-            listaAffiliates = topCampaignCPMRepository.findAffiliatesGroupByCampaignIdAdmin(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds(), request.getAffiliateid(), request.getCampaignid());
+            listaAffiliates = topCampaignCPMRepository.searchTopAffilaites(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds(), request.getAffiliateid(), request.getCampaignid());
         }
         final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), listaAffiliates.size());
-        Page<TopAffiliates> pages = new PageImpl<>(listaAffiliates.stream().distinct().collect(Collectors.toList()).subList(pageableRequest.getPageNumber(), end), pageableRequest, listaAffiliates.size());
+        Page<TopAffiliates> pages = new PageImpl<>(listaAffiliates.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, listaAffiliates.size());
         return pages;
     }
 

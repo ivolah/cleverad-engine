@@ -153,7 +153,6 @@ public class CampaignBusiness {
         } else {
             Filter request = new Filter();
             request.setId(id);
-            // TODO logica per seach di quelli assegnati
             campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
         }
 

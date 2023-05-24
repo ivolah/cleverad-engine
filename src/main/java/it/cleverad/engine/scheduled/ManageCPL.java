@@ -55,7 +55,7 @@ public class ManageCPL {
                 if (cplDTO.getRefferal().length() < 5) {
                     log.trace("Referral con solo Campaign Id :: {}", cplDTO.getRefferal());
                     // cerco da cpc
-                    List<CpcDTO> ips = cpcBusiness.findByIp24HoursBefore(cplDTO.getIp(), cplDTO.getDate()).stream().collect(Collectors.toList());
+                    List<CpcDTO> ips = cpcBusiness.findByIp24HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal()).stream().collect(Collectors.toList());
                     // prendo ultimo ip
                     for (CpcDTO dto : ips)
                         if (StringUtils.isNotBlank(dto.getRefferal())) cplDTO.setRefferal(dto.getRefferal());
@@ -110,7 +110,8 @@ public class ManageCPL {
                     if (rf != null) {
                         transaction.setRevenueId(rf.getId());
                     } else {
-                        log.warn("Non trovato revenue factor di tipo 11 per campagna {}", refferal.getCampaignId());
+                        log.warn("Non trovato revenue factor di tipo 11 per campagna {} , setto default", refferal.getCampaignId());
+                        transaction.setRevenueId(2L);
                     }
 
                     // gesione commisione
@@ -121,7 +122,7 @@ public class ManageCPL {
                     req.setAffiliateId(refferal.getAffiliateId());
                     req.setChannelId(refferal.getChannelId());
                     req.setCampaignId(refferal.getCampaignId());
-                    req.setCommissionDicId(50L);
+                    req.setCommissionDicId(11L);
                     AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
 
                     if (acccFirst != null) {
@@ -168,6 +169,7 @@ public class ManageCPL {
                             transaction.setDictionaryId(48L);
                         }
                     }
+
 
                     // creo la transazione
                     TransactionCPLDTO cpl = transactionBusiness.createCpl(transaction);

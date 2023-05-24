@@ -377,7 +377,7 @@ public class ViewBusiness {
             if (!jwtUserDetailsService.isAdmin()) filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
             List<WidgetCampaignDayCpl> giornato = widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(filter), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
             for (WidgetCampaignDayCpl w : giornato) {
-                dd = dd + w.getValore();
+                dd = dd + 1;
             }
             xSeries.put(today.withDayOfYear(Math.toIntExact(gg)).toString());
             harej.put(dd);

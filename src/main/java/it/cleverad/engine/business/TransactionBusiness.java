@@ -199,7 +199,6 @@ public class TransactionBusiness {
         } else {
             CampaignBusiness.Filter request = new CampaignBusiness.Filter();
             request.setId(id);
-            // TODO logica per seach di quelli assegnati
             transaction = cpcRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
         }
         return TransactionCPCDTO.from(transaction);
@@ -213,7 +212,6 @@ public class TransactionBusiness {
         } else {
             CampaignBusiness.Filter request = new CampaignBusiness.Filter();
             request.setId(id);
-            // TODO logica per seach di quelli assegnati
             transaction = cplRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
         }
         return TransactionCPLDTO.from(transaction);
@@ -227,7 +225,6 @@ public class TransactionBusiness {
         } else {
             CampaignBusiness.Filter request = new CampaignBusiness.Filter();
             request.setId(id);
-            // TODO logica per seach di quelli assegnati
             transaction = cpmRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
         }
         return TransactionCPMDTO.from(transaction);
@@ -241,7 +238,6 @@ public class TransactionBusiness {
         } else {
             CampaignBusiness.Filter request = new CampaignBusiness.Filter();
             request.setId(id);
-            // TODO logica per seach di quelli assegnati
             transaction = cpsRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
         }
         return TransactionCPSDTO.from(transaction);
@@ -251,6 +247,8 @@ public class TransactionBusiness {
     public void delete(Long id, String type) {
         try {
             if (type.equals("CPC")) {
+                // TODO aggiunggi modifica X aggiornamento budget
+
                 cpcRepository.deleteById(id);
             } else if (type.equals("CPL")) {
                 cplRepository.deleteById(id);

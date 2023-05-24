@@ -178,15 +178,18 @@ public class CpcBusiness {
         return page.map(CpcDTO::from);
     }
 
-    public Page<CpcDTO> findByIp24HoursBefore(String ip, LocalDateTime dateTime) {
+    public Page<CpcDTO> findByIp24HoursBefore(String ip, LocalDateTime dateTime, String referral) {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal")));
         Filter request = new Filter();
         request.setIp(ip);
-        request.setDatetimeFrom(dateTime.minusDays(1));
+        //       request.setDatetimeFrom(dateTime.minusMonths(24));
+      request.setDatetimeFrom(dateTime.minusHours(24));
         request.setDatetimeTo(dateTime);
+        request.setRefferal(referral);
         Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CpcDTO::from);
     }
+
     public Page<CpcDTO> findByIpTwoHoursBefore(String ip, LocalDateTime dateTime) {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal")));
         Filter request = new Filter();
@@ -227,13 +230,13 @@ public class CpcBusiness {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
             if (request.getRefferal() != null) {
-                predicates.add(cb.equal(root.get("refferal"), request.getRefferal()));
+                predicates.add(cb.like(root.get("refferal"), '%' + request.getRefferal() + "%"));
             }
             if (request.getRead() != null) {
                 predicates.add(cb.equal(root.get("read"), request.getRead()));
             }
             if (request.getIp() != null) {
-                predicates.add(cb.equal(root.get("ip"), request.getIp()));
+                predicates.add(cb.like(root.get("ip"), '%' + request.getIp() + "%"));
             }
             if (request.getDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("date"), request.getDateFrom().atStartOfDay()));

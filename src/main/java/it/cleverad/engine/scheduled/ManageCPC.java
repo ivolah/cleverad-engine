@@ -66,7 +66,7 @@ public class ManageCPC {
                 if (dto.getRefferal().length() < 5) {
                     log.trace("Referral on solo Campaign Id :: {}", dto.getRefferal());
                     // cerco da cpc
-                    List<CpcDTO> ips = cpcBusiness.findByIp24HoursBefore(dto.getIp(), dto.getDate()).stream().collect(Collectors.toList());
+                    List<CpcDTO> ips = cpcBusiness.findByIp24HoursBefore(dto.getIp(), dto.getDate(), dto.getRefferal()).stream().collect(Collectors.toList());
 
                     // prendo ultimo ipp
                     for (CpcDTO cpcDTO : ips)
@@ -119,9 +119,9 @@ public class ManageCPC {
                     RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(campaignId, 10L);
                     if (rf != null && rf.getId() != null) {
                         transaction.setRevenueId(rf.getId());
-                    }
-                    else {
-                        log.warn("Non trovato revenue factor di tipo 10 per campagna {}", campaignId);
+                    } else {
+                        log.warn("Non trovato revenue factor di tipo 10 per campagna {}, setto default", campaignId);
+                        transaction.setRevenueId(1L);
                     }
 
                     // gesione commisione
@@ -132,7 +132,7 @@ public class ManageCPC {
                     req.setAffiliateId(affiliateId);
                     req.setChannelId(channelId);
                     req.setCampaignId(campaignId);
-                    req.setCommissionDicId(50L);
+                    req.setCommissionDicId(10L);
                     AffiliateChannelCommissionCampaignDTO accc = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
 
                     if (accc != null) {
@@ -147,8 +147,7 @@ public class ManageCPC {
                         commVal = commission != null ? Double.valueOf(commission.getValue()) : 0;
                     }
 
-                    if (commId != null)
-                        transaction.setCommissionId(commId);
+                    if (commId != null) transaction.setCommissionId(commId);
 
                     // calcolo valore
                     Double totale = commVal * aLong;
