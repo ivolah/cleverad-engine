@@ -62,7 +62,10 @@ public class TransactionBusiness {
     private MediaRepository mediaRepository;
     @Autowired
     private DictionaryRepository dictionaryRepository;
-
+    @Autowired
+    private BudgetBusiness budgetBusiness;
+    @Autowired
+    private CampaignBusiness campaignBusiness;
 
     /**
      * ============================================================================================================
@@ -247,14 +250,52 @@ public class TransactionBusiness {
     public void delete(Long id, String type) {
         try {
             if (type.equals("CPC")) {
-                // TODO aggiunggi modifica X aggiornamento budget
+                TransactionCPCDTO dto = this.findByIdCPC(id);
 
+                // aggiorno budget affiliato
+                BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
+                budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
+
+                // aggiorno budget campagna
+                campaignBusiness.updateBudget(dto.getCampaignId(), campaignBusiness.findById(dto.getCampaignId()).getBudget() + dto.getValue());
+
+                //cancello
                 cpcRepository.deleteById(id);
             } else if (type.equals("CPL")) {
+                TransactionCPLDTO dto = this.findByIdCPL(id);
+
+                // aggiorno budget affiliato
+                BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
+                budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
+
+                // aggiorno budget campagna
+                campaignBusiness.updateBudget(dto.getCampaignId(), campaignBusiness.findById(dto.getCampaignId()).getBudget() + dto.getValue());
+
+                //cancello
                 cplRepository.deleteById(id);
             } else if (type.equals("CPM")) {
+                TransactionCPMDTO dto = this.findByIdCPM(id);
+
+                // aggiorno budget affiliato
+                BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
+                budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
+
+                // aggiorno budget campagna
+                campaignBusiness.updateBudget(dto.getCampaignId(), campaignBusiness.findById(dto.getCampaignId()).getBudget() + dto.getValue());
+
+                //cancello
                 cpmRepository.deleteById(id);
             } else if (type.equals("CPS")) {
+                TransactionCPSDTO dto = this.findByIdCPS(id);
+
+                // aggiorno budget affiliato
+                BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
+                budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
+
+                // aggiorno budget campagna
+                campaignBusiness.updateBudget(dto.getCampaignId(), campaignBusiness.findById(dto.getCampaignId()).getBudget() + dto.getValue());
+
+                //cancello
                 cpsRepository.deleteById(id);
             }
         } catch (ConstraintViolationException ex) {
