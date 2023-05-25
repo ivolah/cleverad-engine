@@ -2,7 +2,8 @@ package it.cleverad.engine.persistence.model.service;
 
 public interface TopCampaings {
 
-
+    String getAffiliateName();
+    String getAffiliateId();
     Long getCampaignId();
     String getCampaignName();
     String getCampaignname();
