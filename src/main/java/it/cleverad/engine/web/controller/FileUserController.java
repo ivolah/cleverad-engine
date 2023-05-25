@@ -35,6 +35,15 @@ public class FileUserController {
             throw new PostgresCleveradException("Errore uplaod: " + file.getOriginalFilename() + "!");
         }
     }
+    @PostMapping(path = "/file")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Long uploadFileUserFile(@RequestParam("file") MultipartFile file, FileUserBusiness.BaseCreateRequest request) {
+        try {
+            return business.storeFile(file, request);
+        } catch (Exception e) {
+            throw new PostgresCleveradException("Errore uplaod: " + file.getOriginalFilename() + "!");
+        }
+    }
 
     @GetMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
@@ -74,17 +83,33 @@ public class FileUserController {
         return business.download(id);
     }
 
+    @GetMapping("/{id}/download/file")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseEntity<Resource> downFile(@PathVariable Long id) throws IOException {
+        return business.downloadFile(id);
+    }
+
 
     @PostMapping("/avatar")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Long storeAvatar(@RequestParam("file") MultipartFile file, FileUserBusiness.BaseCreateRequest request) throws IOException {
         return business.storeAvatar(file, request);
     }
+    @PostMapping("/avatar/file")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Long storeAvatarfile(@RequestParam("file") MultipartFile file, FileUserBusiness.BaseCreateRequest request) throws IOException {
+        return business.storeAvatarFile(file, request);
+    }
 
     @GetMapping("/avatar")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public FileUserDTO getAvaTar() {
         return business.getAvatar();
+    }
+    @GetMapping("/avatar/file")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public FileUserDTO getAvaTarfile() throws IOException {
+        return business.getAvatarFile();
     }
 
     /**
