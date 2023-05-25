@@ -32,5 +32,7 @@ public interface TopCampaings {
     Double getBudgetGivenPC();
     Double getInitialBudget();
 
+    String getChannelId();
+    String getChannelName();
 
 }

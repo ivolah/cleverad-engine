@@ -53,12 +53,61 @@ public interface WidgetTopCPMRepository extends JpaRepository<WidgetTopCPM, Long
                     " ORDER BY impressionNumber DESC;")
     List<TopCampaings> searchTopCampaigns(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid );
 
-    //===========================================================================================
-    //===========================================================================================
-    //===========================================================================================
-    //===========================================================================================
-    //===========================================================================================
+    //=========================================================================================================================
+    //=========================================================================================================================
+    //=========================================================================================================================
+    //=========================================================================================================================
+    //=========================================================================================================================
 
+    @Query(nativeQuery = true, value =
+            "Select distinct vall.campaignid, " +
+                    "                vall.campaignname, " +
+                    "                vall.fileid, " +
+                    "                vall.channelid                                                              AS channelId, " +
+                    "                vall.channelname                                                            AS channelName, " +
+                    "                vall.affiliateId                                                                as affiliateId, " +
+                    "                vall.affiliateName                                                              as affiliateName, " +
+                    "                COALESCE(SUM(vall.impression), 0)                                           as impressionNumber, " +
+                    "                COALESCE(SUM(vall.clicknumber), 0)                                          as clickNumber, " +
+                    "                COALESCE(SUM(vall.leadnumber), 0)                                           as leadNumber, " +
+                    "                COALESCE(round((SUM(vall.clicknumber) / SUM(vall.impression) * 100), 2), 0) as CTR, " +
+                    "                COALESCE(round((SUM(vall.leadnumber) / SUM(vall.clicknumber) * 100), 2), 0) as LR, " +
+                    "                COALESCE(round(CAST(SUM(vall.commssion) AS numeric), 2), 0)                 as commission, " +
+                    "                COALESCE(round(CAST(SUM(vall.revenue) AS numeric), 2), 0)                   as revenue, " +
+                    "                COALESCE(round(CAST((SUM(vall.revenue) - SUM(vall.commssion)) AS numeric), " +
+                    "                               2), 0)                                                       as margine, " +
+                    "                case" +
+                    "                    when SUM(vall.revenue) > 0 then" +
+                    "                        round(CAST((SUM(vall.revenue) - SUM(vall.commssion)) / SUM(vall.revenue) * 100 AS numeric), 2)" +
+                    "                    else 0 end                                                              as marginePC," +
+                    "                COALESCE(round(SUM(vall.commssion) / SUM(vall.impression) * 1000, 2), 0)    as ecpm, " +
+                    "                COALESCE(round(SUM(vall.commssion) / SUM(vall.clicknumber), 2), 0)          as ecpc, " +
+                    "                COALESCE(round(SUM(vall.commssion) / SUM(vall.leadnumber), 2), 0)           as ecpl, " +
+                    "                COALESCE(tc.initial_budget, 0)                                              as initialBudget, " +
+                    "                COALESCE(tc.budget, 0)                                                      as budget, " +
+                    "                case" +
+                    "                    when tc.initial_budget > 0 then " +
+                    "                        round(CAST((tc.initial_budget - tc.budget) / tc.initial_budget * 100 AS numeric), 2) " +
+                    "                    else 0 end                                                              as budgetGivenPC, " +
+                    "                case" +
+                    "                    when tc.initial_budget > 0 then " +
+                    "                        round(CAST(tc.budget / tc.initial_budget * 100 AS numeric), 2) " +
+                    "                    else 0 end                                                              as budgetPC " +
+                    "  from v_widget_all vall " +
+                    "          left join t_campaign tc on vall.campaignid = tc.id " +
+                    "  where ((:dateFrom <= vall.date) AND (:dateTo >= vall.date)) " +
+                    "  AND ((:dictionaryList)IS NULL OR (vall.dictionaryId in (:dictionaryList))) " +
+                    "  AND ( (:affiliateId)IS NULL OR (vall.affiliateid = (:affiliateId)))  " +
+                    "  AND ((:campaignid) IS NULL OR (vall.campaignid = (:campaignid)))  " +
+                    " group by vall.fileid, vall.campaignname, vall.campaignid, tc.initial_budget, tc.budget, vall.channelid, vall.channelname, vall.affiliateName, vall.affiliateId " +
+                    " ORDER BY impressionNumber DESC;")
+    List<TopCampaings> searchTopCampaignsChannel(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid );
+
+    //=========================================================================================================================
+    //=========================================================================================================================
+    //=========================================================================================================================
+    //=========================================================================================================================
+    //=========================================================================================================================
 
     @Query(nativeQuery = true, value = "Select distinct vall.affiliateId                                                                as affiliateId, " +
             "                vall.affiliateName                                                              as affiliateName, " +

@@ -73,13 +73,10 @@ public class ReportBusiness {
 
     // SEARCH PAGINATED
     public Page<ReportDTO> search(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
-
-
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Page<Report> page = reportRepository.findAll(getSpecification(request), pageable);
         return page.map(ReportDTO::from);
     }
-
 
     private Specification<Report> getSpecification(Filter request) {
         return (root, query, cb) -> {
@@ -129,6 +126,24 @@ public class ReportBusiness {
             listaCampaigns = topCampaignCPMRepository.searchTopCampaigns(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds(), jwtUserDetailsService.getAffiliateID(), request.getCampaignid());
         } else {
             listaCampaigns = topCampaignCPMRepository.searchTopCampaigns(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds(), request.getAffiliateid(), request.getCampaignid());
+        }
+        final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), listaCampaigns.size());
+        Page<TopCampaings> pages =
+                new PageImpl<>(
+                        listaCampaigns.stream()
+                                .distinct()
+                                .collect(Collectors.toList())
+                                .subList((int) pageableRequest.getOffset(), end), pageableRequest, listaCampaigns.size()
+                );
+        return pages;
+    }
+
+    public Page<TopCampaings> searchTopCampaignsChannel(TopFilter request, Pageable pageableRequest) {
+        List<TopCampaings> listaCampaigns = new ArrayList<>();
+        if (!jwtUserDetailsService.isAdmin()) {
+            listaCampaigns = topCampaignCPMRepository.searchTopCampaignsChannel(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds(), jwtUserDetailsService.getAffiliateID(), request.getCampaignid());
+        } else {
+            listaCampaigns = topCampaignCPMRepository.searchTopCampaignsChannel(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds(), request.getAffiliateid(), request.getCampaignid());
         }
         final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), listaCampaigns.size());
         Page<TopCampaings> pages =
