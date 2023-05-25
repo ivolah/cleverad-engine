@@ -34,14 +34,16 @@ public class FileUser {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+    private String path;
 
-    public FileUser(String name, String docType, byte[] data, User userFiles,  String note, Boolean avatar) {
+    public FileUser(String name, String docType, byte[] data, User userFiles,  String note, Boolean avatar, String path) {
         this.name = name;
         this.type = docType;
         this.data = data;
         this.user = userFiles;
         this.note = note;
         this.avatar = avatar;
+        this.path = path;
     }
 
 }

@@ -5,6 +5,7 @@ import it.cleverad.engine.persistence.model.service.FileUser;
 import it.cleverad.engine.persistence.model.service.User;
 import it.cleverad.engine.persistence.repository.service.FileUserRepository;
 import it.cleverad.engine.persistence.repository.service.UserRepository;
+import it.cleverad.engine.service.FileStoreService;
 import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.FileUserDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -52,6 +53,8 @@ public class FileUserBusiness {
     private JwtUserDetailsService jwtUserDetailsService;
     @Autowired
     private Mapper mapper;
+    @Autowired
+    private FileStoreService fileStoreService;
 
     /**
      * ============================================================================================================
@@ -60,7 +63,14 @@ public class FileUserBusiness {
     // CREATE
     public Long store(MultipartFile file, BaseCreateRequest request) throws IOException {
         User user = userRepository.findById(request.userId).orElseThrow(() -> new ElementCleveradException("User", request.userId));
-        FileUser fileDB = new FileUser(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), file.getBytes(), user, request.note, request.avatar);
+        FileUser fileDB = new FileUser(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), file.getBytes(), user, request.note, request.avatar, null);
+        return repository.save(fileDB).getId();
+    }
+
+    public Long storeFile(MultipartFile file, BaseCreateRequest request) throws IOException {
+        User user = userRepository.findById(request.userId).orElseThrow(() -> new ElementCleveradException("User", request.userId));
+        String path = fileStoreService.storeFile(user.getAffiliate().getId(), StringUtils.cleanPath(file.getOriginalFilename()), file.getBytes());
+        FileUser fileDB = new FileUser(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), null, user, request.note, request.avatar, path);
         return repository.save(fileDB).getId();
     }
 
@@ -78,6 +88,17 @@ public class FileUserBusiness {
     // DELETE BY ID
     public void delete(Long id) {
         try {
+            repository.deleteById(id);
+        } catch (ConstraintViolationException ex) {
+            throw ex;
+        } catch (Exception ee) {
+            throw new PostgresDeleteCleveradException(ee);
+        }
+    }
+
+    public void deleteFile(Long id) {
+        try {
+            fileStoreService.deleteFile(this.findById(id).getPath());
             repository.deleteById(id);
         } catch (ConstraintViolationException ex) {
             throw ex;
@@ -110,6 +131,12 @@ public class FileUserBusiness {
         return ResponseEntity.ok().contentType(MediaType.parseMediaType(fil.getType())).header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fil.getName() + "\"").body(new ByteArrayResource(fil.getData()));
     }
 
+    public ResponseEntity<Resource> downloadFile(Long id) throws IOException {
+        FileUser fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("FileUser", id));
+        byte[] data = fileStoreService.retrieveFile(fil.getPath());
+        return ResponseEntity.ok().contentType(MediaType.parseMediaType(fil.getType())).header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fil.getName() + "\"").body(new ByteArrayResource(data));
+    }
+
 
     public Long storeAvatar(MultipartFile file, BaseCreateRequest request) throws IOException {
         // cancello tutti gli avatar
@@ -123,7 +150,24 @@ public class FileUserBusiness {
         request.setAvatar(true);
         request.setUserId(jwtUserDetailsService.getUserID());
         User user = userRepository.findById(jwtUserDetailsService.getUserID()).orElseThrow(() -> new ElementCleveradException("User", jwtUserDetailsService.getUserID()));
-        FileUser fileDB = new FileUser(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), file.getBytes(), user, request.note, request.avatar);
+        FileUser fileDB = new FileUser(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), file.getBytes(), user, request.note, request.avatar, null);
+        return repository.save(fileDB).getId();
+    }
+
+    public Long storeAvatarFile(MultipartFile file, BaseCreateRequest request) throws IOException {
+        // cancello tutti gli avatar
+        Filter rr = new Filter();
+        rr.setAvatar(true);
+        rr.setUserId(jwtUserDetailsService.getUserID());
+        Page<FileUser> page = repository.findAll(getSpecification(rr), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id"))));
+        page.stream().forEach(fileUser -> repository.delete(fileUser));
+
+        // salvo avatar
+        request.setAvatar(true);
+        request.setUserId(jwtUserDetailsService.getUserID());
+        User user = userRepository.findById(jwtUserDetailsService.getUserID()).orElseThrow(() -> new ElementCleveradException("User", jwtUserDetailsService.getUserID()));
+        String path = fileStoreService.storeFile(user.getAffiliate().getId(), StringUtils.cleanPath(file.getOriginalFilename()), file.getBytes());
+        FileUser fileDB = new FileUser(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), null, user, request.note, request.avatar, path);
         return repository.save(fileDB).getId();
     }
 
@@ -138,6 +182,19 @@ public class FileUserBusiness {
         if (fu != null) {
             FileUserDTO f = FileUserDTO.from(fu);
             f.setData(fu.getData());
+            return f;
+        } else return null;
+    }
+    public FileUserDTO getAvatarFile() throws IOException {
+        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Filter request = new Filter();
+        request.setAvatar(true);
+        request.setUserId(jwtUserDetailsService.getUserID());
+        FileUser fu = repository.findAll(getSpecification(request), pageable).stream().findFirst().orElse(null);
+
+        if (fu != null) {
+            FileUserDTO f = FileUserDTO.from(fu);
+            f.setData( fileStoreService.retrieveFile(fu.getPath()));
             return f;
         } else return null;
     }

@@ -22,8 +22,10 @@ public class FileUserDTO {
     private Long userId;
     private Boolean avatar;
 
+    private String path;
+
     public static FileUserDTO from(FileUser file) {
-        return new FileUserDTO(file.getId(), file.getName(), file.getType(), null, file.getCreationDate(), file.getNote(), file.getUser().getId(), file.getAvatar());
+        return new FileUserDTO(file.getId(), file.getName(), file.getType(), null, file.getCreationDate(), file.getNote(), file.getUser().getId(), file.getAvatar(), file.getPath());
     }
 
 }
