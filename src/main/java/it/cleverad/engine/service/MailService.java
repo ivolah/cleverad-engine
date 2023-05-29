@@ -129,6 +129,13 @@ public class MailService {
         return null;
     }
 
+    public MailDTO inviaMailReset(BaseCreateRequest request) {
+        request.setTemplateId(3L);
+        this.invio(request);
+        return null;
+    }
+
+
     public MailDTO invioTemplate(BaseCreateRequest request) {
         return this.invio(request);
     }

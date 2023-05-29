@@ -1,6 +1,7 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.UserBusiness;
+import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.web.dto.UserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -80,6 +81,18 @@ public class UserController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public UserDTO reset(@PathVariable Long id, @RequestBody UserBusiness.Confirm request) throws Exception {
         return business.resetPassword(id, request.getPassword());
+    }
+
+    @PatchMapping(path = "/reset/user")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public UserDTO reset( @RequestBody UserBusiness.Confirm request) throws Exception {
+        return business.resetPasswordUsername(request.getUsername(), request.getPassword());
+    }
+
+    @PatchMapping(path = "/reset/request")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public UserDTO resetRequest(@RequestBody UserBusiness.Confirm request) throws Exception {
+        return business.requestResetPassword(request.getUsername());
     }
 
     /**

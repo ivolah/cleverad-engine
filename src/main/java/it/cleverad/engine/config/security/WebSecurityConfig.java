@@ -63,8 +63,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/register/types/*",
                         "/register/user/",
                         "/register/user/*",
-                        "/register/user/confirm").permitAll().
-
+                        "/register/user/confirm",
+                        "/reset/request", "/reset/user"
+                ).permitAll().
                 // TUTTE LE ALTRE RICHIESTO SONO AUTENTICATE
                         anyRequest().authenticated().and().
                 // session won't be used to store user's state.
