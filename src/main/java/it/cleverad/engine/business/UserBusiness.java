@@ -5,6 +5,7 @@ import it.cleverad.engine.persistence.model.service.User;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
 import it.cleverad.engine.persistence.repository.service.UserRepository;
+import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.web.dto.AffiliateDTO;
 import it.cleverad.engine.web.dto.UserDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -45,8 +46,7 @@ public class UserBusiness {
     @Autowired
     private AffiliateBusiness affiliateBusiness;
     @Autowired
-    private FileUserBusiness fileUserBusiness;
-
+    private MailService mailService;
     @Autowired
     private AffiliateRepository affiliateRepository;
     @Autowired
@@ -172,6 +172,29 @@ public class UserBusiness {
         return UserDTO.from(repository.save(wser));
     }
 
+    public UserDTO resetPasswordUsername(String username, String password) throws Exception {
+        UserDTO u = this.findByUsername(username);
+        User wser = repository.findById(u.getId()).orElseThrow(() -> new ElementCleveradException("User", u.getId()));
+        wser.setPassword(bcryptEncoder.encode(password));
+        return UserDTO.from(repository.save(wser));
+    }
+
+    public UserDTO requestResetPassword(String username) throws Exception {
+        UserDTO u = this.findByUsername(username);
+        log.info("username " + username);
+
+        if (u != null) {
+            // invio mail USER
+            MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
+            mailRequest.setTemplateId(3L);
+            mailRequest.setAffiliateId(u.getAffiliateId());
+            mailRequest.setUserId(u.getId());
+            mailRequest.setEmail(u.getEmail());
+            mailService.invio(mailRequest);
+        }
+        return null;
+    }
+
     public UserDTO disableUser(Long id) throws Exception {
         User wser = repository.findById(id).orElseThrow(() -> new ElementCleveradException("User", id));
         wser.setStatus(false);
@@ -259,7 +282,6 @@ public class UserBusiness {
         };
     }
 
-
     /**
      * ============================================================================================================
      **/
@@ -295,7 +317,6 @@ public class UserBusiness {
         private Instant lastLoginTo;
         private String uuid;
     }
-
 
     @Data
     @NoArgsConstructor
