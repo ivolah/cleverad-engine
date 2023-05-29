@@ -25,7 +25,7 @@ public class ScheduledActivities {
     @Autowired
     private RevenueFactorBusiness revenueFactorBusiness;
 
-    @Scheduled(cron = "0 15 0 * * ?")
+    @Scheduled(cron = "30 0 0 * * ?")
     public void aggiornaStato() {
         log.info("AGGIORNAMENTO QUOTIDIANO STATO");
 

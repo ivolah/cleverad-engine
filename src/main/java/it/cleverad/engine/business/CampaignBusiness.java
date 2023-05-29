@@ -330,6 +330,13 @@ public class CampaignBusiness {
         return page.map(CampaignDTO::from).toList();
     }
 
+    public List<CampaignDTO> getEnabledCampaigns() {
+        Filter request = new Filter();
+        request.setStatus(true);
+        Page<Campaign> page = repository.findAll(getSpecification(request), PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id"))));
+        return page.map(CampaignDTO::from).toList();
+    }
+
     /**
      * ============================================================================================================
      **/
