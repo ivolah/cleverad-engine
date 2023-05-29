@@ -45,14 +45,14 @@ public class ManageCPL {
     private CpcBusiness cpcBusiness;
 
     @Async
-    @Scheduled(cron = "5 5 0/1 * * ?")
+    @Scheduled(cron = "0 5 0/1 * * ?")
     //@Scheduled(cron = "*/15 * * * * ?")
     public void trasformaTrackingCPL() {
         try {
             //   cplBusiness.getUnreadDayBefore().stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
             cplBusiness.getUnreadOneHourBefore().stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
 
-                if (cplDTO.getRefferal().length() < 5) {
+                if (cplDTO.getRefferal().length() < 6) {
                     log.trace("Referral con solo Campaign Id :: {}", cplDTO.getRefferal());
                     // cerco da cpc
                     List<CpcDTO> ips = cpcBusiness.findByIp24HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal()).stream().collect(Collectors.toList());
@@ -144,7 +144,7 @@ public class ManageCPL {
                     transaction.setLeadNumber(Long.valueOf(1));
 
                     // incemento valore
-                    if (walletID != null) walletBusiness.incement(walletID, totale);
+                    if (walletID != null && totale > 0D) walletBusiness.incement(walletID, totale);
 
                     // decremento budget Affiliato
                     BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
@@ -169,7 +169,6 @@ public class ManageCPL {
                             transaction.setDictionaryId(48L);
                         }
                     }
-
 
                     // creo la transazione
                     TransactionCPLDTO cpl = transactionBusiness.createCpl(transaction);

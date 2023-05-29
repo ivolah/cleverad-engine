@@ -126,7 +126,8 @@ public class ManageCPS {
                 rr.setClickNumber(Long.valueOf(1));
 
                 // incemento valore
-                walletBusiness.incement(walletID, totale);
+                if (walletID != null && totale > 0D)
+                    walletBusiness.incement(walletID, totale);
 
                 // decremento budget Affiliato
                 BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);

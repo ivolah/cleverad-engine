@@ -155,7 +155,7 @@ public class ManageCPC {
                     transaction.setClickNumber(Long.valueOf(aLong));
 
                     // incemento valore
-                    if (walletID != null) walletBusiness.incement(walletID, totale);
+                    if (walletID != null && totale > 0D) walletBusiness.incement(walletID, totale);
 
                     // decremento budget Affiliato
                     BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(campaignId, affiliateId).stream().findFirst().orElse(null);
