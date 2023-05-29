@@ -192,11 +192,11 @@ public class TransactionAllBusiness {
                 predicates.add(cb.lessThanOrEqualTo(root.get("creationDate"), request.getCreationDateTo().plus(1, ChronoUnit.DAYS).atStartOfDay()));
             }
 
-            if (request.getDateTimeFrom() != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("dateTime"), request.getDateTimeFrom().atStartOfDay()));
+            if (request.getCreationDateFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("dateTime"), request.getCreationDateFrom().atStartOfDay()));
             }
-            if (request.getDateTimeTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), request.getDateTimeTo().plus(1, ChronoUnit.DAYS).atStartOfDay()));
+            if (request.getCreationDateTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), request.getCreationDateTo().plus(1, ChronoUnit.DAYS).atStartOfDay()));
             }
 
             if (request.getValueNotZero() != null && request.getValueNotZero()) {

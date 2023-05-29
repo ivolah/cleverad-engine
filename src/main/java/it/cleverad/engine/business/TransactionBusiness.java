@@ -432,6 +432,13 @@ public class TransactionBusiness {
                 predicates.add(cb.equal(root.get("wallet").get("id"), request.getWalletId()));
             }
 
+            if (request.getDateTimeFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("date_time"), request.getDateTimeFrom()));
+            }
+            if (request.getDateTimeTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("date_time"), request.getDateTimeTo()));
+            }
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
@@ -470,6 +477,13 @@ public class TransactionBusiness {
             }
             if (request.getWalletId() != null) {
                 predicates.add(cb.equal(root.get("wallet").get("id"), request.getWalletId()));
+            }
+
+            if (request.getDateTimeFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("date_time"), request.getDateTimeFrom()));
+            }
+            if (request.getDateTimeTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("date_time"), request.getDateTimeTo()));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -512,6 +526,14 @@ public class TransactionBusiness {
                 predicates.add(cb.equal(root.get("wallet").get("id"), request.getWalletId()));
             }
 
+            if (request.getDateTimeFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("date_time"), request.getDateTimeFrom()));
+            }
+            if (request.getDateTimeTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("date_time"), request.getDateTimeTo()));
+            }
+
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
@@ -551,6 +573,14 @@ public class TransactionBusiness {
             if (request.getWalletId() != null) {
                 predicates.add(cb.equal(root.get("wallet").get("id"), request.getWalletId()));
             }
+
+            if (request.getDateTimeFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("date_time"), request.getDateTimeFrom()));
+            }
+            if (request.getDateTimeTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("date_time"), request.getDateTimeTo()));
+            }
+
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
@@ -614,6 +644,9 @@ public class TransactionBusiness {
         private Long leadNumber;
         private Long clickNumber;
         private Long revenueId;
+
+        private LocalDateTime dateTimeFrom;
+        private LocalDateTime dateTimeTo;
     }
 
 }
