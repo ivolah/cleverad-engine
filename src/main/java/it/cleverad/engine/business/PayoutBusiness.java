@@ -277,18 +277,20 @@ public class PayoutBusiness {
                 cpcRepository.save(cpc);
 
                 // incemento valore wallet
-                walletBusiness.incement(cpc.getWallet().getId(), cpc.getValue());
+                if (cpc.getValue() > 0D)
+                    walletBusiness.incement(cpc.getWallet().getId(), cpc.getValue());
 
             });
             payout.getTransactionCPLS().forEach(transactionCPL -> {
                 // rimuovo relazione
-                TransactionCPL cpl= cplRepository.findById(transactionCPL.getId()).orElseThrow(() -> new ElementCleveradException("Transaction CPL", transactionCPL.getId()));
+                TransactionCPL cpl = cplRepository.findById(transactionCPL.getId()).orElseThrow(() -> new ElementCleveradException("Transaction CPL", transactionCPL.getId()));
                 cpl.setPayout(null);
                 cpl.setPayoutReference(null);
                 cplRepository.save(cpl);
 
                 // incemento valore wallet
-                walletBusiness.incement(cpl.getWallet().getId(), cpl.getValue());
+                if (cpl.getValue() > 0D)
+                    walletBusiness.incement(cpl.getWallet().getId(), cpl.getValue());
 
             });
             payout.getTransactionCPSS().forEach(transactionCPS -> {
@@ -299,7 +301,8 @@ public class PayoutBusiness {
                 cpsRepository.save(cps);
 
                 // incemento valore wallet
-                walletBusiness.incement(cps.getWallet().getId(), cps.getValue());
+                if (cps.getValue() > 0D)
+                    walletBusiness.incement(cps.getWallet().getId(), cps.getValue());
             });
 
 
