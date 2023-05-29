@@ -1,7 +1,7 @@
 package it.cleverad.engine.persistence.repository.service;
 
-import it.cleverad.engine.persistence.model.service.TopAffiliates;
-import it.cleverad.engine.persistence.model.service.TopCampaings;
+import it.cleverad.engine.persistence.model.service.ReportTopAffiliates;
+import it.cleverad.engine.persistence.model.service.ReportTopCampaings;
 import it.cleverad.engine.persistence.model.service.ViewTransactionAll;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,7 +40,7 @@ public interface ViewTransactionAllRepository extends JpaRepository<ViewTransact
             " and (:dateTo > al.dateTime) " +
             " and (al.dictionaryId in (:dictionaryList)) " +
             " group by al.campaignId, al.campaignName,al.dictionaryName, al.dictionaryId, tr.revenue, al.budget")
-    Page<TopCampaings> findGroupByCampaignId(Pageable pageableRequest, @Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList);
+    Page<ReportTopCampaings> findGroupByCampaignId(Pageable pageableRequest, @Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList);
 
 
     @Query("SELECT distinct count(*),  " +
@@ -68,7 +68,7 @@ public interface ViewTransactionAllRepository extends JpaRepository<ViewTransact
             " and (:dateTo > al.dateTime) " +
             " and (al.dictionaryId in (:dictionaryList)) " +
             " group by al.affiliateId, al.affiliateName, al.dictionaryId,al.dictionaryName, al.channelId, al.channelName, tr.revenue, al.budget")
-    Page<TopAffiliates> findAffiliatesGroupByCampaignId(Pageable pageableRequest, @Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList);
+    Page<ReportTopAffiliates> findAffiliatesGroupByCampaignId(Pageable pageableRequest, @Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList);
 
 }
 

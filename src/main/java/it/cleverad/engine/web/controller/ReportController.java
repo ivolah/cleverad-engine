@@ -1,8 +1,9 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.ReportBusiness;
-import it.cleverad.engine.persistence.model.service.TopAffiliates;
-import it.cleverad.engine.persistence.model.service.TopCampaings;
+import it.cleverad.engine.persistence.model.service.ReportDaily;
+import it.cleverad.engine.persistence.model.service.ReportTopAffiliates;
+import it.cleverad.engine.persistence.model.service.ReportTopCampaings;
 import it.cleverad.engine.web.dto.ReportDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -12,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -52,20 +52,26 @@ public class ReportController {
 
     @GetMapping(path = "/campagne/top")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<TopCampaings> getCamapgneTop(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
+    public Page<ReportTopCampaings> getCamapgneTop(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
         return reportBusiness.searchTopCampaigns(request, pageable);
     }
 
     @GetMapping(path = "/campagne/top/channel")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<TopCampaings> getCamapgneTopChannel(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
+    public Page<ReportTopCampaings> getCamapgneTopChannel(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
         return reportBusiness.searchTopCampaignsChannel(request, pageable);
     }
 
     @GetMapping(path = "/affiliates/top")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<TopAffiliates> getAffiliatiTop(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
+    public Page<ReportTopAffiliates> getAffiliatiTop(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
         return reportBusiness.searchTopAffilaites(request, pageable);
+    }
+
+    @GetMapping(path = "/daily")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<ReportDaily> getDaily(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
+        return reportBusiness.searchDaily(request, pageable);
     }
 
 //    @GetMapping(path = "/cpc/click/grouped/day")
