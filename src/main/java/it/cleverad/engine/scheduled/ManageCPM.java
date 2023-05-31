@@ -117,16 +117,13 @@ public class ManageCPM {
                             RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 50L);
                             if (rf != null && rf.getId() != null) {
                                 transaction.setRevenueId(rf.getId());
-                            }
-                            else
-                            {
+                            } else {
                                 log.warn("Non trovato revenue factor di tipo 10 per campagna {}, setto default", refferal.getCampaignId());
                                 transaction.setRevenueId(3L);
                             }
                         }
 
                         // gesione commisione
-                        Long commId = null;
                         Double commVal = 0D;
 
                         AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
@@ -137,19 +134,13 @@ public class ManageCPM {
                         AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
 
                         if (acccFirst != null) {
-                            commId = acccFirst.getCommissionId();
+                            log.info(acccFirst.getCommissionId() + " " + acccFirst.getCommissionValue());
                             commVal = acccFirst.getCommissionValue();
+                            transaction.setCommissionId(acccFirst.getCommissionId());
                         } else {
-                            CommissionBusiness.Filter filt = new CommissionBusiness.Filter();
-                            filt.setCampaignId(campaignDTO.getId());
-                            filt.setDictionaryId(50L);
-                            CommissionDTO commission = commissionBusiness.search(filt).stream().findFirst().orElse(null);
-                            commId = commission != null ? commission.getId() : null;
-                            commVal = commission != null ? Double.valueOf(commission.getValue()) : 0;
+                            log.warn("Non trovato Commission di tipo 10 per campagna {}, setto default", refferal.getCampaignId());
+                            transaction.setCommissionId(0L);
                         }
-
-                        if (commId != null)
-                            transaction.setCommissionId(commId);
 
                         Double totale = commVal * aLong;
                         transaction.setValue(totale);

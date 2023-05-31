@@ -125,7 +125,6 @@ public class ManageCPC {
                     }
 
                     // gesione commisione
-                    Long commId = null;
                     Double commVal = 0D;
 
                     AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
@@ -133,21 +132,17 @@ public class ManageCPC {
                     req.setChannelId(channelId);
                     req.setCampaignId(campaignId);
                     req.setCommissionDicId(10L);
-                    AffiliateChannelCommissionCampaignDTO accc = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
 
+                    AffiliateChannelCommissionCampaignDTO accc = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
                     if (accc != null) {
-                        commId = accc.getCommissionId();
+                        log.info(accc.getCommissionId() + " " + accc.getCommissionValue());
                         commVal = accc.getCommissionValue();
+                        transaction.setCommissionId(accc.getCommissionId());
                     } else {
-                        CommissionBusiness.Filter filt = new CommissionBusiness.Filter();
-                        filt.setCampaignId(campaignDTO.getId());
-                        filt.setDictionaryId(10L);
-                        CommissionDTO commission = commissionBusiness.search(filt).stream().findFirst().orElse(null);
-                        commId = commission != null ? commission.getId() : null;
-                        commVal = commission != null ? Double.valueOf(commission.getValue()) : 0;
+                        log.warn("Non trovato Commission di tipo 10 per campagna {}, setto default", campaignId);
+                        transaction.setCommissionId(0L);
                     }
 
-                    if (commId != null) transaction.setCommissionId(commId);
 
                     // calcolo valore
                     Double totale = commVal * aLong;

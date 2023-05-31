@@ -96,7 +96,7 @@ public class ManageCPS {
                 }
 
                 // gesione commisione
-                Long commId = null;
+                Long commId = 3L;
                 Double commVal = 0D;
 
                 AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
@@ -109,14 +109,6 @@ public class ManageCPS {
                 if (acccFirst != null) {
                     commId = acccFirst.getCommissionId();
                     commVal = acccFirst.getCommissionValue();
-                } else {
-                    log.info("ACCCC VUOTO");
-                    CommissionBusiness.Filter filt = new CommissionBusiness.Filter();
-                    filt.setCampaignId(campaignDTO.getId());
-                    filt.setDictionaryId(51L);
-                    CommissionDTO commission = commissionBusiness.search(filt).stream().findFirst().orElse(null);
-                    commId = commission != null ? commission.getId() : null;
-                    commVal = commission != null ? Double.valueOf(commission.getValue()) : 0;
                 }
 
                 Double totale = commVal * 1;
