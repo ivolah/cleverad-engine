@@ -130,7 +130,7 @@ public class RevenueFactorBusiness {
     public RevenueFactor getbyIdCampaignAndDictionrayId(Long campId, Long dictId) {
         Filter request = new Filter();
         request.setCampaignId(campId);
-        request.setStatus(true);
+        //request.setStatus(true);
         request.setDictionaryId(dictId);
         RevenueFactor revenueFactor = repository.findAll(getSpecification(request)).stream().findFirst().orElse(null);
         return revenueFactor;

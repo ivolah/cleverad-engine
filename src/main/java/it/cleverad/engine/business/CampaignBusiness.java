@@ -96,43 +96,43 @@ public class CampaignBusiness {
         campaign.setEncodedId(encodedID);
 
         //Aggiungo revenue factor vuoti
-        RevenueFactorBusiness.BaseCreateRequest rfRequest = new RevenueFactorBusiness.BaseCreateRequest();
-        rfRequest.setCampaignId(dto.getId());
-        rfRequest.setStartDate(dto.getStartDate());
-        rfRequest.setDueDate(dto.getEndDate());
-        rfRequest.setStatus(true);
-        rfRequest.setRevenue(0D);
-
-        rfRequest.setDictionaryId(10L);
-        revenueFactorBusiness.create(rfRequest);
-        rfRequest.setDictionaryId(11L);
-        revenueFactorBusiness.create(rfRequest);
-        rfRequest.setDictionaryId(50L);
-        revenueFactorBusiness.create(rfRequest);
+//        RevenueFactorBusiness.BaseCreateRequest rfRequest = new RevenueFactorBusiness.BaseCreateRequest();
+//        rfRequest.setCampaignId(dto.getId());
+//        rfRequest.setStartDate(dto.getStartDate());
+//        rfRequest.setDueDate(dto.getEndDate());
+//        rfRequest.setStatus(true);
+//        rfRequest.setRevenue(0D);
+//
+//        rfRequest.setDictionaryId(10L);
+//        revenueFactorBusiness.create(rfRequest);
+//        rfRequest.setDictionaryId(11L);
+//        revenueFactorBusiness.create(rfRequest);
+//        rfRequest.setDictionaryId(50L);
+//        revenueFactorBusiness.create(rfRequest);
         //rfRequest.setDictionaryId(51L);
         //revenueFactorBusiness.create(rfRequest);
 
         //Aggiungio Commissioni di default altrimenti non funziona
-        CommissionBusiness.BaseCreateRequest comReq = new CommissionBusiness.BaseCreateRequest();
-        comReq.setCampaignId(dto.getId());
-        comReq.setBase(true);
-        comReq.setStatus(true);
-        comReq.setValue(0D);
-        comReq.setStartDate(dto.getStartDate());
-        comReq.setDueDate(dto.getEndDate());
-
-        comReq.setDescription("Commissione CPC di Default");
-        comReq.setName("CPC @0 Default");
-        comReq.setDictionaryId(10L);
-        commissionBusiness.create(comReq);
-        comReq.setDescription("Commissione CPM di Default");
-        comReq.setName("CPM @0 Default");
-        comReq.setDictionaryId(50L);
-        commissionBusiness.create(comReq);
-        comReq.setDescription("Commissione CPL di Default");
-        comReq.setName("CPL @0 Default");
-        comReq.setDictionaryId(11L);
-        commissionBusiness.create(comReq);
+//        CommissionBusiness.BaseCreateRequest comReq = new CommissionBusiness.BaseCreateRequest();
+//        comReq.setCampaignId(dto.getId());
+//        comReq.setBase(true);
+//        comReq.setStatus(true);
+//        comReq.setValue(0D);
+//        comReq.setStartDate(dto.getStartDate());
+//        comReq.setDueDate(dto.getEndDate());
+//
+//        comReq.setDescription("Commissione CPC di Default");
+//        comReq.setName("CPC @0 Default");
+//        comReq.setDictionaryId(10L);
+//        commissionBusiness.create(comReq);
+//        comReq.setDescription("Commissione CPM di Default");
+//        comReq.setName("CPM @0 Default");
+//        comReq.setDictionaryId(50L);
+//        commissionBusiness.create(comReq);
+//        comReq.setDescription("Commissione CPL di Default");
+//        comReq.setName("CPL @0 Default");
+//        comReq.setDictionaryId(11L);
+//        commissionBusiness.create(comReq);
 //        comReq.setDescription("Commissione CPS di Default");
 //        comReq.setName("CPS @0 Default");
 //        comReq.setDictionaryId(51L);

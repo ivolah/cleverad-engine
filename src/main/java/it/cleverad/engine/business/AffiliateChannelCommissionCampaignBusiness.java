@@ -128,6 +128,14 @@ public class AffiliateChannelCommissionCampaignBusiness {
         Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
         return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
+    public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignIdAndType(Long campaignId,Long typeDictId, Pageable pageableRequest) {
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Filter filter = new Filter();
+        filter.setCampaignId(campaignId);
+        filter.setCommissionDicId(typeDictId);
+        Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
+        return page.map(AffiliateChannelCommissionCampaignDTO::from);
+    }
 
     public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignIdAffiliateNotZero(Long campaignId, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
