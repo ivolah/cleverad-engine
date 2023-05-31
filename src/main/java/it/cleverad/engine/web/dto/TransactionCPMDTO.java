@@ -42,6 +42,9 @@ public class TransactionCPMDTO {
     private String dictionaryName;
 
     private Long impressionNumber;
+    private Long revenueId;
+    private Long walletId;
+
 
     public static TransactionCPMDTO from(TransactionCPM transaction) {
         return new TransactionCPMDTO(transaction.getId(),
@@ -68,7 +71,11 @@ public class TransactionCPMDTO {
                 transaction.getCreationDate(), transaction.getLastModificationDate(),
 
                 transaction.getDictionary().getId(), transaction.getDictionary().getName(),
-                transaction.getImpressionNumber());
+                transaction.getImpressionNumber(),
+                transaction.getRevenueId(),
+                transaction.getWallet().getId());
+
+
     }
 
 }
