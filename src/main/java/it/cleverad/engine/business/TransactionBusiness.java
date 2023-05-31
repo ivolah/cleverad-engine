@@ -247,6 +247,25 @@ public class TransactionBusiness {
     }
 
     // DELETE BY ID
+    public void deleteInterno(Long id, String type) {
+        try {
+            if (type.equals("CPC")) {
+                cpcRepository.deleteById(id);
+            } else if (type.equals("CPM")) {
+                cpmRepository.deleteById(id);
+            } else if (type.equals("CPL")) {
+                cplRepository.deleteById(id);
+            } else if (type.equals("CPS")) {
+                cpsRepository.deleteById(id);
+            }
+        } catch (ConstraintViolationException ex) {
+            throw ex;
+        } catch (Exception ee) {
+            throw new PostgresDeleteCleveradException(ee);
+        }
+    }
+
+
     public void delete(Long id, String type) {
         try {
             if (type.equals("CPC")) {
@@ -433,10 +452,10 @@ public class TransactionBusiness {
             }
 
             if (request.getDateTimeFrom() != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("date_time"), request.getDateTimeFrom()));
+                predicates.add(cb.greaterThanOrEqualTo(root.get("dateTime"), request.getDateTimeFrom()));
             }
             if (request.getDateTimeTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("date_time"), request.getDateTimeTo()));
+                predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), request.getDateTimeTo()));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -480,10 +499,10 @@ public class TransactionBusiness {
             }
 
             if (request.getDateTimeFrom() != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("date_time"), request.getDateTimeFrom()));
+                predicates.add(cb.greaterThanOrEqualTo(root.get("dateTime"), request.getDateTimeFrom()));
             }
             if (request.getDateTimeTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("date_time"), request.getDateTimeTo()));
+                predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), request.getDateTimeTo()));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -527,12 +546,11 @@ public class TransactionBusiness {
             }
 
             if (request.getDateTimeFrom() != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("date_time"), request.getDateTimeFrom()));
+                predicates.add(cb.greaterThanOrEqualTo(root.get("dateTime"), request.getDateTimeFrom()));
             }
             if (request.getDateTimeTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("date_time"), request.getDateTimeTo()));
+                predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), request.getDateTimeTo()));
             }
-
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
