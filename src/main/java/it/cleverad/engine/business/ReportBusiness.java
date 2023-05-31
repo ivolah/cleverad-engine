@@ -168,7 +168,11 @@ public class ReportBusiness {
 
     public Page<ReportDaily> searchDaily(TopFilter request, Pageable pageableRequest) {
         List<ReportDaily> lista = new ArrayList<>();
-        lista = reportRepository.searchDaily(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX));
+        if (!jwtUserDetailsService.isAdmin()) {
+            lista = reportRepository.searchDaily(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), jwtUserDetailsService.getAffiliateID());
+        } else {
+            lista = reportRepository.searchDaily(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getAffiliateid());
+        }
         final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), lista.size());
         Page<ReportDaily> pages = new PageImpl<>(lista.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, lista.size());
         return pages;
