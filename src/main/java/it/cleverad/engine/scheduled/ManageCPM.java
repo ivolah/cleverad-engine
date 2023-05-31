@@ -118,7 +118,7 @@ public class ManageCPM {
                             if (rf != null && rf.getId() != null) {
                                 transaction.setRevenueId(rf.getId());
                             } else {
-                                log.warn("Non trovato revenue factor di tipo 10 per campagna {}, setto default", refferal.getCampaignId());
+                                log.trace("Non trovato revenue factor di tipo 10 per campagna {}, setto default", refferal.getCampaignId());
                                 transaction.setRevenueId(3L);
                             }
                         }
@@ -138,7 +138,7 @@ public class ManageCPM {
                             commVal = acccFirst.getCommissionValue();
                             transaction.setCommissionId(acccFirst.getCommissionId());
                         } else {
-                            log.warn("Non trovato Commission di tipo 10 per campagna {}, setto default", refferal.getCampaignId());
+                            log.trace("Non trovato Commission di tipo 10 per campagna {}, setto default", refferal.getCampaignId());
                             transaction.setCommissionId(0L);
                         }
 

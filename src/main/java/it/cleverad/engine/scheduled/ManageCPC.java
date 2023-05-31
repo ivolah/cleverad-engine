@@ -120,7 +120,7 @@ public class ManageCPC {
                     if (rf != null && rf.getId() != null) {
                         transaction.setRevenueId(rf.getId());
                     } else {
-                        log.warn("Non trovato revenue factor di tipo 10 per campagna {}, setto default", campaignId);
+                        log.trace("Non trovato revenue factor di tipo 10 per campagna {}, setto default", campaignId);
                         transaction.setRevenueId(1L);
                     }
 
@@ -135,11 +135,11 @@ public class ManageCPC {
 
                     AffiliateChannelCommissionCampaignDTO accc = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
                     if (accc != null) {
-                        log.info(accc.getCommissionId() + " " + accc.getCommissionValue());
+                       // log.info(accc.getCommissionId() + " " + accc.getCommissionValue());
                         commVal = accc.getCommissionValue();
                         transaction.setCommissionId(accc.getCommissionId());
                     } else {
-                        log.warn("Non trovato Commission di tipo 10 per campagna {}, setto default", campaignId);
+                        log.trace("Non trovato Commission di tipo 10 per campagna {}, setto default", campaignId);
                         transaction.setCommissionId(0L);
                     }
 
