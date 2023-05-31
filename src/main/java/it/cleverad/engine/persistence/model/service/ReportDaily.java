@@ -17,4 +17,7 @@ public interface ReportDaily {
     Long getClickNumber();
     Long getLeadNumber();
 
+    Double getCTR();
+    Double getLR();
+
 }
