@@ -12,8 +12,8 @@ import java.io.IOException;
 @Slf4j
 public class FileStoreService {
 
-    public String storeFile(Long affiliateId, String fileName, byte[] bytes) throws IOException {
-        String filePath = "/media/cleverad/" + affiliateId + "/" + fileName;
+    public String storeFile(Long affiliateId, String tipo, String fileName, byte[] bytes) throws IOException {
+        String filePath = "/media/cleverad/" + affiliateId + "/" + tipo + "/" + fileName;
 
         FileUtils.writeByteArrayToFile(new File(filePath), bytes);
 

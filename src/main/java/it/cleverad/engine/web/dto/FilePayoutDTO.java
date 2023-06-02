@@ -22,9 +22,11 @@ public class FilePayoutDTO {
     private String dictionaryValue;
     private Long payoutId;
 
+    private String path;
+
     public static FilePayoutDTO from(FilePayout file) {
         return new FilePayoutDTO(file.getId(), file.getName(), file.getType(), null, file.getCreationDate(),
-                file.getDictionary().getId(), file.getDictionary().getName(), file.getPayout().getId());
+                file.getDictionary().getId(), file.getDictionary().getName(), file.getPayout().getId(), file.getPath());
     }
 
 }

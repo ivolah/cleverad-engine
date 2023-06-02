@@ -3,11 +3,11 @@ package it.cleverad.engine.business;
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Dictionary;
 import it.cleverad.engine.persistence.model.service.FilePayout;
-import it.cleverad.engine.persistence.model.service.FileUser;
 import it.cleverad.engine.persistence.model.service.Payout;
 import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
 import it.cleverad.engine.persistence.repository.service.FilePayoutRepository;
 import it.cleverad.engine.persistence.repository.service.PayoutRepository;
+import it.cleverad.engine.service.FileStoreService;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.FilePayoutDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -57,24 +57,33 @@ public class FilePayoutBusiness {
     private DictionaryBusiness dictionaryBusiness;
     @Autowired
     private Mapper mapper;
+    @Autowired
+    private FileStoreService fileStoreService;
 
     /**
      * ============================================================================================================
      **/
 
     // CREATE
-    public Long store(MultipartFile file, BaseCreateRequest request)  {
+    public Long store(MultipartFile file, BaseCreateRequest request) {
         Payout payout = payoutRepository.findById(request.payoutId).orElseThrow(() -> new ElementCleveradException("Payout", request.payoutId));
         Dictionary dictionary = (dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
 
         FilePayout fileDB = null;
         try {
-            fileDB = new FilePayout(StringUtils.cleanPath(file.getOriginalFilename()),
-                    file.getContentType(), file.getBytes(), payout, dictionary);
+            fileDB = new FilePayout(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), file.getBytes(), payout, dictionary, null);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
+        return repository.save(fileDB).getId();
+    }
+
+    public Long storeFile(MultipartFile file, BaseCreateRequest request) throws IOException {
+        Payout payout = payoutRepository.findById(request.payoutId).orElseThrow(() -> new ElementCleveradException("Payout", request.payoutId));
+        Dictionary dictionary = (dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
+        String path = fileStoreService.storeFile(payout.getAffiliate().getId(), "payout", StringUtils.cleanPath(file.getOriginalFilename()), file.getBytes());
+        FilePayout fileDB = new FilePayout(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), null, payout, dictionary, path);
         return repository.save(fileDB).getId();
     }
 
@@ -84,9 +93,21 @@ public class FilePayoutBusiness {
         return FilePayoutDTO.from(file);
     }
 
+
     // DELETE BY ID
     public void delete(Long id) {
         try {
+            repository.deleteById(id);
+        } catch (ConstraintViolationException ex) {
+            throw ex;
+        } catch (Exception ee) {
+            throw new PostgresDeleteCleveradException(ee);
+        }
+    }
+
+    public void deleteFile(Long id) {
+        try {
+            fileStoreService.deleteFile(this.findById(id).getPath());
             repository.deleteById(id);
         } catch (ConstraintViolationException ex) {
             throw ex;
@@ -125,6 +146,15 @@ public class FilePayoutBusiness {
                 .contentType(MediaType.parseMediaType(fil.getType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fil.getName() + "\"")
                 .body(new ByteArrayResource(fil.getData()));
+    }
+
+    public ResponseEntity<Resource> downloadFile(Long id) {
+        FilePayout fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("FilePayout", id));
+        byte[] data = fileStoreService.retrieveFile(fil.getPath());
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(fil.getType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fil.getName() + "\"")
+                .body(new ByteArrayResource(data));
     }
 
     /**
@@ -182,6 +212,7 @@ public class FilePayoutBusiness {
         private Long dictionaryId;
         private Instant creationDateFrom;
         private Instant creationDateTo;
+        private String path;
     }
 
 }

@@ -69,7 +69,7 @@ public class FileUserBusiness {
 
     public Long storeFile(MultipartFile file, BaseCreateRequest request) throws IOException {
         User user = userRepository.findById(request.userId).orElseThrow(() -> new ElementCleveradException("User", request.userId));
-        String path = fileStoreService.storeFile(user.getAffiliate().getId(), StringUtils.cleanPath(file.getOriginalFilename()), file.getBytes());
+        String path = fileStoreService.storeFile(user.getAffiliate().getId(), "user", StringUtils.cleanPath(file.getOriginalFilename()), file.getBytes());
         FileUser fileDB = new FileUser(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), null, user, request.note, request.avatar, path);
         return repository.save(fileDB).getId();
     }
@@ -166,7 +166,7 @@ public class FileUserBusiness {
         request.setAvatar(true);
         request.setUserId(jwtUserDetailsService.getUserID());
         User user = userRepository.findById(jwtUserDetailsService.getUserID()).orElseThrow(() -> new ElementCleveradException("User", jwtUserDetailsService.getUserID()));
-        String path = fileStoreService.storeFile(user.getAffiliate().getId(), StringUtils.cleanPath(file.getOriginalFilename()), file.getBytes());
+        String path = fileStoreService.storeFile(user.getAffiliate().getId(), "user", StringUtils.cleanPath(file.getOriginalFilename()), file.getBytes());
         FileUser fileDB = new FileUser(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), null, user, request.note, request.avatar, path);
         return repository.save(fileDB).getId();
     }
@@ -185,6 +185,7 @@ public class FileUserBusiness {
             return f;
         } else return null;
     }
+
     public FileUserDTO getAvatarFile() throws IOException {
         Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
@@ -194,7 +195,7 @@ public class FileUserBusiness {
 
         if (fu != null) {
             FileUserDTO f = FileUserDTO.from(fu);
-            f.setData( fileStoreService.retrieveFile(fu.getPath()));
+            f.setData(fileStoreService.retrieveFile(fu.getPath()));
             return f;
         } else return null;
     }
@@ -226,6 +227,8 @@ public class FileUserBusiness {
             if (request.getCreationDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("creationDate"), LocalDateTime.ofInstant(request.getCreationDateTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
             }
+
+
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 
@@ -263,6 +266,7 @@ public class FileUserBusiness {
         private Instant creationDateTo;
         private String note;
         private Boolean avatar;
+        private String path;
     }
 
 }

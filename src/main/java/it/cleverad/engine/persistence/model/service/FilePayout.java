@@ -38,12 +38,15 @@ public class FilePayout {
     @JoinColumn(name = "dictionary_id")
     private Dictionary dictionary;
 
-    public FilePayout(String name, String docType, byte[] data, Payout payout, Dictionary dictionary) {
+    private String path;
+
+    public FilePayout(String name, String docType, byte[] data, Payout payout, Dictionary dictionary, String path) {
         this.name = name;
         this.type = docType;
         this.data = data;
         this.payout = payout;
         this.dictionary = dictionary;
+        this.path = path;
     }
 
 }
