@@ -18,19 +18,39 @@ public class ReferralService {
             if (StringUtils.isNotBlank(refferalString)) {
                 String[] tokens = refferalString.split("-");
                 if (tokens[0] != null) {
-                    refferal.setCampaignId(Long.valueOf(decodifica(tokens[0])));
+                    try {
+                        refferal.setCampaignId(Long.valueOf(decodifica(tokens[0])));
+                    } catch (NumberFormatException nf) {
+                        log.warn("Error decoding campaign id : {}", tokens[0]);
+                    }
                 }
                 if (tokens.length > 1 && tokens[1] != null) {
-                    refferal.setMediaId(Long.valueOf(decodifica(tokens[1])));
+                    try {
+                        refferal.setMediaId(Long.valueOf(decodifica(tokens[1])));
+                    } catch (NumberFormatException nf) {
+                        log.warn("Error decoding media id : {}", tokens[0]);
+                    }
                 }
                 if (tokens.length > 2 && tokens[2] != null) {
-                    refferal.setAffiliateId(Long.valueOf(decodifica(tokens[2])));
+                    try {
+                        refferal.setAffiliateId(Long.valueOf(decodifica(tokens[2])));
+                    } catch (NumberFormatException nf) {
+                        log.warn("Error decoding affiliate id : {}", tokens[0]);
+                    }
                 }
                 if (tokens.length > 3 && tokens[3] != null) {
-                    refferal.setChannelId(Long.valueOf(decodifica(tokens[3])));
+                    try {
+                        refferal.setChannelId(Long.valueOf(decodifica(tokens[3])));
+                    } catch (NumberFormatException nf) {
+                        log.warn("Error decoding channel id : {}", tokens[0]);
+                    }
                 }
                 if (tokens.length >= 4 && tokens[4] != null) {
-                    refferal.setTargetId(Long.valueOf(decodifica(tokens[4])));
+                    try {
+                        refferal.setTargetId(Long.valueOf(decodifica(tokens[4])));
+                    } catch (NumberFormatException nf) {
+                        log.warn("Error decoding target id : {}", tokens[0]);
+                    }
                 }
             }
             return refferal;

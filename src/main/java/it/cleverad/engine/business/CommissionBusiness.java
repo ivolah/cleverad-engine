@@ -2,11 +2,13 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Commission;
+import it.cleverad.engine.persistence.model.service.TransactionCPC;
+import it.cleverad.engine.persistence.model.service.TransactionCPL;
+import it.cleverad.engine.persistence.model.service.TransactionCPM;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.CommissionRepository;
 import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
-import it.cleverad.engine.web.dto.CommissionDTO;
-import it.cleverad.engine.web.dto.DictionaryDTO;
+import it.cleverad.engine.web.dto.*;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -47,6 +49,8 @@ public class CommissionBusiness {
     private DictionaryRepository dictionaryRepository;
     @Autowired
     private CampaignRepository campaignRepository;
+    @Autowired
+    private TransactionBusiness transactionBusiness;
 
     @Autowired
     private Mapper mapper;
@@ -83,6 +87,7 @@ public class CommissionBusiness {
         Page<Commission> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CommissionDTO::from);
     }
+
     public Page<CommissionDTO> search(Filter request) {
         Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
         Page<Commission> page = repository.findAll(getSpecification(request), pageable);
@@ -92,17 +97,30 @@ public class CommissionBusiness {
     // UPDATE
     public CommissionDTO update(Long id, Filter filter) {
         Commission ommission = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Commission", id));
-        CommissionDTO campaignDTOfrom = CommissionDTO.from(ommission);
+        mapper.map(filter, ommission);
 
-        mapper.map(filter, campaignDTOfrom);
+        ommission.setLastModificationDate(LocalDateTime.now());
+        ommission.setCampaign(campaignRepository.findById(filter.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", filter.campaignId)));
+        ommission.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.dictionaryId)));
 
-        Commission mappedEntity = mapper.map(ommission, Commission.class);
-        mappedEntity.setLastModificationDate(LocalDateTime.now());
-        mappedEntity.setCampaign(campaignRepository.findById(filter.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", filter.campaignId)));
-        mappedEntity.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.dictionaryId)));
-        mapper.map(campaignDTOfrom, mappedEntity);
+        //aggiorno transazioni
+        // cerco tutte le transazioni con quella commissione
+        TransactionBusiness.Filter request = new TransactionBusiness.Filter();
+        request.setCommissionId(id);
+        //CPC
+        for (TransactionCPC tcps : ommission.getTransactionCPCS()) {
+            transactionBusiness.updateCPCValue(tcps.getClickNumber() * ommission.getValue(), tcps.getId());
+        }
+        //CPL
+        for (TransactionCPL tcpl : ommission.getTransactionCPLS()) {
+            transactionBusiness.updateCPLValue(1 * ommission.getValue(), tcpl.getId());
+        }
+        //CPM
+        for (TransactionCPM tcpm :  ommission.getTransactionCPMS()){
+            transactionBusiness.updateCPMValue(tcpm.getImpressionNumber() * ommission.getValue(), tcpm.getId());
+        }
 
-        return CommissionDTO.from(repository.save(mappedEntity));
+        return CommissionDTO.from(repository.save(ommission));
     }
 
     public CommissionDTO disable(Long id) {
@@ -132,7 +150,7 @@ public class CommissionBusiness {
         return page.map(CommissionDTO::from);
     }
 
-    public Commission getByIdCampaignDictionary(Long idC,Long idD) {
+    public Commission getByIdCampaignDictionary(Long idC, Long idD) {
         Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setCampaignId(idC);

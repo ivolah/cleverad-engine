@@ -133,7 +133,6 @@ public class ManageCPL {
                         transaction.setCommissionId(0L);
                     }
 
-
                     Double totale = commVal * 1;
                     transaction.setValue(totale);
                     transaction.setLeadNumber(Long.valueOf(1));

@@ -194,6 +194,28 @@ public class TransactionBusiness {
         return TransactionCPSDTO.from(cpsRepository.save(map));
     }
 
+
+    public TransactionCPCDTO updateCPCValue(Double value, Long id) {
+        TransactionCPC cpc = cpcRepository.findById(id).get();
+        cpc.setValue(value);
+        return TransactionCPCDTO.from(cpcRepository.save(cpc));
+    }
+    public TransactionCPLDTO updateCPLValue(Double value, Long id) {
+        TransactionCPL cpl = cplRepository.findById(id).get();
+        cpl.setValue(value);
+        return TransactionCPLDTO.from(cplRepository.save(cpl));
+    }
+    public TransactionCPSDTO updateCPSValue(Double value, Long id) {
+        TransactionCPS cps = cpsRepository.findById(id).get();
+        cps.setValue(value);
+        return TransactionCPSDTO.from(cpsRepository.save(cps));
+    }
+    public TransactionCPMDTO updateCPMValue(Double value, Long id) {
+        TransactionCPM cpm = cpmRepository.findById(id).get();
+        cpm.setValue(value);
+        return TransactionCPMDTO.from(cpmRepository.save(cpm));
+    }
+
     // GET BY ID CPC
     public TransactionCPCDTO findByIdCPC(Long id) {
         TransactionCPC transaction = null;
@@ -264,7 +286,6 @@ public class TransactionBusiness {
             throw new PostgresDeleteCleveradException(ee);
         }
     }
-
 
     public void delete(Long id, String type) {
         try {

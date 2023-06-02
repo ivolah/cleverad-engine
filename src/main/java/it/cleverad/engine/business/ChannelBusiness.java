@@ -83,7 +83,8 @@ public class ChannelBusiness {
         Channel map = mapper.map(request, Channel.class);
         map.setDictionary(dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
         map.setDictionaryType(dictionaryRepository.findById(request.typeId).orElseThrow(() -> new ElementCleveradException("Type", request.typeId)));
-        map.setDictionaryBusinessType(dictionaryRepository.findById(request.businessTypeId).orElseThrow(() -> new ElementCleveradException("Business Type", request.businessTypeId)));
+        if (request.businessTypeId != null)
+            map.setDictionaryBusinessType(dictionaryRepository.findById(request.businessTypeId).orElseThrow(() -> new ElementCleveradException("Business Type", request.businessTypeId)));
         map.setDictionaryOwner(dictionaryRepository.findById(request.ownerId).orElseThrow(() -> new ElementCleveradException("Owner", request.ownerId)));
 
         if (request.affiliateId != null) {
@@ -298,6 +299,7 @@ public class ChannelBusiness {
     public Page<DictionaryDTO> getTypes() {
         return dictionaryBusiness.getTypeChannel();
     }
+
     public Page<DictionaryDTO> getBusinessTypes() {
         return dictionaryBusiness.getBusinessTypeChannel();
     }
@@ -367,7 +369,6 @@ public class ChannelBusiness {
                 predicates.add(cb.lessThanOrEqualTo(root.get("lastModificationDate"), LocalDateTime.ofInstant(request.getLastModificationDateTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
             }
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
-
 
 
             return completePredicate;

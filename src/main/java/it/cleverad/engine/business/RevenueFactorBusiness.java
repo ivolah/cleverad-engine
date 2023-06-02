@@ -136,7 +136,6 @@ public class RevenueFactorBusiness {
         return revenueFactor;
     }
 
-
     //  GET TIPI
     public Page<DictionaryDTO> getTypes() {
         return dictionaryBusiness.getTypeCommission();

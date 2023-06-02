@@ -217,7 +217,17 @@ public class CampaignBusiness {
     public CampaignDTO update(Long id, Filter filter) {
 
         Campaign campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
+
+        Double newBB = null;
+        if (!campaign.getInitialBudget().equals(filter.getInitialBudget())) {
+            newBB = campaign.getBudget() + (filter.getInitialBudget()) - campaign.getInitialBudget();
+        }
+
         mapper.map(filter, campaign);
+
+        if (newBB != null)
+            campaign.setBudget(newBB);
+
 
         // SET
         if (filter.getCookieId() != null)
