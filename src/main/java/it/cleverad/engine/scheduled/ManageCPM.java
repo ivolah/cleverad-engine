@@ -44,8 +44,7 @@ public class ManageCPM {
     private RevenueFactorBusiness revenueFactorBusiness;
     @Autowired
     private ReferralService referralService;
-    @Autowired
-    private CommissionBusiness commissionBusiness;
+
 
     @Async
     @Scheduled(cron = "2 2 0/1 * * ?")
@@ -56,12 +55,11 @@ public class ManageCPM {
             // trovo tutti i tracking con read == false
             Map<String, Integer> mappa = new HashMap<>();
             Page<CpmDTO> last = CpmBusiness.getUnreadHourBefore();
-            last.stream().filter(CpmDTO -> CpmDTO.getRefferal() != null).forEach(cpm -> {
 
+            last.stream().filter(CpmDTO -> CpmDTO.getRefferal() != null).forEach(cpm -> {
                 // gestisco calcolatore
                 Integer num = mappa.get(cpm.getRefferal());
                 if (num == null) num = 0;
-
                 if (cpm.getRefferal().length() < 5) {
                     log.trace("Referral on solo Campaign Id :: {}", cpm.getRefferal());
                     // cerco da cpc
@@ -72,7 +70,6 @@ public class ManageCPM {
                     log.warn("Nuovo refferal :: {} ", cpm.getRefferal());
                 }
                 mappa.put(cpm.getRefferal(), num + 1);
-
                 // setto a gestito
                 CpmBusiness.setRead(cpm.getId());
             });
