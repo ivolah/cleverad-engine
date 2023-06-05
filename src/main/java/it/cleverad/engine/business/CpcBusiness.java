@@ -252,7 +252,6 @@ public class CpcBusiness {
                 predicates.add(cb.lessThanOrEqualTo(root.get("date"), request.getDatetimeTo()));
             }
 
-
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
@@ -269,6 +268,7 @@ public class CpcBusiness {
         private String refferal;
         private String ip;
         private String agent;
+        private String subid;
     }
 
     @Data

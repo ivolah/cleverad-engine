@@ -190,7 +190,7 @@ public class CpmBusiness {
         request.setDateFrom(LocalDate.now().minusDays(1));
         request.setDateTo(LocalDate.now().minusDays(1));
         Page<Cpm> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id"))));
-        log.info("UNREAD CPM :: {}", page.getTotalElements());
+        log.info("ALL DAY BEFORE :: CPM :: {}", page.getTotalElements());
         return page.map(CpmDTO::from);
     }
 

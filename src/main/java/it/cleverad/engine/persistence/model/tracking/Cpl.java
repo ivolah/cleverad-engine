@@ -24,7 +24,7 @@ public class Cpl {
     private String ip;
     private String agent;
     private String data;
-
+    private String subid;
     private LocalDateTime date = LocalDateTime.now();
     private Boolean read = false;
 

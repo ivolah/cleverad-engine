@@ -254,6 +254,7 @@ public class CplBusiness {
         private String ip;
         private String agent;
         private String data;
+        private String subid;
     }
 
     @Data
