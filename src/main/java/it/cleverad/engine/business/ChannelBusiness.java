@@ -16,6 +16,7 @@ import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.exception.ConstraintViolationException;
@@ -161,7 +162,6 @@ public class ChannelBusiness {
 
     // SEARCH PAGINATED
     public Page<ChannelDTO> search(Filter request, Pageable pageableRequest) {
-
         Page<AffiliateChannelCommissionCampaignDTO> searchACCC = null;
         if (!jwtUserDetailsService.isAdmin()) {
             request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
@@ -405,6 +405,7 @@ public class ChannelBusiness {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @ToString
     public static class Filter {
         private Long id;
 
