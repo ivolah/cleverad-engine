@@ -1,13 +1,11 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.service.Affiliate;
-import it.cleverad.engine.persistence.model.service.Dictionary;
-import it.cleverad.engine.persistence.model.service.File;
-import it.cleverad.engine.persistence.model.service.FileAffiliate;
+import it.cleverad.engine.persistence.model.service.*;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
 import it.cleverad.engine.persistence.repository.service.FileAffiliateRepository;
+import it.cleverad.engine.service.FileStoreService;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.FileAffiliateDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -57,6 +55,8 @@ public class FileAffiliateBusiness {
     private DictionaryBusiness dictionaryBusiness;
     @Autowired
     private Mapper mapper;
+    @Autowired
+    private FileStoreService fileStoreService;
 
     /**
      * ============================================================================================================
@@ -66,9 +66,17 @@ public class FileAffiliateBusiness {
     public Long store(MultipartFile file, BaseCreateRequest request) throws IOException {
         Affiliate aff = affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId));
         Dictionary dictionary = (dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
-        FileAffiliate fileDB = new FileAffiliate(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), file.getBytes(), aff, dictionary, request.note);
+        FileAffiliate fileDB = new FileAffiliate(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), file.getBytes(), aff, dictionary, request.note, null);
         return repository.save(fileDB).getId();
     }
+    public Long storeFile(MultipartFile file, BaseCreateRequest request) throws IOException {
+        Affiliate aff = affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId));
+        Dictionary dictionary = (dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
+        String path = fileStoreService.storeFile(aff.getId(), "affiliate", StringUtils.cleanPath(file.getOriginalFilename()), file.getBytes());
+        FileAffiliate fileDB = new FileAffiliate(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), file.getBytes(), aff, dictionary, request.note,path);
+        return repository.save(fileDB).getId();
+    }
+
 
     // GET BY ID
     public FileAffiliateDTO findById(Long id) {
@@ -79,6 +87,16 @@ public class FileAffiliateBusiness {
     // DELETE BY ID
     public void delete(Long id) {
         try {
+            repository.deleteById(id);
+        } catch (ConstraintViolationException ex) {
+            throw ex;
+        } catch (Exception ee) {
+            throw new PostgresDeleteCleveradException(ee);
+        }
+    }
+    public void deleteFile(Long id) {
+        try {
+            fileStoreService.deleteFile(this.findById(id).getPath());
             repository.deleteById(id);
         } catch (ConstraintViolationException ex) {
             throw ex;
@@ -117,6 +135,15 @@ public class FileAffiliateBusiness {
                 .contentType(MediaType.parseMediaType(fil.getType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fil.getName() + "\"")
                 .body(new ByteArrayResource(fil.getData()));
+    }
+
+    public ResponseEntity<Resource> downloadFile(Long id) throws IOException {
+        FileAffiliate fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("FileAffiliate", id));
+        byte[] data = fileStoreService.retrieveFile(fil.getPath());
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(fil.getType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fil.getName() + "\"")
+                .body(new ByteArrayResource(data));
     }
 
     /**

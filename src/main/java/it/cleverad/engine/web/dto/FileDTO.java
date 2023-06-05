@@ -1,6 +1,7 @@
 package it.cleverad.engine.web.dto;
 
 import it.cleverad.engine.persistence.model.service.File;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -8,6 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class FileDTO {
 
     private Long id;
@@ -16,17 +18,10 @@ public class FileDTO {
     private byte[] data;
     private LocalDateTime creationDate;
     private String nomeCodificato;
-
-    public FileDTO(Long id, String name, String type, byte[] data, LocalDateTime creationDate) {
-        this.id = id;
-        this.name = name;
-        this.type = type;
-        this.data = data;
-        this.creationDate = creationDate;
-    }
+    private String path;
 
     public static FileDTO from(File file) {
-        return new FileDTO(file.getId(), file.getName(), file.getType(), file.getData(), file.getCreationDate());
+        return new FileDTO(file.getId(), file.getName(), file.getType(), file.getData(), file.getCreationDate(),"", file.getPath());
     }
 
 }

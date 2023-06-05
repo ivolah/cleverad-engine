@@ -148,7 +148,7 @@ public class FilePayoutBusiness {
                 .body(new ByteArrayResource(fil.getData()));
     }
 
-    public ResponseEntity<Resource> downloadFile(Long id) {
+    public ResponseEntity<Resource> downloadFile(Long id) throws IOException {
         FilePayout fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("FilePayout", id));
         byte[] data = fileStoreService.retrieveFile(fil.getPath());
         return ResponseEntity.ok()

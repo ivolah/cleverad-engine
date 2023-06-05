@@ -27,12 +27,14 @@ public class File {
 
     @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
+    private String path;
 
-    public File(String name, String type, byte[] data) {
+    public File(String name, String type, byte[] data, String path) {
         this.name = name;
         this.type = type;
         this.data = data;
         this.creationDate = LocalDateTime.now();
+        this.path = path;
     }
 
 }

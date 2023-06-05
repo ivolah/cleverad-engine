@@ -22,11 +22,11 @@ public class FileAffiliateDTO {
     private String dictionaryValue;
     private Long affiliateId;
     private String affiliateName;
-
+    private String path;
 
     public static FileAffiliateDTO from(FileAffiliate file) {
         return new FileAffiliateDTO(file.getId(), file.getName(), file.getType(), null, file.getCreationDate(), file.getNote(),
-                file.getDictionary().getId(), file.getDictionary().getName(), file.getAffiliate().getId(), file.getAffiliate().getName());
+                file.getDictionary().getId(), file.getDictionary().getName(), file.getAffiliate().getId(), file.getAffiliate().getName(), file.getPath());
     }
 
 }

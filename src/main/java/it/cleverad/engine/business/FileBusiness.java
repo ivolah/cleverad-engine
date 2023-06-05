@@ -4,6 +4,7 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.File;
 import it.cleverad.engine.persistence.model.service.Media;
 import it.cleverad.engine.persistence.repository.service.FileRepository;
+import it.cleverad.engine.service.FileStoreService;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.FileDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -23,6 +24,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -37,7 +39,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.http.ResponseEntity;
 
 @Slf4j
 @Component
@@ -46,15 +47,14 @@ public class FileBusiness {
 
     @Autowired
     private FileRepository repository;
-
     @Autowired
     private Mapper mapper;
-
     @Autowired
     private ReferralService referralService;
-
     @Autowired
     private MediaBusiness mediaBusiness;
+    @Autowired
+    private FileStoreService fileStoreService;
 
     /**
      * ============================================================================================================
@@ -63,9 +63,17 @@ public class FileBusiness {
     // CREATE
     public Long store(MultipartFile file) throws IOException {
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-        File fileDB = new File(fileName, file.getContentType(), file.getBytes());
+        File fileDB = new File(fileName, file.getContentType(), file.getBytes(), null);
         return repository.save(fileDB).getId();
     }
+
+    public Long storeFile(MultipartFile file) throws IOException {
+        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+        String path = fileStoreService.storeFile(1L, "misc", StringUtils.cleanPath(file.getOriginalFilename()), file.getBytes());
+        File fileDB = new File(fileName, file.getContentType(), file.getBytes(), path);
+        return repository.save(fileDB).getId();
+    }
+
 
     // GET BY ID
     public FileDTO findById(Long id) {
@@ -76,6 +84,17 @@ public class FileBusiness {
     // DELETE BY ID
     public void delete(Long id) {
         try {
+            repository.deleteById(id);
+        } catch (ConstraintViolationException ex) {
+            throw ex;
+        } catch (Exception ee) {
+            throw new PostgresDeleteCleveradException(ee);
+        }
+    }
+
+    public void deleteFile(Long id) {
+        try {
+            fileStoreService.deleteFile(this.findById(id).getPath());
             repository.deleteById(id);
         } catch (ConstraintViolationException ex) {
             throw ex;
@@ -119,7 +138,7 @@ public class FileBusiness {
                 FileDTO dto = FileDTO.from(ele);
                 dto.setNomeCodificato(stringa);
                 return dto;
-            }else{
+            } else {
                 return null;
             }
         }).collect(Collectors.toList());
@@ -127,7 +146,7 @@ public class FileBusiness {
         return fileDTOList.stream().distinct().collect(Collectors.toList());
     }
 
-    public ResponseEntity<Resource>  download(Long id) {
+    public ResponseEntity<Resource> download(Long id) {
         File fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File", id));
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(fil.getType()))
@@ -135,6 +154,14 @@ public class FileBusiness {
                 .body(new ByteArrayResource(fil.getData()));
     }
 
+    public ResponseEntity<Resource> downloadFile(Long id) throws IOException {
+        File fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File", id));
+        byte[] data = fileStoreService.retrieveFile(fil.getPath());
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(fil.getType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fil.getName() + "\"")
+                .body(new ByteArrayResource(data));
+    }
 
 
     /**
