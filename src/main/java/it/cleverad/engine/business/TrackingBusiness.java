@@ -61,7 +61,7 @@ public class TrackingBusiness {
         TargetDTO targetDTO = new TargetDTO();
         Refferal refferal = referralService.decodificaReferral(request.getRefferalId());
 
-        if (refferal.getMediaId() != null) {
+        if (refferal != null && refferal.getMediaId() != null) {
             MediaDTO mediaDTO = mediaBusiness.findById(refferal.getMediaId());
             targetDTO.setTarget(mediaDTO.getTarget());
             targetDTO.setMediaId(refferal.getMediaId());
@@ -74,7 +74,7 @@ public class TrackingBusiness {
             }
         }
 
-        if (refferal.getAffiliateId() != null && refferal.getCampaignId() != null)
+        if (refferal != null && refferal.getAffiliateId() != null && refferal.getCampaignId() != null)
             campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(refferal.getAffiliateId(), refferal.getCampaignId()).stream().findFirst().ifPresent(campaignAffiliateDTO -> targetDTO.setFollowThorugh(campaignAffiliateDTO.getFollowThrough()));
 
         return targetDTO;
@@ -117,11 +117,9 @@ public class TrackingBusiness {
     }
 
     public void setRead(long id) {
-
         Tracking media = repository.findById(id).get();
         media.setRead(true);
         repository.save(media);
-
     }
 
     // SEARCH PAGINATED
