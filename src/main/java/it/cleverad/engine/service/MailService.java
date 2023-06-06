@@ -44,6 +44,7 @@ public class MailService {
     @Autowired
     private JavaMailSender emailSender;
 
+    private static String MAIL_INFO = "info@cleverad.it";
 
     /**
      * ============================================================================================================
@@ -54,7 +55,7 @@ public class MailService {
 
         SimpleMailMessage message = new SimpleMailMessage();
 
-        message.setFrom("info@cleverad.it");
+        message.setFrom(MAIL_INFO);
         message.setTo(request.email);
         message.setSubject(request.oggetto);
         message.setText(request.testo);
@@ -68,10 +69,10 @@ public class MailService {
     public MailDTO inviaSingola(BaseCreateRequest request) {
 
         AffiliateDTO affiliato = affiliateBusiness.findById(request.getAffiliateId());
-        CampaignDTO campaign = campaignBusiness.findById(request.getCampaignId());
+        //CampaignDTO campaign = campaignBusiness.findById(request.getCampaignId());
 
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("info@cleverad.it");
+        message.setFrom(MAIL_INFO);
         message.setTo(affiliato.getPrimaryMail());
         message.setSubject("TEST MAIL CLEVERAD");
         message.setText("CONTENUTO DI TESTTTT");
@@ -118,7 +119,7 @@ public class MailService {
 
         MimeMessage mimeMessage = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
-        helper.setFrom("info@cleverad.it");
+        helper.setFrom(MAIL_INFO);
         if (request.getEmail() != null) helper.setTo(request.getEmail());
         else helper.setTo(affiliate.getPrimaryMail());
         helper.setSubject(mailTemplate.getSubject());
@@ -182,8 +183,9 @@ public class MailService {
         AffiliateDTO affiliato = affiliateBusiness.findById(jwtUserDetailsService.getAffiliateID());
         CampaignDTO campaign = campaignBusiness.findById(request.getCampaignId());
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("info@cleverad.it");
-        message.setTo(campaign.getPlannerMail());
+        message.setFrom(MAIL_INFO);
+        log.info("MAIL {}", campaign.getPlannerMail());
+        message.setTo(campaign.getPlannerMail(), MAIL_INFO);
         message.setSubject("Richiesta partecipazione campagna " + campaign.getName());
         message.setText("L'affiliato " + affiliato.getName() + " ha richiesto di partecipare alla campagmna " + campaign.getName() + ".");
         emailSender.send(message);
