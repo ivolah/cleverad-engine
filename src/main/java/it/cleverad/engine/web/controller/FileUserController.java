@@ -26,23 +26,16 @@ public class FileUserController {
      * ============================================================================================================
      **/
 
-    @PostMapping()
+    @PostMapping(path = "/old")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Long uploadFileUser(@RequestParam("file") MultipartFile file, FileUserBusiness.BaseCreateRequest request) {
-        try {
             return business.store(file, request);
-        } catch (Exception e) {
-            throw new PostgresCleveradException("Errore uplaod: " + file.getOriginalFilename() + "!");
-        }
     }
-    @PostMapping(path = "/file")
+
+    @PostMapping( )
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Long uploadFileUserFile(@RequestParam("file") MultipartFile file, FileUserBusiness.BaseCreateRequest request) {
-        try {
             return business.storeFile(file, request);
-        } catch (Exception e) {
-            throw new PostgresCleveradException("Errore uplaod: " + file.getOriginalFilename() + "!");
-        }
     }
 
     @GetMapping
@@ -71,42 +64,46 @@ public class FileUserController {
         return business.findById(id);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}/old")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void delete(@PathVariable Long id) {
         this.business.delete(id);
     }
-
-    @GetMapping("/{id}/download")
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void deleteFile(@PathVariable Long id) {
+        this.business.deleteFile(id);
+    }
+    @GetMapping("/{id}/download/old")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<Resource> down(@PathVariable Long id) {
         return business.download(id);
     }
 
-    @GetMapping("/{id}/download/file")
+    @GetMapping("/{id}/download")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<Resource> downFile(@PathVariable Long id) throws IOException {
         return business.downloadFile(id);
     }
 
 
-    @PostMapping("/avatar")
+    @PostMapping("/avatar/old")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Long storeAvatar(@RequestParam("file") MultipartFile file, FileUserBusiness.BaseCreateRequest request) throws IOException {
         return business.storeAvatar(file, request);
     }
-    @PostMapping("/avatar/file")
+    @PostMapping("/avatar")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Long storeAvatarfile(@RequestParam("file") MultipartFile file, FileUserBusiness.BaseCreateRequest request) throws IOException {
         return business.storeAvatarFile(file, request);
     }
 
-    @GetMapping("/avatar")
+    @GetMapping("/avatar/old")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public FileUserDTO getAvaTar() {
         return business.getAvatar();
     }
-    @GetMapping("/avatar/file")
+    @GetMapping("/avatar")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public FileUserDTO getAvaTarfile() throws IOException {
         return business.getAvatarFile();

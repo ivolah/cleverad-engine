@@ -11,6 +11,7 @@ import it.cleverad.engine.service.FileStoreService;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.FilePayoutDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
+import it.cleverad.engine.web.exception.PostgresCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -79,12 +80,16 @@ public class FilePayoutBusiness {
         return repository.save(fileDB).getId();
     }
 
-    public Long storeFile(MultipartFile file, BaseCreateRequest request) throws IOException {
-        Payout payout = payoutRepository.findById(request.payoutId).orElseThrow(() -> new ElementCleveradException("Payout", request.payoutId));
-        Dictionary dictionary = (dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
-        String path = fileStoreService.storeFile(payout.getAffiliate().getId(), "payout", StringUtils.cleanPath(file.getOriginalFilename()), file.getBytes());
-        FilePayout fileDB = new FilePayout(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), null, payout, dictionary, path);
-        return repository.save(fileDB).getId();
+    public Long storeFile(MultipartFile file, BaseCreateRequest request) {
+        try {
+            Payout payout = payoutRepository.findById(request.payoutId).orElseThrow(() -> new ElementCleveradException("Payout", request.payoutId));
+            Dictionary dictionary = (dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
+            String path = fileStoreService.storeFile(payout.getAffiliate().getId(), "payout", StringUtils.cleanPath(file.getOriginalFilename()), file.getBytes());
+            FilePayout fileDB = new FilePayout(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), null, payout, dictionary, path);
+            return repository.save(fileDB).getId();
+        } catch (Exception e) {
+            throw new PostgresCleveradException("Errore uplaod: " + file.getOriginalFilename() + "!", e);
+        }
     }
 
     // GET BY ID
@@ -148,13 +153,17 @@ public class FilePayoutBusiness {
                 .body(new ByteArrayResource(fil.getData()));
     }
 
-    public ResponseEntity<Resource> downloadFile(Long id) throws IOException {
-        FilePayout fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("FilePayout", id));
-        byte[] data = fileStoreService.retrieveFile(fil.getPath());
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(fil.getType()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fil.getName() + "\"")
-                .body(new ByteArrayResource(data));
+    public ResponseEntity<Resource> downloadFile(Long id) {
+        try {
+            FilePayout fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("FilePayout", id));
+            byte[] data = fileStoreService.retrieveFile(fil.getPath());
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(fil.getType()))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fil.getName() + "\"")
+                    .body(new ByteArrayResource(data));
+        } catch (IOException e) {
+            throw new PostgresCleveradException("Errore downlaod", e);
+        }
     }
 
     /**

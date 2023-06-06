@@ -14,9 +14,7 @@ public class FileStoreService {
 
     public String storeFile(Long affiliateId, String tipo, String fileName, byte[] bytes) throws IOException {
         String filePath = "/media/cleverad/" + affiliateId + "/" + tipo + "/" + fileName;
-
         FileUtils.writeByteArrayToFile(new File(filePath), bytes);
-
         return filePath;
     }
 

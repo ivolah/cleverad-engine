@@ -9,11 +9,14 @@ import it.cleverad.engine.service.FileStoreService;
 import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.FileUserDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
+import it.cleverad.engine.web.exception.PostgresCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -39,6 +42,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -61,17 +65,29 @@ public class FileUserBusiness {
      **/
 
     // CREATE
-    public Long store(MultipartFile file, BaseCreateRequest request) throws IOException {
-        User user = userRepository.findById(request.userId).orElseThrow(() -> new ElementCleveradException("User", request.userId));
-        FileUser fileDB = new FileUser(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), file.getBytes(), user, request.note, request.avatar, null);
-        return repository.save(fileDB).getId();
+    public Long store(MultipartFile file, BaseCreateRequest request) {
+        try {
+            User user = userRepository.findById(request.userId).orElseThrow(() -> new ElementCleveradException("User", request.userId));
+            FileUser fileDB = new FileUser(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), file.getBytes(), user, request.note, request.avatar, null);
+            return repository.save(fileDB).getId();
+        } catch (Exception e) {
+            throw new PostgresCleveradException("Errore uplaod: " + file.getOriginalFilename() + "!", e);
+        }
     }
 
-    public Long storeFile(MultipartFile file, BaseCreateRequest request) throws IOException {
-        User user = userRepository.findById(request.userId).orElseThrow(() -> new ElementCleveradException("User", request.userId));
-        String path = fileStoreService.storeFile(user.getAffiliate().getId(), "user", StringUtils.cleanPath(file.getOriginalFilename()), file.getBytes());
-        FileUser fileDB = new FileUser(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), null, user, request.note, request.avatar, path);
-        return repository.save(fileDB).getId();
+    public Long storeFile(MultipartFile file, BaseCreateRequest request) {
+        try {
+            log.info("Req {}", request);
+            User user = userRepository.findById(request.userId).orElseThrow(() -> new ElementCleveradException("User", request.userId));
+            String filename = StringUtils.cleanPath(file.getOriginalFilename());
+            byte[] bytes = file.getBytes();
+            Long affiliateID = user.getAffiliate().getId();
+            String path = fileStoreService.storeFile(affiliateID, "user", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), bytes);
+            FileUser fileDB = new FileUser(filename, file.getContentType(), null, user, request.note, request.avatar, path);
+            return repository.save(fileDB).getId();
+        } catch (Exception e) {
+            throw new PostgresCleveradException("Errore uplaod: " + file.getOriginalFilename() + "!", e);
+        }
     }
 
     // GET BY ID
@@ -162,12 +178,14 @@ public class FileUserBusiness {
         Page<FileUser> page = repository.findAll(getSpecification(rr), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id"))));
         page.stream().forEach(fileUser -> repository.delete(fileUser));
 
+        String filename = StringUtils.cleanPath(file.getOriginalFilename());
+
         // salvo avatar
         request.setAvatar(true);
         request.setUserId(jwtUserDetailsService.getUserID());
         User user = userRepository.findById(jwtUserDetailsService.getUserID()).orElseThrow(() -> new ElementCleveradException("User", jwtUserDetailsService.getUserID()));
-        String path = fileStoreService.storeFile(user.getAffiliate().getId(), "user", StringUtils.cleanPath(file.getOriginalFilename()), file.getBytes());
-        FileUser fileDB = new FileUser(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), null, user, request.note, request.avatar, path);
+        String path = fileStoreService.storeFile(user.getAffiliate().getId(), "user", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), file.getBytes());
+        FileUser fileDB = new FileUser(filename, file.getContentType(), null, user, request.note, request.avatar, path);
         return repository.save(fileDB).getId();
     }
 
@@ -229,7 +247,6 @@ public class FileUserBusiness {
             }
 
 
-
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 
             return completePredicate;
@@ -244,6 +261,7 @@ public class FileUserBusiness {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @ToString
     public static class BaseCreateRequest {
         private String name;
         private byte[] data;

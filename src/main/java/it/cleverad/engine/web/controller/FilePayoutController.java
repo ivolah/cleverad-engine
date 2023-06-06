@@ -1,10 +1,8 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.FilePayoutBusiness;
-import it.cleverad.engine.business.FilePayoutBusiness;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.FilePayoutDTO;
-import it.cleverad.engine.web.exception.PostgresCleveradException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -29,11 +27,7 @@ public class FilePayoutController {
     @PostMapping()
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Long uploadFilePayout(@RequestParam("file") MultipartFile file, FilePayoutBusiness.BaseCreateRequest request) {
-       // try {
-            return business.store(file, request);
-      //  } catch (Exception e) {
-        //    throw new PostgresCleveradException("Errore uplaod: " + file.getOriginalFilename() + "!");
-     //   }
+        return business.storeFile(file, request);
     }
 
     @GetMapping
@@ -65,7 +59,7 @@ public class FilePayoutController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void delete(@PathVariable Long id) {
-        this.business.delete(id);
+        this.business.deleteFile(id);
     }
 
     @GetMapping("/types")
@@ -77,7 +71,7 @@ public class FilePayoutController {
     @GetMapping("/{id}/download")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<Resource> down(@PathVariable Long id) {
-        return business. download(id);
+        return business.downloadFile(id);
     }
 
     /**

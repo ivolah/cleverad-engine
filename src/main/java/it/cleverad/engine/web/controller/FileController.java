@@ -32,7 +32,7 @@ public class FileController {
         try {
             return business.store(file);
         } catch (Exception e) {
-            throw new PostgresCleveradException("Errore uplaod: " + file.getOriginalFilename() + "!");
+            throw new PostgresCleveradException("Errore uplaod: " + file.getOriginalFilename() + "!", e);
         }
     }
 
