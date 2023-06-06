@@ -145,28 +145,29 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
     //=========================================================================================================================
     //=========================================================================================================================
 
-    @Query(nativeQuery = true, value =
-            "Select distinct datadx as giorno, " +
-                    "                COALESCE(SUM(dt.impressionnumber), 0)                                           as impressionNumber, " +
-                    "                COALESCE(SUM(dt.clicknumber), 0)                                                as clickNumber, " +
-                    "                COALESCE(SUM(dt.leadnumber), 0)                                                 as leadNumber, " +
-                    "                COALESCE(round(CAST(SUM(dt.commission) AS numeric), 2), 0)                      as commission, " +
-                    "                COALESCE(round((SUM(dt.clicknumber) / SUM(dt.impressionnumber) * 100), 2), 0)   as CTR, " +
-                    "                COALESCE(round(CAST((SUM(dt.leadnumber) / SUM(dt.clicknumber) * 100) AS numeric), 2), 0)         as LR, " +
-                    "                COALESCE(round(CAST(SUM(dt.revenue) AS numeric), 2), 0)                         as revenue, " +
-                    "                COALESCE(round(CAST((SUM(dt.revenue) - SUM(dt.commission)) AS numeric), " +
-                    "                               2), 0)                                                           as margine, " +
-                    "                COALESCE(round(CAST((SUM(dt.revenue) - SUM(dt.commission)) AS numeric) " +
-                    "                                   / CAST(SUM(nullif(dt.revenue, 0)) AS numeric) * 100, 2), 0) " +
-                    "                                                                                                as marginePC, " +
-                    "                COALESCE(round(SUM(dt.commission) / SUM(dt.impressionnumber) * 1000, 2), 0)     as ecpm, " +
-                    "                COALESCE(round(SUM(dt.commission) / SUM(dt.clicknumber), 2), 0)                 as ecpc, " +
-                    "                COALESCE(round(CAST(SUM(dt.commission) / SUM(dt.leadnumber) AS numeric), 2), 0) as ecpl " +
-                    "from v_daily_transactions dt " +
-                    " where ((:dateFrom <= dt.datadx) AND (:dateTo >= dt.datadx)) " +
-                    "  AND ( (:affiliateId)IS NULL OR (dt.affilaiteid = (:affiliateId)))  " +
-                    "group by dt.datadx " +
-                    "order by dt.datadx asc ;")
+    @Query(nativeQuery = true, value = "Select distinct datadx                                                                          as giorno, " +
+            "                COALESCE(SUM(dt.impressionnumber), 0)                                           as impressionNumber, " +
+            "                COALESCE(SUM(dt.clicknumber), 0)                                                as clickNumber, " +
+            "                COALESCE(SUM(dt.leadnumber), 0)                                                 as leadNumber, " +
+            "                COALESCE(round((SUM(dt.clicknumber) / SUM(dt.impressionnumber) * 100), 2), 0)   as CTR, " +
+            "                COALESCE(round(CAST((SUM(dt.leadnumber) / SUM(dt.clicknumber) * 100) AS numeric), 2), 0)         as LR, " +
+            "                COALESCE(round(CAST(SUM(dt.commission) AS numeric), 2), 0)                      as commission, " +
+            "                COALESCE(round(CAST(SUM(dt.revenue) AS numeric), 2), 0)                         as revenue, " +
+            "                COALESCE(round(CAST((SUM(dt.revenue) - SUM(dt.commission)) AS numeric), " +
+            "                               2), 0)                                                           as margine, " +
+            "                COALESCE(round(CAST((SUM(dt.revenue) - SUM(dt.commission)) AS numeric) " +
+            "                                   / CAST(SUM(nullif(dt.revenue, 0)) AS numeric) * 100, 2), 0) " +
+            "                                                                                                as marginePC, " +
+            "                COALESCE(round(SUM(dt.commission) / SUM(dt.impressionnumber) * 1000, 2), 0)     as ecpm, " +
+            "                COALESCE(round(SUM(dt.commission) / SUM(dt.clicknumber), 2), 0)                 as ecpc, " +
+            "                COALESCE(round(CAST(SUM(dt.commission) / SUM(dt.leadnumber) AS numeric), 2), 0) as ecpl " +
+            " from v_daily_transactions dt " +
+            " where (cast(:dateFrom as date) IS NULL OR (:dateFrom <= dt.datadx)) " +
+            "  AND (cast(:dateTo as date) IS NULL OR (:dateTo >= dt.datadx)) " +
+            "  AND ((:affiliateId) IS NULL OR (dt.affilaiteid = (:affiliateId))) " +
+            " group by dt.datadx" +
+            " order by dt.datadx asc"
+    )
     List<ReportDaily> searchDaily(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("affiliateId") Long affiliateId);
 
 }

@@ -13,6 +13,7 @@ import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.criteria.Predicate;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -168,11 +170,19 @@ public class ReportBusiness {
 
     public Page<ReportDaily> searchDaily(TopFilter request, Pageable pageableRequest) {
         List<ReportDaily> lista = new ArrayList<>();
-        if (!jwtUserDetailsService.isAdmin()) {
-            lista = reportRepository.searchDaily(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), jwtUserDetailsService.getAffiliateID());
-        } else {
-            lista = reportRepository.searchDaily(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getAffiliateid());
+        if (Boolean.FALSE.equals(jwtUserDetailsService.isAdmin()))
+            request.setAffiliateid(jwtUserDetailsService.getAffiliateID());
+
+        LocalDateTime uno = null;
+        if (request.getDateTimeFrom() != null) {
+            uno = request.getDateTimeFrom().atStartOfDay();
         }
+        LocalDateTime due = null;
+        if (request.getDateTimeTo() != null) {
+            due = request.getDateTimeTo().atTime(LocalTime.MAX);
+        }
+        lista = reportRepository.searchDaily(uno, due, request.getAffiliateid());
+
         final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), lista.size());
         Page<ReportDaily> pages = new PageImpl<>(lista.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, lista.size());
         return pages;
@@ -186,6 +196,7 @@ public class ReportBusiness {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @ToString
     public static class TopFilter {
         @NotNull
         @DateTimeFormat(pattern = "yyyy-MM-dd")

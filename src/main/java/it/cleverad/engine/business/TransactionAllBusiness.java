@@ -86,18 +86,19 @@ public class TransactionAllBusiness {
     public Page<TransactionAllDTO> searchPrefiltrato(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("dateTime")));
         request.setPayoutId(null);
-
-      log.info("RR {}", request.toString());
-        if (jwtUserDetailsService.getRole().equals("Admin")) {
-            request.setValueNotZero(true);
-            Page<ViewTransactionAll> page = repository.findAll(getSpecification(request), pageable);
-            return page.map(TransactionAllDTO::from);
-        } else {
-            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-            request.setValueNotZero(true);
-            Page<ViewTransactionAll> page = repository.findAll(getSpecification(request), pageable);
-            return page.map(TransactionAllDTO::from);
+        request.setValueNotZero(true);
+        if (request.getDictionaryId() != null) {
+            if (request.getDictionaryId() == 10) request.setTipo("CPC");
+            else if (request.getDictionaryId() == 11) request.setTipo("CPL");
+            else if (request.getDictionaryId() == 50) request.setTipo("CPM");
+            else if (request.getDictionaryId() == 51) request.setTipo("CPS");
+            request.setDictionaryId(null);
         }
+        if (!jwtUserDetailsService.getRole().equals("Admin")) {
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+        }
+        Page<ViewTransactionAll> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(TransactionAllDTO::from);
     }
 
 
@@ -180,20 +181,12 @@ public class TransactionAllBusiness {
             if (request.getData() != null) {
                 predicates.add(cb.equal(root.get("data"), request.getData()));
             }
-
-            if (request.getDictionaryId() != null)
-                if (request.getDictionaryId().equals(10))
-                    predicates.add(cb.equal(root.get("tipo"), "CPC"));
-                else if (request.getDictionaryId().equals(11))
-                    predicates.add(cb.equal(root.get("tipo"), "CPL"));
-                else if (request.getDictionaryId().equals(50))
-                    predicates.add(cb.equal(root.get("tipo"), "CPM"));
-                else if (request.getDictionaryId().equals(51))
-                    predicates.add(cb.equal(root.get("tipo"), "CPS"));
-
-            //  if (request.getDictionaryId() != null) {
-            //      predicates.add(cb.equal(root.get("dictionaryId"), request.getDictionaryId()));
-            //  }
+            if (request.getTipo() != null) {
+                predicates.add(cb.equal(root.get("tipo"), request.getTipo()));
+            }
+            if (request.getDictionaryId() != null) {
+                predicates.add(cb.equal(root.get("dictionaryId"), request.getDictionaryId()));
+            }
 
             if (request.getCreationDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("creationDate"), request.getCreationDateFrom().atStartOfDay()));

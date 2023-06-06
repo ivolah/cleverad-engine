@@ -268,12 +268,14 @@ public class CplBusiness {
         private String agent;
         private String data;
         private Boolean read;
+        private String subid;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dateFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dateTo;
         private LocalDateTime datetimeFrom;
         private LocalDateTime datetimeTo;
+
     }
 
 }
