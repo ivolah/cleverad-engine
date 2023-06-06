@@ -62,9 +62,7 @@ public class AdvertiserBusiness {
     // DELETE BY ID
     public void delete(Long id) {
         try {
-            representativeBusiness.findByIdAdvertiser(id).forEach(representativeDTO -> {
-                representativeBusiness.delete(representativeDTO.getId());
-            });
+            representativeBusiness.findByIdAdvertiser(id).forEach(representativeDTO -> representativeBusiness.delete(representativeDTO.getId()));
             repository.deleteById(id);
         } catch (ConstraintViolationException ex) {
             throw ex;

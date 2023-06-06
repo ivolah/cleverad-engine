@@ -81,7 +81,7 @@ public class AgentBusiness {
     }
 
     public List<WidgetAgent> searchOS(Filter request) {
-        if (jwtUserDetailsService.isAdmin()) {
+        if (Boolean.TRUE.equals(jwtUserDetailsService.isAdmin())) {
             return repository.geOs(request.getCampaignId(), request.getAffiliateId());
         } else {
             return repository.geOs(request.getCampaignId(), String.valueOf(jwtUserDetailsService.getAffiliateID()));
@@ -89,7 +89,7 @@ public class AgentBusiness {
     }
 
     public List<WidgetAgent> searchDevic(Filter request) {
-        if (jwtUserDetailsService.isAdmin()) {
+        if (Boolean.TRUE.equals(jwtUserDetailsService.isAdmin())) {
             return repository.getDevice(request.getCampaignId(), request.getAffiliateId());
         } else {
             return repository.getDevice(request.getCampaignId(), String.valueOf(jwtUserDetailsService.getAffiliateID()));
@@ -98,7 +98,7 @@ public class AgentBusiness {
 
     //  SEARCH AGENT DATA
     public List<WidgetAgent> searchAgentDetailed(Filter request) {
-        if (jwtUserDetailsService.isAdmin()) {
+        if (Boolean.TRUE.equals(jwtUserDetailsService.isAdmin())) {
             return repository.searchAgentDetailed(request.getCampaignId(), request.getAffiliateId());
         } else {
             return repository.searchAgentDetailed(request.getCampaignId(), String.valueOf(jwtUserDetailsService.getAffiliateID()));
@@ -106,7 +106,7 @@ public class AgentBusiness {
     }
 
     public List<WidgetAgent> searchAgent(Filter request) {
-        if (jwtUserDetailsService.isAdmin()) {
+        if (Boolean.TRUE.equals(jwtUserDetailsService.isAdmin())) {
             return repository.getAgent(request.getCampaignId(), request.getAffiliateId());
         } else {
             return repository.getAgent(request.getCampaignId(), String.valueOf(jwtUserDetailsService.getAffiliateID()));

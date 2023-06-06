@@ -155,7 +155,6 @@ public class AffiliateChannelCommissionCampaignBusiness {
         return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
 
-
     // SEARCH searchScheduledActivities
     public AffiliateChannelCommissionCampaign searchScheduledActivities(Filter request) {
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.asc("id")));
