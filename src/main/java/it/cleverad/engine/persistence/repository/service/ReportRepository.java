@@ -164,10 +164,11 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
             " from v_daily_transactions dt " +
             " where (cast(:dateFrom as date) IS NULL OR (:dateFrom <= dt.datadx)) " +
             "  AND (cast(:dateTo as date) IS NULL OR (:dateTo >= dt.datadx)) " +
-            "  AND ((:affiliateId) IS NULL OR (dt.affilaiteid = (:affiliateId))) " +
+            "  AND ((:affiliateId) IS NULL OR (dt.affilaiteid = (:affiliateId)))  " +
+            "  AND ((:campaignid) IS NULL OR (dt.campaignid = (:campaignid)))  " +
             " group by dt.datadx" +
             " order by dt.datadx asc"
     )
-    List<ReportDaily> searchDaily(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("affiliateId") Long affiliateId);
+    List<ReportDaily> searchDaily(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid);
 
 }

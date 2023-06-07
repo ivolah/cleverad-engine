@@ -181,7 +181,7 @@ public class ReportBusiness {
         if (request.getDateTimeTo() != null) {
             due = request.getDateTimeTo().atTime(LocalTime.MAX);
         }
-        lista = reportRepository.searchDaily(uno, due, request.getAffiliateid());
+        lista = reportRepository.searchDaily(uno, due, request.getAffiliateid(), request.getCampaignid());
 
         final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), lista.size());
         Page<ReportDaily> pages = new PageImpl<>(lista.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, lista.size());
