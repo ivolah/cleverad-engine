@@ -30,7 +30,7 @@ public class FileController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Long uploadFile(@RequestParam("file") MultipartFile file) {
         try {
-            return business.store(file);
+            return business.storeFile(file);
         } catch (Exception e) {
             throw new PostgresCleveradException("Errore uplaod: " + file.getOriginalFilename() + "!", e);
         }
@@ -57,7 +57,7 @@ public class FileController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void delete(@PathVariable Long id) {
-        this.business.delete(id);
+        this.business.deleteFile(id);
     }
 
     @GetMapping("/encoded")
@@ -69,7 +69,11 @@ public class FileController {
     @GetMapping("/{id}/download")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<Resource> down(@PathVariable Long id) {
-        return business.download(id);
+        try {
+            return business.downloadFile(id);
+        } catch (Exception e) {
+            throw new PostgresCleveradException("Errore download!", e);
+        }
     }
 
     /**

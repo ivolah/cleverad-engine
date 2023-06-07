@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -42,6 +43,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -84,8 +86,9 @@ public class FilePayoutBusiness {
         try {
             Payout payout = payoutRepository.findById(request.payoutId).orElseThrow(() -> new ElementCleveradException("Payout", request.payoutId));
             Dictionary dictionary = (dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
-            String path = fileStoreService.storeFile(payout.getAffiliate().getId(), "payout", StringUtils.cleanPath(file.getOriginalFilename()), file.getBytes());
-            FilePayout fileDB = new FilePayout(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), null, payout, dictionary, path);
+            String filename = StringUtils.cleanPath(file.getOriginalFilename());
+            String path = fileStoreService.storeFile(payout.getAffiliate().getId(), "payout", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), file.getBytes());
+            FilePayout fileDB = new FilePayout(filename, file.getContentType(), null, payout, dictionary, path);
             return repository.save(fileDB).getId();
         } catch (Exception e) {
             throw new PostgresCleveradException("Errore uplaod: " + file.getOriginalFilename() + "!", e);

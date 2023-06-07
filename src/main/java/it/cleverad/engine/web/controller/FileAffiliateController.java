@@ -28,11 +28,7 @@ public class FileAffiliateController {
     @PostMapping()
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Long uploadFileAffiliate(@RequestParam("file") MultipartFile file, FileAffiliateBusiness.BaseCreateRequest request) {
-        try {
-            return business.store(file, request);
-        } catch (Exception e) {
-            throw new PostgresCleveradException("Errore uplaod: " + file.getOriginalFilename() + "!");
-        }
+            return business.storeFile(file, request);
     }
 
     @GetMapping
@@ -64,7 +60,7 @@ public class FileAffiliateController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void delete(@PathVariable Long id) {
-        this.business.delete(id);
+        this.business.deleteFile(id);
     }
 
     @GetMapping("/types")
@@ -76,7 +72,7 @@ public class FileAffiliateController {
     @GetMapping("/{id}/download")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<Resource> down(@PathVariable Long id) {
-        return business.download(id);
+        return business.downloadFile(id);
     }
 
 

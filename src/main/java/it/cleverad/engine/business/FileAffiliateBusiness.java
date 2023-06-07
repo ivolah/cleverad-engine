@@ -1,7 +1,9 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.service.*;
+import it.cleverad.engine.persistence.model.service.Affiliate;
+import it.cleverad.engine.persistence.model.service.Dictionary;
+import it.cleverad.engine.persistence.model.service.FileAffiliate;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
 import it.cleverad.engine.persistence.repository.service.FileAffiliateRepository;
@@ -9,11 +11,14 @@ import it.cleverad.engine.service.FileStoreService;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.FileAffiliateDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
+import it.cleverad.engine.web.exception.PostgresCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -39,6 +44,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -69,12 +75,18 @@ public class FileAffiliateBusiness {
         FileAffiliate fileDB = new FileAffiliate(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), file.getBytes(), aff, dictionary, request.note, null);
         return repository.save(fileDB).getId();
     }
-    public Long storeFile(MultipartFile file, BaseCreateRequest request) throws IOException {
-        Affiliate aff = affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId));
-        Dictionary dictionary = (dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
-        String path = fileStoreService.storeFile(aff.getId(), "affiliate", StringUtils.cleanPath(file.getOriginalFilename()), file.getBytes());
-        FileAffiliate fileDB = new FileAffiliate(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), file.getBytes(), aff, dictionary, request.note,path);
-        return repository.save(fileDB).getId();
+
+    public Long storeFile(MultipartFile file, BaseCreateRequest request) {
+        try {
+            Affiliate aff = affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId));
+            Dictionary dictionary = (dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
+            String filename = StringUtils.cleanPath(file.getOriginalFilename());
+            String path = fileStoreService.storeFile(aff.getId(), "affiliate", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), file.getBytes());
+            FileAffiliate fileDB = new FileAffiliate(filename, file.getContentType(), null, aff, dictionary, request.note, path);
+            return repository.save(fileDB).getId();
+        } catch (Exception e) {
+            throw new PostgresCleveradException("Errore uplaod: " + file.getOriginalFilename() + "!");
+        }
     }
 
 
@@ -94,6 +106,7 @@ public class FileAffiliateBusiness {
             throw new PostgresDeleteCleveradException(ee);
         }
     }
+
     public void deleteFile(Long id) {
         try {
             fileStoreService.deleteFile(this.findById(id).getPath());
@@ -137,13 +150,17 @@ public class FileAffiliateBusiness {
                 .body(new ByteArrayResource(fil.getData()));
     }
 
-    public ResponseEntity<Resource> downloadFile(Long id) throws IOException {
-        FileAffiliate fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("FileAffiliate", id));
-        byte[] data = fileStoreService.retrieveFile(fil.getPath());
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(fil.getType()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fil.getName() + "\"")
-                .body(new ByteArrayResource(data));
+    public ResponseEntity<Resource> downloadFile(Long id) {
+        try {
+            FileAffiliate fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("FileAffiliate", id));
+            byte[] data = fileStoreService.retrieveFile(fil.getPath());
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(fil.getType()))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fil.getName() + "\"")
+                    .body(new ByteArrayResource(data));
+        } catch (Exception e) {
+            throw new PostgresCleveradException("Errore download ", e);
+        }
     }
 
     /**
@@ -188,6 +205,7 @@ public class FileAffiliateBusiness {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @ToString
     public static class BaseCreateRequest {
         private String name;
         private String type;

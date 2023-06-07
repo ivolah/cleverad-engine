@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -38,6 +39,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -69,15 +71,19 @@ public class FileBusiness {
 
     public Long storeFile(MultipartFile file) throws IOException {
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-        String path = fileStoreService.storeFile(1L, "misc", StringUtils.cleanPath(file.getOriginalFilename()), file.getBytes());
-        File fileDB = new File(fileName, file.getContentType(), file.getBytes(), path);
+        String path = fileStoreService.storeFile(1L, "misc", UUID.randomUUID() + "." + FilenameUtils.getExtension(fileName), file.getBytes());
+        File fileDB = new File(fileName, file.getContentType(), null, path);
         return repository.save(fileDB).getId();
     }
-
 
     // GET BY ID
     public FileDTO findById(Long id) {
         File file = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File", id));
+        try {
+            file.setData(fileStoreService.retrieveFile(file.getPath()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         return FileDTO.from(file);
     }
 
@@ -126,8 +132,13 @@ public class FileBusiness {
     public List<FileDTO> listaFileCodificati() {
         Filter request = new Filter();
         Page<File> page = repository.findAll(getSpecification(request), PageRequest.of(0, 10, Sort.by(Sort.Order.desc("creationDate"))));
-
         List<FileDTO> fileDTOList = page.stream().distinct().map(ele -> {
+            byte[] data = new byte[0];
+            try {
+                data = fileStoreService.retrieveFile(ele.getPath());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             // trovo media id collegato e campaign id a cui e colelgato il media
             Media mm = mediaBusiness.getByFileId(ele.getId());
             if (mm != null) {
@@ -137,6 +148,7 @@ public class FileBusiness {
                 String stringa = referralService.encode(String.valueOf(campaignId)) + "-" + referralService.encode(String.valueOf(mediaId));
                 FileDTO dto = FileDTO.from(ele);
                 dto.setNomeCodificato(stringa);
+                dto.setData(data);
                 return dto;
             } else {
                 return null;
