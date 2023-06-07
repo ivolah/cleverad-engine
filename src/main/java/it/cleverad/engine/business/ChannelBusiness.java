@@ -223,8 +223,8 @@ public class ChannelBusiness {
 
         // SET Category - cancello precedenti
         channelCategoryBusiness.deleteByChannelID(id);
-        log.info("" + filter.getCategoryList().isEmpty());
-        log.info(filter.getCategoryList().size() + "");
+        // log.info("" + filter.getCategoryList().isEmpty());
+        //  log.info(filter.getCategoryList().size() + "");
 
         // setto nuvoi
         if (filter.getCategoryList() != null && !filter.getCategoryList().isEmpty()) {
