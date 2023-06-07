@@ -187,8 +187,9 @@ public class CpmBusiness {
 
     public Page<CpmDTO> getAllDayBefore() {
         Filter request = new Filter();
-        request.setDateFrom(LocalDate.now().minusDays(1));
-        request.setDateTo(LocalDate.now().minusDays(1));
+        request.setDatetimeFrom(LocalDate.now().minusDays(1).atStartOfDay());
+       // request.setDatetimeTo(LocalDate.now().minusDays(1).atStartOfDay().plusHours(1));
+        request.setDatetimeTo(LocalDate.now().minusDays(1).atStartOfDay().plusHours(24));
         Page<Cpm> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id"))));
         log.info("ALL DAY BEFORE :: CPM :: {}", page.getTotalElements());
         return page.map(CpmDTO::from);

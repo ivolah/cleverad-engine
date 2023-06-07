@@ -187,19 +187,17 @@ public class Consolida {
         }//tripletta
     }//trasformaTrackingCPC
 
-
     @Async
- //   @Scheduled(cron = "0 30 0 * * ?")
-    //@Scheduled(cron = "*/8 * * * * ?")
+    // @Scheduled(cron = "0 30 1 * * ?")
+    // @Scheduled(cron = "0 */2 * * * ?")
     public void trasformaTrackingCPM() {
 
         try {
 
-            // trovo tutti i tracking con read == false
             Map<String, Integer> mappa = new HashMap<>();
             Page<CpmDTO> tutti = CpmBusiness.getAllDayBefore();
-            tutti.stream().filter(CpmDTO -> CpmDTO.getRefferal() != null).forEach(cpm -> {
 
+            tutti.stream().filter(CpmDTO -> CpmDTO.getRefferal() != null).forEach(cpm -> {
                 // gestisco calcolatore
                 Integer num = mappa.get(cpm.getRefferal());
                 if (num == null) num = 0;
@@ -214,15 +212,12 @@ public class Consolida {
                     log.warn("Nuovo refferal :: {} ", cpm.getRefferal());
                 }
                 mappa.put(cpm.getRefferal(), num + 1);
-
-                // setto a gestito
-                CpmBusiness.setRead(cpm.getId());
             });
 
             mappa.forEach((x, aLong) -> {
                 // prendo reffereal e lo leggo
                 Refferal refferal = referralService.decodificaReferral(x);
-                log.info(">>>> T-CPC :: {} -> {} - {}", aLong, x, refferal);
+                log.info(">>>> T-CPM :: {} -> {} - {}", aLong, x, refferal);
                 if (refferal != null && refferal.getCampaignId() != null && !Objects.isNull(refferal.getAffiliateId())) {
 
                     // setta transazione
@@ -288,14 +283,9 @@ public class Consolida {
                         transaction.setValue(totale);
                         transaction.setImpressionNumber(Long.valueOf(aLong));
 
-                        // incemento valore
-                        if (walletID != null && totale > 0D) walletBusiness.incement(walletID, totale);
-
-                        // decremento budget Affiliato
                         BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
                         if (bb != null) {
                             Double totBudgetDecrementato = bb.getBudget() - totale;
-                            budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
 
                             // setto stato transazione a ovebudget editore se totale < 0
                             if (totBudgetDecrementato < 0) {
@@ -308,8 +298,6 @@ public class Consolida {
                         if (rff != null && rff.getRevenue() != null) {
                             Double totaleDaDecurtare = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 50L).getRevenue() * aLong;
                             Double budgetCampagna = campaignDTO.getBudget() - totaleDaDecurtare;
-                            campaignBusiness.updateBudget(campaignDTO.getId(), budgetCampagna);
-
                             // setto stato transazione a ovebudget editore se totale < 0
                             if (budgetCampagna < 0) {
                                 transaction.setDictionaryId(48L);
@@ -317,12 +305,23 @@ public class Consolida {
                         }
 
                         // creo la transazione
-                        TransactionCPMDTO tcpm = transactionBusiness.createCpm(transaction);
-                        log.info("CREATO TRANSAZIONE :::: CPM :::: {} \n", tcpm.getId());
+//                        TransactionCPMDTO tcpm = transactionBusiness.createCpm(transaction);
+//                        log.info("CREATO TRANSAZIONE PULITA :::: CPM :::: {} \n", tcpm.getId());
                     }
 
                 }// refferal not null
             });
+
+
+            // trovo tutte le transazioni CCPM di ieri e le cancello           }
+
+            TransactionBusiness.Filter request = new TransactionBusiness.Filter();
+            LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
+            request.setDateTimeFrom(LocalDate.now().minusDays(1).atStartOfDay());
+            request.setDateTimeTo(LocalDate.now().atStartOfDay());
+            Page<TransactionCPMDTO> cpcM = transactionBusiness.searchCpm(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
+            log.info("TOTALE CCPM DA CANCCELLAT ::{} ", cpcM.stream().collect(Collectors.toList()).size());
+         //   cpcM.stream().forEach(transactionCPMDTO -> transactionBusiness.deleteInterno(transactionCPMDTO.getId(), "CPM"));
 
         } catch (Exception e) {
             log.error("Eccezione Scheduler Cpm --  {}", e.getMessage(), e);

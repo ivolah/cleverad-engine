@@ -48,7 +48,7 @@ public class ManageCPC {
     private CommissionBusiness commissionBusiness;
 
     //@Scheduled(cron = "*/15 * * * * ?")
-    @Scheduled(cron = "3 3 0/1 * * ?")
+    @Scheduled(cron = "0 3 0/1 * * ?")
     @Async
     public void trasformaTrackingCPC() {
         //   log.info("trasformaTrackingCPC");
@@ -96,7 +96,7 @@ public class ManageCPC {
                     Long mediaId = refferal.getMediaId();
                     if (mediaId != null) transaction.setMediaId(mediaId);
 
-                    transaction.setDateTime(LocalDateTime.now().withMinute(0).withSecond(0).withNano(0));
+                    transaction.setDateTime(LocalDateTime.now().withMinute(0).withSecond(0).withNano(0).minusMinutes(1));
                     transaction.setApproved(true);
 
                     // controlla data scadneza camapgna

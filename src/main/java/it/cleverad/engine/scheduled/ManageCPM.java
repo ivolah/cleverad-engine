@@ -47,7 +47,7 @@ public class ManageCPM {
 
 
     @Async
-    @Scheduled(cron = "2 2 0/1 * * ?")
+    @Scheduled(cron = "0 2 0/1 * * ?")
     //@Scheduled(cron = "*/8 * * * * ?")
     public void trasformaTrackingCPM() {
         try {
@@ -85,7 +85,7 @@ public class ManageCPM {
                     transaction.setAffiliateId(refferal.getAffiliateId());
                     transaction.setCampaignId(refferal.getCampaignId());
                     transaction.setChannelId(refferal.getChannelId());
-                    transaction.setDateTime(LocalDateTime.now().withMinute(0).withSecond(0).withNano(0));
+                    transaction.setDateTime(LocalDateTime.now().withMinute(0).withSecond(0).withNano(0).minusMinutes(1));
                     transaction.setMediaId(refferal.getMediaId());
                     transaction.setApproved(true);
 
