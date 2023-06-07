@@ -278,16 +278,14 @@ public class ViewBusiness {
 
         listaTop10.removeAll(listaTop0);
 
-
         Integer limite = 6;
         if (listaTop10.size() + listaTop0.size() < 6)
-
+            limite = listaTop10.size() + listaTop0.size();
 
         while (listaTop0.size() < limite && listaTop10.size() > 0) {
             listaTop0.add(listaTop10.stream().collect(Collectors.toList()).get(0));
             listaTop10.remove(0);
         }
-
 
         Set<Long> doysDaVerificare = new HashSet<>();
         if (!doys.isEmpty() && doys.size() > 0)
