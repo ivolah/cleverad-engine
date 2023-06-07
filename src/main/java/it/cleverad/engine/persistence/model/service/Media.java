@@ -36,6 +36,7 @@ public class Media {
     private String idFile;
 
     private Boolean status = true;
+    private Boolean visibile = true;
     @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
     @Column(name = "last_modification_date")

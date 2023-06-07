@@ -298,6 +298,10 @@ public class MediaBusiness {
                 predicates.add(cb.equal(root.get("status"), request.getStatus()));
             }
 
+            if (request.getVisibile() != null) {
+                predicates.add(cb.equal(root.get("visibile"), request.getVisibile()));
+            }
+
             if (request.getUrl() != null) {
                 predicates.add(cb.equal(root.get("url"), request.getUrl()));
             }
@@ -359,6 +363,7 @@ public class MediaBusiness {
         private Long campaignId;
         private String mailSubject;
         private String sender;
+        private Boolean visibile = true;
     }
 
     @Data
@@ -383,6 +388,7 @@ public class MediaBusiness {
         private Instant lastModificationDateFrom;
         private Instant lastModificationDateTo;
         private String sender;
+        private Boolean visibile;
     }
 
 }
