@@ -270,6 +270,7 @@ public class ViewBusiness {
         Page<WidgetCampaignDayCpm> tutto = widgetCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("totale"))));
 
         Set<Long> doys = tutto.stream().map(WidgetCampaignDayCpm::getDoy).collect(Collectors.toSet());
+
         Set<Long> listaTop0 = widgetTopCPMRepository.listaTopCampagne(request.getAffiliateId(), 0).stream().filter(topCampagneCPM -> topCampagneCPM.getimpression() > 100L).map(TopCampagneCPM::getcampaignid).collect(Collectors.toSet());
         // Set<Long> listaTop3 = widgetTopCPMRepository.listaTopCampagne(request.getAffiliateId(), 3).stream().filter(topCampagneCPM -> topCampagneCPM.getimpression() > 100L).map(TopCampagneCPM::getcampaignid).collect(Collectors.toSet());
         // Set<Long> listaTop5 = widgetTopCPMRepository.listaTopCampagne(request.getAffiliateId(), 5).stream().filter(topCampagneCPM -> topCampagneCPM.getimpression() > 100L).map(TopCampagneCPM::getcampaignid).collect(Collectors.toSet());
@@ -277,10 +278,16 @@ public class ViewBusiness {
 
         listaTop10.removeAll(listaTop0);
 
-        while (listaTop0.size() < 6 && listaTop10.size() > 0) {
+
+        Integer limite = 6;
+        if (listaTop10.size() + listaTop0.size() < 6)
+
+
+        while (listaTop0.size() < limite && listaTop10.size() > 0) {
             listaTop0.add(listaTop10.stream().collect(Collectors.toList()).get(0));
             listaTop10.remove(0);
         }
+
 
         Set<Long> doysDaVerificare = new HashSet<>();
         if (!doys.isEmpty() && doys.size() > 0)
