@@ -17,6 +17,8 @@ import java.time.LocalDateTime;
 public class WidgetTopCPM {
     @Id
     private Long campaignId;
+
+    private Long campaignid;
     private String campaignName;
     private Long affiliateId;
     private String affiliateName;
