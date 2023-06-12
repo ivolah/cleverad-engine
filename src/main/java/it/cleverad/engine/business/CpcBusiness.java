@@ -139,11 +139,8 @@ public class CpcBusiness {
     // UPDATE
     public CpcDTO update(Long id, Filter filter) {
         Cpc channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cpc", id));
-        CpcDTO campaignDTOfrom = CpcDTO.from(channel);
-        mapper.map(filter, campaignDTOfrom);
-        Cpc mappedEntity = mapper.map(channel, Cpc.class);
-        mapper.map(campaignDTOfrom, mappedEntity);
-        return CpcDTO.from(repository.save(mappedEntity));
+        mapper.map(filter, channel);
+        return CpcDTO.from(repository.save(channel));
     }
 
     public Page<CpcDTO> getUnread() {
@@ -269,6 +266,8 @@ public class CpcBusiness {
         private String ip;
         private String agent;
         private String subid;
+        private String htmlRefferral;
+        private String info;
     }
 
     @Data

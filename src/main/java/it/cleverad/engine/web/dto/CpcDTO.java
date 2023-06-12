@@ -22,18 +22,22 @@ public class CpcDTO {
     private String affiliateName;
     private Long channelId;
     private String channelName;
+    private String htmlRefferral;
+    private String info;
 
-    public CpcDTO(long id, String refferal, String ip, String agent, LocalDateTime date, Boolean read) {
+    public CpcDTO(long id, String refferal, String ip, String agent, LocalDateTime date, Boolean read, String htmlRefferral, String info) {
         this.id = id;
         this.refferal = refferal;
         this.ip = ip;
         this.agent = agent;
         this.date = date;
         this.read = read;
+        this.htmlRefferral = htmlRefferral;
+        this.info = info;
     }
 
     public static CpcDTO from(Cpc cpc) {
-        return new CpcDTO(cpc.getId(), cpc.getRefferal(),cpc.getIp(), cpc.getAgent(), cpc.getDate(), cpc.getRead());
+        return new CpcDTO(cpc.getId(), cpc.getRefferal(), cpc.getIp(), cpc.getAgent(), cpc.getDate(), cpc.getRead(), cpc.getHtmlRefferral(), cpc.getInfo());
     }
 
 }

@@ -142,14 +142,8 @@ public class CplBusiness {
     // UPDATE
     public CplDTO update(Long id, Filter filter) {
         Cpl channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cpl", id));
-        CplDTO campaignDTOfrom = CplDTO.from(channel);
-
-        mapper.map(filter, campaignDTOfrom);
-
-        Cpl mappedEntity = mapper.map(channel, Cpl.class);
-        mapper.map(campaignDTOfrom, mappedEntity);
-
-        return CplDTO.from(repository.save(mappedEntity));
+        mapper.map(filter, channel);
+        return CplDTO.from(repository.save(channel));
     }
 
     public void setRead(long id) {
@@ -255,6 +249,7 @@ public class CplBusiness {
         private String agent;
         private String data;
         private String info;
+
     }
 
     @Data

@@ -23,8 +23,10 @@ public class Cpc {
     private String refferal;
     private String ip;
     private String agent;
-    private String subid;
     private LocalDateTime date = LocalDateTime.now();
     private Boolean read = false;
+    @Column(name = "html_referral")
+    private String htmlRefferral;
+    private String info;
 
 }
