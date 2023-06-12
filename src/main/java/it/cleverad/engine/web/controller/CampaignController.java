@@ -58,21 +58,22 @@ public class CampaignController {
     public Page<CampaignDTO> getCampaigns(@PathVariable Long affiliateId) {
         return business.getCampaigns(affiliateId);
     }
+
     @GetMapping("/affiliate")
-    public Page<CampaignDTO> getCampaigns() {
-        return business.getCampaignsActive(jwtUserDetailsService.getAffiliateID());
+    public Page<CampaignDTO> getCampaigns(Pageable pageable) {
+        return business.getCampaignsActive(jwtUserDetailsService.getAffiliateID(), pageable);
     }
+
     @GetMapping("/affiliate/not")
-    public Page<CampaignDTO> getCampaignsNot() {
-        return business.getCampaignsNot(jwtUserDetailsService.getAffiliateID());
+    public Page<CampaignDTO> getCampaignsNot(Pageable pageable) {
+        return business.getCampaignsNot(jwtUserDetailsService.getAffiliateID(), pageable);
     }
 
 //    @GetMapping("/affiliate")
 //    public Page<CampaignDTO> getCampaignAffilaite(Pageable pageable) {
 //        return business.getCampaignsGuest(pageable);
 //    }
-//
-    
+
     /**
      * ============================================================================================================
      **/

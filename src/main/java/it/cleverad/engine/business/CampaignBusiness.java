@@ -1,7 +1,10 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.service.*;
+import it.cleverad.engine.persistence.model.service.Affiliate;
+import it.cleverad.engine.persistence.model.service.Campaign;
+import it.cleverad.engine.persistence.model.service.CampaignCategory;
+import it.cleverad.engine.persistence.model.service.Media;
 import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.service.ReferralService;
@@ -20,6 +23,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -282,38 +286,31 @@ public class CampaignBusiness {
         return page.map(CampaignDTO::from);
     }
 
-    public Page<CampaignDTO> getCampaignsActive(Long affiliateId) {
-        Affiliate cc = affiliateRepository.findById(affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", affiliateId));
+    public Page<CampaignDTO> getCampaignsActive(Long affiliateId, Pageable pageable) {
 
-        List<Campaign> campaigns = new ArrayList<>();
-        if (cc.getCampaignAffiliates() != null) {
-            List<CampaignAffiliate> cf = cc.getCampaignAffiliates().stream().filter(ca -> ca.getCampaign().getStatus()).collect(Collectors.toList());
-            campaigns = cf.stream().map(campaignAffiliate -> campaignAffiliate.getCampaign()).collect(Collectors.toList());
-        }
+        List<Long> listaId = new ArrayList<>();
+        affiliateRepository.findById(affiliateId).get().getCampaignAffiliates().stream().forEach(campaignAffiliate -> {
+            listaId.add(campaignAffiliate.getCampaign().getId());
+        });
 
-        Page<Campaign> page = new PageImpl<>(campaigns.stream().distinct().collect(Collectors.toList()));
+        Filter request = new Filter();
+        request.setStatus(true);
+        request.setIdListIn(listaId);
+        Page<Campaign> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CampaignDTO::from);
     }
 
-    public Page<CampaignDTO> getCampaignsNot(Long affiliateId) {
+    public Page<CampaignDTO> getCampaignsNot(Long affiliateId, Pageable pageable) {
 
-        Pageable pageable = PageRequest.of(0, 200, Sort.by(Sort.Order.desc("id")));
-        Filter request = new Filter();
-        request.setStatus(true);
-        Page<Campaign> page = repository.findAll(getSpecification(request), pageable);
+        List<Long> listaId = new ArrayList<>();
+        affiliateRepository.findById(affiliateId).get().getCampaignAffiliates().stream().forEach(campaignAffiliate -> {
+            listaId.add(campaignAffiliate.getCampaign().getId());
+        });
 
-        Affiliate cc = affiliateRepository.findById(affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", affiliateId));
-
-        if (cc.getCampaignAffiliates() != null) {
-            List campaigns = cc.getCampaignAffiliates().stream().map(campaignAffiliate -> campaignAffiliate.getCampaign().getId()).collect(Collectors.toList());
-            List<Campaign> ll = page.stream().filter(campaign -> {
-                if (!campaigns.contains(campaign.getId())) return true;
-                else return false;
-            }).collect(Collectors.toList());
-
-            page = new PageImpl<>(ll.stream().distinct().collect(Collectors.toList()));
-        }
-
+        Filter requestNot = new Filter();
+        requestNot.setStatus(true);
+        requestNot.setIdListNotIn(listaId);
+        Page<Campaign> page = repository.findAll(getSpecification(requestNot), pageable);
         return page.map(CampaignDTO::from);
     }
 
@@ -399,6 +396,24 @@ public class CampaignBusiness {
                 predicates.add(cb.lessThanOrEqualTo(root.get("endDate"), (request.getEndDateTo().plus(1, ChronoUnit.DAYS))));
             }
 
+            if (request.getIdListIn() != null) {
+                CriteriaBuilder.In<Long> inClause = cb.in(root.get("id"));
+                for (Long id : request.getIdListIn()) {
+                    inClause.value(id);
+                }
+                predicates.add(inClause);
+            }
+
+            if (request.getIdListNotIn() != null) {
+                CriteriaBuilder.In<Long> inClauseNot = cb.in(root.get("id"));
+                for (Long id : request.getIdListNotIn()) {
+                    inClauseNot.value(id);
+                }
+                predicates.add(inClauseNot.not());
+            }
+
+
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 
             return completePredicate;
@@ -474,6 +489,8 @@ public class CampaignBusiness {
         private Long plannerId;
         private Long dealerId;
         private String cap;
+        private List<Long> idListIn;
+        private List<Long> idListNotIn;
     }
 
 }

@@ -46,7 +46,7 @@ public class ManageCPL {
 
     @Async
     @Scheduled(cron = "0 5 0/1 * * ?")
-    //@Scheduled(cron = "*/15 * * * * ?")
+   // @Scheduled(cron = "*/15 * * * * ?")
     public void trasformaTrackingCPL() {
         try {
             //   cplBusiness.getUnreadDayBefore().stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
