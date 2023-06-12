@@ -25,9 +25,9 @@ public class CplDTO {
     private String affiliateName;
     private Long channelId;
     private String channelName;
-    private String subid;
+    private String info;
 
-    public CplDTO(long id, String refferal, String ip, String agent, String data, LocalDateTime date, Boolean read, String subid) {
+    public CplDTO(long id, String refferal, String ip, String agent, String data, LocalDateTime date, Boolean read, String info) {
         this.id = id;
         this.refferal = refferal;
         this.ip = ip;
@@ -35,11 +35,11 @@ public class CplDTO {
         this.data = data;
         this.date = date;
         this.read = read;
-        this.subid = subid;
+        this.info = info;
     }
 
     public static CplDTO from(Cpl cpl) {
-        return new CplDTO(cpl.getId(), cpl.getRefferal(), cpl.getIp(), cpl.getAgent(), cpl.getData(), cpl.getDate(), cpl.getRead(),  cpl.getSubid());
+        return new CplDTO(cpl.getId(), cpl.getRefferal(), cpl.getIp(), cpl.getAgent(), cpl.getData(), cpl.getDate(), cpl.getRead(),  cpl.getInfo());
     }
 
 }

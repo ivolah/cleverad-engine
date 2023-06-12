@@ -254,7 +254,7 @@ public class CplBusiness {
         private String ip;
         private String agent;
         private String data;
-        private String subid;
+        private String info;
     }
 
     @Data
@@ -268,7 +268,7 @@ public class CplBusiness {
         private String agent;
         private String data;
         private Boolean read;
-        private String subid;
+        private String info;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dateFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
