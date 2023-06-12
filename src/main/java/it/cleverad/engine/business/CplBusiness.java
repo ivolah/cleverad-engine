@@ -157,8 +157,8 @@ public class CplBusiness {
         Filter request = new Filter();
         request.setRead(false);
         LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
-        request.setDatetimeFrom(oraSpaccata.minusHours(24));
-       // request.setDatetimeFrom(oraSpaccata.minusHours(240));
+       // request.setDatetimeFrom(oraSpaccata.minusHours(24));
+        request.setDatetimeFrom(oraSpaccata.minusHours(350));
         request.setDatetimeTo(oraSpaccata);
         Page<Cpl> page = repository.findAll(getSpecification(request), pageable);
         log.info("\n\n\n >>>>>>>>>>>>>>>>>>>>>> UNREAD CPL HOUR BEFORE :: {}", page.getTotalElements());
@@ -231,6 +231,10 @@ public class CplBusiness {
                 predicates.add(cb.lessThanOrEqualTo(root.get("date"), request.getDatetimeTo()));
             }
 
+            if (request.getCountry() != null) {
+                predicates.add(cb.equal(root.get("country"), request.getCountry()));
+            }
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
@@ -249,7 +253,7 @@ public class CplBusiness {
         private String agent;
         private String data;
         private String info;
-
+        private String country;
     }
 
     @Data
@@ -270,7 +274,7 @@ public class CplBusiness {
         private LocalDate dateTo;
         private LocalDateTime datetimeFrom;
         private LocalDateTime datetimeTo;
-
+        private String country;
     }
 
 }

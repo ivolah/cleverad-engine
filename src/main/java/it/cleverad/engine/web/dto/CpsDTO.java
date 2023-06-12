@@ -31,7 +31,7 @@ public class CpsDTO {
     }
 
     public static CpsDTO from(Cps cps) {
-        return new CpsDTO(cps.getId(), cps.getRefferal(), cps.getIp(),cps.getAgent(), cps.getData(), cps.getDate(), cps.getRead());
+        return new CpsDTO(cps.getId(), cps.getRefferal(), cps.getIp(), cps.getAgent(), cps.getData(), cps.getDate(), cps.getRead());
     }
 
 }

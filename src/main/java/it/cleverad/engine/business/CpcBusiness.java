@@ -265,9 +265,9 @@ public class CpcBusiness {
         private String refferal;
         private String ip;
         private String agent;
-        private String subid;
-        private String htmlRefferral;
+        private String htmlReferral;
         private String info;
+        private String country;
     }
 
     @Data
@@ -285,6 +285,7 @@ public class CpcBusiness {
         private LocalDate dateTo;
         private LocalDateTime datetimeFrom;
         private LocalDateTime datetimeTo;
+        private String country;
     }
 
 }

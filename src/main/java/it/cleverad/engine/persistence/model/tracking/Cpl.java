@@ -25,6 +25,7 @@ public class Cpl {
     private String agent;
     private String data;
     private String info;
+    private String country;
     private LocalDateTime date = LocalDateTime.now();
     private Boolean read = false;
 

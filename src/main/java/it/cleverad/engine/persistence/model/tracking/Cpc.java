@@ -26,7 +26,8 @@ public class Cpc {
     private LocalDateTime date = LocalDateTime.now();
     private Boolean read = false;
     @Column(name = "html_referral")
-    private String htmlRefferral;
+    private String htmlReferral;
     private String info;
+    private String country;
 
 }
