@@ -74,7 +74,7 @@ public class TransactionBusiness {
     // CREATE
     public TransactionCPCDTO createCpc(BaseCreateRequest request) {
         TransactionCPC map = mapper.map(request, TransactionCPC.class);
-        request.setDictionaryId(42L);
+       // request.setDictionaryId(42L);
 
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
 
@@ -104,7 +104,7 @@ public class TransactionBusiness {
 
     public TransactionCPLDTO createCpl(BaseCreateRequest request) {
         TransactionCPL map = mapper.map(request, TransactionCPL.class);
-        request.setDictionaryId(42L);
+      //  request.setDictionaryId(42L);
 
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
 
@@ -134,7 +134,7 @@ public class TransactionBusiness {
 
     public TransactionCPMDTO createCpm(BaseCreateRequest request) {
         TransactionCPM map = mapper.map(request, TransactionCPM.class);
-        request.setDictionaryId(42L);
+       // request.setDictionaryId(42L);
 
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
 
@@ -164,7 +164,7 @@ public class TransactionBusiness {
 
     public TransactionCPSDTO createCps(BaseCreateRequest request) {
         TransactionCPS map = mapper.map(request, TransactionCPS.class);
-        request.setDictionaryId(42L);
+     //   request.setDictionaryId(42L);
 
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
 

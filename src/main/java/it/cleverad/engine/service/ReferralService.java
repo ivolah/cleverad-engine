@@ -45,12 +45,16 @@ public class ReferralService {
                         log.warn("Error decoding channel id : {}", tokens[0]);
                     }
                 }
-                if (tokens.length >= 4 && tokens[4] != null) {
-                    try {
-                        refferal.setTargetId(Long.valueOf(decodifica(tokens[4])));
-                    } catch (NumberFormatException nf) {
-                        log.warn("Error decoding target id : {}", tokens[0]);
+                try {
+                    if (tokens.length > 4 && tokens[4] != null) {
+                        try {
+                            refferal.setTargetId(Long.valueOf(decodifica(tokens[4])));
+                        } catch (NumberFormatException nf) {
+                            log.warn("Error decoding target id : {}", tokens[0]);
+                        }
                     }
+                }catch (Exception cc){
+                    log.warn("Eccezione token 4 :: {}", cc);
                 }
             }
             return refferal;

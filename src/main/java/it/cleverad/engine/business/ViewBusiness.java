@@ -271,21 +271,25 @@ public class ViewBusiness {
 
         Set<Long> doys = tutto.stream().map(WidgetCampaignDayCpm::getDoy).collect(Collectors.toSet());
 
-        Set<Long> listaTop0 = widgetTopCPMRepository.listaTopCampagne(request.getAffiliateId(), 0).stream().filter(topCampagneCPM -> topCampagneCPM.getimpression() > 100L).map(TopCampagneCPM::getcampaignid).collect(Collectors.toSet());
+        List<Long> listaTop0 = widgetTopCPMRepository.listaTopCampagne(request.getAffiliateId(), 0).stream().filter(topCampagneCPM -> topCampagneCPM.getimpression() > 100L).map(TopCampagneCPM::getcampaignid).collect(Collectors.toList());
         // Set<Long> listaTop3 = widgetTopCPMRepository.listaTopCampagne(request.getAffiliateId(), 3).stream().filter(topCampagneCPM -> topCampagneCPM.getimpression() > 100L).map(TopCampagneCPM::getcampaignid).collect(Collectors.toSet());
-        // Set<Long> listaTop5 = widgetTopCPMRepository.listaTopCampagne(request.getAffiliateId(), 5).stream().filter(topCampagneCPM -> topCampagneCPM.getimpression() > 100L).map(TopCampagneCPM::getcampaignid).collect(Collectors.toSet());
-        Set<Long> listaTop10 = widgetTopCPMRepository.listaTopCampagne(request.getAffiliateId(), 10).stream().filter(topCampagneCPM -> topCampagneCPM.getimpression() > 100L).map(TopCampagneCPM::getcampaignid).collect(Collectors.toSet());
+        List<Long> listaTop5 = widgetTopCPMRepository.listaTopCampagne(request.getAffiliateId(), 5).stream().filter(topCampagneCPM -> topCampagneCPM.getimpression() > 100L).map(TopCampagneCPM::getcampaignid).collect(Collectors.toList());
+        // Set<Long> listaTop10 = widgetTopCPMRepository.listaTopCampagne(request.getAffiliateId(), 10).stream().filter(topCampagneCPM -> topCampagneCPM.getimpression() > 100L).map(TopCampagneCPM::getcampaignid).collect(Collectors.toSet());
 
-        listaTop10.removeAll(listaTop0);
+        // tolgo dalla lista gli elementi già presenti in lista 0
+        listaTop5.removeAll(listaTop0);
+        log.trace(listaTop5.size() + " - di 5");
+        listaTop5.forEach(aLong -> log.trace(">>>> 5 :: {}", aLong));
+        log.trace(listaTop0.size() + " - di 0");
+        listaTop0.forEach(aLong -> log.trace(">>>> 0 :: {}", aLong));
 
-        Integer limite = 6;
-        if (listaTop10.size() + listaTop0.size() < 6)
-            limite = listaTop10.size() + listaTop0.size();
-
-        while (listaTop0.size() < limite && listaTop10.size() > 0) {
-            listaTop0.add(listaTop10.stream().collect(Collectors.toList()).get(0));
-            listaTop10.remove(0);
+        if (listaTop0.size() < 6 && listaTop5.size() > 0) {
+            listaTop0.addAll(listaTop5);
+            listaTop0.forEach(aLong -> log.trace("NEW 0 :: {}", aLong));
         }
+        listaTop0.subList(0, listaTop0.size());
+
+        log.trace("CAMAPGNE {}", listaTop0.size());
 
         Set<Long> doysDaVerificare = new HashSet<>();
         if (!doys.isEmpty() && doys.size() > 0)
