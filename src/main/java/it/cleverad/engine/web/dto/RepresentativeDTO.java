@@ -21,7 +21,7 @@ public class RepresentativeDTO {
 
     private Long affiliateId;
     private String affiliateName;
-    
+
     private Long advertiserId;
     private String advertiserName;
 

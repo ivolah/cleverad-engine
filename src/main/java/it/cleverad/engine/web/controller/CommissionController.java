@@ -60,7 +60,7 @@ public class CommissionController {
 
     @DeleteMapping("/{commissionId}/campaign/{campaignId}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void delete(@PathVariable Long campaignId, @PathVariable Long commissionId ) {
+    public void delete(@PathVariable Long campaignId, @PathVariable Long commissionId) {
         this.business.delete(campaignId, commissionId);
     }
 

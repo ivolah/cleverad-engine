@@ -37,7 +37,7 @@ public class WalletDTO {
     public static WalletDTO from(Wallet wallet) {
         return new WalletDTO(wallet.getId(), wallet.getNome(), wallet.getDescription(), wallet.getTotal(), wallet.getPayed(), wallet.getResidual(), wallet.getStatus(),
                 wallet.getAffiliate() != null ? wallet.getAffiliate().getId() : null,
-                wallet.getAffiliate() != null ? wallet.getAffiliate().getName() : null );
+                wallet.getAffiliate() != null ? wallet.getAffiliate().getName() : null);
     }
 
 }

@@ -1,7 +1,6 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.UserBusiness;
-import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.web.dto.UserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -10,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "*",maxAge = 3600)
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping(value = "/user")
 public class UserController {
@@ -42,7 +41,7 @@ public class UserController {
 
     @PatchMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public UserDTO update(@PathVariable Long id, @RequestBody UserBusiness.Filter request){
+    public UserDTO update(@PathVariable Long id, @RequestBody UserBusiness.Filter request) {
         return business.update(id, request);
     }
 
@@ -85,7 +84,7 @@ public class UserController {
 
     @PatchMapping(path = "/reset/user")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public UserDTO reset( @RequestBody UserBusiness.Confirm request) throws Exception {
+    public UserDTO reset(@RequestBody UserBusiness.Confirm request) throws Exception {
         return business.resetPasswordUsername(request.getUsername(), request.getPassword());
     }
 

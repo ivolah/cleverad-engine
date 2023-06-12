@@ -1,6 +1,5 @@
 package it.cleverad.engine.web.dto;
 
-import it.cleverad.engine.persistence.model.service.FileUser;
 import it.cleverad.engine.persistence.model.service.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,7 +27,7 @@ public class UserDTO {
     private LocalDateTime lastLogin;
     private List<FileUserDTO> fileUser;
 
-    public UserDTO(long id, String username, String password, String name, String surname, String email, Long affiliateId, String affiliateName, Long roleId, String role, Boolean status, LocalDateTime creationDate, LocalDateTime lastLogin,List<FileUserDTO> fileUsers) {
+    public UserDTO(long id, String username, String password, String name, String surname, String email, Long affiliateId, String affiliateName, Long roleId, String role, Boolean status, LocalDateTime creationDate, LocalDateTime lastLogin, List<FileUserDTO> fileUsers) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -49,7 +48,7 @@ public class UserDTO {
 
         List<FileUserDTO> listaFile = null;
         if (user.getFileUsers() != null && !user.getFileUsers().isEmpty()) {
-            listaFile = user.getFileUsers().stream().map(fileUser  -> {
+            listaFile = user.getFileUsers().stream().map(fileUser -> {
                 FileUserDTO file = new FileUserDTO();
                 file.setNote(fileUser.getNote());
                 file.setId(fileUser.getId());

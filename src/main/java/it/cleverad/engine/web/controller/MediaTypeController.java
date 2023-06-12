@@ -24,7 +24,7 @@ public class MediaTypeController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public MediaTypeDTO create(@ModelAttribute MediaTypeBusiness.BaseCreateRequest request) {
-        return  business.create(request);
+        return business.create(request);
     }
 
     @GetMapping
@@ -33,7 +33,7 @@ public class MediaTypeController {
         return business.search(request, pageable);
     }
 
-    @PatchMapping(path = "/{id}" )
+    @PatchMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public MediaTypeDTO update(@PathVariable Long id, @RequestBody MediaTypeBusiness.Filter request) {
         return business.update(id, request);

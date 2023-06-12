@@ -24,7 +24,7 @@ public class DictionaryController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public DictionaryDTO create(@ModelAttribute DictionaryBusiness.BaseCreateRequest request) {
-        return  business.create(request);
+        return business.create(request);
     }
 
     @GetMapping
@@ -33,7 +33,7 @@ public class DictionaryController {
         return business.search(request, pageable);
     }
 
-    @PatchMapping(path = "/{id}" )
+    @PatchMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public DictionaryDTO update(@PathVariable Long id, @RequestBody DictionaryBusiness.Filter request) {
         return business.update(id, request);

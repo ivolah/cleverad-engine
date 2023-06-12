@@ -35,7 +35,7 @@ public class AgentDTO {
     private String AgentVersion;
 
     public static AgentDTO from(Agent a) {
-        return new AgentDTO(a.getId(), a.getTipo(),a.getCampaignId(),a.getAffiliateId(),
+        return new AgentDTO(a.getId(), a.getTipo(), a.getCampaignId(), a.getAffiliateId(),
                 a.getDeviceName(), a.getDeviceBrand(), a.getDeviceCpu(), a.getDeviceCpuBits(), a.getDeviceVersion(),
                 a.getOperatingSystemClass(), a.getOperatingSystemName(), a.getOperatingSystemVersion(),
                 a.getLayoutEngineClass(), a.getLayoutEngineName(), a.getLayoutEngineVersion(),

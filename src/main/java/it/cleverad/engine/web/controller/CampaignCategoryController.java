@@ -24,7 +24,7 @@ public class CampaignCategoryController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public CampaignCategoryDTO create(@ModelAttribute CampaignCategoryBusiness.BaseCreateRequest request) {
-        return   business.create(request);
+        return business.create(request);
     }
 
     @GetMapping
@@ -33,10 +33,10 @@ public class CampaignCategoryController {
         return business.search(request, pageable);
     }
 
-    @PatchMapping(path = "/{id}" )
+    @PatchMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public CampaignCategoryDTO update(@PathVariable Long id, @RequestBody CampaignCategoryBusiness.Filter request) {
-        return  business.update(id, request);
+        return business.update(id, request);
     }
 
     @GetMapping("/{id}")

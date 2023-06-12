@@ -3,7 +3,6 @@ package it.cleverad.engine.web.controller;
 import it.cleverad.engine.business.FileAffiliateBusiness;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.FileAffiliateDTO;
-import it.cleverad.engine.web.exception.PostgresCleveradException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -28,7 +27,7 @@ public class FileAffiliateController {
     @PostMapping()
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Long uploadFileAffiliate(@RequestParam("file") MultipartFile file, FileAffiliateBusiness.BaseCreateRequest request) {
-            return business.storeFile(file, request);
+        return business.storeFile(file, request);
     }
 
     @GetMapping

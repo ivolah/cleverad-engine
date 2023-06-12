@@ -3,7 +3,6 @@ package it.cleverad.engine.web.controller;
 import it.cleverad.engine.business.AdvertiserBusiness;
 import it.cleverad.engine.business.RepresentativeBusiness;
 import it.cleverad.engine.web.dto.AdvertiserDTO;
-import it.cleverad.engine.web.dto.ChannelDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,7 +45,7 @@ public class AdvertiserController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public AdvertiserDTO getByUuid(@PathVariable Long id)  {
+    public AdvertiserDTO getByUuid(@PathVariable Long id) {
         return business.findById(id);
     }
 

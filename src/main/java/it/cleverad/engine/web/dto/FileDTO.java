@@ -21,7 +21,7 @@ public class FileDTO {
     private String path;
 
     public static FileDTO from(File file) {
-        return new FileDTO(file.getId(), file.getName(), file.getType(), file.getData(), file.getCreationDate(),"", file.getPath());
+        return new FileDTO(file.getId(), file.getName(), file.getType(), file.getData(), file.getCreationDate(), "", file.getPath());
     }
 
 }

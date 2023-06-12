@@ -18,8 +18,6 @@ public class TrackingDTO {
     private Boolean read;
 
 
-
-
     public TrackingDTO(long id, String refferalId, String ip, String agent, LocalDateTime creationDate, Boolean read) {
         this.id = id;
         this.refferalId = refferalId;

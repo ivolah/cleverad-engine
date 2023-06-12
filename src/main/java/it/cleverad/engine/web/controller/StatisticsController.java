@@ -3,7 +3,6 @@ package it.cleverad.engine.web.controller;
 import it.cleverad.engine.business.AgentBusiness;
 import it.cleverad.engine.business.ViewBusiness;
 import it.cleverad.engine.persistence.model.service.*;
-import it.cleverad.engine.web.dto.AgentDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,6 +43,7 @@ public class StatisticsController {
     public Page<WidgetCampaignDayCpc> getStatCpcCampaignDay(ViewBusiness.Filter request, Pageable pageable) {
         return business.getStatCampaignDayCpc(request, pageable);
     }
+
     @GetMapping(path = "/cpc/campaign/{id}/day")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<WidgetCampaignDayCpc> getStatCpcCampaignDay(@PathVariable Long id, Pageable pageable) {
@@ -79,6 +79,7 @@ public class StatisticsController {
     public Page<WidgetCampaignDayCpm> getStatDayCpm(ViewBusiness.Filter request, Pageable pageable) {
         return business.getStatCampaignDayCpm(request, pageable);
     }
+
     @GetMapping(path = "/cpm/campaign/{id}/day")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<WidgetCampaignDayCpm> getStatCampaignDayCpm(@PathVariable Long id, Pageable pageable) {
@@ -114,6 +115,7 @@ public class StatisticsController {
     public Page<WidgetCampaignDayCpl> getStatCplDay(ViewBusiness.Filter request, Pageable pageable) {
         return business.getStatCampaignDayCpl(request, pageable);
     }
+
     @GetMapping(path = "/cpl/campaign/{id}/day")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<WidgetCampaignDayCpl> getStatCplCampaignDay(@PathVariable Long id, Pageable pageable) {
@@ -137,11 +139,13 @@ public class StatisticsController {
     public Page<WidgetCampaignDayCps> getStatTopCps() {
         return business.getTopCampaignsDayCps();
     }
+
     @GetMapping(path = "/cps/campaign/day")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<WidgetCampaignDayCps> getStatCpsCampaignDay(ViewBusiness.Filter request, Pageable pageable) {
         return business.getStatCampaignDayCps(request, pageable);
     }
+
     @GetMapping(path = "/cps/campaign/{id}/day")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<WidgetCampaignDayCps> getStatCpsCampaignDay(@PathVariable Long id, Pageable pageable) {
@@ -177,6 +181,7 @@ public class StatisticsController {
     public List<WidgetAgent> searchAgent(AgentBusiness.Filter request) {
         return agentBusiness.searchAgent(request);
     }
+
     @GetMapping(path = "/agent/data/detailed")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public List<WidgetAgent> searchAgentDetailed(AgentBusiness.Filter request) {

@@ -25,7 +25,7 @@ public class CategoryController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public CategoryDTO create(@ModelAttribute CategoryBusiness.BaseCreateRequest request) {
-        return   business.create(request);
+        return business.create(request);
     }
 
     @GetMapping
@@ -34,10 +34,10 @@ public class CategoryController {
         return business.search(request, pageable);
     }
 
-    @PatchMapping(path = "/{id}" )
+    @PatchMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public CategoryDTO update(@PathVariable Long id, @RequestBody CategoryBusiness.Filter request) {
-        return  business.update(id, request);
+        return business.update(id, request);
     }
 
     @GetMapping("/{id}")

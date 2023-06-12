@@ -41,7 +41,7 @@ public class EditorController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public EditorDTO getByUuid(@PathVariable Long id)  {
+    public EditorDTO getByUuid(@PathVariable Long id) {
         return business.findById(id);
     }
 

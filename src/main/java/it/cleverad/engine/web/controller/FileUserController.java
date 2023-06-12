@@ -2,7 +2,6 @@ package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.FileUserBusiness;
 import it.cleverad.engine.web.dto.FileUserDTO;
-import it.cleverad.engine.web.exception.PostgresCleveradException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -29,13 +28,13 @@ public class FileUserController {
     @PostMapping(path = "/old")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Long uploadFileUser(@RequestParam("file") MultipartFile file, FileUserBusiness.BaseCreateRequest request) {
-            return business.store(file, request);
+        return business.store(file, request);
     }
 
-    @PostMapping( )
+    @PostMapping()
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Long uploadFileUserFile(@RequestParam("file") MultipartFile file, FileUserBusiness.BaseCreateRequest request) {
-            return business.storeFile(file, request);
+        return business.storeFile(file, request);
     }
 
     @GetMapping
@@ -69,11 +68,13 @@ public class FileUserController {
     public void delete(@PathVariable Long id) {
         this.business.delete(id);
     }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void deleteFile(@PathVariable Long id) {
         this.business.deleteFile(id);
     }
+
     @GetMapping("/{id}/download/old")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<Resource> down(@PathVariable Long id) {
@@ -92,6 +93,7 @@ public class FileUserController {
     public Long storeAvatar(@RequestParam("file") MultipartFile file, FileUserBusiness.BaseCreateRequest request) throws IOException {
         return business.storeAvatar(file, request);
     }
+
     @PostMapping("/avatar")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Long storeAvatarfile(@RequestParam("file") MultipartFile file, FileUserBusiness.BaseCreateRequest request) throws IOException {
@@ -103,6 +105,7 @@ public class FileUserController {
     public FileUserDTO getAvaTar() {
         return business.getAvatar();
     }
+
     @GetMapping("/avatar")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public FileUserDTO getAvaTarfile() throws IOException {

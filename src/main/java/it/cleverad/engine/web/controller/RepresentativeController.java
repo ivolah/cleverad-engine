@@ -28,13 +28,13 @@ public class RepresentativeController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "/affiliate")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public RepresentativeDTO createaff(@ModelAttribute RepresentativeBusiness.BaseCreateRequest request) {
-        return business.create(request,"AFFILIATE");
+        return business.create(request, "AFFILIATE");
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "/advertiser")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public RepresentativeDTO createadv(@ModelAttribute RepresentativeBusiness.BaseCreateRequest request) {
-        return business.create(request,"ADVERTISER");
+        return business.create(request, "ADVERTISER");
     }
 
     @GetMapping
@@ -46,13 +46,13 @@ public class RepresentativeController {
     @PatchMapping(path = "/{id}/affiliate")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public RepresentativeDTO updateAFF(@PathVariable Long id, @RequestBody RepresentativeBusiness.Filter request) {
-        return business.update(id, request,"AFFILIATE");
+        return business.update(id, request, "AFFILIATE");
     }
 
     @PatchMapping(path = "/{id}/advertiser")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public RepresentativeDTO updateADV(@PathVariable Long id, @RequestBody RepresentativeBusiness.Filter request) {
-        return business.update(id, request,"ADVERTISER");
+        return business.update(id, request, "ADVERTISER");
     }
 
     @GetMapping("/{id}")
@@ -66,6 +66,7 @@ public class RepresentativeController {
     public void delete(@PathVariable Long id) {
         this.business.delete(id);
     }
+
     @DeleteMapping("/{id}/advertiser")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void deleteDaAdvertiser(@PathVariable Long id) {
@@ -90,7 +91,6 @@ public class RepresentativeController {
     public Page<RepresentativeDTO> findByIdAdvertiser(@PathVariable Long id) {
         return business.findByIdAdvertiser(id);
     }
-
 
 
     /**

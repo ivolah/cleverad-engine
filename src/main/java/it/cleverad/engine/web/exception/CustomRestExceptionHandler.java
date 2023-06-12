@@ -164,7 +164,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({ElementCleveradException.class})
     protected ResponseEntity<Object> handleElementCleveradException(final ElementCleveradException ex, final WebRequest request) {
-        logger.error(ex.getClass().getName() + " "+ ex.getMessage(), ex);
+        logger.error(ex.getClass().getName() + " " + ex.getMessage(), ex);
         final ApiError apiError = new ApiError(HttpStatus.NOT_FOUND, ex.getLocalizedMessage(), ex.getMessage());
         return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
     }
@@ -179,7 +179,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({DataIntegrityViolationException.class})
     public ResponseEntity<Object> handleDataIntegrityViolationException(final DataIntegrityViolationException ex, final WebRequest request) {
-        logger.error(ex.getClass().getName() + " :: "+ ex.getMostSpecificCause(), ex);
+        logger.error(ex.getClass().getName() + " :: " + ex.getMostSpecificCause(), ex);
         final ApiError apiError = new ApiError(HttpStatus.CONFLICT, "Conflict in the requested behaviour :" + ex.getMostSpecificCause(), ex.getMessage());
         return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
     }
