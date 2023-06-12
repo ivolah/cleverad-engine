@@ -64,7 +64,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/register/user/",
                         "/register/user/*",
                         "/register/user/confirm",
-                        "/reset/request", "/reset/user"
+                        "/reset/request", "/reset/user", "/short/*"
                 ).permitAll().
                 // TUTTE LE ALTRE RICHIESTO SONO AUTENTICATE
                         anyRequest().authenticated().and().
