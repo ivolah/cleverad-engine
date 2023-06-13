@@ -14,7 +14,7 @@ public interface WidgetTopCPMRepository extends JpaRepository<WidgetTopCPM, Long
     @Query(nativeQuery = true, value =
             " select campaignid, sum(impression) as impression " +
                     " from v_widget_all " +
-                    " where date > CURRENT_DATE - (:days) " +
+                    " where datetime > CURRENT_DATE - (:days) " +
                     " and impression > 0 " +
                     " and ((:affiliateid) IS NULL OR (affiliateid = (:affiliateid))) " +
                     " group by campaignid " +

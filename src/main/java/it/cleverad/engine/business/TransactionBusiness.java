@@ -74,7 +74,7 @@ public class TransactionBusiness {
     // CREATE
     public TransactionCPCDTO createCpc(BaseCreateRequest request) {
         TransactionCPC map = mapper.map(request, TransactionCPC.class);
-       // request.setDictionaryId(42L);
+        // request.setDictionaryId(42L);
 
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
 
@@ -104,7 +104,7 @@ public class TransactionBusiness {
 
     public TransactionCPLDTO createCpl(BaseCreateRequest request) {
         TransactionCPL map = mapper.map(request, TransactionCPL.class);
-      //  request.setDictionaryId(42L);
+        //  request.setDictionaryId(42L);
 
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
 
@@ -134,7 +134,7 @@ public class TransactionBusiness {
 
     public TransactionCPMDTO createCpm(BaseCreateRequest request) {
         TransactionCPM map = mapper.map(request, TransactionCPM.class);
-       // request.setDictionaryId(42L);
+        // request.setDictionaryId(42L);
 
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
 
@@ -164,7 +164,7 @@ public class TransactionBusiness {
 
     public TransactionCPSDTO createCps(BaseCreateRequest request) {
         TransactionCPS map = mapper.map(request, TransactionCPS.class);
-     //   request.setDictionaryId(42L);
+        //   request.setDictionaryId(42L);
 
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
 
@@ -200,16 +200,19 @@ public class TransactionBusiness {
         cpc.setValue(value);
         return TransactionCPCDTO.from(cpcRepository.save(cpc));
     }
+
     public TransactionCPLDTO updateCPLValue(Double value, Long id) {
         TransactionCPL cpl = cplRepository.findById(id).get();
         cpl.setValue(value);
         return TransactionCPLDTO.from(cplRepository.save(cpl));
     }
+
     public TransactionCPSDTO updateCPSValue(Double value, Long id) {
         TransactionCPS cps = cpsRepository.findById(id).get();
         cps.setValue(value);
         return TransactionCPSDTO.from(cpsRepository.save(cps));
     }
+
     public TransactionCPMDTO updateCPMValue(Double value, Long id) {
         TransactionCPM cpm = cpmRepository.findById(id).get();
         cpm.setValue(value);
@@ -306,7 +309,10 @@ public class TransactionBusiness {
 
                 // aggiorno budget affiliato
                 BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
-                budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
+                if (budgetAff != null) {
+                    budgetBusiness.updateBudget(budgetAff.getId(),
+                            budgetAff.getBudget() + dto.getValue());
+                }
 
                 // aggiorno budget campagna
                 campaignBusiness.updateBudget(dto.getCampaignId(), campaignBusiness.findById(dto.getCampaignId()).getBudget() + dto.getValue());
@@ -318,7 +324,10 @@ public class TransactionBusiness {
 
                 // aggiorno budget affiliato
                 BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
-                budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
+                if (budgetAff != null) {
+                    budgetBusiness.updateBudget(budgetAff.getId(),
+                            budgetAff.getBudget() + dto.getValue());
+                }
 
                 // aggiorno budget campagna
                 campaignBusiness.updateBudget(dto.getCampaignId(), campaignBusiness.findById(dto.getCampaignId()).getBudget() + dto.getValue());
@@ -330,7 +339,10 @@ public class TransactionBusiness {
 
                 // aggiorno budget affiliato
                 BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
-                budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
+                if (budgetAff != null) {
+                    budgetBusiness.updateBudget(budgetAff.getId(),
+                            budgetAff.getBudget() + dto.getValue());
+                }
 
                 // aggiorno budget campagna
                 campaignBusiness.updateBudget(dto.getCampaignId(), campaignBusiness.findById(dto.getCampaignId()).getBudget() + dto.getValue());

@@ -26,8 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.criteria.Predicate;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -123,9 +121,9 @@ public class ReportBusiness {
     public Page<ReportTopCampaings> searchTopCampaigns(TopFilter request, Pageable pageableRequest) {
         List<ReportTopCampaings> listaCampaigns = new ArrayList<>();
         if (!jwtUserDetailsService.isAdmin()) {
-            listaCampaigns = reportRepository.searchTopCampaigns(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds(), jwtUserDetailsService.getAffiliateID(), request.getCampaignid());
+            listaCampaigns = reportRepository.searchTopCampaigns(request.getDateTimeFrom(), request.getDateTimeTo().plusDays(1), jwtUserDetailsService.getAffiliateID(), request.getCampaignid());
         } else {
-            listaCampaigns = reportRepository.searchTopCampaigns(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds(), request.getAffiliateid(), request.getCampaignid());
+            listaCampaigns = reportRepository.searchTopCampaigns(request.getDateTimeFrom(), request.getDateTimeTo().plusDays(1), request.getAffiliateid(), request.getCampaignid());
         }
         final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), listaCampaigns.size());
         Page<ReportTopCampaings> pages =
@@ -137,13 +135,17 @@ public class ReportBusiness {
                 );
         return pages;
     }
+
+    /**
+     * ============================================================================================================
+     **/
 
     public Page<ReportTopCampaings> searchTopCampaignsChannel(TopFilter request, Pageable pageableRequest) {
         List<ReportTopCampaings> listaCampaigns = new ArrayList<>();
         if (!jwtUserDetailsService.isAdmin()) {
-            listaCampaigns = reportRepository.searchTopCampaignsChannel(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds(), jwtUserDetailsService.getAffiliateID(), request.getCampaignid());
+            listaCampaigns = reportRepository.searchTopCampaignsChannel(request.getDateTimeFrom(), request.getDateTimeTo().plusDays(1), jwtUserDetailsService.getAffiliateID(), request.getCampaignid());
         } else {
-            listaCampaigns = reportRepository.searchTopCampaignsChannel(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds(), request.getAffiliateid(), request.getCampaignid());
+            listaCampaigns = reportRepository.searchTopCampaignsChannel(request.getDateTimeFrom(), request.getDateTimeTo().plusDays(1),request.getAffiliateid(), request.getCampaignid());
         }
         final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), listaCampaigns.size());
         Page<ReportTopCampaings> pages =
@@ -156,38 +158,37 @@ public class ReportBusiness {
         return pages;
     }
 
+    /**
+     * ============================================================================================================
+     **/
+
     public Page<ReportTopAffiliates> searchTopAffilaites(TopFilter request, Pageable pageableRequest) {
         List<ReportTopAffiliates> listaAffiliates = new ArrayList<>();
         if (!jwtUserDetailsService.isAdmin()) {
-            listaAffiliates = reportRepository.searchTopAffilaites(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds(), jwtUserDetailsService.getAffiliateID(), request.getCampaignid());
+            listaAffiliates = reportRepository.searchTopAffilaites(request.getDateTimeFrom(), request.getDateTimeTo(),  jwtUserDetailsService.getAffiliateID(), request.getCampaignid());
         } else {
-            listaAffiliates = reportRepository.searchTopAffilaites(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(LocalTime.MAX), request.getDictionaryIds(), request.getAffiliateid(), request.getCampaignid());
+            listaAffiliates = reportRepository.searchTopAffilaites(request.getDateTimeFrom(), request.getDateTimeTo(), request.getAffiliateid(), request.getCampaignid());
         }
         final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), listaAffiliates.size());
         Page<ReportTopAffiliates> pages = new PageImpl<>(listaAffiliates.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, listaAffiliates.size());
         return pages;
     }
 
+    /**
+     * ============================================================================================================
+     **/
+
     public Page<ReportDaily> searchDaily(TopFilter request, Pageable pageableRequest) {
         List<ReportDaily> lista = new ArrayList<>();
         if (Boolean.FALSE.equals(jwtUserDetailsService.isAdmin()))
             request.setAffiliateid(jwtUserDetailsService.getAffiliateID());
 
-        LocalDateTime uno = null;
-        if (request.getDateTimeFrom() != null) {
-            uno = request.getDateTimeFrom().atStartOfDay();
-        }
-        LocalDateTime due = null;
-        if (request.getDateTimeTo() != null) {
-            due = request.getDateTimeTo().atTime(LocalTime.MAX);
-        }
-        lista = reportRepository.searchDaily(uno, due, request.getAffiliateid(), request.getCampaignid());
+        lista = reportRepository.searchDaily(request.getDateTimeFrom(), request.getDateTimeTo().plusDays(1), request.getAffiliateid(), request.getCampaignid());
 
         final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), lista.size());
         Page<ReportDaily> pages = new PageImpl<>(lista.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, lista.size());
         return pages;
     }
-
 
     /**
      * ============================================================================================================

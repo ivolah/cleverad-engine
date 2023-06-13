@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecificationExecutor<Report> {
@@ -47,13 +47,15 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
                     "                    else 0 end                                                              as budgetPC " +
                     "  from v_widget_all vall " +
                     "          left join t_campaign tc on vall.campaignid = tc.id " +
-                    "  where ((:dateFrom <= vall.date) AND (:dateTo >= vall.date)) " +
-                    "  AND ((:dictionaryList)IS NULL OR (vall.dictionaryId in (:dictionaryList))) " +
+                    "  where " +
+                    "  (cast(:dateFrom as date) IS NULL OR (:dateFrom <= vall.datetime)) " +
+                    "  AND (cast(:dateTo as date) IS NULL OR (:dateTo >= vall.datetime + interval '24 hours')) " +
                     "  AND ( (:affiliateId)IS NULL OR (vall.affiliateid = (:affiliateId)))  " +
                     "  AND ((:campaignid) IS NULL OR (vall.campaignid = (:campaignid)))  " +
                     " group by vall.fileid, vall.campaignname, vall.campaignid, tc.initial_budget, tc.budget " +
                     " ORDER BY impressionNumber DESC;")
-    List<ReportTopCampaings> searchTopCampaigns(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid);
+    List<ReportTopCampaings> searchTopCampaigns(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid);
+    //"  AND ((:dictionaryList)IS NULL OR (vall.dictionaryId in (:dictionaryList))) " +
 
     //=========================================================================================================================
     //=========================================================================================================================
@@ -94,16 +96,18 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
                     "                case" +
                     "                    when tc.initial_budget > 0 then " +
                     "                        round(CAST(tc.budget / tc.initial_budget * 100 AS numeric), 2) " +
-                    "                    else 0 end                                                              as budgetPC " +
+                    "                    else 0 end                                                              as budgetPC" +
                     "  from v_widget_all vall " +
                     "          left join t_campaign tc on vall.campaignid = tc.id " +
-                    "  where ((:dateFrom <= vall.date) AND (:dateTo >= vall.date)) " +
-                    "  AND ((:dictionaryList)IS NULL OR (vall.dictionaryId in (:dictionaryList))) " +
+                    "  where " +
+                    "  (cast(:dateFrom as date) IS NULL OR (:dateFrom <= vall.datetime)) " +
+                    "  AND (cast(:dateTo as date) IS NULL OR (:dateTo >= vall.datetime + interval '24 hours')) " +
                     "  AND ( (:affiliateId)IS NULL OR (vall.affiliateid = (:affiliateId)))  " +
                     "  AND ((:campaignid) IS NULL OR (vall.campaignid = (:campaignid)))  " +
-                    " group by vall.fileid, vall.campaignname, vall.campaignid, tc.initial_budget, tc.budget, vall.channelid, vall.channelname, vall.affiliateName, vall.affiliateId " +
+                    " group by vall.fileid, vall.campaignname, vall.campaignid, tc.initial_budget, tc.budget, tc.name, vall.channelid, vall.channelname, " +
+                    "         vall.affiliateid ,    vall.affiliatename " +
                     " ORDER BY impressionNumber DESC;")
-    List<ReportTopCampaings> searchTopCampaignsChannel(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid);
+    List<ReportTopCampaings> searchTopCampaignsChannel(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid);
 
     //=========================================================================================================================
     //=========================================================================================================================
@@ -131,13 +135,14 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
             "                COALESCE(round(SUM(vall.commssion) / SUM(vall.clicknumber), 2), 0)   as ecpc, " +
             "                COALESCE(round(SUM(vall.commssion) / SUM(vall.leadnumber), 2), 0)           as ecpl" +
             " from v_widget_all vall " +
-            " where ((:dateFrom <= vall.date) AND (:dateTo >= vall.date)) " +
-            "  AND ((:dictionaryList)IS NULL OR (vall.dictionaryId in (:dictionaryList))) " +
+            " where " +
+            "  (cast(:dateFrom as date) IS NULL OR (:dateFrom <= vall.datetime)) " +
+            "  AND (cast(:dateTo as date) IS NULL OR (:dateTo >= vall.datetime + interval '24 hours')) " +
             "  AND ( (:affiliateId)IS NULL OR (vall.affiliateid = (:affiliateId)))  " +
             "  AND ((:campaignid) IS NULL OR (vall.campaignid = (:campaignid)))  " +
             " group by vall.affiliateName, vall.affiliateId, vall.channelid, vall.channelName" +
             " ORDER BY impressionNumber DESC;")
-    List<ReportTopAffiliates> searchTopAffilaites(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("dictionaryList") List<Long> dictionaryList, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid);
+    List<ReportTopAffiliates> searchTopAffilaites(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid);
 
     //=========================================================================================================================
     //=========================================================================================================================
@@ -163,12 +168,12 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
             "                COALESCE(round(CAST(SUM(dt.commission) / SUM(dt.leadnumber) AS numeric), 2), 0) as ecpl " +
             " from v_daily_transactions dt " +
             " where (cast(:dateFrom as date) IS NULL OR (:dateFrom <= dt.datadx)) " +
-            "  AND (cast(:dateTo as date) IS NULL OR (:dateTo >= dt.datadx)) " +
+            "  AND (cast(:dateTo as date) IS NULL OR (:dateTo >= dt.datadx + interval '24 hours')) " +
             "  AND ((:affiliateId) IS NULL OR (dt.affilaiteid = (:affiliateId)))  " +
             "  AND ((:campaignid) IS NULL OR (dt.campaignid = (:campaignid)))  " +
             " group by dt.datadx" +
             " order by dt.datadx asc"
     )
-    List<ReportDaily> searchDaily(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid);
+    List<ReportDaily> searchDaily(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid);
 
 }
