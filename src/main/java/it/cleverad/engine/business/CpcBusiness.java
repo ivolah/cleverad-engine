@@ -171,7 +171,8 @@ public class CpcBusiness {
         request.setDatetimeFrom(oraSpaccata.minusHours(1));
         request.setDatetimeTo(oraSpaccata);
         Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
-        log.info("\n\n\n >>>>>>>>>>>>>>>>>>>>>> UNREAD CPC HOUR BEFORE :: {}", page.getTotalElements());
+        if (page.getTotalElements() > 0)
+            log.trace("\n\n\n >>>>>>>>>>>>>>>>>>>>>> UNREAD CPC HOUR BEFORE :: {}", page.getTotalElements());
         return page.map(CpcDTO::from);
     }
 
@@ -180,7 +181,7 @@ public class CpcBusiness {
         Filter request = new Filter();
         request.setIp(ip);
         //       request.setDatetimeFrom(dateTime.minusMonths(24));
-      request.setDatetimeFrom(dateTime.minusHours(24));
+        request.setDatetimeFrom(dateTime.minusHours(24));
         request.setDatetimeTo(dateTime);
         request.setRefferal(referral);
         Page<Cpc> page = repository.findAll(getSpecification(request), pageable);

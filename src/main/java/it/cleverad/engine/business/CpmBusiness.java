@@ -5,7 +5,6 @@ import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.Channel;
-import it.cleverad.engine.persistence.model.tracking.Cpc;
 import it.cleverad.engine.persistence.model.tracking.Cpm;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
@@ -13,7 +12,6 @@ import it.cleverad.engine.persistence.repository.service.ChannelRepository;
 import it.cleverad.engine.persistence.repository.tracking.CpmRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.service.ReferralService;
-import it.cleverad.engine.web.dto.CpcDTO;
 import it.cleverad.engine.web.dto.CpmDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -174,21 +172,23 @@ public class CpmBusiness {
         log.info("UNREAD CPM :: {}", page.getTotalElements());
         return page.map(CpmDTO::from);
     }
+
     public Page<CpmDTO> getUnreadHourBefore() {
         Filter request = new Filter();
         request.setRead(false);
         LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
-        request.setDatetimeFrom(oraSpaccata.minusHours(36));
+        request.setDatetimeFrom(oraSpaccata.minusHours(1));
         request.setDatetimeTo(oraSpaccata);
         Page<Cpm> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id"))));
-        log.info("\n\n\n >>>>>>>>>>>>>>>>>>>>>> UNREAD CPM HOUR BEFORE :: {}", page.getTotalElements());
+        if (page.getTotalElements() > 0)
+            log.trace("\n\n\n >>>>>>>>>>>>>>>>>>>>>> UNREAD CPM HOUR BEFORE :: {}", page.getTotalElements());
         return page.map(CpmDTO::from);
     }
 
     public Page<CpmDTO> getAllDayBefore() {
         Filter request = new Filter();
         request.setDatetimeFrom(LocalDate.now().minusDays(1).atStartOfDay());
-       // request.setDatetimeTo(LocalDate.now().minusDays(1).atStartOfDay().plusHours(1));
+        // request.setDatetimeTo(LocalDate.now().minusDays(1).atStartOfDay().plusHours(1));
         request.setDatetimeTo(LocalDate.now().minusDays(1).atStartOfDay().plusHours(24));
         Page<Cpm> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id"))));
         log.info("ALL DAY BEFORE :: CPM :: {}", page.getTotalElements());
@@ -196,7 +196,7 @@ public class CpmBusiness {
     }
 
     public Page<CpmDTO> findByIp24HoursBefore(String ip, LocalDateTime dateTime) {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE , Sort.by(Sort.Order.desc("refferal")));
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal")));
         Filter request = new Filter();
         request.setIp(ip);
         request.setDatetimeFrom(dateTime.minusDays(1));
