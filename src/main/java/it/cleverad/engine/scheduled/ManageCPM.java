@@ -47,8 +47,8 @@ public class ManageCPM {
 
 
     @Async
-    @Scheduled(cron = "0 2 0/1 * * ?")
-    //@Scheduled(cron = "*/8 * * * * ?")
+    // @Scheduled(cron = "0 2 0/1 * * ?")
+    @Scheduled(cron = "30 */1 * * * ?")
     public void trasformaTrackingCPM() {
         try {
 
