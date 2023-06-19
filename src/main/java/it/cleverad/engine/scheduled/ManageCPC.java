@@ -47,8 +47,7 @@ public class ManageCPC {
     @Autowired
     private CommissionBusiness commissionBusiness;
 
-    //@Scheduled(cron = "*/15 * * * * ?")
-    @Scheduled(cron = "15 */2 * * * ?")
+    @Scheduled(cron = "16 */3 * * * ?")
     @Async
     public void trasformaTrackingCPC() {
         //   log.info("trasformaTrackingCPC");
@@ -82,7 +81,7 @@ public class ManageCPC {
             mappa.forEach((s, aLong) -> {
                 // prendo reffereal e lo leggo
                 Refferal refferal = referralService.decodificaReferral(s);
-                log.info(">>>> T-CPC :: {} -> {} - {}", aLong, s, refferal);
+                log.trace(">>>> T-CPC :: {} -> {} - {}", aLong, s, refferal);
                 if (refferal != null && refferal.getCampaignId() != null && !Objects.isNull(refferal.getAffiliateId())) {
                     Long campaignId = refferal.getCampaignId();
                     // setta transazione
@@ -186,7 +185,7 @@ public class ManageCPC {
 
                     // creo la transazione
                     TransactionCPCDTO tcpc = transactionBusiness.createCpc(transaction);
-                    log.info("CREATO TRANSAZIONE :::: CPC :::: {} \n", tcpc.getId());
+                    log.info(">>> CREATO TRANSAZIONE :::: CPC :::: {} -- {} -- {}", tcpc.getId(), s, refferal);
                 }
             });
 

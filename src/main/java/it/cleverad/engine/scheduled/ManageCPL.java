@@ -46,7 +46,7 @@ public class ManageCPL {
 
     @Async
     // @Scheduled(cron = "0 5 0/1 * * ?")
-    @Scheduled(cron = "5 */1 * * * ?")
+    @Scheduled(cron = "8 0/3 * * * ?")
     public void trasformaTrackingCPL() {
         try {
             //   cplBusiness.getUnreadDayBefore().stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
@@ -169,7 +169,7 @@ public class ManageCPL {
 
                         // creo la transazione
                         TransactionCPLDTO cpl = transactionBusiness.createCpl(transaction);
-                        log.info(">>> CREATO TRANSAZIONE :::: CPL :::: {} \n", cpl.getId());
+                        log.info(">>> CREATO TRANSAZIONE :::: CPL :::: {} ", cpl.getId());
 
                         // setto a gestito
                         cplBusiness.setRead(cplDTO.getId());

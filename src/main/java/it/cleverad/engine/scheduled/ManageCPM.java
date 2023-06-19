@@ -48,7 +48,7 @@ public class ManageCPM {
 
     @Async
     // @Scheduled(cron = "0 2 0/1 * * ?")
-    @Scheduled(cron = "30 */1 * * * ?")
+    @Scheduled(cron = "32 */3 * * * ?")
     public void trasformaTrackingCPM() {
         try {
 
@@ -67,7 +67,7 @@ public class ManageCPM {
                     // prendo ultimo   isp
                     for (CpmDTO dto : ips)
                         if (StringUtils.isNotBlank(dto.getRefferal())) dto.setRefferal(dto.getRefferal());
-                    log.warn("Nuovo refferal :: {} ", cpm.getRefferal());
+                    log.trace("Nuovo refferal :: {} ", cpm.getRefferal());
                 }
                 mappa.put(cpm.getRefferal(), num + 1);
                 // setto a gestito
@@ -77,7 +77,7 @@ public class ManageCPM {
             mappa.forEach((x, aLong) -> {
                 // prendo reffereal e lo leggo
                 Refferal refferal = referralService.decodificaReferral(x);
-                log.info(">>>> T-CPC :: {} -> {} - {}", aLong, x, refferal);
+                log.trace(">>>> T-CPM :: {} -> {} - {}", aLong, x, refferal);
                 if (refferal != null && refferal.getCampaignId() != null && !Objects.isNull(refferal.getAffiliateId())) {
 
                     // setta transazione
@@ -131,7 +131,7 @@ public class ManageCPM {
                         AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
 
                         if (acccFirst != null) {
-                            log.info(acccFirst.getCommissionId() + " " + acccFirst.getCommissionValue());
+                            log.trace(acccFirst.getCommissionId() + " " + acccFirst.getCommissionValue());
                             commVal = acccFirst.getCommissionValue();
                             transaction.setCommissionId(acccFirst.getCommissionId());
                         } else {
@@ -173,7 +173,7 @@ public class ManageCPM {
 
                         // creo la transazione
                         TransactionCPMDTO tcpm = transactionBusiness.createCpm(transaction);
-                        log.info("CREATO TRANSAZIONE :::: CPM :::: {} \n", tcpm.getId());
+                        log.trace(">>> CREATO TRANSAZIONE :::: CPM :::: {}", tcpm.getId());
                     }
 
                 }// refferal not null
