@@ -168,8 +168,8 @@ public class CpcBusiness {
         Filter request = new Filter();
         request.setRead(false);
         LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
-        request.setDatetimeFrom(oraSpaccata.minusHours(1));
-        request.setDatetimeTo(oraSpaccata);
+        request.setDatetimeFrom(oraSpaccata.toLocalDate().atStartOfDay());
+        request.setDatetimeTo(LocalDateTime.now());
         Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
         if (page.getTotalElements() > 0)
             log.trace("\n\n\n >>>>>>>>>>>>>>>>>>>>>> UNREAD CPC HOUR BEFORE :: {}", page.getTotalElements());

@@ -177,8 +177,8 @@ public class CpmBusiness {
         Filter request = new Filter();
         request.setRead(false);
         LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
-        request.setDatetimeFrom(oraSpaccata.minusHours(1));
-        request.setDatetimeTo(oraSpaccata);
+        request.setDatetimeFrom(oraSpaccata.toLocalDate().atStartOfDay());
+        request.setDatetimeTo(LocalDateTime.now());
         Page<Cpm> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id"))));
         if (page.getTotalElements() > 0)
             log.trace("\n\n\n >>>>>>>>>>>>>>>>>>>>>> UNREAD CPM HOUR BEFORE :: {}", page.getTotalElements());

@@ -157,9 +157,8 @@ public class CplBusiness {
         Filter request = new Filter();
         request.setRead(false);
         LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
-        request.setDatetimeFrom(oraSpaccata.minusHours(1));
-        //request.setDatetimeFrom(oraSpaccata.minusHours(350));
-        request.setDatetimeTo(oraSpaccata);
+        request.setDatetimeFrom(oraSpaccata.toLocalDate().atStartOfDay());
+        request.setDatetimeTo(LocalDateTime.now());;
         Page<Cpl> page = repository.findAll(getSpecification(request), pageable);
         if (page.getTotalElements() > 0)
             log.trace("\n\n\n >>>>>>>>>>>>>>>>>>>>>> UNREAD CPL HOUR BEFORE :: {}", page.getTotalElements());
