@@ -16,7 +16,8 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
 
 
     @Query(nativeQuery = true, value =
-            "Select distinct vall.campaignid, " +
+            "WITH w as ( " +
+                    "Select distinct vall.campaignid, " +
                     "                vall.campaignname, " +
                     "                vall.fileid, " +
                     "                COALESCE(SUM(vall.impression), 0)                                           as impressionNumber, " +
@@ -53,7 +54,33 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
                     "  AND ( (:affiliateId)IS NULL OR (vall.affiliateid = (:affiliateId)))  " +
                     "  AND ((:campaignid) IS NULL OR (vall.campaignid = (:campaignid)))  " +
                     " group by vall.fileid, vall.campaignname, vall.campaignid, tc.initial_budget, tc.budget " +
-                    " ORDER BY impressionNumber DESC;")
+                    " ) " +
+                    "SELECT campaignid, " +
+                    "       campaignname, " +
+                    "       fileid, " +
+                    "       COALESCE(SUM(impressionnumber), 0)                     as impressionNumber, " +
+                    "       COALESCE(SUM(clicknumber), 0)                          as clickNumber, " +
+                    "       COALESCE(SUM(leadnumber), 0)                           as leadNumber, " +
+                    "       CONCAT(COALESCE(round(AVG(CTR), 2), 0), '')           as CTR, " +
+                    "       CONCAT(COALESCE(round(AVG(LR), 2), 0), '')            as LR, " +
+                    "       CONCAT(COALESCE(SUM(commission), 0), '')              as commission, " +
+                    "       CONCAT(COALESCE(SUM(revenue), 0), '')                 as revenue, " +
+                    "       CONCAT(COALESCE(SUM(margine), 0), '')                 as margine, " +
+                    "       CONCAT(COALESCE(round(AVG(marginePC), 2), 0), '')     as marginePC, " +
+                    "       CONCAT(COALESCE(round(AVG(ecpm), 2), 0), '')          as ecpm, " +
+                    "       CONCAT(COALESCE(round(AVG(ecpc), 2), 0), '')          as ecpc, " +
+                    "       CONCAT(COALESCE(round(AVG(ecpc), 2), 0), '')          as ecpl, " +
+                    "       CONCAT(COALESCE(SUM(budget), 0), '')                  as budget, " +
+                    "       CONCAT(COALESCE(round(AVG(budgetGivenPC), 2), 0), '') as budgetGivenPC, " +
+                    "       CONCAT(COALESCE(round(AVG(budgetPC), 2), 0), '')      as budgetPC " +
+                    "FROM w " +
+                    "GROUP BY ROLLUP ((campaignid, campaignname, fileid, " +
+                    "                  impressionNumber, clickNumber, leadnumber, " +
+                    "                  ctr, lr, " +
+                    "                  commission, revenue, margine, marginePC, " +
+                    "                  ecpm, ecpc, ecpl, " +
+                    "                  budget, budgetGivenPC, budgetPC)) " +
+                    "order by  campaignname  nulls last")
     List<ReportTopCampaings> searchTopCampaigns(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid);
     //"  AND ((:dictionaryList)IS NULL OR (vall.dictionaryId in (:dictionaryList))) " +
 
@@ -64,8 +91,9 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
     //=========================================================================================================================
 
     @Query(nativeQuery = true, value =
-            "Select distinct vall.campaignid, " +
-                    "                vall.campaignname, " +
+            "WITH w as ( " +
+                    "Select distinct vall.campaignid, " +
+                    "                vall.campaignname as campaignname, " +
                     "                vall.fileid, " +
                     "                vall.channelid                                                              AS channelId, " +
                     "                vall.channelname                                                            AS channelName, " +
@@ -106,7 +134,38 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
                     "  AND ((:campaignid) IS NULL OR (vall.campaignid = (:campaignid)))  " +
                     " group by vall.fileid, vall.campaignname, vall.campaignid, tc.initial_budget, tc.budget, tc.name, vall.channelid, vall.channelname, " +
                     "         vall.affiliateid ,    vall.affiliatename " +
-                    " ORDER BY impressionNumber DESC;")
+                    " ) " +
+                    "SELECT campaignid, " +
+                    "       campaignname, " +
+                    "       fileid, " +
+                    "       channelId, " +
+                    "       channelName, " +
+                    "       affiliateId, " +
+                    "       affiliateName, " +
+                    "       COALESCE(SUM(impressionnumber), 0)                     as impressionNumber, " +
+                    "       COALESCE(SUM(clicknumber), 0)                          as clickNumber, " +
+                    "       COALESCE(SUM(leadnumber), 0)                           as leadNumber, " +
+                    "       CONCAT(COALESCE(round(AVG(CTR), 2), 0), '')           as CTR, " +
+                    "       CONCAT(COALESCE(round(AVG(LR), 2), 0), '')            as LR, " +
+                    "       CONCAT(COALESCE(SUM(commission), 0), '')              as commission, " +
+                    "       CONCAT(COALESCE(SUM(revenue), 0), '')                 as revenue, " +
+                    "       CONCAT(COALESCE(SUM(margine), 0), '')                 as margine, " +
+                    "       CONCAT(COALESCE(round(AVG(marginePC), 2), 0), '')     as marginePC, " +
+                    "       CONCAT(COALESCE(round(AVG(ecpm), 2), 0), '')          as ecpm, " +
+                    "       CONCAT(COALESCE(round(AVG(ecpc), 2), 0), '')          as ecpc, " +
+                    "       CONCAT(COALESCE(round(AVG(ecpc), 2), 0), '')          as ecpl, " +
+                    "       CONCAT(COALESCE(SUM(budget), 0), '')                  as budget, " +
+                    "       CONCAT(COALESCE(round(AVG(budgetGivenPC), 2), 0), '') as budgetGivenPC, " +
+                    "       CONCAT(COALESCE(round(AVG(budgetPC), 2), 0), '')      as budgetPC " +
+                    "FROM w " +
+                    "GROUP BY ROLLUP ((campaignid, campaignname, fileid, " +
+                    "                  channelId, channelName, affiliateId, affiliateName, "+
+                    "                  impressionNumber, clickNumber, leadnumber, " +
+                    "                  ctr, lr, " +
+                    "                  commission, revenue, margine, marginePC, " +
+                    "                  ecpm, ecpc, ecpl, " +
+                    "                  budget, budgetGivenPC, budgetPC)) " +
+                    "order by  campaignname  nulls last")
     List<ReportTopCampaings> searchTopCampaignsChannel(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid);
 
     //=========================================================================================================================
@@ -137,7 +196,7 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
             " from v_widget_all vall " +
             " where " +
             "  (cast(:dateFrom as date) IS NULL OR (:dateFrom <= vall.datetime)) " +
-            "  AND (cast(:dateTo as date) IS NULL OR (:dateTo >= vall.datetime + interval '24 hours')) " +
+            "  AND (cast(:dateTo as date) IS NULL OR (:dateTo >= vall.datetime )) " +
             "  AND ( (:affiliateId)IS NULL OR (vall.affiliateid = (:affiliateId)))  " +
             "  AND ((:campaignid) IS NULL OR (vall.campaignid = (:campaignid)))  " +
             " group by vall.affiliateName, vall.affiliateId, vall.channelid, vall.channelName" +
@@ -150,7 +209,8 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
     //=========================================================================================================================
     //=========================================================================================================================
 
-    @Query(nativeQuery = true, value = "Select distinct datadx                                                                          as giorno, " +
+    @Query(nativeQuery = true, value = "WITH w as ( " +
+            "Select distinct datadx                                                                          as giorno, " +
             "                COALESCE(SUM(dt.impressionnumber), 0)                                           as impressionNumber, " +
             "                COALESCE(SUM(dt.clicknumber), 0)                                                as clickNumber, " +
             "                COALESCE(SUM(dt.leadnumber), 0)                                                 as leadNumber, " +
@@ -171,8 +231,24 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
             "  AND (cast(:dateTo as date) IS NULL OR (:dateTo >= dt.datadx + interval '24 hours')) " +
             "  AND ((:affiliateId) IS NULL OR (dt.affilaiteid = (:affiliateId)))  " +
             "  AND ((:campaignid) IS NULL OR (dt.campaignid = (:campaignid)))  " +
-            " group by dt.datadx" +
-            " order by dt.datadx asc"
+            " group by dt.datadx " +
+            " ) " +
+            "SELECT giorno, " +
+            "       COALESCE(SUM(impressionnumber), 0)                 as impressionNumber, " +
+            "       COALESCE(SUM(clicknumber), 0)                      as clickNumber, " +
+            "       COALESCE(SUM(leadnumber), 0)                       as leadNumber, " +
+            "       CONCAT(COALESCE(round(AVG(CTR), 2), 0), '')       as CTR, " +
+            "       CONCAT(COALESCE(round(AVG(LR), 2), 0), '')        as LR, " +
+            "       CONCAT(COALESCE(SUM(commission), 0), '')          as commission, " +
+            "       CONCAT(COALESCE(SUM(revenue), 0), '')             as revenue, " +
+            "       CONCAT(COALESCE(SUM(margine), 0), '')             as margine, " +
+            "       CONCAT(COALESCE(round(AVG(marginePC), 2), 0), '') as marginePC, " +
+            "       CONCAT(COALESCE(round(AVG(ecpm), 2), 0), '')      as ecpm, " +
+            "       CONCAT(COALESCE(round(AVG(ecpc), 2), 0), '')      as ecpc, " +
+            "       CONCAT(COALESCE(round(AVG(ecpc), 2), 0), '')      as ecpl " +
+            "FROM w " +
+            "GROUP BY ROLLUP ((giorno, impressionNumber, clickNumber, leadnumber, ctr, lr, commission, revenue, margine, marginePC, ecpm, ecpc, ecpl)) " +
+            "order by giorno nulls last"
     )
     List<ReportDaily> searchDaily(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid);
 

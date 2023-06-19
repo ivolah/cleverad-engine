@@ -3,37 +3,55 @@ package it.cleverad.engine.persistence.model.service;
 public interface ReportTopCampaings {
 
     String getAffiliateName();
+
     String getAffiliateId();
-    Long getCampaignId();
+
+    String getCampaignId();
+
     String getCampaignName();
-    String getCampaignname();
-    Long getDictionaryId();
+
+    //String getCampaignname();
+
+    String getDictionaryId();
+
     String getDictionaryName();
-    Long getFileid();
 
-    Long getImpressionNumber();
-    Long getClickNumber();
-    Long getLeadNumber();
+    String getFileid();
 
-    Double getCTR();
-    Double getLR();
+    String getImpressionNumber();
 
-    Double getCommission();
-    Double getRevenue();
+    String getClickNumber();
 
-    Double getMargine();
-    Double getMarginePC();
+    String getLeadNumber();
 
-    Double getEcpm();
-    Double getEcpc();
-    Double getEcpl();
+    String getCTR();
 
-    Double getBudget();
-    Double getBudgetPC();
-    Double getBudgetGivenPC();
-    Double getInitialBudget();
+    String getLR();
+
+    String getCommission();
+
+    String getRevenue();
+
+    String getMargine();
+
+    String getMarginePC();
+
+    String getEcpm();
+
+    String getEcpc();
+
+    String getEcpl();
+
+    String getBudget();
+
+    String getBudgetPC();
+
+    String getBudgetGivenPC();
+
+    String getInitialBudget();
 
     String getChannelId();
+
     String getChannelName();
 
 }

@@ -3,21 +3,29 @@ package it.cleverad.engine.persistence.model.service;
 public interface ReportDaily {
 
     String getGiorno();
-    Double getCommission();
-    Double getRevenue();
 
-    Double getMargine();
-    Double getMarginePC();
+    String getCommission();
 
-    Double getEcpm();
-    Double getEcpc();
-    Double getEcpl();
+    String getRevenue();
+
+    String getMargine();
+
+    String getMarginePC();
+
+    String getEcpm();
+
+    String getEcpc();
+
+    String getEcpl();
 
     Long getImpressionNumber();
+
     Long getClickNumber();
+
     Long getLeadNumber();
 
-    Double getCTR();
-    Double getLR();
+    String getCTR();
+
+    String getLR();
 
 }
