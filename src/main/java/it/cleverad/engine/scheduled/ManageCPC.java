@@ -185,7 +185,7 @@ public class ManageCPC {
 
                     // creo la transazione
                     TransactionCPCDTO tcpc = transactionBusiness.createCpc(transaction);
-                    log.info(">>> CREATO TRANSAZIONE :::: CPC :::: {} -- {} -- {}", tcpc.getId(), s, refferal);
+                    log.trace(">>> CREATO TRANSAZIONE :::: CPC :::: {} -- {} -- {}", tcpc.getId(), s, refferal);
                 }
             });
 
