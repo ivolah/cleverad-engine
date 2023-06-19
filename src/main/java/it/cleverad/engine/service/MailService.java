@@ -43,6 +43,8 @@ public class MailService {
     private JwtUserDetailsService jwtUserDetailsService;
     @Autowired
     private JavaMailSender emailSender;
+    @Autowired
+    private CampaignAffiliateRequestBusiness campaignAffiliateRequestBusiness;
 
     private static String MAIL_INFO = "info@cleverad.it";
 
@@ -189,6 +191,12 @@ public class MailService {
         message.setSubject("Richiesta partecipazione campagna " + campaign.getName());
         message.setText("L'affiliato " + affiliato.getName() + " ha richiesto di partecipare alla campagmna " + campaign.getName() + ".");
         emailSender.send(message);
+
+        CampaignAffiliateRequestBusiness.BaseCreateRequest reqCrea = new CampaignAffiliateRequestBusiness.BaseCreateRequest();
+        reqCrea.setStatusId(64L);
+        reqCrea.setCampaignId(campaign.getId());
+        reqCrea.setAffiliateId(affiliato.getId());
+        campaignAffiliateRequestBusiness.create(reqCrea);
     }
 
     /**

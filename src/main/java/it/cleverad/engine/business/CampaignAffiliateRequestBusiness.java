@@ -3,9 +3,10 @@ package it.cleverad.engine.business;
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.Campaign;
-import it.cleverad.engine.persistence.model.service.CampaignAffiliate;
-import it.cleverad.engine.persistence.repository.service.CampaignAffiliateRepository;
-import it.cleverad.engine.web.dto.CampaignAffiliateDTO;
+import it.cleverad.engine.persistence.model.service.CampaignAffiliateRequest;
+import it.cleverad.engine.persistence.model.service.Dictionary;
+import it.cleverad.engine.persistence.repository.service.CampaignAffiliateRequestRepository;
+import it.cleverad.engine.web.dto.CampaignAffiliateRequestDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -30,10 +31,10 @@ import java.util.List;
 @Slf4j
 @Component
 @Transactional
-public class CampaignAffiliateBusiness {
+public class CampaignAffiliateRequestBusiness {
 
     @Autowired
-    private CampaignAffiliateRepository repository;
+    private CampaignAffiliateRequestRepository repository;
 
     @Autowired
     private DictionaryBusiness dictionaryBusiness;
@@ -46,8 +47,8 @@ public class CampaignAffiliateBusiness {
      **/
 
     // CREATE
-    public CampaignAffiliateDTO create(BaseCreateRequest request) {
-        CampaignAffiliate map = mapper.map(request, CampaignAffiliate.class);
+    public CampaignAffiliateRequestDTO create(BaseCreateRequest request) {
+        CampaignAffiliateRequest map = mapper.map(request, CampaignAffiliateRequest.class);
 
         Affiliate cat = new Affiliate();
         cat.setId(request.getAffiliateId());
@@ -57,28 +58,17 @@ public class CampaignAffiliateBusiness {
         campaign.setId(request.getCampaignId());
         map.setCampaign(campaign);
 
-        return CampaignAffiliateDTO.from(repository.save(map));
+        Dictionary dict = new Dictionary();
+        dict.setId(request.getStatusId());
+        map.setDictionaryStatusCampaignAffiliateRequest(dict);
+
+        return CampaignAffiliateRequestDTO.from(repository.save(map));
     }
-
-    public CampaignAffiliate createEntity(BaseCreateRequest request) {
-        CampaignAffiliate map = mapper.map(request, CampaignAffiliate.class);
-
-        Affiliate cat = new Affiliate();
-        cat.setId(request.getAffiliateId());
-        map.setAffiliate(cat);
-
-        Campaign campaign = new Campaign();
-        campaign.setId(request.getCampaignId());
-        map.setCampaign(campaign);
-
-        return repository.save(map);
-    }
-
 
     // GET BY ID
-    public CampaignAffiliateDTO findById(Long id) {
-        CampaignAffiliate channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignAffiliate", id));
-        return CampaignAffiliateDTO.from(channel);
+    public CampaignAffiliateRequestDTO findById(Long id) {
+        CampaignAffiliateRequest campaignAffiliateRequest = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignAffiliateRequest", id));
+        return CampaignAffiliateRequestDTO.from(campaignAffiliateRequest);
     }
 
     // DELETE BY ID
@@ -92,85 +82,60 @@ public class CampaignAffiliateBusiness {
         }
     }
 
-    public void deleteByCampaignID(Long id) {
-        Filter request = new Filter();
-        request.setCampaignId(id);
-        request.setFollowNull(false);
-        Page<CampaignAffiliate> page = repository.findAll(getSpecification(request), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id"))));
-        try {
-            page.stream().forEach(campaignAffiliate -> {
-                repository.deleteById(campaignAffiliate.getId());
-            });
-        } catch (javax.validation.ConstraintViolationException ex) {
-            throw ex;
-        } catch (Exception ee) {
-            throw new PostgresDeleteCleveradException(ee);
-        }
-    }
-
-    public void deleteByCampaignIdAndAffiliateId(Long campaignId, Long affiliateID) {
-        repository.findByAffiliateIdAndCampaignId(affiliateID, campaignId).stream().forEach(campaignAffiliate -> repository.deleteById(campaignAffiliate.getId()));
-    }
-
     // SEARCH PAGINATED
-    public Page<CampaignAffiliateDTO> search(Filter request, Pageable pageableRequest) {
+    public Page<CampaignAffiliateRequestDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-        Page<CampaignAffiliate> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(CampaignAffiliateDTO::from);
+        Page<CampaignAffiliateRequest> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(CampaignAffiliateRequestDTO::from);
     }
 
-    public Page<CampaignAffiliateDTO> searchByAffiliateID(Long affiliateId) {
+    public Page<CampaignAffiliateRequestDTO> searchByAffiliateID(Long affiliateId) {
         Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setAffiliateId(affiliateId);
-        Page<CampaignAffiliate> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(CampaignAffiliateDTO::from);
-        // List<CampaignAffiliate> page = repository.findByAffiliateId(affiliateId);
-        // return null;
+        Page<CampaignAffiliateRequest> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(CampaignAffiliateRequestDTO::from);
     }
 
-    public Page<CampaignAffiliateDTO> searchByCampaignID(Long campaignId, Pageable pageableRequest) {
+    public Page<CampaignAffiliateRequestDTO> searchByCampaignID(Long campaignId, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setCampaignId(campaignId);
-
-        Page<CampaignAffiliate> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(CampaignAffiliateDTO::from);
-        // List<CampaignAffiliate> page = repository.findByAffiliateId(affiliateId);
-        // return null;
+        Page<CampaignAffiliateRequest> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(CampaignAffiliateRequestDTO::from);
     }
 
-    public Page<CampaignAffiliateDTO> searchByAffiliateIdAndCampaignId(Long affiliateId, Long campaignId) {
+    public Page<CampaignAffiliateRequestDTO> searchByAffiliateIdAndCampaignId(Long affiliateId, Long campaignId) {
         Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setAffiliateId(affiliateId);
         request.setCampaignId(campaignId);
-        Page<CampaignAffiliate> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(CampaignAffiliateDTO::from);
+        Page<CampaignAffiliateRequest> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(CampaignAffiliateRequestDTO::from);
     }
 
     // UPDATE
-    public CampaignAffiliateDTO update(Long id, Filter filter) {
-        CampaignAffiliate channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignAffiliate", id));
-        CampaignAffiliateDTO campaignDTOfrom = CampaignAffiliateDTO.from(channel);
+    public CampaignAffiliateRequestDTO update(Long id, Filter filter) {
+        CampaignAffiliateRequest channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignAffiliateRequest", id));
+        CampaignAffiliateRequestDTO campaignDTOfrom = CampaignAffiliateRequestDTO.from(channel);
 
         mapper.map(filter, campaignDTOfrom);
 
-        CampaignAffiliate mappedEntity = mapper.map(channel, CampaignAffiliate.class);
+        CampaignAffiliateRequest mappedEntity = mapper.map(channel, CampaignAffiliateRequest.class);
         mapper.map(campaignDTOfrom, mappedEntity);
 
-        return CampaignAffiliateDTO.from(repository.save(mappedEntity));
+        return CampaignAffiliateRequestDTO.from(repository.save(mappedEntity));
     }
 
     public Page<DictionaryDTO> getTypes() {
-        return dictionaryBusiness.getAffiliateStatusTypes();
+        return dictionaryBusiness.getAffiliateCampaignRequestStatusTypes();
     }
 
     /**
      * ============================================================================================================
      **/
 
-    private Specification<CampaignAffiliate> getSpecification(Filter request) {
+    private Specification<CampaignAffiliateRequest> getSpecification(Filter request) {
         return (root, query, cb) -> {
             Predicate completePredicate = null;
             List<Predicate> predicates = new ArrayList<>();
@@ -178,16 +143,15 @@ public class CampaignAffiliateBusiness {
             if (request.getId() != null) {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
-
             if (request.getAffiliateId() != null) {
                 predicates.add(cb.equal(root.get("affiliate").get("id"), request.getAffiliateId()));
             }
             if (request.getCampaignId() != null) {
                 predicates.add(cb.equal(root.get("campaign").get("id"), request.getCampaignId()));
             }
-
-            if (request.getFollowNull())
-                predicates.add(cb.isNotNull(root.get("followThrough")));
+            if (request.getStatusId() != null) {
+                predicates.add(cb.equal(root.get("dictionary").get("id"), request.getStatusId()));
+            }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 
@@ -205,7 +169,6 @@ public class CampaignAffiliateBusiness {
     public static class BaseCreateRequest {
         private Long campaignId;
         private Long affiliateId;
-        private String followThrough;
         private Long statusId;
     }
 
@@ -214,11 +177,9 @@ public class CampaignAffiliateBusiness {
     @AllArgsConstructor
     public static class Filter {
         private Long id;
-        private String followThrough;
         private Long campaignId;
         private Long affiliateId;
         private Long statusId;
-        private Boolean followNull = true;
     }
 
 }

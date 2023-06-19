@@ -96,92 +96,56 @@ public class DictionaryBusiness {
     }
 
     public Page<DictionaryDTO> getTypeCommission() {
-        Pageable pageable = PageRequest.of(0, 200, Sort.by(Sort.Order.asc("id")));
-        Filter request = new Filter();
-        request.setType("COMMISSION");
-        Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(DictionaryDTO::from);
+        return this.getStatusTypes("COMMISSION");
     }
 
     public Page<DictionaryDTO> getTypeChannel() {
-        Pageable pageable = PageRequest.of(0, 200, Sort.by(Sort.Order.asc("id")));
-        Filter request = new Filter();
-        request.setType("CHANNEL");
-        Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(DictionaryDTO::from);
+        return this.getStatusTypes("CHANNEL");
     }
 
     public Page<DictionaryDTO> getBusinessTypeChannel() {
-        Pageable pageable = PageRequest.of(0, 200, Sort.by(Sort.Order.asc("id")));
-        Filter request = new Filter();
-        request.setType("CHANNELBT");
-        Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(DictionaryDTO::from);
+        return this.getStatusTypes("CHANNELBT");
     }
 
     public Page<DictionaryDTO> getTypePayout() {
-        Pageable pageable = PageRequest.of(0, 200, Sort.by(Sort.Order.asc("id")));
-        Filter request = new Filter();
-        request.setType("PAYOUT");
-        Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(DictionaryDTO::from);
+        return this.getStatusTypes("PAYOUT");
     }
 
     public Page<DictionaryDTO> getTypeDocument() {
-        Pageable pageable = PageRequest.of(0, 200, Sort.by(Sort.Order.asc("id")));
-        Filter request = new Filter();
-        request.setType("DOCTYPE");
-        Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(DictionaryDTO::from);
+        return this.getStatusTypes("DOCTYPE");
     }
 
     public Page<DictionaryDTO> getTypeCompany() {
-        Pageable pageable = PageRequest.of(0, 200, Sort.by(Sort.Order.asc("id")));
-        Filter request = new Filter();
-        request.setType("COMPANYTYPE");
-        Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(DictionaryDTO::from);
+        return this.getStatusTypes("COMPANYTYPE");
     }
 
     public Page<DictionaryDTO> getChannelTypeAffiliate() {
-        Pageable pageable = PageRequest.of(0, 200, Sort.by(Sort.Order.asc("id")));
-        Filter request = new Filter();
-        request.setType("CHANNELTYPE");
-        Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(DictionaryDTO::from);
-    }
-
-    public Page<DictionaryDTO> getCampaignAffiliateStatus() {
-        Pageable pageable = PageRequest.of(0, 200, Sort.by(Sort.Order.asc("id")));
-        Filter request = new Filter();
-        request.setType("CAMPAIGNAFFILIATE");
-        Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(DictionaryDTO::from);
+        return this.getStatusTypes("CHANNELTYPE");
     }
 
     public Page<DictionaryDTO> getTransactionTypes() {
-        Pageable pageable = PageRequest.of(0, 200, Sort.by(Sort.Order.asc("id")));
-        Filter request = new Filter();
-        request.setType("TRANSACTIONS");
-        Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(DictionaryDTO::from);
+        return this.getStatusTypes("TRANSACTIONS");
     }
 
     public Page<DictionaryDTO> getFilePayoutTypes() {
-        Pageable pageable = PageRequest.of(0, 200, Sort.by(Sort.Order.asc("id")));
+        return this.getStatusTypes("FILEPAYOUT");
+    }
+
+    public Page<DictionaryDTO> getAffiliateStatusTypes() {
+        return this.getStatusTypes("AFFILIATESTATUS");
+    }
+    public Page<DictionaryDTO> getAffiliateCampaignRequestStatusTypes() {
+        return this.getStatusTypes("AFFILIATEREQUESTSTATUS");
+    }
+
+    private Page<DictionaryDTO> getStatusTypes(String tipo) {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
-        request.setType("FILEPAYOUT");
+        request.setType(tipo);
         Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
         return page.map(DictionaryDTO::from);
     }
 
-    public Page<DictionaryDTO> getAffiliateStatusTypes() {
-        Pageable pageable = PageRequest.of(0, 200, Sort.by(Sort.Order.asc("id")));
-        Filter request = new Filter();
-        request.setType("AFFILIATESTATUS");
-        Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(DictionaryDTO::from);
-    }
     /**
      * ============================================================================================================
      **/

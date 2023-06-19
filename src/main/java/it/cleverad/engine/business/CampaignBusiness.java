@@ -69,6 +69,8 @@ public class CampaignBusiness {
     private CampaignAffiliateBusiness campaignAffiliateBusiness;
     @Autowired
     private MediaBusiness mediaBusiness;
+//    @Autowired
+//    TelegramService telegramService;
 
     /**
      * ============================================================================================================
@@ -141,6 +143,10 @@ public class CampaignBusiness {
 //        comReq.setName("CPS @0 Default");
 //        comReq.setDictionaryId(51L);
 //        commissionBusiness.create(comReq);
+
+        // INVIO NOTIFICA CANALE
+        //telegramService.sendNotification("Nuova CAMPAGNA  " + campaign.getName() + "!!!! \n Accedi alla piattaforma e richiedi di partecipare!");
+
 
         dto = CampaignDTO.from(repository.save(campaign));
 
@@ -411,7 +417,6 @@ public class CampaignBusiness {
                 }
                 predicates.add(inClauseNot.not());
             }
-
 
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
