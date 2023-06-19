@@ -25,7 +25,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -56,24 +55,10 @@ public class PayoutBusiness {
      * ============================================================================================================
      **/
 
-    public Page<PayoutDTO> create(Lista lista) {
-        AtomicReference<Page<PayoutDTO>> res = new AtomicReference<>();
-        lista.getLista().forEach((s1, s2) -> {
-            if (s1.equals("CPC")) {
-                String[] ids = s2.split(",");
-                List<Long> listaTransactions = Arrays.stream(ids).map(s -> Long.valueOf(s)).collect(Collectors.toList());
-                res.set(createCpc(listaTransactions));
-            } else if (s1.equals("CPL")) {
-                String[] ids = s2.split(",");
-                List<Long> listaTransactions = Arrays.stream(ids).map(s -> Long.valueOf(s)).collect(Collectors.toList());
-                res.set(createCpl(listaTransactions));
-            } else if (s1.equals("CPS")) {
-                String[] ids = s2.split(",");
-                List<Long> listaTransactions = Arrays.stream(ids).map(s -> Long.valueOf(s)).collect(Collectors.toList());
-                res.set(createCps(listaTransactions));
-            }
-        });
-        return res.get();
+    public Page<PayoutDTO> create(BaseCreateRequest request) {
+        this.createCpl(request.getTransazioniCpl());
+        this.createCpc(request.getTransazioniCpc());
+        return null;
     }
 
     public Page<PayoutDTO> createCpc(List<Long> listaTransactions) {
@@ -443,7 +428,8 @@ public class PayoutBusiness {
         private LocalDate data;
         private Boolean stato;
         private Long affiliateId;
-        private List<Long> transazioni;
+        private List<Long> transazioniCpl;
+        private List<Long> transazioniCpc;
     }
 
     @Data
