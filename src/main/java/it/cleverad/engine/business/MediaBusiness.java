@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
 @Slf4j
 @Component
 @Transactional
@@ -45,23 +44,18 @@ public class MediaBusiness {
 
     @Autowired
     private MediaRepository repository;
-
     @Autowired
     private Mapper mapper;
-
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
-
     @Autowired
     private MediaTypeBusiness mediaTypeBusiness;
-
     @Autowired
     private MediaTypeRepository mediaTypeRepository;
     @Autowired
     private AffiliateRepository affiliateRepository;
     @Autowired
     private CampaignRepository campaignRepository;
-
     @Autowired
     private ReferralService referralService;
     @Autowired
@@ -75,6 +69,7 @@ public class MediaBusiness {
     public MediaDTO create(BaseCreateRequest request) {
 
         String bannerCode = request.getBannerCode();
+        request.setVisibile(true);
         String url = request.getUrl();
         if (StringUtils.isNotBlank(url)) bannerCode.replace("{{url}}", url);
 
@@ -85,7 +80,7 @@ public class MediaBusiness {
 
         Media map = mapper.map(request, Media.class);
         map.setMediaType(mediaTypeRepository.findById(request.typeId).orElseThrow(() -> new ElementCleveradException("Media Type", request.typeId)));
-        map.setStatus(true);
+        //map.setStatus(true);
         Media saved = repository.save(map);
         Campaign cc = campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.getCampaignId()));
         cc.addMedia(saved);
@@ -144,7 +139,7 @@ public class MediaBusiness {
         media.setMediaType(mediaTypeRepository.findById(filter.typeId).orElseThrow(() -> new ElementCleveradException("Media Type", filter.typeId)));
         media.setLastModificationDate(LocalDateTime.now());
         media.setBannerCode(bannerCode);
-        media.setStatus(true);
+        //media.setStatus(true);
         Media saved = repository.save(media);
 
         Campaign cc = campaignRepository.findById(filter.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", filter.getCampaignId()));
@@ -363,7 +358,8 @@ public class MediaBusiness {
         private Long campaignId;
         private String mailSubject;
         private String sender;
-        private Boolean visibile = true;
+        private Boolean visibile;
+        private Boolean status;
     }
 
     @Data

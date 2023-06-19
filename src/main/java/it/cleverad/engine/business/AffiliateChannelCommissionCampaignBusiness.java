@@ -48,7 +48,6 @@ public class AffiliateChannelCommissionCampaignBusiness {
     private CampaignAffiliateBusiness campaignAffiliateBusiness;
     @Autowired
     private MailService mailService;
-
     @Autowired
     private Mapper mapper;
 
@@ -128,7 +127,8 @@ public class AffiliateChannelCommissionCampaignBusiness {
         Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
         return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
-    public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignIdAndType(Long campaignId,Long typeDictId, Pageable pageableRequest) {
+
+    public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignIdAndType(Long campaignId, Long typeDictId, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Filter filter = new Filter();
         filter.setCampaignId(campaignId);
@@ -141,7 +141,8 @@ public class AffiliateChannelCommissionCampaignBusiness {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Filter filter = new Filter();
         filter.setCampaignId(campaignId);
-        filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+        if (!jwtUserDetailsService.isAdmin())
+            filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         filter.setNotzero(true);
         Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
         return page.map(AffiliateChannelCommissionCampaignDTO::from);

@@ -118,7 +118,7 @@ public class BudgetBusiness {
     }
 
     public Page<BudgetDTO> getByIdCampaign(Long id) {
-        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setCampaignId(id);
         Page<Budget> page = repository.findAll(getSpecification(request), pageable);
@@ -126,7 +126,7 @@ public class BudgetBusiness {
     }
 
     public Page<BudgetDTO> getByIdCampaignAndIdAffiliate(Long idCampaign, Long idAffilaite) {
-        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setCampaignId(idCampaign);
         request.setAffiliateId(idAffilaite);
@@ -136,7 +136,7 @@ public class BudgetBusiness {
     }
 
     public List<BudgetDTO> getBudgetToDisable() {
-        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setDueDateTo(LocalDate.now());
         request.setStatus(true);
