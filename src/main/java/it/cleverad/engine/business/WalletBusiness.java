@@ -97,7 +97,7 @@ public class WalletBusiness {
     public WalletDTO incement(Long id, Double value) {
         Wallet wallet = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Wallet", id));
 
-        log.info("Increment {} by :: {}", id, value);
+        log.trace("Increment {} by :: {}", id, value);
 
         // savo storicizzazione wallet
         WalletTransactionBusiness.BaseCreateRequest req = new WalletTransactionBusiness.BaseCreateRequest();

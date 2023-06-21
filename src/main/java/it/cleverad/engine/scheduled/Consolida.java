@@ -28,26 +28,11 @@ public class Consolida {
 
     @Autowired
     private TransactionBusiness transactionBusiness;
-    @Autowired
-    private CampaignBusiness campaignBusiness;
-    @Autowired
-    private it.cleverad.engine.business.CpmBusiness CpmBusiness;
-    @Autowired
-    private WalletRepository walletRepository;
-    @Autowired
-    private BudgetBusiness budgetBusiness;
-    @Autowired
-    private AffiliateChannelCommissionCampaignBusiness affiliateChannelCommissionCampaignBusiness;
-    @Autowired
-    private RevenueFactorBusiness revenueFactorBusiness;
-    @Autowired
-    private ReferralService referralService;
-
 
     @Async
     @Scheduled(cron = "0 0/31 * * * ?")
     public void ciclaCPC() {
-        log.info("\n\n\nCONSOLIDA CPC ");
+        log.trace("\n\n\nCONSOLIDA CPC ");
 
         LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
         consolidaCPC(oraSpaccata);
@@ -100,7 +85,7 @@ public class Consolida {
                 transactionBusiness.deleteInterno(tcpc.getId(), "CPC");
             }
             if (totaleClick > 0) {
-                log.info("CONSOLIDATO CPC :: {} :: {} ::: {} - {} - {} ::: ", totaleClick, value, ttt.getLeft(), ttt.getMiddle(), ttt.getRight(), totaleClick, value);
+                log.trace("CONSOLIDATO CPC :: {} :: {} ::: {} - {} - {} ::: ", totaleClick, value, ttt.getLeft(), ttt.getMiddle(), ttt.getRight(), totaleClick, value);
                 TransactionBusiness.BaseCreateRequest bReq = new TransactionBusiness.BaseCreateRequest();
                 bReq.setClickNumber(totaleClick);
                 bReq.setValue(value);
@@ -115,7 +100,7 @@ public class Consolida {
                 bReq.setRevenueId(revenueId);
                 bReq.setWalletId(walletId);
                 bReq.setAgent("");
-                TransactionCPCDTO cpc = transactionBusiness.createCpc(bReq);
+                transactionBusiness.createCpc(bReq);
             }
 
         }//tripletta
