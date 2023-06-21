@@ -85,15 +85,18 @@ public class TransactionAllBusiness {
 
     public Page<TransactionAllDTO> searchPrefiltrato(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("dateTime")));
-        request.setPayoutId(null);
-        request.setValueNotZero(true);
-        if (request.getDictionaryId() != null) {
-            if (request.getDictionaryId() == 10) request.setTipo("CPC");
-            else if (request.getDictionaryId() == 11) request.setTipo("CPL");
-            else if (request.getDictionaryId() == 50) request.setTipo("CPM");
-            else if (request.getDictionaryId() == 51) request.setTipo("CPS");
-            request.setDictionaryId(null);
-        }
+
+      //  request.setPayoutId(null);
+       // request.setValueNotZero(true);
+
+//        if (request.getDictionaryId() != null) {
+//            if (request.getDictionaryId() == 10) request.setTipo("CPC");
+//            else if (request.getDictionaryId() == 11) request.setTipo("CPL");
+//            else if (request.getDictionaryId() == 50) request.setTipo("CPM");
+//            else if (request.getDictionaryId() == 51) request.setTipo("CPS");
+//            request.setDictionaryId(null);
+//        }
+
         if (!jwtUserDetailsService.getRole().equals("Admin")) {
             request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         }
@@ -206,7 +209,8 @@ public class TransactionAllBusiness {
                 predicates.add(cb.notEqual(root.get("value"), "0"));
             }
 
-            predicates.add(cb.isNull(root.get("payoutId")));
+            if (request.getPayoutId() == null)
+                predicates.add(cb.isNull(root.get("payoutId")));
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;

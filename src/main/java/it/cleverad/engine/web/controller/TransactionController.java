@@ -3,6 +3,7 @@ package it.cleverad.engine.web.controller;
 import it.cleverad.engine.business.TransactionAllBusiness;
 import it.cleverad.engine.business.TransactionBusiness;
 import it.cleverad.engine.web.dto.*;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin
 @RestController
 @RequestMapping(value = "/transaction")
+@Log4j2
 public class TransactionController {
 
     @Autowired
@@ -178,6 +180,15 @@ public class TransactionController {
     public Page<TransactionCPSDTO> searchByAffiliateCps(TransactionBusiness.Filter request, Pageable pageable) {
         return business.searchByAffiliateCps(request, null, pageable);
     }
+
+
+    @PatchMapping("/update/status")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void updateStatus(@RequestBody TransactionBusiness.FilterUpdate request) {
+        log.info(request);
+        business.updateStatus(request.getId(), request.getDictionaryId(), request.getTipo(), request.getApproved());
+    }
+
 
     /**
      * ============================================================================================================
