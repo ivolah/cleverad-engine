@@ -8,11 +8,13 @@ import nl.basjes.parse.useragent.UserAgent;
 import nl.basjes.parse.useragent.UserAgentAnalyzer;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
+@Async
 public class ManageAgent {
 
     @Autowired
@@ -28,7 +30,8 @@ public class ManageAgent {
     @Autowired
     private CpsBusiness cpsBusiness;
 
-    @Scheduled(cron = "0 0 4 * * ?")
+    @Async
+    @Scheduled(cron = "0 15 18 * * ?")
     public void aggiornaStato() {
         log.info("AGGIORNAMENTO QUOTIDIANO -- AGENT");
         UserAgentAnalyzer uaa = UserAgentAnalyzer.newBuilder().hideMatcherLoadStats().withCache(10000).build();
@@ -83,11 +86,10 @@ public class ManageAgent {
         request.setOperatingSystemClass(a.get("OperatingSystemClass").getValue());
         request.setOperatingSystemName(a.get("OperatingSystemName").getValue());
 
-        if (StringUtils.isNotBlank(refferal) && !refferal.contains("{{refferalId}}")) {
-            Refferal reff = referralService.decodificaReferral(refferal);
-            request.setCampaignId(reff.getCampaignId().toString());
-            if (refferal.length() > 5) request.setAffiliateId(reff.getAffiliateId().toString());
-        }
+        Refferal reff = referralService.decodificaReferral(refferal);
+        if (reff != null && reff.getCampaignId() != null) request.setCampaignId(reff.getCampaignId().toString());
+        if (reff != null && reff.getAffiliateId() != null) request.setAffiliateId(reff.getAffiliateId().toString());
+
         agentBusiness.create(request);
     }
 
