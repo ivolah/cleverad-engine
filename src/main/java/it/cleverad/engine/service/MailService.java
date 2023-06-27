@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.mail.SimpleMailMessage;
@@ -39,6 +40,8 @@ public class MailService {
     ChannelBusiness channelBusiness;
     @Autowired
     PlannerBusiness plannerBusiness;
+    @Autowired
+    PayoutBusiness payoutBusiness;
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
     @Autowired
@@ -100,11 +103,18 @@ public class MailService {
         UserDTO user = null;
         ChannelDTO channelDTO = null;
         PlannerDTO plannerDTO = null;
+        PayoutDTO payoutDTO = null;
         if (request.affiliateId != null) affiliate = affiliateBusiness.findById(request.affiliateId);
         if (request.campaignId != null) campaign = campaignBusiness.findById(request.campaignId);
         if (request.userId != null) user = userBusiness.findById(request.userId);
         if (request.channelId != null) channelDTO = channelBusiness.findById(request.channelId);
         if (request.plannerId != null) plannerDTO = plannerBusiness.findById(request.plannerId);
+        if (request.payoutId != null) payoutDTO = payoutBusiness.findById(request.payoutId);
+
+        if(StringUtils.isBlank(affiliate.getIban()))
+            affiliate.setIban(">>> INSERISCI IL TUO IBAN <<<");
+        if(StringUtils.isBlank(affiliate.getSwift()))
+            affiliate.setSwift(">>> INSERISCI IL TUO SWIFT <<<");
 
         Template t = new Template(mailTemplate.getName(), new StringReader(mailTemplate.getContent()), new Configuration());
         StringWriter stringWriter = new StringWriter();
@@ -116,6 +126,7 @@ public class MailService {
         model.put("channel", channelDTO);
         model.put("planner", plannerDTO);
         model.put("user", user);
+        model.put("payout", payoutDTO);
 
         t.process(model, stringWriter);
 
@@ -181,6 +192,12 @@ public class MailService {
         return null;
     }
 
+    public MailDTO inviaMailPayout(BaseCreateRequest request) {
+        request.setTemplateId(4L);
+        this.invio(request);
+        return null;
+    }
+
     public void invioRichiesta(BaseCreateRequest request) {
         AffiliateDTO affiliato = affiliateBusiness.findById(jwtUserDetailsService.getAffiliateID());
         CampaignDTO campaign = campaignBusiness.findById(request.getCampaignId());
@@ -214,6 +231,7 @@ public class MailService {
         private Long affiliateId;
         private Long channelId;
         private Long userId;
+        private Long payoutId;
         private String email;
         private String oggetto;
         private String testo;

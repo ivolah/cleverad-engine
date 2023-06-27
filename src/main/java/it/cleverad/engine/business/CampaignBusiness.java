@@ -231,13 +231,13 @@ public class CampaignBusiness {
         Double newBB = null;
         if (!campaign.getInitialBudget().equals(filter.getInitialBudget())) {
             newBB = campaign.getBudget() + (filter.getInitialBudget()) - campaign.getInitialBudget();
+            campaign.setInitialBudget(filter.getInitialBudget());
         }
 
         mapper.map(filter, campaign);
 
         if (newBB != null)
             campaign.setBudget(newBB);
-
 
         // SET
         if (filter.getCookieId() != null)
