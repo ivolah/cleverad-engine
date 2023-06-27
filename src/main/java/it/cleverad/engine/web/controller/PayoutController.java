@@ -29,13 +29,13 @@ public class PayoutController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "/cpc")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<PayoutDTO> createcpc(@ModelAttribute PayoutBusiness.BaseCreateRequest request) {
-        return business.createCpc(request.getTransazioniCpc());
+        return business.createCpc(request.getTransazioniCpc(), request.getNote());
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "/cpl")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<PayoutDTO> createcpl(@ModelAttribute PayoutBusiness.BaseCreateRequest request) {
-        return business.createCpl(request.getTransazioniCpl());
+        return business.createCpl(request.getTransazioniCpl(), request.getNote());
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

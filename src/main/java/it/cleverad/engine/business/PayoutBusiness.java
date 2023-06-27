@@ -4,6 +4,8 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Dictionary;
 import it.cleverad.engine.persistence.model.service.*;
 import it.cleverad.engine.persistence.repository.service.*;
+import it.cleverad.engine.persistence.repository.tracking.TrackingRepository;
+import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.PayoutDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -12,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -31,6 +34,8 @@ import java.util.stream.Collectors;
 @Component
 @Transactional
 public class PayoutBusiness {
+    @Autowired
+    private TrackingRepository trackingRepository;
 
     @Autowired
     private PayoutRepository repository;
@@ -50,18 +55,23 @@ public class PayoutBusiness {
     private WalletBusiness walletBusiness;
     @Autowired
     private Mapper mapper;
+    @Autowired
+    private MailService mailService;
 
     /**
      * ============================================================================================================
      **/
 
     public Page<PayoutDTO> create(BaseCreateRequest request) {
-        this.createCpl(request.getTransazioniCpl());
-        this.createCpc(request.getTransazioniCpc());
+        this.createCpl(request.getTransazioniCpl(), request.getNote());
+        this.createCpc(request.getTransazioniCpc(), request.getNote());
         return null;
     }
 
-    public Page<PayoutDTO> createCpc(List<Long> listaTransactions) {
+    public Page<PayoutDTO> createCpc(List<Long> listaTransactions, String note) {
+
+        if (StringUtils.isEmpty(note))
+            note = "";
 
         //prndo tutti gli affigliati
         List<Long> affiliatesList = new ArrayList<>();
@@ -72,6 +82,7 @@ public class PayoutBusiness {
 
         // faccio distinct e creo un pqyout vuoto per ognuno
         HashMap<Long, Long> affiliatoPayout = new HashMap<>();
+        String finalNote = note;
         affiliatesList.stream().distinct().forEach(idAffiliate -> {
             Payout map = new Payout();
             Affiliate affiliate = affiliateRepository.findById(idAffiliate).orElseThrow(() -> new ElementCleveradException("Affiliate", idAffiliate));
@@ -81,6 +92,7 @@ public class PayoutBusiness {
             map.setCreationDate(LocalDateTime.now());
             map.setLastModificationDate(LocalDateTime.now());
             map.setTotale(0.0);
+            map.setNote(finalNote);
             Dictionary dictionary = dictionaryRepository.findById(19L).orElseThrow(() -> new ElementCleveradException("Dictionary", 18L));
             map.setDictionary(dictionary);
             map = repository.save(map);
@@ -109,20 +121,30 @@ public class PayoutBusiness {
             //aggiorno transazione e setto riferimento a payout
             transaction.setPayout(payout);
             transaction.setPayoutReference("Payout " + payoutId);
+            transaction.setPayoutPresent(true);
             cpcRepository.save(transaction);
         });
 
         Set<Payout> list2 = new HashSet<>();
         list.forEach(payout -> {
             list2.add(repository.findById(payout.getId()).orElseThrow(() -> new ElementCleveradException("PAYOUT CPC", payout.getId())));
-        });
 
+            log.info("PAYOUT  CPC::: " + payout.getId());
+            // INVIA MAIL PAYOUT
+            MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
+            mailRequest.setAffiliateId(payout.getAffiliate().getId());
+            mailRequest.setPayoutId(payout.getId());
+            mailService.inviaMailPayout(mailRequest);
+        });
 
         Page<Payout> page = new PageImpl<>(list2.stream().distinct().collect(Collectors.toList()));
         return page.map(PayoutDTO::from);
     }
 
-    public Page<PayoutDTO> createCpl(List<Long> listaTransactions) {
+    public Page<PayoutDTO> createCpl(List<Long> listaTransactions, String note) {
+
+        if (StringUtils.isEmpty(note))
+            note = "";
 
         //prndo tutti gli affigliati
         List<Long> affiliatesList = new ArrayList<>();
@@ -133,6 +155,7 @@ public class PayoutBusiness {
 
         // faccio distinct e creo un pqyout vuoto per ognuno
         HashMap<Long, Long> affiliatoPayout = new HashMap<>();
+        String finalNote = note;
         affiliatesList.stream().distinct().forEach(idAffiliate -> {
             Payout map = new Payout();
             Affiliate affiliate = affiliateRepository.findById(idAffiliate).orElseThrow(() -> new ElementCleveradException("Affiliate", idAffiliate));
@@ -142,7 +165,8 @@ public class PayoutBusiness {
             map.setCreationDate(LocalDateTime.now());
             map.setLastModificationDate(LocalDateTime.now());
             map.setTotale(0.0);
-            Dictionary dictionary = dictionaryRepository.findById(19L).orElseThrow(() -> new ElementCleveradException("Dictionary", 18L));
+            map.setNote(finalNote);
+            Dictionary dictionary = dictionaryRepository.findById(19L).orElseThrow(() -> new ElementCleveradException("Dictionary", 19L));
             map.setDictionary(dictionary);
             map = repository.save(map);
             affiliatoPayout.put(idAffiliate, map.getId());
@@ -170,13 +194,23 @@ public class PayoutBusiness {
             //aggiorno transazione e setto riferimento a payout
             transaction.setPayout(payout);
             transaction.setPayoutReference("Payout " + payoutId);
+            transaction.setPayoutPresent(true);
             cplRepository.save(transaction);
         });
 
         Set<Payout> listaPayout = new HashSet<>();
         list.forEach(payout -> {
+
             //aggiungo payout
             listaPayout.add(repository.findById(payout.getId()).orElseThrow(() -> new ElementCleveradException("PAYOUT CPL", payout.getId())));
+
+            log.info("PAYOUT  CPL::: " + payout.getId());
+
+            // INVIA MAIL PAYOUT
+            MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
+            mailRequest.setAffiliateId(payout.getAffiliate().getId());
+            mailRequest.setPayoutId(payout.getId());
+            mailService.inviaMailPayout(mailRequest);
         });
 
         Page<Payout> page = new PageImpl<>(listaPayout.stream().distinct().collect(Collectors.toList()));
@@ -231,6 +265,7 @@ public class PayoutBusiness {
             //aggiorno transazione e setto riferimento a payout
             transaction.setPayout(payout);
             transaction.setPayoutReference("Payout " + payoutId);
+            transaction.setPayoutPresent(true);
             cpsRepository.save(transaction);
         });
 
@@ -316,16 +351,14 @@ public class PayoutBusiness {
 
     // UPDATE
     public PayoutDTO update(Long id, Filter filter) {
+
         Payout payout = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Payout", id));
-        PayoutDTO campaignDTOfrom = PayoutDTO.from(payout);
-        mapper.map(filter, campaignDTOfrom);
+        mapper.map(filter, payout);
 
-        Payout mappedEntity = mapper.map(payout, Payout.class);
-        mappedEntity.setAffiliate(affiliateRepository.findById(filter.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", filter.affiliateId)));
-        mappedEntity.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.dictionaryId)));
+        payout.setAffiliate(affiliateRepository.findById(filter.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", filter.affiliateId)));
+        payout.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.dictionaryId)));
 
-        mapper.map(campaignDTOfrom, mappedEntity);
-        return PayoutDTO.from(repository.save(mappedEntity));
+        return PayoutDTO.from(repository.save(payout));
     }
 
     public PayoutDTO updateStatus(Long id, Long dictionaryId) {
@@ -406,6 +439,10 @@ public class PayoutBusiness {
             }
             if (request.getDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("data"), request.getDateTo().plus(1, ChronoUnit.DAYS)));
+            }
+
+            if (request.getNote() != null) {
+                predicates.add(cb.like(cb.upper(root.get("note")), "%" + request.getNote().toUpperCase() + "%"));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
