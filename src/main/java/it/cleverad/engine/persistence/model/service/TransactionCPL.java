@@ -35,7 +35,8 @@ public class TransactionCPL {
     private String note;
     @Column(name = "lead_number")
     private Long leadNumber;
-
+    @Column(name = "payout_present")
+    private Boolean payoutPresent;
     @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
     @Column(name = "last_modification_date")

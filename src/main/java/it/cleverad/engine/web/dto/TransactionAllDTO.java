@@ -41,7 +41,7 @@ public class TransactionAllDTO {
     private String tipo;
 
     private Long dictionaryId;
-    private String dictionaryName;
+    private String dictionaryName;    private Boolean payoutPresent;
 
     public static TransactionAllDTO from(ViewTransactionAll transaction) {
         return new TransactionAllDTO(
@@ -72,7 +72,8 @@ public class TransactionAllDTO {
                 transaction.getAdvertiserId(),
                 transaction.getData(),
                 transaction.getTipo(),
-                transaction.getDictionaryId(), transaction.getDictionaryName()
+                transaction.getDictionaryId(), transaction.getDictionaryName(),
+                transaction.getPayoutPresent()
         );
     }
 

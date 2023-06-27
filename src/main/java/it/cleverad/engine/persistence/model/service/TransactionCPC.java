@@ -31,7 +31,8 @@ public class TransactionCPC {
     @Column(name = "payout_reference")
     private String payoutReference;
     private String note;
-
+    @Column(name = "payout_present")
+    private Boolean payoutPresent;
     @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
     @Column(name = "last_modification_date")

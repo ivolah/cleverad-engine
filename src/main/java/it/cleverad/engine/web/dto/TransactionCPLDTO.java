@@ -42,6 +42,7 @@ public class TransactionCPLDTO {
     private Long dictionaryId;
     private String dictionaryName;
     private Long leadNumber;
+    private Boolean payoutPresent;
 
     public static TransactionCPLDTO from(TransactionCPL transaction) {
         return new TransactionCPLDTO(transaction.getId(), transaction.getAffiliate() != null ? transaction.getAffiliate().getId() : null, transaction.getAffiliate() != null ? transaction.getAffiliate().getName() : null,
@@ -60,7 +61,8 @@ public class TransactionCPLDTO {
 
                 transaction.getNote(), transaction.getCreationDate(), transaction.getLastModificationDate(),
 
-                transaction.getDictionary().getId(), transaction.getDictionary().getName(), transaction.getLeadNumber());
+                transaction.getDictionary().getId(), transaction.getDictionary().getName(), transaction.getLeadNumber(),
+                transaction.getPayoutPresent());
     }
 
 }

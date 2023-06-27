@@ -36,6 +36,9 @@ public class TransactionCPS {
     @Column(name = "revenue_id")
     private Long revenueId;
 
+    @Column(name = "payout_present")
+    private Boolean payoutPresent;
+
     @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
     @Column(name = "last_modification_date")

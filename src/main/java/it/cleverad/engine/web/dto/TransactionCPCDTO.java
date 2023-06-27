@@ -44,6 +44,7 @@ public class TransactionCPCDTO {
 
     private Long walletId;
     private Long revenueId;
+    private Boolean payoutPresent;
 
 
     public static TransactionCPCDTO from(TransactionCPC transaction) {
@@ -79,8 +80,8 @@ public class TransactionCPCDTO {
 
                 transaction.getWallet() != null ? transaction.getWallet().getId() : null,
 
-                transaction.getRevenueId()
-        );
+                transaction.getRevenueId(),
+                transaction.getPayoutPresent());
     }
 
 }

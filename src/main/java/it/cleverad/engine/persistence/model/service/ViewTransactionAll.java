@@ -83,4 +83,7 @@ public class ViewTransactionAll {
     @Column(name = "revenue_id")
     private Long revenueId;
 
+    @Column(name = "payoutpresent")
+    private Boolean payoutPresent;
+
 }

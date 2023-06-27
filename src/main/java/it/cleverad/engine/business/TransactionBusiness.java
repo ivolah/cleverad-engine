@@ -107,6 +107,7 @@ public class TransactionBusiness {
         newCpcTransaction.setWallet(ww);
         if (request.mediaId != null)
             newCpcTransaction.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
+        newCpcTransaction.setPayoutPresent(false);
 
         return TransactionCPCDTO.from(cpcRepository.save(newCpcTransaction));
     }
@@ -152,6 +153,8 @@ public class TransactionBusiness {
         newCplTransaction.setWallet(ww);
         //map.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
 
+        newCplTransaction.setPayoutPresent(false);
+
         return TransactionCPLDTO.from(cplRepository.save(newCplTransaction));
     }
 
@@ -181,6 +184,7 @@ public class TransactionBusiness {
         }
         map.setWallet(ww);
         map.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
+        map.setPayoutPresent(false);
 
         return TransactionCPMDTO.from(cpmRepository.save(map));
     }
@@ -213,6 +217,7 @@ public class TransactionBusiness {
         map.setWallet(ww);
         if (request.mediaId != null)
             map.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
+        map.setPayoutPresent(false);
 
         return TransactionCPSDTO.from(cpsRepository.save(map));
     }
@@ -248,24 +253,44 @@ public class TransactionBusiness {
             if (dictionaryId != null)
                 cpc.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", dictionaryId)));
             if (approved != null) cpc.setApproved(approved);
+            if(dictionaryId == 40){
+                // setto revenue e commission a 0
+                cpc.setRevenueId(1L);
+                cpc.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
+            }
             cpcRepository.save(cpc);
         } else if (tipo.equals("CPL")) {
             TransactionCPL cpl = cplRepository.findById(id).get();
             if (dictionaryId != null)
                 cpl.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", dictionaryId)));
             if (approved != null) cpl.setApproved(approved);
+            if(dictionaryId == 40){
+                // setto revenue e commission a 0
+                cpl.setRevenueId(1L);
+                cpl.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
+            }
             cplRepository.save(cpl);
         } else if (tipo.equals("CPM")) {
             TransactionCPM cpm = cpmRepository.findById(id).get();
             if (dictionaryId != null)
                 cpm.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", dictionaryId)));
             if (approved != null) cpm.setApproved(approved);
+            if(dictionaryId == 40){
+                // setto revenue e commission a 0
+                cpm.setRevenueId(1L);
+                cpm.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
+            }
             cpmRepository.save(cpm);
         } else if (tipo.equals("CPS")) {
             TransactionCPS cps = cpsRepository.findById(id).get();
             if (dictionaryId != null)
                 cps.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", dictionaryId)));
             if (approved != null) cps.setApproved(approved);
+            if(dictionaryId == 40){
+                // setto revenue e commission a 0
+                cps.setRevenueId(1L);
+                cps.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
+            }
             cpsRepository.save(cps);
         }
     }
@@ -723,6 +748,7 @@ public class TransactionBusiness {
         private Long leadNumber;
         private Long clickNumber;
         private Long revenueId;
+        private Boolean payoutPresent;
 
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate manualDate;

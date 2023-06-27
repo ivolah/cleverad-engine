@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.Column;
 import java.time.LocalDateTime;
 
 @Data
@@ -41,6 +42,7 @@ public class TransactionCPSDTO {
 
     private Long dictionaryId;
     private String dictionaryName;
+    private Boolean payoutPresent;
 
     public static TransactionCPSDTO from(TransactionCPS transaction) {
         return new TransactionCPSDTO(transaction.getId(), transaction.getAffiliate() != null ? transaction.getAffiliate().getId() : null, transaction.getAffiliate() != null ? transaction.getAffiliate().getName() : null,
@@ -62,7 +64,8 @@ public class TransactionCPSDTO {
 
                 transaction.getNote(), transaction.getCreationDate(), transaction.getLastModificationDate(),
 
-                transaction.getDictionary().getId(), transaction.getDictionary().getName());
+                transaction.getDictionary().getId(), transaction.getDictionary().getName(),
+                transaction.getPayoutPresent());
     }
 
 }

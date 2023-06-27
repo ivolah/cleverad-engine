@@ -75,48 +75,15 @@ public class TransactionAllBusiness {
     }
 
     // SEARCH PAGINATED
-    public Page<TransactionAllDTO> search(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("dateTime")));
-        request.setPayoutId(null);
-        request.setValueNotZero(true);
-        Page<ViewTransactionAll> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(TransactionAllDTO::from);
-    }
-
     public Page<TransactionAllDTO> searchPrefiltrato(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("dateTime")));
-
-      //  request.setPayoutId(null);
-       // request.setValueNotZero(true);
-
-//        if (request.getDictionaryId() != null) {
-//            if (request.getDictionaryId() == 10) request.setTipo("CPC");
-//            else if (request.getDictionaryId() == 11) request.setTipo("CPL");
-//            else if (request.getDictionaryId() == 50) request.setTipo("CPM");
-//            else if (request.getDictionaryId() == 51) request.setTipo("CPS");
-//            request.setDictionaryId(null);
-//        }
-
-        if (!jwtUserDetailsService.getRole().equals("Admin")) {
+        if (!jwtUserDetailsService.getRole().equals("Admin"))
             request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-        }
+
         Page<ViewTransactionAll> page = repository.findAll(getSpecification(request), pageable);
         return page.map(TransactionAllDTO::from);
     }
 
-
-    // UPDATE
-    //    public TransactionDTO update(Long id, Filter filter) {
-    //        Transaction channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
-    //        TransactionDTO campaignDTOfrom = TransactionDTO.from(channel);
-    //
-    //        mapper.map(filter, campaignDTOfrom);
-    //
-    //        Transaction mappedEntity = mapper.map(channel, Transaction.class);
-    //        mapper.map(campaignDTOfrom, mappedEntity);
-    //
-    //        return TransactionDTO.from(repository.save(mappedEntity));
-    //    }
 
     /**
      * ============================================================================================================
@@ -182,7 +149,7 @@ public class TransactionAllBusiness {
                 predicates.add(cb.equal(root.get("advertiserId"), request.getAdvertiserId()));
             }
             if (request.getData() != null) {
-                predicates.add(cb.equal(root.get("data"), request.getData()));
+                predicates.add(cb.like(cb.upper(root.get("data")), "%" + request.getData().toUpperCase() + "%"));
             }
             if (request.getTipo() != null) {
                 predicates.add(cb.equal(root.get("tipo"), request.getTipo()));
@@ -209,8 +176,9 @@ public class TransactionAllBusiness {
                 predicates.add(cb.notEqual(root.get("value"), "0"));
             }
 
-            if (request.getPayoutId() == null)
-                predicates.add(cb.isNull(root.get("payoutId")));
+            if (request.getPayoutPresent() != null) {
+                predicates.add(cb.equal(root.get("payoutPresent"), request.getPayoutPresent()));
+            }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
@@ -287,8 +255,7 @@ public class TransactionAllBusiness {
         private String tipo;
         private Long dictionaryId;
         private Boolean valueNotZero;
-
-
+        private Boolean payoutPresent;
     }
 
 }

@@ -36,6 +36,8 @@ public class TransactionCPM {
     private String note;
     @Column(name = "impression_number")
     private Long impressionNumber;
+    @Column(name = "payout_present")
+    private Boolean payoutPresent;
 
     @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
