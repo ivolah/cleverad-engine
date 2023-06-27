@@ -228,7 +228,7 @@ public class CpcBusiness {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
             if (request.getRefferal() != null) {
-                predicates.add(cb.like(root.get("refferal"), '%' + request.getRefferal() + "%"));
+                predicates.add(cb.like(cb.upper(root.get("refferal")), "%" + request.getRefferal().toUpperCase() + "%"));
             }
             if (request.getRead() != null) {
                 predicates.add(cb.equal(root.get("read"), request.getRead()));
