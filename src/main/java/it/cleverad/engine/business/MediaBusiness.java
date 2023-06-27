@@ -192,7 +192,7 @@ public class MediaBusiness {
 
             Set<Long> ids = new HashSet<>();
             campaigns.stream().spliterator().forEachRemaining(campaign -> {
-                campaign.getMedias().forEach(media -> {
+                campaign.getMedias().stream().filter(media -> media.getStatus().equals(true)).forEach(media -> {
                     ids.add(media.getId());
                 });
             });
@@ -360,6 +360,8 @@ public class MediaBusiness {
         private String sender;
         private Boolean visibile;
         private Boolean status;
+        private String description;
+        private String title;
     }
 
     @Data
@@ -385,6 +387,8 @@ public class MediaBusiness {
         private Instant lastModificationDateTo;
         private String sender;
         private Boolean visibile;
+        private String description;
+        private String title;
     }
 
 }

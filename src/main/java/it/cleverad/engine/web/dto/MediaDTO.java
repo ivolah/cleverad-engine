@@ -41,12 +41,17 @@ public class MediaDTO {
 
     private Boolean visibile;
 
+    private String description;
+    private String title;
+
     public MediaDTO(long id, String name, String url, String mailSubject, String bannerCode, String note, String idFile, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long campaignId, String campaignName, Long typeId,
                     String typeName,
                     // List<TargetDTO> targets,
                     String sender,
                     String target,
-                    Boolean visibile) {
+                    Boolean visibile,
+                    String description,
+                    String title) {
         this.id = id;
         this.name = name;
         this.url = url;
@@ -65,6 +70,8 @@ public class MediaDTO {
         this.sender = sender;
         this.target = target;
         this.visibile = visibile;
+        this.description = description;
+        this.title = title;
     }
 
     public static MediaDTO from(Media media) {
@@ -90,7 +97,8 @@ public class MediaDTO {
                 //targets,
                 media.getSender(),
                 media.getTarget()
-                , media.getVisibile());
+                , media.getVisibile()
+                , media.getDescription(), media.getTitle());
     }
 
 }
