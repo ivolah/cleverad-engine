@@ -77,6 +77,7 @@ public class ManageCPL {
                     transaction.setMediaId(refferal.getMediaId());
                     transaction.setDateTime(cplDTO.getDate());
                     transaction.setApproved(true);
+                    transaction.setPayoutPresent(false);
 
                     if (StringUtils.isNotBlank(cplDTO.getAgent()))
                         transaction.setAgent(cplDTO.getAgent());

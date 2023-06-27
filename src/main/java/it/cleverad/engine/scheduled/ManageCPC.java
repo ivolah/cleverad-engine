@@ -87,6 +87,7 @@ public class ManageCPC {
                     // setta transazione
                     TransactionBusiness.BaseCreateRequest transaction = new TransactionBusiness.BaseCreateRequest();
                     transaction.setCampaignId(campaignId);
+                    transaction.setPayoutPresent(false);
 
                     Long affiliateId = refferal.getAffiliateId();
                     if (!Objects.isNull(affiliateId)) transaction.setAffiliateId(affiliateId);

@@ -88,6 +88,7 @@ public class ManageCPM {
                     transaction.setDateTime(LocalDateTime.now().withMinute(0).withSecond(0).withNano(0).minusMinutes(1));
                     transaction.setMediaId(refferal.getMediaId());
                     transaction.setApproved(true);
+                    transaction.setPayoutPresent(false);
 
                     // controlla data scadneza camapgna
                     CampaignDTO campaignDTO = campaignBusiness.findByIdAdminNull(refferal.getCampaignId());
