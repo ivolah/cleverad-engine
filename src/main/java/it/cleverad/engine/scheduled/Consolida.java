@@ -1,8 +1,6 @@
 package it.cleverad.engine.scheduled;
 
-import it.cleverad.engine.business.*;
-import it.cleverad.engine.persistence.repository.service.WalletRepository;
-import it.cleverad.engine.service.ReferralService;
+import it.cleverad.engine.business.TransactionBusiness;
 import it.cleverad.engine.web.dto.TransactionCPCDTO;
 import it.cleverad.engine.web.dto.TransactionCPMDTO;
 import lombok.extern.slf4j.Slf4j;
