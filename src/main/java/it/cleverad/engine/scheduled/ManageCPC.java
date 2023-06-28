@@ -1,13 +1,19 @@
 package it.cleverad.engine.scheduled;
 
+import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
+import it.cleverad.engine.persistence.model.tracking.Cpc;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
+import it.cleverad.engine.persistence.repository.tracking.CpcRepository;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.*;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.Async;
@@ -16,10 +22,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -45,16 +48,16 @@ public class ManageCPC {
     @Autowired
     private ReferralService referralService;
     @Autowired
-    private CommissionBusiness commissionBusiness;
+    private CpcRepository repository;
 
-    @Scheduled(cron = "16 */3 * * * ?")
+    @Scheduled(cron = "16 */2 * * * ?")
     @Async
     public void trasformaTrackingCPC() {
-        //   log.info("trasformaTrackingCPC");
-        try {
 
+        try {
             // trovo tutti i tracking con read == false
             Map<String, Integer> mappa = new HashMap<>();
+            List<Triple> triples = new ArrayList<>();
             Page<CpcDTO> last = cpcBusiness.getUnreadOneHourBefore();
             last.stream().filter(dto -> dto.getRefferal() != null).forEach(dto -> {
 
@@ -76,13 +79,32 @@ public class ManageCPC {
                 mappa.put(dto.getRefferal(), num + 1);
                 // setto a gestito
                 cpcBusiness.setRead(dto.getId());
+
+                Triple<String, Integer, Long> triple = new ImmutableTriple<>(dto.getRefferal(), num + 1, dto.getId());
+                triples.add(triple);
             });
 
-            mappa.forEach((s, aLong) -> {
+            //  mappa.forEach((s, aLong) -> {
+            for (Triple ttt : triples) {
+
+                String ref = (String) ttt.getLeft();
+                Integer numer = (Integer) ttt.getMiddle();
+                Long id = (Long) ttt.getRight();
+
                 // prendo reffereal e lo leggo
-                Refferal refferal = referralService.decodificaReferral(s);
-                log.trace(">>>> T-CPC :: {} -> {} - {}", aLong, s, refferal);
+                Refferal refferal = referralService.decodificaReferral(ref);
+                log.trace(">>>> T-CPC :: {} -> {} - {}", numer, ref, refferal);
                 if (refferal != null && refferal.getCampaignId() != null && !Objects.isNull(refferal.getAffiliateId())) {
+
+                    //aggiorno dati CPc
+                    Cpc cccp = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cpl", id));
+                    cccp.setMediaId(refferal.getMediaId());
+                    cccp.setCampaignId(refferal.getCampaignId());
+                    cccp.setAffiliateId(refferal.getAffiliateId());
+                    cccp.setChannelId(refferal.getChannelId());
+                    cccp.setTargetId(refferal.getTargetId());
+                    repository.save(cccp);
+
                     Long campaignId = refferal.getCampaignId();
                     // setta transazione
                     TransactionBusiness.BaseCreateRequest transaction = new TransactionBusiness.BaseCreateRequest();
@@ -135,7 +157,7 @@ public class ManageCPC {
 
                     AffiliateChannelCommissionCampaignDTO accc = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
                     if (accc != null) {
-                       // log.info(accc.getCommissionId() + " " + accc.getCommissionValue());
+                        // log.info(accc.getCommissionId() + " " + accc.getCommissionValue());
                         commVal = accc.getCommissionValue();
                         transaction.setCommissionId(accc.getCommissionId());
                     } else {
@@ -143,11 +165,10 @@ public class ManageCPC {
                         transaction.setCommissionId(0L);
                     }
 
-
                     // calcolo valore
-                    Double totale = commVal * aLong;
+                    Double totale = commVal * numer;
                     transaction.setValue(totale);
-                    transaction.setClickNumber(Long.valueOf(aLong));
+                    transaction.setClickNumber(Long.valueOf(numer));
 
                     // incemento valore
                     if (walletID != null && totale > 0D) walletBusiness.incement(walletID, totale);
@@ -186,10 +207,10 @@ public class ManageCPC {
 
                     // creo la transazione
                     TransactionCPCDTO tcpc = transactionBusiness.createCpc(transaction);
-                    log.trace(">>> CREATO TRANSAZIONE :::: CPC :::: {} -- {} -- {}", tcpc.getId(), s, refferal);
+                    log.trace(">>> CREATO TRANSAZIONE :::: CPC :::: {} -- {} -- {}", tcpc.getId(), ref, refferal);
                 }
-            });
-
+                // });
+            }
         } catch (Exception e) {
             log.error("Eccezione Scheduler CPC --  {}", e.getMessage(), e);
         }

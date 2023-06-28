@@ -3,9 +3,12 @@ package it.cleverad.engine.scheduled;
 import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
+import it.cleverad.engine.persistence.model.tracking.Cpl;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
+import it.cleverad.engine.persistence.repository.tracking.CplRepository;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.*;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,13 +43,13 @@ public class ManageCPL {
     @Autowired
     private ReferralService referralService;
     @Autowired
-    private CommissionBusiness commissionBusiness;
-    @Autowired
     private CpcBusiness cpcBusiness;
+    @Autowired
+    private CplRepository cplRepository;
 
     @Async
     // @Scheduled(cron = "0 5 0/1 * * ?")
-    @Scheduled(cron = "8 0/3 * * * ?")
+    @Scheduled(cron = "8 0/2 * * * ?")
     public void trasformaTrackingCPL() {
         try {
             //   cplBusiness.getUnreadDayBefore().stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
@@ -64,11 +67,19 @@ public class ManageCPL {
 
                 // prendo reffereal e lo leggo
                 Refferal refferal = referralService.decodificaReferral(cplDTO.getRefferal());
-                log.trace(">>>> T-CPL REFERRAL :: {}", refferal );
 
                 if (refferal != null && refferal.getAffiliateId() != null) {
-                    log.debug(">>>> T-CPL :: {}", cplDTO);
-                    log.debug(">>>> T-CPL REFERRAL :: {}", refferal);
+                    log.debug(">>>> T-CPL :: {} :: ", cplDTO, refferal);
+
+                    //aggiorno dati CPL
+                    Cpl cccpl = cplRepository.findById(cplDTO.getId()).orElseThrow(() -> new ElementCleveradException("Cpl", cplDTO.getId()));
+                    cccpl.setMediaId(refferal.getMediaId());
+                    cccpl.setCampaignId(refferal.getCampaignId());
+                    cccpl.setAffiliateId(refferal.getAffiliateId());
+                    cccpl.setChannelId(refferal.getChannelId());
+                    cccpl.setTargetId(refferal.getTargetId());
+                    cplRepository.save(cccpl);
+
                     // setta transazione
                     TransactionBusiness.BaseCreateRequest transaction = new TransactionBusiness.BaseCreateRequest();
                     transaction.setAffiliateId(refferal.getAffiliateId());
@@ -129,7 +140,6 @@ public class ManageCPL {
                         AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
 
                         if (acccFirst != null) {
-                            log.info(acccFirst.getCommissionId() + " " + acccFirst.getCommissionValue());
                             commVal = acccFirst.getCommissionValue();
                             transaction.setCommissionId(acccFirst.getCommissionId());
                         } else {
