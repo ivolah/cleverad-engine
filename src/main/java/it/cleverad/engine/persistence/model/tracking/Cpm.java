@@ -38,4 +38,11 @@ public class Cpm {
     @Column(nullable = false)
     private Boolean read = false;
 
+    //dati refferal
+    @Column(name = "affiliate_id")
+    private Long affiliateId;
+    @Column(name = "channel_id")
+    private Long channelId;
+    @Column(name = "target_id")
+    private Long targetId;
 }

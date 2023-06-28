@@ -3,6 +3,7 @@ package it.cleverad.engine.persistence.model.tracking;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+@ToString
 public class Cpc {
 
     @Id
@@ -29,5 +31,17 @@ public class Cpc {
     private String htmlReferral;
     private String info;
     private String country;
+
+    //dati refferal
+    @Column(name = "media_id")
+    private Long mediaId;
+    @Column(name = "campaign_id")
+    private Long campaignId;
+    @Column(name = "affiliate_id")
+    private Long affiliateId;
+    @Column(name = "channel_id")
+    private Long channelId;
+    @Column(name = "target_id")
+    private Long targetId;
 
 }

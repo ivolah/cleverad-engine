@@ -28,4 +28,15 @@ public class Cps {
     private LocalDateTime date = LocalDateTime.now();
     private Boolean read = false;
 
+    //dati refferal
+    @Column(name = "media_id")
+    private Long mediaId;
+    @Column(name = "campaign_id")
+    private Long campaignId;
+    @Column(name = "affiliate_id")
+    private Long affiliateId;
+    @Column(name = "channel_id")
+    private Long channelId;
+    @Column(name = "target_id")
+    private Long targetId;
 }

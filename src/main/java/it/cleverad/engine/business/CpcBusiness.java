@@ -1,7 +1,6 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.Channel;
@@ -11,15 +10,14 @@ import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.ChannelRepository;
 import it.cleverad.engine.persistence.repository.tracking.CpcRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
-import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.CpcDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -44,8 +42,6 @@ public class CpcBusiness {
     private JwtUserDetailsService jwtUserDetailsService;
     @Autowired
     private CpcRepository repository;
-    @Autowired
-    private ReferralService referralService;
     @Autowired
     private CampaignRepository campaignRepository;
     @Autowired
@@ -98,31 +94,22 @@ public class CpcBusiness {
         Page<CpcDTO> res = page.map(CpcDTO::from);
         List<CpcDTO> exp = new ArrayList<>();
         res.stream().forEach(cpcDTO -> {
-            if (StringUtils.isNotBlank(cpcDTO.getRefferal()) && !cpcDTO.getRefferal().contains("{{refferalId}}")) {
-                Refferal referral = referralService.decodificaReferral(cpcDTO.getRefferal());
 
-                Campaign campaign = campaignRepository.findById(referral.getCampaignId()).orElse(null);
-                if (referral.getCampaignId() != null && campaign != null && campaign.getName() != null) {
+            if (cpcDTO.getCampaignId() != null) {
+                Campaign campaign = campaignRepository.findById(cpcDTO.getCampaignId()).orElse(null);
+                if (cpcDTO.getCampaignId() != null && campaign != null && campaign.getName() != null)
                     cpcDTO.setCampaignName(campaign.getName());
-                    cpcDTO.setCampaignId(referral.getCampaignId());
-                }
+            }
 
-                if (referral.getAffiliateId() != null) {
-                    Affiliate affiliate = affiliateRepository.findById(referral.getAffiliateId()).orElse(null);
-                    if (referral.getAffiliateId() != null && affiliate != null && affiliate.getName() != null) {
-                        cpcDTO.setAffiliateName(affiliate.getName());
-                        cpcDTO.setAffiliateId(referral.getAffiliateId());
-                    }
-                }
-                if (referral.getChannelId() != null) {
-                    Channel channel = channelRepository.findById(referral.getChannelId()).orElse(null);
-                    if (referral.getChannelId() != null && channel != null && channel.getName() != null) {
-                        cpcDTO.setChannelName(channel.getName());
-                        cpcDTO.setChannelId(referral.getChannelId());
-                    }
-                }
-            } else {
-                cpcDTO.setRefferal("");
+            if (cpcDTO.getAffiliateId() != null) {
+                Affiliate affiliate = affiliateRepository.findById(cpcDTO.getAffiliateId()).orElse(null);
+                if (cpcDTO.getAffiliateId() != null && affiliate != null && affiliate.getName() != null)
+                    cpcDTO.setAffiliateName(affiliate.getName());
+            }
+            if (cpcDTO.getChannelId() != null) {
+                Channel channel = channelRepository.findById(cpcDTO.getChannelId()).orElse(null);
+                if (cpcDTO.getChannelId() != null && channel != null && channel.getName() != null)
+                    cpcDTO.setChannelName(channel.getName());
             }
 
             if (jwtUserDetailsService.isAdmin()) {
@@ -138,9 +125,9 @@ public class CpcBusiness {
 
     // UPDATE
     public CpcDTO update(Long id, Filter filter) {
-        Cpc channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cpc", id));
-        mapper.map(filter, channel);
-        return CpcDTO.from(repository.save(channel));
+        Cpc cpc = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Cpc", id));
+        mapper.map(filter, cpc);
+        return CpcDTO.from(repository.save(cpc));
     }
 
     public Page<CpcDTO> getUnread() {
@@ -250,6 +237,13 @@ public class CpcBusiness {
                 predicates.add(cb.lessThanOrEqualTo(root.get("date"), request.getDatetimeTo()));
             }
 
+            if (request.getAffiliateid() != null) {
+                predicates.add(cb.equal(root.get("affiliateId"), request.getAffiliateid()));
+            }
+            if (request.getCampaignid() != null) {
+                predicates.add(cb.equal(root.get("campaignId"), request.getCampaignid()));
+            }
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
@@ -274,19 +268,32 @@ public class CpcBusiness {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @ToString
     public static class Filter {
-        private Long id;
+
         private String refferal;
         private String ip;
         private String agent;
+        private LocalDateTime date;
         private Boolean read;
+        private String htmlReferral;
+        private String info;
+        private String country;
+        private String id;
+
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dateFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dateTo;
         private LocalDateTime datetimeFrom;
         private LocalDateTime datetimeTo;
-        private String country;
+
+        //dati referral
+        private Long mediaId;
+        private Long campaignid;
+        private Long affiliateid;
+        private Long channelId;
+        private Long targetId;
     }
 
 }
