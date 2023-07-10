@@ -28,4 +28,11 @@ public interface ReportDaily {
 
     String getLR();
 
+
+    Long getImpressionNumberrigettato();
+
+    Long getClickNumberrigettato();
+
+    Long getLeadNumberrigettato();
+
 }

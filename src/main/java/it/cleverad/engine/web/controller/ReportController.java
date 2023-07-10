@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Comparator;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -54,6 +55,14 @@ public class ReportController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<ReportTopCampaings> getCamapgneTop(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
         return reportBusiness.searchTopCampaigns(request, pageable);
+    }
+
+    @GetMapping(path = "/campagne/orderby/imp")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<ReportTopCampaings> getCamapgneTopOBI(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
+        request.setDictionaryIds(null);
+        Page<ReportTopCampaings> lista = reportBusiness.searchTopCampaignsSORT(request, pageable);
+        return lista;
     }
 
     @GetMapping(path = "/campagne/top/channel")
