@@ -54,7 +54,7 @@ public class TransactionCPC {
     @JoinColumn(name = "commission_id")
     private Commission commission;
 
-    @ManyToOne
+    @ManyToOne()
     @JoinColumn(name = "channel_id")
     private Channel channel;
 

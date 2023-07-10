@@ -77,6 +77,7 @@ public class TransactionAllBusiness {
     // SEARCH PAGINATED
     public Page<TransactionAllDTO> searchPrefiltrato(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("dateTime")));
+
         if (!jwtUserDetailsService.getRole().equals("Admin"))
             request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
 
@@ -158,18 +159,18 @@ public class TransactionAllBusiness {
                 predicates.add(cb.equal(root.get("dictionaryId"), request.getDictionaryId()));
             }
 
-            if (request.getCreationDateFrom() != null) {
+/*            if (request.getCreationDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("creationDate"), request.getCreationDateFrom().atStartOfDay()));
             }
             if (request.getCreationDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("creationDate"), request.getCreationDateTo().plus(1, ChronoUnit.DAYS).atStartOfDay()));
-            }
+            }*/
 
             if (request.getCreationDateFrom() != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("dateTime"), request.getCreationDateFrom().atStartOfDay()));
+                predicates.add(cb.greaterThanOrEqualTo(root.get("dateTime"), request.getCreationDateFrom()));
             }
             if (request.getCreationDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), request.getCreationDateTo().plus(1, ChronoUnit.DAYS).atStartOfDay()));
+                predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), request.getCreationDateTo().plusDays(1)));
             }
 
             if (request.getValueNotZero() != null && request.getValueNotZero()) {

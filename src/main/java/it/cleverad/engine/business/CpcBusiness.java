@@ -196,6 +196,14 @@ public class CpcBusiness {
         return page.map(CpcDTO::from);
     }
 
+    public Page<CpcDTO> getAllByDay(LocalDate data) {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal")));
+        Filter request = new Filter();
+        request.setDateFrom(data);
+        request.setDateTo(data);
+        Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(CpcDTO::from);
+    }
 
     public void setRead(long id) {
         Cpc cpc = repository.findById(id).get();

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -16,7 +17,7 @@ public class TransactionAllDTO {
     private String agent;
     private Boolean approved;
     private LocalDateTime creationDate;
-    private LocalDateTime dateTime;
+    private LocalDate dateTime;
     private String ip;
     private String note;
     private String payoutReference;

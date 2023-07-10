@@ -109,6 +109,7 @@ public class TransactionBusiness {
             newCpcTransaction.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
         newCpcTransaction.setPayoutPresent(false);
 
+        newCpcTransaction.setApproved(true);
         return TransactionCPCDTO.from(cpcRepository.save(newCpcTransaction));
     }
 
@@ -154,6 +155,7 @@ public class TransactionBusiness {
         //map.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
 
         newCplTransaction.setPayoutPresent(false);
+        newCplTransaction.setApproved(true);
 
         return TransactionCPLDTO.from(cplRepository.save(newCplTransaction));
     }
@@ -186,6 +188,7 @@ public class TransactionBusiness {
         map.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
         map.setPayoutPresent(false);
 
+        map.setApproved(true);
         return TransactionCPMDTO.from(cpmRepository.save(map));
     }
 
@@ -257,6 +260,7 @@ public class TransactionBusiness {
                 // setto revenue e commission a 0
                 cpc.setRevenueId(1L);
                 cpc.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
+                cpc.setValue(0D);
             }
             cpcRepository.save(cpc);
         } else if (tipo.equals("CPL")) {
@@ -268,6 +272,7 @@ public class TransactionBusiness {
                 // setto revenue e commission a 0
                 cpl.setRevenueId(1L);
                 cpl.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
+                cpl.setValue(0D);
             }
             cplRepository.save(cpl);
         } else if (tipo.equals("CPM")) {
@@ -279,6 +284,7 @@ public class TransactionBusiness {
                 // setto revenue e commission a 0
                 cpm.setRevenueId(1L);
                 cpm.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
+                cpm.setValue(0D);
             }
             cpmRepository.save(cpm);
         } else if (tipo.equals("CPS")) {
@@ -290,6 +296,7 @@ public class TransactionBusiness {
                 // setto revenue e commission a 0
                 cps.setRevenueId(1L);
                 cps.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
+                cps.setValue(0D);
             }
             cpsRepository.save(cps);
         }

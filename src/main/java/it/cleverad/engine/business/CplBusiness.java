@@ -174,6 +174,15 @@ public class CplBusiness {
         return page.map(CplDTO::from);
     }
 
+    public Page<CplDTO> getAllDayCustom() {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
+        Filter request = new Filter();
+        request.setDateFrom(LocalDate.of(2023, 7,5));
+        request.setDateTo(LocalDate.of(2023, 7,5));
+        Page<Cpl> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(CplDTO::from);
+    }
+
     public Page<CplDTO> findByIp24HoursBefore(String ip, LocalDateTime dateTime) {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();

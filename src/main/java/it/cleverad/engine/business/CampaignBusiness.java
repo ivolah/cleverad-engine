@@ -204,7 +204,7 @@ public class CampaignBusiness {
 
     // SEARCH PAGINATED
     public Page<CampaignDTO> search(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("name")));
         Page<Campaign> page;
         if (jwtUserDetailsService.getRole().equals("Admin")) {
             page = repository.findAll(getSpecification(request), pageable);
@@ -329,13 +329,13 @@ public class CampaignBusiness {
     }
 
     public Page<CampaignDTO> searchByMediaId(Long mediaId) {
-        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("name")));
         Page<Campaign> page;
         return null;
     }
 
     public List<CampaignDTO> getCampaignsToDisable() {
-        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id")));
+        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("name")));
         Filter request = new Filter();
         request.setStatus(true);
         request.setEndDateTo(LocalDate.now());
