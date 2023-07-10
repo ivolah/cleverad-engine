@@ -14,7 +14,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,16 +30,10 @@ public class Consolida {
     private TransactionBusiness transactionBusiness;
 
     @Async
-    @Scheduled(cron = "0 0/31 * * * ?")
+    @Scheduled(cron = "0 0/9 * * * ?")
     public void ciclaCPC() {
-        log.trace("\n\n\nCONSOLIDA CPC ");
-
         LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
         consolidaCPC(oraSpaccata);
-        for (int i = 0; i < 60; i++) {
-            //  consolidaCPM(LocalDate.now().minusDays(i).atTime(LocalTime.MAX));
-        }
-
     }//trasformaTrackingCPC
 
     public void consolidaCPC(LocalDateTime oraSpaccata) {
@@ -106,20 +102,19 @@ public class Consolida {
     }//trasformaTrackingCPC
 
     @Async
-    @Scheduled(cron = "33 0/3 * * * ?")
+    @Scheduled(cron = "5 5 5 * * ?")
     public void ciclaCPM() {
-        log.trace("\n\n\nCONSOLIDA CPM ");
-
         LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
         consolidaCPM(oraSpaccata);
-        for (int i = 0; i < 60; i++) {
-            //  consolidaCPM(LocalDate.now().minusDays(i).atTime(LocalTime.MAX));
-        }
+        consolidaCPM(LocalDate.now().minusDays(1).atTime(LocalTime.MAX));
 
+        for (int i = 45; i < 60; i++) {
+           //   consolidaCPM(LocalDate.now().minusDays(i).atTime(LocalTime.MAX));
+        }
     }//trasformaTrackingCPC
 
     public void consolidaCPM(LocalDateTime oraSpaccata) {
-        log.trace("\n\n\nCONSOLIDA CPM " + oraSpaccata.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        log.info("\n\n\nCONSOLIDA CPM " + oraSpaccata.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
         TransactionBusiness.Filter request = new TransactionBusiness.Filter();
         request.setDateTimeFrom(oraSpaccata.toLocalDate().atStartOfDay());
@@ -132,9 +127,7 @@ public class Consolida {
             triples.add(triple);
         }
 
-        log.trace("triplette sporche : " + triples.size());
         List<Triple> listWithoutDuplicates = triples.stream().distinct().collect(Collectors.toList());
-        log.trace("triplette pulite  : " + listWithoutDuplicates.size());
         for (Triple ttt : listWithoutDuplicates) {
 
             request = new TransactionBusiness.Filter();
@@ -161,13 +154,12 @@ public class Consolida {
                 dictionaryId = tcpm.getDictionaryId();
                 revenueId = tcpm.getRevenueId();
                 commissionId = tcpm.getCommissionId();
-                //log.info("TRANSAZIONE CPM ID :: {} : {} :: {}", tcpm.getId(), tcpm.getImpressionNumber(), tcpm.getDateTime());
+                log.info("TRANSAZIONE CPM ID :: {} : {} :: {}", tcpm.getId(), tcpm.getImpressionNumber(), tcpm.getDateTime());
                 transactionBusiness.deleteInterno(tcpm.getId(), "CPM");
-                //log.info("DELETE {} ", tcpm.getId());
+               log.info("DELETE {} ", tcpm.getId());
             }
             if (impressionNumber > 0) {
-                log.trace("CONSOLIDATO CPM :: {} :: {} ::: {} - {} - {} ::: ", impressionNumber, value, ttt.getLeft(), ttt.getMiddle(), ttt.getRight());
-
+                log.info("CONSOLIDATO CPM :: {} :: {} ::: {} - {} - {} ::: ", impressionNumber, value, ttt.getLeft(), ttt.getMiddle(), ttt.getRight());
                 TransactionBusiness.BaseCreateRequest bReq = new TransactionBusiness.BaseCreateRequest();
                 bReq.setImpressionNumber(impressionNumber);
                 bReq.setValue(value);
