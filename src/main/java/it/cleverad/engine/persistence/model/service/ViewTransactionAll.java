@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -25,7 +26,7 @@ public class ViewTransactionAll {
     @Column(name = "creation_date")
     private LocalDateTime creationDate;
     @Column(name = "date_time")
-    private LocalDateTime dateTime;
+    private LocalDate dateTime;
     private String ip;
     private String note;
     @Column(name = "payout_reference")
