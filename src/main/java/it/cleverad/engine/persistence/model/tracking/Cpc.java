@@ -44,4 +44,6 @@ public class Cpc {
     @Column(name = "target_id")
     private Long targetId;
 
+    private Boolean blacklisted = false;
+
 }

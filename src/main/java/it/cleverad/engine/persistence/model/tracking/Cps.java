@@ -39,4 +39,6 @@ public class Cps {
     private Long channelId;
     @Column(name = "target_id")
     private Long targetId;
+
+    private Boolean blacklisted = false;
 }
