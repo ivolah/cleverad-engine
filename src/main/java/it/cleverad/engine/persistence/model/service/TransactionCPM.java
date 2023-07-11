@@ -78,5 +78,7 @@ public class TransactionCPM {
 
     @Column(name = "revenue_id")
     private Long revenueId;
-
+    @ManyToOne
+    @JoinColumn(name = "status_id")
+    private Dictionary dictionaryStatus;
 }

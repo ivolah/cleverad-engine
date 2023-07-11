@@ -250,6 +250,9 @@ public class TransactionBusiness {
         return TransactionCPMDTO.from(cpmRepository.save(cpm));
     }
 
+   // TODO quando campbio stato devo ricalcolare i budget affilitato e campagna
+    //        nuovi tre stati  : pending, approvato e rifutato
+
     public void updateStatus(Long id, Long dictionaryId, String tipo, Boolean approved) {
         if (tipo.equals("CPC")) {
             TransactionCPC cpc = cpcRepository.findById(id).get();
@@ -577,6 +580,10 @@ public class TransactionBusiness {
                 predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), request.getDateTimeTo()));
             }
 
+            if (request.getDictionaryId() != null) {
+                predicates.add(cb.equal(root.get("dictionary").get("id"), request.getDictionaryId()));
+            }
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
@@ -622,6 +629,10 @@ public class TransactionBusiness {
             }
             if (request.getDateTimeTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), request.getDateTimeTo()));
+            }
+
+            if (request.getDictionaryId() != null) {
+                predicates.add(cb.equal(root.get("dictionary").get("id"), request.getDictionaryId()));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -671,6 +682,10 @@ public class TransactionBusiness {
                 predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), request.getDateTimeTo()));
             }
 
+            if (request.getDictionaryId() != null) {
+                predicates.add(cb.equal(root.get("dictionary").get("id"), request.getDictionaryId()));
+            }
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
@@ -718,6 +733,14 @@ public class TransactionBusiness {
                 predicates.add(cb.lessThanOrEqualTo(root.get("date_time"), request.getDateTimeTo()));
             }
 
+            if (request.getDictionaryId() != null) {
+                predicates.add(cb.equal(root.get("dictionary").get("id"), request.getDictionaryId()));
+            }
+
+
+//            if (request.getStatusId() != null) {
+//                predicates.add(cb.equal(root.get("dictionary").get("id"), request.getStatusId()));
+//            }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
@@ -759,6 +782,8 @@ public class TransactionBusiness {
 
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate manualDate;
+
+        private Long statusId;
     }
 
     @Data
@@ -789,6 +814,7 @@ public class TransactionBusiness {
         private LocalDateTime dateTimeFrom;
         private LocalDateTime dateTimeTo;
 
+        private Long statusId;
     }
 
     @Data
@@ -800,6 +826,7 @@ public class TransactionBusiness {
         private Long dictionaryId;
         private Boolean approved;
         private String tipo;
+        private Long statusId;
     }
 
 }

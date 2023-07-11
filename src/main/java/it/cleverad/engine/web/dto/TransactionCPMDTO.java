@@ -46,6 +46,8 @@ public class TransactionCPMDTO {
     private Long walletId;
     private Boolean payoutPresent;
 
+    private Long statusId;
+
     public static TransactionCPMDTO from(TransactionCPM transaction) {
         return new TransactionCPMDTO(transaction.getId(),
                 transaction.getAffiliate() != null ? transaction.getAffiliate().getId() : null,
@@ -74,7 +76,8 @@ public class TransactionCPMDTO {
                 transaction.getImpressionNumber(),
                 transaction.getRevenueId(),
                 transaction.getWallet().getId(),
-                transaction.getPayoutPresent());
+                transaction.getPayoutPresent(),
+                transaction.getDictionaryStatus().getId());
 
 
     }

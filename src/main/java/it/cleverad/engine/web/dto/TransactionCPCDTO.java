@@ -46,6 +46,7 @@ public class TransactionCPCDTO {
     private Long revenueId;
     private Boolean payoutPresent;
 
+    private Long statusId;
 
     public static TransactionCPCDTO from(TransactionCPC transaction) {
         return new it.cleverad.engine.web.dto.TransactionCPCDTO(transaction.getId(),
@@ -81,7 +82,8 @@ public class TransactionCPCDTO {
                 transaction.getWallet() != null ? transaction.getWallet().getId() : null,
 
                 transaction.getRevenueId(),
-                transaction.getPayoutPresent());
+                transaction.getPayoutPresent(),
+                transaction.getDictionaryStatus().getId());
     }
 
 }

@@ -154,12 +154,22 @@ public class CpcBusiness {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal")));
         Filter request = new Filter();
         request.setRead(false);
+        request.setBlacklisted(false);
         LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
         request.setDatetimeFrom(oraSpaccata.toLocalDate().atStartOfDay());
         request.setDatetimeTo(LocalDateTime.now());
         Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
-        if (page.getTotalElements() > 0)
-            log.trace("\n\n\n >>>>>>>>>>>>>>>>>>>>>> UNREAD CPC HOUR BEFORE :: {}", page.getTotalElements());
+        return page.map(CpcDTO::from);
+    }
+
+    public Page<CpcDTO> getUnreadBlacklisted() {
+        Filter request = new Filter();
+        request.setRead(false);
+        request.setBlacklisted(true);
+        LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
+        request.setDatetimeFrom(oraSpaccata.toLocalDate().atStartOfDay().minusHours(3));
+        request.setDatetimeTo(LocalDateTime.now());
+        Page<Cpc> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(CpcDTO::from);
     }
 
@@ -252,6 +262,11 @@ public class CpcBusiness {
                 predicates.add(cb.equal(root.get("campaignId"), request.getCampaignid()));
             }
 
+            if (request.getBlacklisted() != null) {
+                predicates.add(cb.equal(root.get("blacklisted"), request.getBlacklisted()));
+            }
+
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
@@ -302,6 +317,8 @@ public class CpcBusiness {
         private Long affiliateid;
         private Long channelId;
         private Long targetId;
+
+        private Boolean blacklisted;
     }
 
 }

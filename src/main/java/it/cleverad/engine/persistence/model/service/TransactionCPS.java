@@ -79,5 +79,7 @@ public class TransactionCPS {
     @ManyToOne
     @JoinColumn(name = "dictionary_id")
     private Dictionary dictionary;
-
+    @ManyToOne
+    @JoinColumn(name = "status_id")
+    private Dictionary dictionaryStatus;
 }

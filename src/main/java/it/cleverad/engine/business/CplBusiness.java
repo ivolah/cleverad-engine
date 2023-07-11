@@ -4,6 +4,7 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.Channel;
+import it.cleverad.engine.persistence.model.tracking.Cpc;
 import it.cleverad.engine.persistence.model.tracking.Cpl;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
@@ -11,6 +12,7 @@ import it.cleverad.engine.persistence.repository.service.ChannelRepository;
 import it.cleverad.engine.persistence.repository.tracking.CplRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.service.ReferralService;
+import it.cleverad.engine.web.dto.CpcDTO;
 import it.cleverad.engine.web.dto.CplDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -143,10 +145,10 @@ public class CplBusiness {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setRead(false);
+        request.setBlacklisted(false);
         LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
         request.setDatetimeFrom(oraSpaccata.toLocalDate().atStartOfDay());
         request.setDatetimeTo(LocalDateTime.now());
-        ;
         Page<Cpl> page = repository.findAll(getSpecification(request), pageable);
         if (page.getTotalElements() > 0)
             log.trace("\n\n\n >>>>>>>>>>>>>>>>>>>>>> UNREAD CPL HOUR BEFORE :: {}", page.getTotalElements());
@@ -194,6 +196,17 @@ public class CplBusiness {
         return page.map(CplDTO::from);
     }
 
+
+    public Page<CplDTO> getUnreadBlacklisted() {
+        Filter request = new Filter();
+        request.setRead(false);
+        request.setBlacklisted(true);
+        LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
+        request.setDatetimeFrom(oraSpaccata.toLocalDate().atStartOfDay().minusHours(3));
+        request.setDatetimeTo(LocalDateTime.now());
+        Page<Cpl> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
+        return page.map(CplDTO::from);
+    }
     /**
      * ============================================================================================================
      **/
@@ -239,6 +252,10 @@ public class CplBusiness {
                 predicates.add(cb.equal(root.get("campaignId"), request.getCampaignid()));
             }
 
+            if (request.getBlacklisted() != null) {
+                predicates.add(cb.equal(root.get("blacklisted"), request.getBlacklisted()));
+            }
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
@@ -258,6 +275,7 @@ public class CplBusiness {
         private String data;
         private String info;
         private String country;
+        private Boolean blacklisted;
     }
 
     @Data
@@ -285,6 +303,7 @@ public class CplBusiness {
         private Long affiliateid;
         private Long channelId;
         private Long targetId;
+        private Boolean blacklisted;
     }
 
 }

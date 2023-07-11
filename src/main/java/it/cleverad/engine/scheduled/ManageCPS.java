@@ -147,6 +147,9 @@ public class ManageCPS {
                     }
                 }
 
+                //setto pending
+                rr.setStatusId(42L);
+
                 // creo la transazione
                 transactionBusiness.createCps(rr);
 

@@ -47,9 +47,22 @@ public class ManageCPL {
     @Autowired
     private CplRepository cplRepository;
 
+    /**
+     * ============================================================================================================
+     **/
+
+    @Scheduled(cron = "2 */2 * * * ?")
     @Async
-    // @Scheduled(cron = "0 5 0/1 * * ?")
-    @Scheduled(cron = "8 0/2 * * * ?")
+    public void gestisciTransazioni() {
+        trasformaTrackingCPL();
+        gestisciBlacklisted();
+    }
+
+    /**
+     * ============================================================================================================
+     **/
+
+    @Async
     public void trasformaTrackingCPL() {
         try {
             cplBusiness.getUnreadOneHourBefore().stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
@@ -89,10 +102,8 @@ public class ManageCPL {
                     transaction.setApproved(true);
                     transaction.setPayoutPresent(false);
 
-                    if (StringUtils.isNotBlank(cplDTO.getAgent()))
-                        transaction.setAgent(cplDTO.getAgent());
-                    else
-                        transaction.setAgent("");
+                    if (StringUtils.isNotBlank(cplDTO.getAgent())) transaction.setAgent(cplDTO.getAgent());
+                    else transaction.setAgent("");
 
                     transaction.setIp(cplDTO.getIp());
                     transaction.setData(cplDTO.getData());
@@ -177,6 +188,9 @@ public class ManageCPL {
                             }
                         }
 
+                        //setto pending
+                        transaction.setStatusId(42L);
+
                         // creo la transazione
                         TransactionCPLDTO cpl = transactionBusiness.createCpl(transaction);
                         log.info(">>> CREATO TRANSAZIONE :::: CPL :::: {} ", cpl.getId());
@@ -193,14 +207,14 @@ public class ManageCPL {
         }
     }//trasformaTrackingCPL
 
+    /**
+     * ============================================================================================================
+     **/
 
-
-
-    @Async
-    @Scheduled(cron = "3 40 18 * * ?")
-    public void girocustom() {
+    public void gestisciBlacklisted() {
         try {
-            cplBusiness.getAllDayCustom().stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
+
+            cplBusiness.getUnreadBlacklisted().stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
 
                 if (cplDTO.getRefferal().length() < 6) {
                     // cerco da cpc
@@ -212,9 +226,8 @@ public class ManageCPL {
 
                 // prendo reffereal e lo leggo
                 Refferal refferal = referralService.decodificaReferral(cplDTO.getRefferal());
-
                 if (refferal != null && refferal.getAffiliateId() != null) {
-                    log.debug(" CUSTOM >>>> T-CPL :: {} :: ", cplDTO, refferal);
+                    log.debug(">>>> BLACLISTED CPL :: {} :: {}", cplDTO, refferal);
 
                     //aggiorno dati CPL
                     Cpl cccpl = cplRepository.findById(cplDTO.getId()).orElseThrow(() -> new ElementCleveradException("Cpl", cplDTO.getId()));
@@ -232,13 +245,11 @@ public class ManageCPL {
                     transaction.setChannelId(refferal.getChannelId());
                     transaction.setMediaId(refferal.getMediaId());
                     transaction.setDateTime(cplDTO.getDate());
-                    transaction.setApproved(true);
+                    transaction.setApproved(false);
                     transaction.setPayoutPresent(false);
 
-                    if (StringUtils.isNotBlank(cplDTO.getAgent()))
-                        transaction.setAgent(cplDTO.getAgent());
-                    else
-                        transaction.setAgent("");
+                    if (StringUtils.isNotBlank(cplDTO.getAgent())) transaction.setAgent(cplDTO.getAgent());
+                    else transaction.setAgent("");
 
                     transaction.setIp(cplDTO.getIp());
                     transaction.setData(cplDTO.getData());
@@ -247,22 +258,11 @@ public class ManageCPL {
                     // controlla data scadneza camapgna
                     try {
                         CampaignDTO campaignDTO = campaignBusiness.findByIdAdmin(refferal.getCampaignId());
-                        LocalDate endDate = campaignDTO.getEndDate();
-                        if (endDate.isBefore(cplDTO.getDate().toLocalDate())) {
-                            // setto a campagna scaduta
-                            transaction.setDictionaryId(49L);
-                        } else {
-                            //setto pending
-                            transaction.setDictionaryId(42L);
-                        }
 
                         // associo a wallet
                         Long affiliateID = refferal.getAffiliateId();
-
-                        Long walletID = null;
                         if (affiliateID != null) {
-                            walletID = walletRepository.findByAffiliateId(affiliateID).getId();
-                            transaction.setWalletId(walletID);
+                            transaction.setWalletId(walletRepository.findByAffiliateId(affiliateID).getId());
                         }
 
                         // trovo revenue
@@ -276,14 +276,12 @@ public class ManageCPL {
 
                         // gesione commisione
                         Double commVal = 0D;
-
                         AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
                         req.setAffiliateId(refferal.getAffiliateId());
                         req.setChannelId(refferal.getChannelId());
                         req.setCampaignId(refferal.getCampaignId());
                         req.setCommissionDicId(11L);
                         AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
-
                         if (acccFirst != null) {
                             commVal = acccFirst.getCommissionValue();
                             transaction.setCommissionId(acccFirst.getCommissionId());
@@ -292,51 +290,28 @@ public class ManageCPL {
                             transaction.setCommissionId(0L);
                         }
 
-                        Double totale = commVal * 1;
-                        transaction.setValue(totale);
+                        transaction.setValue(commVal * 1);
                         transaction.setLeadNumber(Long.valueOf(1));
 
-                        // incemento valore
-                        if (walletID != null && totale > 0D) walletBusiness.incement(walletID, totale);
-
-                        // decremento budget Affiliato
-                        BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
-                        if (bb != null) {
-                            Double totBudgetDecrementato = bb.getBudget() - totale;
-                            budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
-
-                            // setto stato transazione a ovebudget editore se totale < 0
-                            if (totBudgetDecrementato < 0) {
-                                transaction.setDictionaryId(47L);
-                            }
-                        }
-
-                        // decremento budget Campagna
-                        if (campaignDTO != null) {
-
-                            Double budgetCampagna = campaignDTO.getBudget() - totale;
-                            campaignBusiness.updateBudget(campaignDTO.getId(), budgetCampagna);
-
-                            // setto stato transazione a ovebudget editore se totale < 0
-                            if (budgetCampagna < 0) {
-                                transaction.setDictionaryId(48L);
-                            }
-                        }
+                        //setto rifiutato
+                        transaction.setStatusId(40L);
+                        // setto blacklisted
+                        transaction.setDictionaryId(70L);
 
                         // creo la transazione
                         TransactionCPLDTO cpl = transactionBusiness.createCpl(transaction);
-                        log.info(">>> CUSTOM CREATO TRANSAZIONE :::: CPL :::: {} ", cpl.getId());
+                        log.info(">>>BLACKLIST :::: CPL :::: {} ", cpl.getId());
 
                         // setto a gestito
                         cplBusiness.setRead(cplDTO.getId());
                     } catch (Exception ecc) {
-                        log.error("ECCEZIONE CPL :> ", ecc);
+                        log.error("BLACKLIS ECCEZIONE CPL :> ", ecc);
                     }
                 }// creo solo se ho affiliate
             });
         } catch (Exception e) {
-            log.error("CUSTOM Eccezione Scheduler CPL --  {}", e.getMessage(), e);
+            log.error("Eccezione Scheduler CPL --  {}", e.getMessage(), e);
         }
-    }//trasformaTrackingCPL
+    }//gestisciBlacklisted
 
 }

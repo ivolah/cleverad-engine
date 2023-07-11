@@ -67,6 +67,7 @@ public class Consolida {
             Long dictionaryId = null;
             Long revenueId = null;
             Long commissionId = null;
+            Long statusId = null;
             for (TransactionCPCDTO tcpc : cpcs) {
                 totaleClick += tcpc.getClickNumber();
                 value += tcpc.getValue();
@@ -75,6 +76,7 @@ public class Consolida {
                 dictionaryId = tcpc.getDictionaryId();
                 revenueId = tcpc.getRevenueId();
                 commissionId = tcpc.getCommissionId();
+                statusId = tcpc.getStatusId();
                 log.trace("TRANSAZIONE CPC ID :: {} : {} :: {}", tcpc.getId(), tcpc.getClickNumber(), tcpc.getDateTime());
                 transactionBusiness.deleteInterno(tcpc.getId(), "CPC");
             }
@@ -94,6 +96,7 @@ public class Consolida {
                 bReq.setRevenueId(revenueId);
                 bReq.setWalletId(walletId);
                 bReq.setAgent("");
+                bReq.setStatusId(statusId);
                 transactionBusiness.createCpc(bReq);
             }
 
@@ -146,6 +149,7 @@ public class Consolida {
             Long dictionaryId = null;
             Long revenueId = null;
             Long commissionId = null;
+            Long statusId = null;
             for (TransactionCPMDTO tcpm : cpcM) {
                 impressionNumber += tcpm.getImpressionNumber();
                 value += tcpm.getValue();
@@ -154,6 +158,7 @@ public class Consolida {
                 dictionaryId = tcpm.getDictionaryId();
                 revenueId = tcpm.getRevenueId();
                 commissionId = tcpm.getCommissionId();
+                statusId = tcpm.getStatusId();
                 log.info("TRANSAZIONE CPM ID :: {} : {} :: {}", tcpm.getId(), tcpm.getImpressionNumber(), tcpm.getDateTime());
                 transactionBusiness.deleteInterno(tcpm.getId(), "CPM");
                log.info("DELETE {} ", tcpm.getId());
@@ -174,6 +179,7 @@ public class Consolida {
                 bReq.setRevenueId(revenueId);
                 bReq.setWalletId(walletId);
                 bReq.setAgent("");
+                bReq.setStatusId(statusId);
                 transactionBusiness.createCpm(bReq);
             }
 

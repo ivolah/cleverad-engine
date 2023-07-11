@@ -57,8 +57,21 @@ public class ManageCPC {
     @Autowired
     private CampaignRepository campaignRepository;
 
-    @Scheduled(cron = "20 */2 * * * ?")
+    /**
+     * ============================================================================================================
+     **/
+
+    @Scheduled(cron = "4 */4 * * * ?")
     @Async
+    public void gestiusciTransazioni() {
+        trasformaTrackingCPC();
+        gestisciBlacklisted();
+    }
+
+    /**
+     * ============================================================================================================
+     **/
+
     public void trasformaTrackingCPC() {
 
         try {
@@ -105,28 +118,25 @@ public class ManageCPC {
                 Refferal refferal = referralService.decodificaReferral(ref);
                 log.trace(">>>> T-CPC :: {} -> {} - {}", numer, ref, refferal);
                 if (refferal != null && refferal.getCampaignId() != null && !Objects.isNull(refferal.getAffiliateId())) {
-
                     Long campaignId = refferal.getCampaignId();
-                    // setta transazione
-                    TransactionBusiness.BaseCreateRequest transaction = new TransactionBusiness.BaseCreateRequest();
-                    transaction.setCampaignId(campaignId);
-                    transaction.setPayoutPresent(false);
-
-                    Long affiliateId = refferal.getAffiliateId();
-                    if (!Objects.isNull(affiliateId)) transaction.setAffiliateId(affiliateId);
-                    Long channelId = refferal.getChannelId();
-                    if (channelId != null) transaction.setChannelId(channelId);
-                    Long mediaId = refferal.getMediaId();
-                    if (mediaId != null) transaction.setMediaId(mediaId);
-
-                    transaction.setDateTime(LocalDateTime.now().withMinute(0).withSecond(0).withNano(0).minusMinutes(1));
-                    transaction.setApproved(true);
-
-                    // controlla data scadneza camapgna
 
                     // controlla data scadneza camapgna
                     Campaign campaign = campaignRepository.findById(campaignId).orElse(null);
                     if (campaign != null) {
+                        // setta transazione
+                        TransactionBusiness.BaseCreateRequest transaction = new TransactionBusiness.BaseCreateRequest();
+                        transaction.setCampaignId(campaignId);
+                        transaction.setPayoutPresent(false);
+
+                        Long affiliateId = refferal.getAffiliateId();
+                        if (!Objects.isNull(affiliateId)) transaction.setAffiliateId(affiliateId);
+                        Long channelId = refferal.getChannelId();
+                        if (channelId != null) transaction.setChannelId(channelId);
+                        Long mediaId = refferal.getMediaId();
+                        if (mediaId != null) transaction.setMediaId(mediaId);
+
+                        transaction.setDateTime(LocalDateTime.now().withMinute(0).withSecond(0).withNano(0).minusMinutes(1));
+                        transaction.setApproved(true);
 
                         if (campaign.getEndDate().isBefore(LocalDate.now())) {
                             // setto a campagna scaduta
@@ -206,13 +216,15 @@ public class ManageCPC {
                             }
                         }
 
-                        transaction.setAgent(" ");
+                        transaction.setAgent("");
+                        //setto pending
+                        transaction.setStatusId(42L);
 
                         // creo la transazione
                         TransactionCPCDTO tcpc = transactionBusiness.createCpc(transaction);
                         log.trace(">>> CREATO TRANSAZIONE :::: CPC :::: {} -- {} -- {}", tcpc.getId(), ref, refferal);
                     } else {
-                        log.info(">>> CAMPAGNA NULLO :: {}",campaignId);
+                        log.info(">>> CAMPAGNA NULLO :: {}", campaignId);
                     }
                 }
 
@@ -223,19 +235,15 @@ public class ManageCPC {
 
     }//trasformaTrackingCPC
 
-   //@Scheduled(cron = "1 20 16 * * ?")
-    @Async
-    public void gira() {
-        ccorreggi(6);
-    }
+    /**
+     * ============================================================================================================
+     **/
 
-    public void ccorreggi(Integer gio) {
-        LocalDate dataDaGestire = LocalDate.of(2023, 7, gio);
+    public void gestisciBlacklisted() {
 
         try {
-            // trovo tutti i tracking con read == false
             Map<String, Integer> mappa = new HashMap<>();
-            Page<CpcDTO> day = cpcBusiness.getAllByDay(dataDaGestire);
+            Page<CpcDTO> day = cpcBusiness.getUnreadBlacklisted();
             day.stream().filter(dto -> dto.getRefferal() != null).forEach(dto -> {
 
                 // gestisco calcolatore
@@ -243,14 +251,11 @@ public class ManageCPC {
                 if (num == null) num = 0;
 
                 if (dto.getRefferal().length() < 5) {
-                    log.trace("Referral on solo Campaign Id :: {}", dto.getRefferal());
                     // cerco da cpc
                     List<CpcDTO> ips = cpcBusiness.findByIp24HoursBefore(dto.getIp(), dto.getDate(), dto.getRefferal()).stream().collect(Collectors.toList());
-
                     // prendo ultimo ipp
                     for (CpcDTO cpcDTO : ips)
                         if (StringUtils.isNotBlank(cpcDTO.getRefferal())) dto.setRefferal(cpcDTO.getRefferal());
-                    log.trace("Nuovo refferal :: {} ", dto.getRefferal());
                 }
 
                 mappa.put(dto.getRefferal(), num + 1);
@@ -271,47 +276,33 @@ public class ManageCPC {
 
             });
 
-            log.info(" >> MAPPA >> " + mappa.size());
-            mappa.forEach((s, integer) -> {
-                log.info("R  ::  " + s + "  ==  " + integer);
-            });
-
             mappa.forEach((ref, numer) -> {
 
                 Refferal refferal = referralService.decodificaReferral(ref);
-                log.info(">>>> T-CPC :: {} -> {} - {}", numer, ref, refferal);
                 if (refferal != null && refferal.getCampaignId() != null && !Objects.isNull(refferal.getAffiliateId())) {
-
                     Long campaignId = refferal.getCampaignId();
-                    // setta transazione
-                    TransactionBusiness.BaseCreateRequest transaction = new TransactionBusiness.BaseCreateRequest();
-                    transaction.setCampaignId(campaignId);
-                    transaction.setPayoutPresent(false);
 
-                    if (!Objects.isNull(refferal.getAffiliateId()))
-                        transaction.setAffiliateId(refferal.getAffiliateId());
-                    if (refferal.getChannelId() != null) transaction.setChannelId(refferal.getChannelId());
-                    if (refferal.getMediaId() != null) transaction.setMediaId(refferal.getMediaId());
-
-                    transaction.setDateTime(dataDaGestire.atTime(1, 1, 1));
-                    transaction.setApproved(true);
-
-                    // controlla data scadneza camapgna
                     Campaign campaign = campaignRepository.findById(campaignId).orElse(null);
                     if (campaign != null) {
 
-                        if (campaign.getEndDate().isBefore(dataDaGestire)) {
-                            // setto a campagna scaduta
-                            transaction.setDictionaryId(49L);
-                        } else {
-                            transaction.setDictionaryId(42L);
-                        }
+                        // setta transazione
+                        TransactionBusiness.BaseCreateRequest transaction = new TransactionBusiness.BaseCreateRequest();
+                        transaction.setCampaignId(campaignId);
+                        transaction.setPayoutPresent(false);
+
+                        Long affiliateId = refferal.getAffiliateId();
+                        if (!Objects.isNull(affiliateId)) transaction.setAffiliateId(affiliateId);
+                        Long channelId = refferal.getChannelId();
+                        if (channelId != null) transaction.setChannelId(channelId);
+                        Long mediaId = refferal.getMediaId();
+                        if (mediaId != null) transaction.setMediaId(mediaId);
+
+                        transaction.setDateTime(LocalDateTime.now().withMinute(0).withSecond(0).minusMinutes(1));
+                        transaction.setApproved(Boolean.FALSE);
 
                         // associo a wallet
-                        Long walletID = null;
-                        if (refferal.getAffiliateId() != null) {
-                            walletID = walletRepository.findByAffiliateId(refferal.getAffiliateId()).getId();
-                            transaction.setWalletId(walletID);
+                        if (affiliateId != null) {
+                            transaction.setWalletId(walletRepository.findByAffiliateId(affiliateId).getId());
                         }
 
                         // trovo revenue
@@ -319,7 +310,6 @@ public class ManageCPC {
                         if (rf != null && rf.getId() != null) {
                             transaction.setRevenueId(rf.getId());
                         } else {
-                            log.trace("Non trovato revenue factor di tipo 10 per campagna {}, setto default", campaignId);
                             transaction.setRevenueId(1L);
                         }
 
@@ -327,70 +317,39 @@ public class ManageCPC {
                         Double commVal = 0D;
 
                         AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
-                        req.setAffiliateId(refferal.getAffiliateId());
-                        req.setChannelId(refferal.getChannelId());
+                        req.setAffiliateId(affiliateId);
+                        req.setChannelId(channelId);
                         req.setCampaignId(campaignId);
                         req.setCommissionDicId(10L);
-
                         AffiliateChannelCommissionCampaignDTO accc = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
                         if (accc != null) {
-                            // log.info(accc.getCommissionId() + " " + accc.getCommissionValue());
                             commVal = accc.getCommissionValue();
                             transaction.setCommissionId(accc.getCommissionId());
                         } else {
-                            log.trace("Non trovato Commission di tipo 10 per campagna {}, setto default", campaignId);
                             transaction.setCommissionId(0L);
                         }
 
                         // calcolo valore
-                        Double totale = commVal * numer;
-                        transaction.setValue(totale);
+                        transaction.setValue(commVal * numer);
                         transaction.setClickNumber(Long.valueOf(numer));
 
-                        // incemento valore
-                        if (walletID != null && totale > 0D) walletBusiness.incement(walletID, totale);
+                        transaction.setAgent("");
 
-                        // decremento budget Affiliato
-                        BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(campaignId, refferal.getAffiliateId()).stream().findFirst().orElse(null);
-                        if (bb != null) {
-                            Double totBudgetDecrementato = bb.getBudget() - totale;
-                            budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
-
-                            // setto stato transazione a ovebudget editore se totale < 0
-                            if (totBudgetDecrementato < 0) {
-                                transaction.setDictionaryId(47L);
-                            }
-                        }
-
-                        // decremento budget Campagna
-                        Double budgetCampagna = campaign.getBudget() - totale;
-                        campaignBusiness.updateBudget(campaign.getId(), budgetCampagna);
-
-                        // setto stato transazione a ovebudget editore se totale < 0
-                        if (budgetCampagna < 0) {
-                            transaction.setDictionaryId(48L);
-                        }
-
-
-                        if (accc != null && accc.getCommissionDueDate() != null) {
-                            // commissione scaduta
-                            if (accc.getCommissionDueDate().isBefore(dataDaGestire)) {
-                                transaction.setDictionaryId(49L);
-                            }
-                        }
-
-                        transaction.setAgent(" ");
+                        //setto rifiutato
+                        transaction.setStatusId(40L);
+                        // setto blacklisted
+                        transaction.setDictionaryId(70L);
 
                         // creo la transazione
                         TransactionCPCDTO tcpc = transactionBusiness.createCpc(transaction);
-                        log.info(">>> RICREA TRANSAZIONE :::: CPC :::: {} -- {} -- {}", tcpc.getId(), ref, refferal);
+                        log.trace(">>>BLACKLISTED CPC :::: {} -- {} -- {}", tcpc.getId(), ref, refferal);
                     } else {
-                        log.info(">>> CAMPAGNA NULLO :: {}", campaignId);
+                        log.info(">>> BLACKLISTED CAMPAGNA NULLO :: {}", campaignId);
                     }
                 }
             });
         } catch (Exception e) {
-            log.error("Eccezione Scheduler CPC --  {}", e.getMessage(), e);
+            log.error("BLACKLISTED Eccezione Scheduler CPC --  {}", e.getMessage(), e);
         }
 
     }//trasformaTrackingCPC
