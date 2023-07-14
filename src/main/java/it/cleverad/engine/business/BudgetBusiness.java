@@ -11,6 +11,7 @@ import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,17 +91,23 @@ public class BudgetBusiness {
     // UPDATE
     public BudgetDTO update(Long id, Filter filter) {
 
+        log.info(">>>> " + filter);
         Budget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Budget", id));
-        BudgetDTO budgetDTO = BudgetDTO.from(budget);
-        mapper.map(filter, budgetDTO);
 
-        Budget mappedEntity = mapper.map(budget, Budget.class);
-        mappedEntity.setLastModificationDate(LocalDateTime.now());
-        mappedEntity.setAffiliate(affiliateRepository.findById(filter.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", filter.affiliateId)));
-        mappedEntity.setCampaign(campaignRepository.findById(filter.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", filter.campaignId)));
-        mapper.map(budgetDTO, mappedEntity);
+        Double newBudget = null;
+        if (!budget.getInitialBudget().equals(filter.getInitialBudget())) {
+            newBudget = budget.getBudget() + filter.getInitialBudget() - budget.getInitialBudget();
+            log.info(newBudget + "");
+        }
 
-        return BudgetDTO.from(repository.save(mappedEntity));
+        mapper.map(filter, budget);
+
+        budget.setBudget(newBudget);
+        budget.setLastModificationDate(LocalDateTime.now());
+        budget.setAffiliate(affiliateRepository.findById(filter.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", filter.affiliateId)));
+        budget.setCampaign(campaignRepository.findById(filter.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", filter.campaignId)));
+
+        return BudgetDTO.from(repository.save(budget));
     }
 
     public BudgetDTO disable(Long id) {
@@ -218,11 +225,13 @@ public class BudgetBusiness {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @ToString
     public static class Filter {
         private Long id;
         private Long affiliateId;
         private Long campaignId;
         private Double budget;
+        private Double initialBudget;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate startDate;
         @DateTimeFormat(pattern = "yyyy-MM-dd")

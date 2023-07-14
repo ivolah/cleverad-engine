@@ -271,9 +271,8 @@ public class CampaignBusiness {
 
     public CampaignDTO updateBudget(Long campaignId, Double budget) {
         Campaign campaign = repository.findById(campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", campaignId));
-        Campaign mappedEntity = mapper.map(campaign, Campaign.class);
-        mappedEntity.setBudget(budget);
-        return CampaignDTO.from(repository.save(mappedEntity));
+        campaign.setBudget(budget);
+        return CampaignDTO.from(repository.save(campaign));
     }
 
     // TROVA LE CAMPAGNE DELL AFFILIATE
