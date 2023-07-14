@@ -214,7 +214,6 @@ public class MediaBusiness {
         if (jwtUserDetailsService.getRole().equals("Admin")) {
             list = cc.getMedias();
         } else {
-            // N.B. Lista presettata a status == True
             list = cc.getMedias().stream().filter(media -> media.getStatus().booleanValue()).collect(Collectors.toSet());
         }
         Page<Media> page = new PageImpl<>(list.stream().distinct().collect(Collectors.toList()));

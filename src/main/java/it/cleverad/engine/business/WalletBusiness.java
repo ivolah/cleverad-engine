@@ -109,11 +109,11 @@ public class WalletBusiness {
 
         Double totale = wallet.getTotal() + value;
         Double residual = wallet.getResidual() + value;
-      //  if ((!wallet.getTotal().equals(totale)) || (!wallet.getResidual().equals(residual))) {
-            req.setTotalAfter(totale);
-            req.setResidualAfter(residual);
-            walletTransactionBusiness.create(req);
-      //  }
+        //  if ((!wallet.getTotal().equals(totale)) || (!wallet.getResidual().equals(residual))) {
+        req.setTotalAfter(totale);
+        req.setResidualAfter(residual);
+        walletTransactionBusiness.create(req);
+        //  }
 
         wallet.setResidual(residual);
         wallet.setTotal(totale);
@@ -123,7 +123,7 @@ public class WalletBusiness {
     public WalletDTO decrement(Long id, Double value) {
         Wallet wallet = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Wallet", id));
 
-        log.info("Decrement by :: {}", value);
+        log.trace("Decrement by :: {}", value);
 
         WalletTransactionBusiness.BaseCreateRequest req = new WalletTransactionBusiness.BaseCreateRequest();
         req.setWalletId(id);
@@ -133,16 +133,18 @@ public class WalletBusiness {
 
         Double residual = wallet.getResidual() - value;
         Double payed = wallet.getPayed() + value;
-       // if (!wallet.getPayed().equals(payed) || !wallet.getResidual().equals(residual)) {
-            req.setPayedAfter(payed);
-            req.setTotalAfter(wallet.getTotal() - value);
-            req.setResidualAfter(residual);
-            walletTransactionBusiness.create(req);
-     //   }
+        // if (!wallet.getPayed().equals(payed) || !wallet.getResidual().equals(residual)) {
+        req.setPayedAfter(payed);
+        req.setTotalAfter(wallet.getTotal() - value);
+        req.setResidualAfter(residual);
+        walletTransactionBusiness.create(req);
+        //   }
 
         wallet.setPayed(payed);
         wallet.setTotal(residual);
-        return WalletDTO.from(repository.save(wallet));
+
+
+        return WalletDTO.from(repository.saveAndFlush(wallet));
     }
 
     /**

@@ -26,6 +26,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -46,25 +47,20 @@ public class ChannelBusiness {
     private ChannelRepository repository;
     @Autowired
     private Mapper mapper;
-
     @Autowired
     private DictionaryRepository dictionaryRepository;
     @Autowired
     private AffiliateRepository affiliateRepository;
-
     @Autowired
     private DictionaryBusiness dictionaryBusiness;
     @Autowired
     private UserBusiness userBusiness;
     @Autowired
     private ChannelCategoryBusiness channelCategoryBusiness;
-
     @Autowired
     private AffiliateChannelCommissionCampaignBusiness accc;
-
     @Autowired
     private MailService mailService;
-
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
 
@@ -259,7 +255,7 @@ public class ChannelBusiness {
         }
     }
 
-    public Page<ChannelDTO> getbyIdAffiliateAllActive(Pageable pageableRequest) {
+    public Page<ChannelDTO> getbyIdAffiliateAllActivePrefiltrato(Pageable pageableRequest) {
         if (jwtUserDetailsService.getRole().equals("Admin")) {
             Filter request = new Filter();
             Page<Channel> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id"))));
@@ -268,6 +264,13 @@ public class ChannelBusiness {
             Page<Channel> page = repository.findByAffiliateIdAndStatus(jwtUserDetailsService.getAffiliateID(), true, pageableRequest);
             return page.map(ChannelDTO::from);
         }
+    }
+
+    public List<Long> getbyIdAffiliateAllActive(Long affiliateId) {
+        Page<Channel> page = repository.findByAffiliateIdAndStatus(affiliateId, true, PageRequest.of(0, Integer.MAX_VALUE));
+        return page.map(ChannelDTO::from).stream().map(channelDTO -> {
+            return channelDTO.getId();
+        }).collect(Collectors.toList());
     }
 
     public Page<ChannelDTO> getbyIdUser(Long id, Pageable pageableRequest) {
@@ -368,8 +371,15 @@ public class ChannelBusiness {
             if (request.getLastModificationDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("lastModificationDate"), LocalDateTime.ofInstant(request.getLastModificationDateTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
             }
-            completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 
+            if (request.getIdListIn() != null) {
+                CriteriaBuilder.In<Long> in = cb.in(root.get("id"));
+                for (Long id : request.getIdListIn())
+                    in.value(id);
+                predicates.add(in);
+            }
+
+            completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 
             return completePredicate;
         };
@@ -427,6 +437,8 @@ public class ChannelBusiness {
         private Instant creationDateTo;
         private Instant lastModificationDateFrom;
         private Instant lastModificationDateTo;
+
+        private List<Long> idListIn;
     }
 
 }

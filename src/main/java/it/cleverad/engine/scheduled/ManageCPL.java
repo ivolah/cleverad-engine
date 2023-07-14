@@ -51,7 +51,7 @@ public class ManageCPL {
      * ============================================================================================================
      **/
 
-    @Scheduled(cron = "2 */2 * * * ?")
+    @Scheduled(cron = "3 */3 * * * ?")
     @Async
     public void gestisciTransazioni() {
         trasformaTrackingCPL();

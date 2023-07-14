@@ -30,7 +30,7 @@ public class Consolida {
     private TransactionBusiness transactionBusiness;
 
     @Async
-    @Scheduled(cron = "0 0/9 * * * ?")
+    @Scheduled(cron = "8 58 * * * ?")
     public void ciclaCPC() {
         LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
         consolidaCPC(oraSpaccata);
@@ -105,14 +105,14 @@ public class Consolida {
     }//trasformaTrackingCPC
 
     @Async
-    @Scheduled(cron = "5 5 5 * * ?")
+    @Scheduled(cron = "9 59 * * * ?")
     public void ciclaCPM() {
         LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
         consolidaCPM(oraSpaccata);
         consolidaCPM(LocalDate.now().minusDays(1).atTime(LocalTime.MAX));
 
         for (int i = 45; i < 60; i++) {
-           //   consolidaCPM(LocalDate.now().minusDays(i).atTime(LocalTime.MAX));
+            //   consolidaCPM(LocalDate.now().minusDays(i).atTime(LocalTime.MAX));
         }
     }//trasformaTrackingCPC
 
@@ -159,9 +159,9 @@ public class Consolida {
                 revenueId = tcpm.getRevenueId();
                 commissionId = tcpm.getCommissionId();
                 statusId = tcpm.getStatusId();
-                log.info("TRANSAZIONE CPM ID :: {} : {} :: {}", tcpm.getId(), tcpm.getImpressionNumber(), tcpm.getDateTime());
+                log.trace("TRANSAZIONE CPM ID :: {} : {} :: {}", tcpm.getId(), tcpm.getImpressionNumber(), tcpm.getDateTime());
                 transactionBusiness.deleteInterno(tcpm.getId(), "CPM");
-               log.info("DELETE {} ", tcpm.getId());
+                log.trace("DELETE {} ", tcpm.getId());
             }
             if (impressionNumber > 0) {
                 log.info("CONSOLIDATO CPM :: {} :: {} ::: {} - {} - {} ::: ", impressionNumber, value, ttt.getLeft(), ttt.getMiddle(), ttt.getRight());
