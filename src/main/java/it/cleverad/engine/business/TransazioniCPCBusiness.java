@@ -5,14 +5,14 @@ import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.model.tracking.Cpc;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
-import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.persistence.repository.tracking.CpcRepository;
 import it.cleverad.engine.service.ReferralService;
-import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
-import it.cleverad.engine.web.dto.BudgetDTO;
-import it.cleverad.engine.web.dto.CpcDTO;
-import it.cleverad.engine.web.dto.TransactionCPCDTO;
+import it.cleverad.engine.web.dto.*;
 import it.cleverad.engine.web.exception.ElementCleveradException;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -39,8 +35,6 @@ public class TransazioniCPCBusiness {
     private CpcBusiness cpcBusiness;
     @Autowired
     private TransactionBusiness transactionBusiness;
-    @Autowired
-    private WalletRepository walletRepository;
     @Autowired
     private WalletBusiness walletBusiness;
     @Autowired
@@ -57,27 +51,49 @@ public class TransazioniCPCBusiness {
     private CpcRepository repository;
     @Autowired
     private CampaignRepository campaignRepository;
+    @Autowired
+    private TransactionAllBusiness transactionAllBusiness;
 
-    public void rigeneraCPC(Integer anno, Integer mese, Integer giorno) {
-
+    public void rigenera(Integer anno, Integer mese, Integer giorno) {
         LocalDate dataDaGestire = LocalDate.of(anno, mese, giorno);
-        LocalDateTime inizio = dataDaGestire.atStartOfDay();
-        LocalDateTime fine = LocalDateTime.now().withMinute(0).withSecond(0).withDayOfYear(dataDaGestire.getDayOfYear());
+        log.info(anno + "-" + mese + "-" + giorno + " >> " + dataDaGestire);
 
-        // cancello le transazioni
-        TransactionBusiness.Filter request = new TransactionBusiness.Filter();
-        request.setDateTimeFrom(inizio);
-        request.setDateTimeTo(fine);
-        Page<TransactionCPCDTO> cpcs = transactionBusiness.searchCpc(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
+        TransactionAllBusiness.Filter request = new TransactionAllBusiness.Filter();
+        request.setCreationDateFrom(dataDaGestire);
+        request.setCreationDateTo(dataDaGestire);
+        request.setTipo("CPC");
 
-        for (TransactionCPCDTO tcpc : cpcs) {
-            log.trace("CANCELLO PER RIGENERA TRANSAZIONE CPC ID :: {} : {} :: {}", tcpc.getId(), tcpc.getClickNumber(), tcpc.getDateTime());
-            transactionBusiness.delete(tcpc.getId(), "CPC");
-        }
+        // cancello le transazioni not blacklisted e not manuali
+        List not = new ArrayList();
+        not.add(68L);
+        not.add(70L);
+        request.setNotInId(not);
+        Page<TransactionAllDTO> ls = transactionAllBusiness.searchPrefiltrato(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
+        if (ls.getTotalElements() > 0) this.gestisci(ls, dataDaGestire, 42L);
 
+        // blacklisted
+        request = new TransactionAllBusiness.Filter();
+        request.setCreationDateFrom(dataDaGestire);
+        request.setCreationDateTo(dataDaGestire);
+        request.setTipo("CPC");
 
-        //RIGENERO
+        request.setDictionaryId(70L);
+        Page<TransactionAllDTO> black = transactionAllBusiness.searchPrefiltrato(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
+        if (black.getTotalElements() > 0) this.gestisci(black, dataDaGestire, 70L);
+    }
+
+    public void gestisci(Page<TransactionAllDTO> ls, LocalDate dataDaGestire, Long statusID) {
         try {
+
+            log.info(">>> TOT :: " + ls.getTotalElements());
+
+            for (TransactionAllDTO tcpc : ls) {
+                log.debug("CANCELLO PER RIGENERA CPC :: {} : {} :: {}", tcpc.getId(), tcpc.getClickNumber(), tcpc.getDateTime());
+                transactionBusiness.delete(tcpc.getId(), "CPC");
+                Thread.sleep(75L);
+            }
+
+            //RIGENERO
             Map<String, Integer> mappa = new HashMap<>();
             Page<CpcDTO> day = cpcBusiness.getAllByDay(dataDaGestire);
             day.stream().filter(dto -> dto.getRefferal() != null).forEach(dto -> {
@@ -110,11 +126,6 @@ public class TransazioniCPCBusiness {
                 if (refferal != null && refferal.getTargetId() != null) cccp.setTargetId(refferal.getTargetId());
                 repository.save(cccp);
 
-            });
-
-            log.info(" >> MAPPA >> " + mappa.size());
-            mappa.forEach((s, integer) -> {
-                log.info("R  ::  " + s + "  ==  " + integer);
             });
 
             mappa.forEach((ref, numer) -> {
@@ -151,7 +162,7 @@ public class TransazioniCPCBusiness {
                         // associo a wallet
                         Long walletID = null;
                         if (refferal.getAffiliateId() != null) {
-                            walletID = walletRepository.findByAffiliateId(refferal.getAffiliateId()).getId();
+                            walletID = walletBusiness.findByIdAffilaite(refferal.getAffiliateId()).stream().findFirst().get().getId();
                             transaction.setWalletId(walletID);
                         }
 
@@ -160,7 +171,6 @@ public class TransazioniCPCBusiness {
                         if (rf != null && rf.getId() != null) {
                             transaction.setRevenueId(rf.getId());
                         } else {
-                            log.trace("Non trovato revenue factor di tipo 10 per campagna {}, setto default", campaignId);
                             transaction.setRevenueId(1L);
                         }
 
@@ -179,7 +189,6 @@ public class TransazioniCPCBusiness {
                             commVal = accc.getCommissionValue();
                             transaction.setCommissionId(accc.getCommissionId());
                         } else {
-                            log.trace("Non trovato Commission di tipo 10 per campagna {}, setto default", campaignId);
                             transaction.setCommissionId(0L);
                         }
 
@@ -221,19 +230,31 @@ public class TransazioniCPCBusiness {
                         }
 
                         transaction.setAgent(" ");
+                        transaction.setStatusId(statusID);
+
 
                         // creo la transazione
                         TransactionCPCDTO tcpc = transactionBusiness.createCpc(transaction);
-                        log.info(">>> RIGENERO CPC :::: {} -- {} -- {}", tcpc.getId(), ref, refferal);
+                        log.info(">>>RI-CLICK :::: {} -- {} -- {}", tcpc.getId(), ref, refferal);
                     } else {
-                        log.info(">>> RIGENERO Camp nulla :: {}", campaignId);
+                        log.info(">>> RIGENERO Campagna nulla :: {}", campaignId);
                     }
                 }
             });
-        } catch (Exception e) {
-            log.error("Rigenero Eccezione Scheduler CPC --  {}", e.getMessage(), e);
-        }
 
+        } catch (Exception e) {
+            log.error("CUSTOM Eccezione Scheduler CPC --  {}", e.getMessage(), e);
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @ToString
+    public static class FilterUpdate {
+        private String year;
+        private String month;
+        private String day;
     }
 
 

@@ -83,7 +83,7 @@ public class TransactionCPCDTO {
 
                 transaction.getRevenueId(),
                 transaction.getPayoutPresent(),
-                transaction.getDictionaryStatus().getId());
+                transaction.getDictionaryStatus() != null ? transaction.getDictionaryStatus().getId() : null);
     }
 
 }

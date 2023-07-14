@@ -24,9 +24,9 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
                     "                           COALESCE(round((SUM(click_number) / SUM(nullif(lead_number, 0)) * 100), 2), 0)                  as CTR, " +
                     "                           COALESCE(round(CAST((SUM(lead_number) / SUM(nullif(click_number, 0)) * 100) AS numeric), 2), 0) as LR, " +
                     "                           COALESCE(round(CAST(SUM(commission_value) AS numeric), 2), 0)                                   as commission, " +
-                    "                           COALESCE(round(CAST(SUM(value) AS numeric), 2), 0)                                              as revenue, " +
-                    "                           COALESCE(round(CAST((SUM(value) - SUM(commission_value)) AS numeric), 2), 0)                    as margine, " +
-                    "                           COALESCE(round(CAST((SUM(value) - SUM(commission_value)) AS numeric) / CAST(SUM(nullif(value, 0)) AS numeric) * 100, 2), " +
+                    "                           COALESCE(round(CAST(SUM(revenue) AS numeric), 2), 0)                                              as revenue, " +
+                    "                           COALESCE(round(CAST((SUM(revenue) - SUM(commission_value)) AS numeric), 2), 0)                    as margine, " +
+                    "                           COALESCE(round(CAST((SUM(revenue) - SUM(commission_value)) AS numeric) / CAST(SUM(nullif(revenue, 0)) AS numeric) * 100, 2), " +
                     "                                    0)                                                                                     as marginePC, " +
                     "                           COALESCE(round(CAST(SUM(nullif(commission_value, 0)) / SUM(nullif(impression_number, 0)) * 1000 AS numeric), 2), " +
                     "                                    0)                                                                                     as ecpm, " +
@@ -87,9 +87,9 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
                    "                           COALESCE(round((SUM(click_number) / SUM(nullif(lead_number, 0)) * 100), 2), 0)                  as CTR, " +
                    "                           COALESCE(round(CAST((SUM(lead_number) / SUM(nullif(click_number, 0)) * 100) AS numeric), 2), 0) as LR, " +
                    "                           COALESCE(round(CAST(SUM(commission_value) AS numeric), 2), 0)                                   as commission, " +
-                   "                           COALESCE(round(CAST(SUM(value) AS numeric), 2), 0)                                              as revenue, " +
-                   "                           COALESCE(round(CAST((SUM(value) - SUM(commission_value)) AS numeric), 2), 0)                    as margine, " +
-                   "                           COALESCE(round(CAST((SUM(value) - SUM(commission_value)) AS numeric) / CAST(SUM(nullif(value, 0)) AS numeric) * 100, 2), " +
+                   "                           COALESCE(round(CAST(SUM(revenue) AS numeric), 2), 0)                                              as revenue, " +
+                   "                           COALESCE(round(CAST((SUM(revenue) - SUM(commission_value)) AS numeric), 2), 0)                    as margine, " +
+                   "                           COALESCE(round(CAST((SUM(revenue) - SUM(commission_value)) AS numeric) / CAST(SUM(nullif(revenue, 0)) AS numeric) * 100, 2), " +
                    "                                    0)                                                                                     as marginePC, " +
                    "                           COALESCE(round(CAST(SUM(nullif(commission_value, 0)) / SUM(nullif(impression_number, 0)) * 1000 AS numeric), 2), " +
                    "                                    0)                                                                                     as ecpm, " +
@@ -133,9 +133,9 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
             "                           COALESCE(round((SUM(click_number) / SUM(nullif(lead_number, 0)) * 100), 2), 0)                  as CTR, " +
             "                           COALESCE(round(CAST((SUM(lead_number) / SUM(nullif(click_number, 0)) * 100) AS numeric), 2), 0) as LR, " +
             "                           COALESCE(round(CAST(SUM(commission_value) AS numeric), 2), 0)                                   as commission, " +
-            "                           COALESCE(round(CAST(SUM(value) AS numeric), 2), 0)                                              as revenue, " +
-            "                           COALESCE(round(CAST((SUM(value) - SUM(commission_value)) AS numeric), 2), 0)                    as margine, " +
-            "                           COALESCE(round(CAST((SUM(value) - SUM(commission_value)) AS numeric) / CAST(SUM(nullif(value, 0)) AS numeric) * 100, 2), " +
+            "                           COALESCE(round(CAST(SUM(revenue) AS numeric), 2), 0)                                              as revenue, " +
+            "                           COALESCE(round(CAST((SUM(revenue) - SUM(commission_value)) AS numeric), 2), 0)                    as margine, " +
+            "                           COALESCE(round(CAST((SUM(revenue) - SUM(commission_value)) AS numeric) / CAST(SUM(nullif(revenue, 0)) AS numeric) * 100, 2), " +
             "                                    0)                                                                                     as marginePC, " +
             "                           COALESCE(round(CAST(SUM(nullif(commission_value, 0)) / SUM(nullif(impression_number, 0)) * 1000 AS numeric), 2), " +
             "                                    0)                                                                                     as ecpm, " +
@@ -194,7 +194,8 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
     //=========================================================================================================================
     //=========================================================================================================================
 
-    @Query(nativeQuery = true, value = "Select distinct vall.affiliate_id                                                                                                   as affiliateId, " +
+    @Query(nativeQuery = true, value = "Select distinct vall.dictionary_name, " +
+            "                vall.affiliate_id                                                                                                   as affiliateId, " +
             "                vall.affiliate_name                                                                                                 as affiliateName, " +
             "                vall.channel_id                                                                                                     as channelId, " +
             "                tc.name                                                                                                             as channelName, " +
@@ -204,9 +205,9 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
             "                COALESCE(round((SUM(click_number) / SUM(nullif(lead_number, 0)) * 100), 2), 0)                                      as CTR, " +
             "                COALESCE(round(CAST((SUM(lead_number) / SUM(nullif(click_number, 0)) * 100) AS numeric), 2), 0)                     as LR, " +
             "                COALESCE(round(CAST(SUM(commission_value) AS numeric), 2), 0)                                                       as commission, " +
-            "                COALESCE(round(CAST(SUM(value) AS numeric), 2), 0)                                                                  as revenue, " +
-            "                COALESCE(round(CAST((SUM(value) - SUM(commission_value)) AS numeric), 2), 0)                                        as margine, " +
-            "                COALESCE(round(CAST((SUM(value) - SUM(commission_value)) AS numeric) / CAST(SUM(nullif(value, 0)) AS numeric) * 100, 2), " +
+            "                COALESCE(round(CAST(SUM(revenue) AS numeric), 2), 0)                                                                  as revenue, " +
+            "                COALESCE(round(CAST((SUM(revenue) - SUM(commission_value)) AS numeric), 2), 0)                                        as margine, " +
+            "                COALESCE(round(CAST((SUM(revenue) - SUM(commission_value)) AS numeric) / CAST(SUM(nullif(revenue, 0)) AS numeric) * 100, 2), " +
             "                         0)                                                                                                         as marginePC, " +
             "                COALESCE(round(CAST(SUM(nullif(commission_value, 0)) / SUM(nullif(impression_number, 0)) * 1000 AS numeric), 2), 0) as ecpm, " +
             "                COALESCE(round(CAST(SUM(commission_value) / SUM(nullif(click_number, 0)) AS numeric), 2), 0)                        as ecpc, " +
@@ -219,8 +220,8 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
             "  AND ((:affiliateId) IS NULL OR (vall.affiliate_id = (:affiliateId))) " +
             "  AND ((:campaignid) IS NULL OR (vall.campaign_id = (:campaignid))) " +
             "  AND ((:dictionaryList) IS NULL OR (vall.dictionary_id in (:dictionaryList))) " +
-            "GROUP BY ((affiliateId, channelid, channelName, vall.affiliate_name)) " +
-            "order by affiliateName DESC nulls last " +
+            "GROUP BY ((affiliateId, channelid, channelName, vall.affiliate_name, vall.dictionary_id)), vall.dictionary_name " +
+            "order by affiliateName DESC nulls last" +
             " ")
     List<ReportTopAffiliates> searchTopAffilaites(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid, @Param("dictionaryList") List<Long> dictionaryList);
 

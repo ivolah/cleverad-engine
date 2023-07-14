@@ -65,7 +65,8 @@ public class TransactionCPLDTO {
 
                 transaction.getDictionary().getId(), transaction.getDictionary().getName(), transaction.getLeadNumber(),
                 transaction.getPayoutPresent(),
-                transaction.getDictionaryStatus().getId());
+                transaction.getDictionaryStatus() != null ? transaction.getDictionaryStatus().getId() : null
+                );
     }
 
 }

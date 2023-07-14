@@ -3,18 +3,25 @@ package it.cleverad.engine.business;
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.model.tracking.Cpl;
-import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.persistence.repository.tracking.CplRepository;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.*;
 import it.cleverad.engine.web.exception.ElementCleveradException;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,9 +35,9 @@ public class TransazioniCPLBusiness {
     @Autowired
     private TransactionBusiness transactionBusiness;
     @Autowired
-    private WalletRepository walletRepository;
+    private TransactionAllBusiness transactionAllBusiness;
     @Autowired
-    private WalletBusiness walletBusiness;
+     private WalletBusiness walletBusiness;
     @Autowired
     private BudgetBusiness budgetBusiness;
     @Autowired
@@ -46,15 +53,34 @@ public class TransazioniCPLBusiness {
     @Autowired
     private CplRepository cplRepository;
 
-    public void rigeneraCPC(Integer anno, Integer mese, Integer giorno) {
+    public void rigenera(Integer anno, Integer mese, Integer giorno) {
 
         try {
-            cplBusiness.getAllDayCustom().stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
+            LocalDate dataDaGestire = LocalDate.of(anno, mese, giorno);
+            log.info(anno + "-" + mese + "-" + giorno + " >> " + dataDaGestire);
+
+            // cancello le transazioni
+            TransactionAllBusiness.Filter request = new TransactionAllBusiness.Filter();
+            request.setCreationDateFrom(dataDaGestire);
+            request.setCreationDateTo(dataDaGestire);
+            List not = new ArrayList();
+            not.add(68L);
+            request.setNotInId(not);
+            request.setTipo("CPL");
+            Page<TransactionAllDTO> ls = transactionAllBusiness.searchPrefiltrato(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
+
+            log.info(">>> TOT :: " + ls.getTotalElements());
+
+            for (TransactionAllDTO tcpl : ls) {
+                log.info("CANCELLO PER RIGENERA CP :: {} : {} :: {}", tcpl.getId(), tcpl.getValue(), tcpl.getDateTime());
+                transactionBusiness.delete(tcpl.getId(), "CPL");
+                Thread.sleep(100L);
+            }
+
+            cplBusiness.getAllDay(anno, mese, giorno).stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
 
                 if (cplDTO.getRefferal().length() < 6) {
-                    // cerco da cpc
                     List<CpcDTO> ips = cpcBusiness.findByIp24HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal()).stream().collect(Collectors.toList());
-                    // prendo ultimo ip
                     for (CpcDTO dto : ips)
                         if (StringUtils.isNotBlank(dto.getRefferal())) cplDTO.setRefferal(dto.getRefferal());
                 }
@@ -63,7 +89,7 @@ public class TransazioniCPLBusiness {
                 Refferal refferal = referralService.decodificaReferral(cplDTO.getRefferal());
 
                 if (refferal != null && refferal.getAffiliateId() != null) {
-                    log.debug(" CUSTOM >>>> T-CPL :: {} :: ", cplDTO, refferal);
+                    log.debug("RELEAD :: {} :: ", cplDTO);
 
                     //aggiorno dati CPL
                     Cpl cccpl = cplRepository.findById(cplDTO.getId()).orElseThrow(() -> new ElementCleveradException("Cpl", cplDTO.getId()));
@@ -84,10 +110,8 @@ public class TransazioniCPLBusiness {
                     transaction.setApproved(true);
                     transaction.setPayoutPresent(false);
 
-                    if (StringUtils.isNotBlank(cplDTO.getAgent()))
-                        transaction.setAgent(cplDTO.getAgent());
-                    else
-                        transaction.setAgent("");
+                    if (StringUtils.isNotBlank(cplDTO.getAgent())) transaction.setAgent(cplDTO.getAgent());
+                    else transaction.setAgent("");
 
                     transaction.setIp(cplDTO.getIp());
                     transaction.setData(cplDTO.getData());
@@ -110,7 +134,7 @@ public class TransazioniCPLBusiness {
 
                         Long walletID = null;
                         if (affiliateID != null) {
-                            walletID = walletRepository.findByAffiliateId(affiliateID).getId();
+                            walletID = walletBusiness.findByIdAffilaite(refferal.getAffiliateId()).stream().findFirst().get().getId();
                             transaction.setWalletId(walletID);
                         }
 
@@ -119,7 +143,6 @@ public class TransazioniCPLBusiness {
                         if (rf != null) {
                             transaction.setRevenueId(rf.getId());
                         } else {
-                            log.warn("Non trovato revenue factor di tipo 11 per campagna {} , setto default", refferal.getCampaignId());
                             transaction.setRevenueId(2L);
                         }
 
@@ -137,7 +160,6 @@ public class TransazioniCPLBusiness {
                             commVal = acccFirst.getCommissionValue();
                             transaction.setCommissionId(acccFirst.getCommissionId());
                         } else {
-                            log.warn("Non trovato Commission di tipo 10 per campagna {}, setto default", refferal.getCampaignId());
                             transaction.setCommissionId(0L);
                         }
 
@@ -172,9 +194,12 @@ public class TransazioniCPLBusiness {
                             }
                         }
 
+                        if (cccpl.getBlacklisted()) transaction.setStatusId(70L);
+                        else transaction.setStatusId(42L);
+
                         // creo la transazione
                         TransactionCPLDTO cpl = transactionBusiness.createCpl(transaction);
-                        log.info(">>> CUSTOM CREATO TRANSAZIONE :::: CPL :::: {} ", cpl.getId());
+                        log.info(">>>RIGENERATO LEAD :::: {} ", cpl.getId());
 
                         // setto a gestito
                         cplBusiness.setRead(cplDTO.getId());
@@ -186,5 +211,15 @@ public class TransazioniCPLBusiness {
         } catch (Exception e) {
             log.error("CUSTOM Eccezione Scheduler CPL --  {}", e.getMessage(), e);
         }
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @ToString
+    public static class FilterUpdate {
+        private String year;
+        private String month;
+        private String day;
     }
 }

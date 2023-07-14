@@ -297,6 +297,7 @@ public class ReportBusiness {
         private List<Long> dictionaryIds = null;
         private Long affiliateid;
         private Long campaignid;
+        private Long campaignIdd;
     }
 
 }
