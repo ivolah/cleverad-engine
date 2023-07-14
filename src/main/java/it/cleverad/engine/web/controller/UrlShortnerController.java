@@ -21,7 +21,7 @@ public class UrlShortnerController {
     private UrlService urlService;
 
     @GetMapping(path = "/old/{id}")
-    public String getUrl(@PathVariable String shortUrl) {
+    public String getUrlOl(@PathVariable String shortUrl) {
         return urlService.getOriginalUrl(shortUrl);
     }
 
@@ -31,14 +31,18 @@ public class UrlShortnerController {
         return urlService.convertToShortUrl(req);
     }
 
-    @GetMapping(value = "{shortUrl}")
-    @Cacheable(value = "urls", key = "#shortUrl", sync = true)
-    public ResponseEntity<Void> getAndRedirect(@PathVariable String shortUrl) {
-        var url = urlService.getOriginalUrl(shortUrl);
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .location(URI.create(url))
-                .build();
-    }
+//    @GetMapping(value = "{shortUrl}")
+//    @Cacheable(value = "urls", key = "#shortUrl", sync = true)
+//    public ResponseEntity<Void> getAndRedirect(@PathVariable String shortUrl) {
+//        var url = urlService.getOriginalUrl(shortUrl);
+//        return ResponseEntity.status(HttpStatus.FOUND)
+//                .location(URI.create(url))
+//                .build();
+//    }
 
+    @GetMapping(path = "{shortUrl}")
+    public String getUrl(@PathVariable String shortUrl) {
+        return urlService.getOriginalUrl(shortUrl);
+    }
 
 }
