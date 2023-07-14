@@ -1,7 +1,6 @@
 package it.cleverad.engine.web.controller;
 
-import it.cleverad.engine.business.TransactionAllBusiness;
-import it.cleverad.engine.business.TransactionBusiness;
+import it.cleverad.engine.business.*;
 import it.cleverad.engine.web.dto.*;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +18,15 @@ public class TransactionController {
 
     @Autowired
     private TransactionBusiness business;
+    @Autowired
+    private TransazioniCPCBusiness transazioniCPCBusiness;
+    @Autowired
+    private TransazioniCPLBusiness transazioniCPLBusiness;
 
     @Autowired
     private TransactionAllBusiness allBusiness;
+    @Autowired
+    private TransactionStatusBusiness statusBusiness;
 
     /**
      * ============================================================================================================
@@ -205,5 +210,40 @@ public class TransactionController {
     public Page<TransactionAllDTO> searchAllPrefiltrato(TransactionAllBusiness.Filter request, Pageable pageable) {
         return allBusiness.searchPrefiltrato(request, pageable);
     }
+
+
+    /**
+     * ============================================================================================================
+     **/
+
+    @GetMapping("/status")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<TransactionStatusDTO> searchAll(TransactionStatusBusiness.Filter request, Pageable pageable) {
+        return statusBusiness.searchPrefiltrato(request, pageable);
+    }
+
+    @GetMapping("/status/affiliate")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<TransactionStatusDTO> searchAllPrefiltrato(TransactionStatusBusiness.Filter request, Pageable pageable) {
+        return statusBusiness.searchPrefiltrato(request, pageable);
+    }
+
+
+    /**
+     * ============================================================================================================
+     **/
+
+    @PostMapping("/manage/cpl")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void manageCPL(@ModelAttribute TransazioniCPLBusiness.FilterUpdate request) {
+        transazioniCPLBusiness.rigenera(Integer.parseInt(request.getYear()), Integer.parseInt(request.getMonth()), Integer.parseInt(request.getDay()));
+    }
+
+    @PostMapping("/manage/cpc")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void manageCPL(@ModelAttribute TransazioniCPCBusiness.FilterUpdate request) {
+        transazioniCPCBusiness.rigenera(Integer.parseInt(request.getYear()), Integer.parseInt(request.getMonth()), Integer.parseInt(request.getDay()));
+    }
+
 
 }

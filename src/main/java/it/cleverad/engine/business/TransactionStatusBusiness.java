@@ -1,9 +1,13 @@
 package it.cleverad.engine.business;
 
+import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.ViewTransactionAll;
+import it.cleverad.engine.persistence.model.service.ViewTransactionStatus;
 import it.cleverad.engine.persistence.repository.service.ViewTransactionAllRepository;
+import it.cleverad.engine.persistence.repository.service.ViewTransactionStatusRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.TransactionAllDTO;
+import it.cleverad.engine.web.dto.TransactionStatusDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,34 +33,34 @@ import java.util.List;
 @Slf4j
 @Component
 @Transactional
-public class TransactionAllBusiness {
+public class TransactionStatusBusiness {
 
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
     @Autowired
-    private ViewTransactionAllRepository repository;
+    private ViewTransactionStatusRepository repository;
 
     /**
      * ============================================================================================================
      **/
 
+
     // GET BY ID
-    public TransactionAllDTO findById(Long id) {
-        ViewTransactionAll transaction = null;
+    public TransactionStatusDTO findById(Long id) {
+        ViewTransactionStatus transaction = null;
         if (jwtUserDetailsService.getRole().equals("Admin")) {
-            transaction = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction ALL", id));
+            transaction = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction Status", id));
         }
-        return TransactionAllDTO.from(transaction);
+        return TransactionStatusDTO.from(transaction);
     }
 
-
     // SEARCH PAGINATED
-    public Page<TransactionAllDTO> searchPrefiltrato(Filter request, Pageable pageableRequest) {
+    public Page<TransactionStatusDTO> searchPrefiltrato(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("dateTime")));
         if (!jwtUserDetailsService.getRole().equals("Admin"))
             request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-        Page<ViewTransactionAll> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(TransactionAllDTO::from);
+        Page<ViewTransactionStatus> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(TransactionStatusDTO::from);
     }
 
 
@@ -64,25 +68,13 @@ public class TransactionAllBusiness {
      * ============================================================================================================
      **/
 
-    private Specification<ViewTransactionAll> getSpecification(Filter request) {
+    private Specification<ViewTransactionStatus> getSpecification(Filter request) {
         return (root, query, cb) -> {
             Predicate completePredicate = null;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
-            }
-            if (request.getAgent() != null) {
-                predicates.add(cb.equal(root.get("agent"), request.getAgent()));
-            }
-            if (request.getApproved() != null) {
-                predicates.add(cb.equal(root.get("approved"), request.getApproved()));
-            }
-            if (request.getIp() != null) {
-                predicates.add(cb.equal(root.get("ip"), request.getIp()));
-            }
-            if (request.getNote() != null) {
-                predicates.add(cb.equal(root.get("note"), request.getNote()));
             }
             if (request.getPayoutReference() != null) {
                 predicates.add(cb.equal(root.get("payoutReference"), request.getPayoutReference()));
@@ -114,15 +106,6 @@ public class TransactionAllBusiness {
             if (request.getClickNumber() != null) {
                 predicates.add(cb.equal(root.get("clickNumber"), request.getClickNumber()));
             }
-            if (request.getRefferal() != null) {
-                predicates.add(cb.equal(root.get("refferal"), request.getRefferal()));
-            }
-            if (request.getCompanyId() != null) {
-                predicates.add(cb.equal(root.get("companyId"), request.getCompanyId()));
-            }
-            if (request.getAdvertiserId() != null) {
-                predicates.add(cb.equal(root.get("advertiserId"), request.getAdvertiserId()));
-            }
             if (request.getData() != null) {
                 predicates.add(cb.like(cb.upper(root.get("data")), "%" + request.getData().toUpperCase() + "%"));
             }
@@ -133,34 +116,53 @@ public class TransactionAllBusiness {
                 predicates.add(cb.equal(root.get("dictionaryId"), request.getDictionaryId()));
             }
 
-/*            if (request.getCreationDateFrom() != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("creationDate"), request.getCreationDateFrom().atStartOfDay()));
-            }
-            if (request.getCreationDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("creationDate"), request.getCreationDateTo().plus(1, ChronoUnit.DAYS).atStartOfDay()));
-            }*/
 
-            if (request.getCreationDateFrom() != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("dateTime"), request.getCreationDateFrom()));
-            }
-            if (request.getCreationDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), request.getCreationDateTo()));
+            if (request.getPayoutPresent() != null) {
+                predicates.add(cb.equal(root.get("payoutPresent"), request.getPayoutPresent()));
             }
 
             if (request.getValueNotZero() != null && request.getValueNotZero()) {
                 predicates.add(cb.notEqual(root.get("value"), "0"));
             }
 
-            if (request.getPayoutPresent() != null) {
-                predicates.add(cb.equal(root.get("payoutPresent"), request.getPayoutPresent()));
+
+            if (request.getInDictionaryId() != null) {
+                CriteriaBuilder.In<Long> inClause = cb.in(root.get("dictionaryId"));
+                for (Long id : request.getInDictionaryId()) {
+                    inClause.value(id);
+                }
+                predicates.add(inClause);
             }
 
-            if (request.getNotInId() != null) {
+            if (request.getInStausId() != null) {
+                CriteriaBuilder.In<Long> inClause = cb.in(root.get("statusId"));
+                for (Long id : request.getInStausId()) {
+                    inClause.value(id);
+                }
+                predicates.add(inClause);
+            }
+
+            if (request.getNotInDictionaryId() != null) {
                 CriteriaBuilder.In<Long> inClauseNot = cb.in(root.get("dictionaryId"));
-                for (Long id : request.getNotInId()) {
+                for (Long id : request.getNotInDictionaryId()) {
                     inClauseNot.value(id);
                 }
                 predicates.add(inClauseNot.not());
+            }
+
+            if (request.getNotInStausId() != null) {
+                CriteriaBuilder.In<Long> inClauseNot = cb.in(root.get("statusId"));
+                for (Long id : request.getNotInStausId()) {
+                    inClauseNot.value(id);
+                }
+                predicates.add(inClauseNot.not());
+            }
+
+            if (request.getCreationDateFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("dateTime"), request.getCreationDateFrom()));
+            }
+            if (request.getCreationDateTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), request.getCreationDateTo()));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -172,14 +174,15 @@ public class TransactionAllBusiness {
      * ============================================================================================================
      **/
 
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     @ToString
     public static class Filter {
+
         private Long id;
-        private String agent;
-        private Boolean approved;
+        private String tipo;
 
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate creationDateFrom;
@@ -191,27 +194,41 @@ public class TransactionAllBusiness {
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dateTimeTo;
 
-        private String ip;
-        private String note;
-        private String payoutReference;
-        private Double value;
-        private Long affiliateId;
-        private Long campaignId;
-        private Long channelId;
-        private Long commissionId;
-        private Long payoutId;
-        private Long walletId;
-        private Long mediaId;
-        private Long clickNumber;
-        private String refferal;
-        private Long companyId;
-        private Long advertiserId;
-        private String data;
-        private String tipo;
+        private Long statusId;
+        private String statusName;
         private Long dictionaryId;
-        private Boolean valueNotZero;
+        private String dictionaryName;
+
+        private Long affiliateId;
+        private String affiliateName;
+        private Long channelId;
+        private String channelName;
+        private Long campaignId;
+        private String campaignName;
+        private Long mediaId;
+        private String mediaName;
+        private Long commissionId;
+        private String commissionName;
+        private Double commissionValue;
+
+        private Double value;
+        private Long revenueId;
+        private Long revenue;
+
+        private Long clickNumber;
+        private Long impressionNumber;
+        private Long leadNumber;
+        private String data;
+        private Long walletId;
         private Boolean payoutPresent;
-        public List<Long> notInId;
+        private Long payoutId;
+        private String payoutReference;
+
+        private Boolean valueNotZero;
+        public List<Long> inDictionaryId;
+        public List<Long> inStausId;
+        public List<Long> notInDictionaryId;
+        public List<Long> notInStausId;
     }
 
 }
