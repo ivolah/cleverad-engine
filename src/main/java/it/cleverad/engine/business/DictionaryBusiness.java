@@ -81,14 +81,14 @@ public class DictionaryBusiness {
         return page.map(DictionaryDTO::from);
     }
 
-    public Page<DictionaryDTO> getTypeStatus(Filter request, @PageableDefault(value = 200) Pageable pageableRequest) {
+    public Page<DictionaryDTO> getTypeStatus(Filter request, @PageableDefault(value = Integer.MAX_VALUE) Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         request.setType("STATUS");
         Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
         return page.map(DictionaryDTO::from);
     }
 
-    public Page<DictionaryDTO> getTypeRole(Filter request, @PageableDefault(value = 200) Pageable pageableRequest) {
+    public Page<DictionaryDTO> getTypeRole(Filter request, @PageableDefault(value = Integer.MAX_VALUE) Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         request.setType("ROLE");
         Page<Dictionary> page = repository.findAll(getSpecification(request), pageable);
