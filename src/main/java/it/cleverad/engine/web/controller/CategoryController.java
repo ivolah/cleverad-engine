@@ -30,7 +30,7 @@ public class CategoryController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<CategoryDTO> search(CategoryBusiness.Filter request, @PageableDefault(value = 200) Pageable pageable) {
+    public Page<CategoryDTO> search(CategoryBusiness.Filter request, @PageableDefault(value = Integer.MAX_VALUE) Pageable pageable) {
         return business.search(request, pageable);
     }
 

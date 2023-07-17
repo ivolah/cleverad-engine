@@ -6,6 +6,7 @@ import it.cleverad.engine.web.dto.CampaignDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +33,7 @@ public class CampaignController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<CampaignDTO> search(CampaignBusiness.Filter request, Pageable pageable) {
+    public Page<CampaignDTO> search(CampaignBusiness.Filter request, @PageableDefault(value = Integer.MAX_VALUE) Pageable pageable) {
         return business.search(request, pageable);
     }
 
@@ -60,12 +61,12 @@ public class CampaignController {
     }
 
     @GetMapping("/affiliate")
-    public Page<CampaignDTO> getCampaigns(Pageable pageable) {
+    public Page<CampaignDTO> getCampaigns(@PageableDefault(value = Integer.MAX_VALUE)Pageable pageable) {
         return business.getCampaignsActive(jwtUserDetailsService.getAffiliateID(), pageable);
     }
 
     @GetMapping("/affiliate/not")
-    public Page<CampaignDTO> getCampaignsNot(Pageable pageable) {
+    public Page<CampaignDTO> getCampaignsNot( @PageableDefault(value = Integer.MAX_VALUE)Pageable pageable) {
         return business.getCampaignsNot(jwtUserDetailsService.getAffiliateID(), pageable);
     }
 

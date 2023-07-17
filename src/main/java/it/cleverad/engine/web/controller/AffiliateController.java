@@ -34,7 +34,7 @@ public class AffiliateController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<AffiliateDTO> search(AffiliateBusiness.Filter request, @PageableDefault(value = 500) Pageable pageable) {
+    public Page<AffiliateDTO> search(AffiliateBusiness.Filter request, @PageableDefault(value = Integer.MAX_VALUE) Pageable pageable) {
         return business.search(request, pageable);
     }
 
