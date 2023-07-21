@@ -36,11 +36,7 @@ public class Campaign {
     private LocalDate endDate;
     @Column(name = "id_file")
     private String idFile;
-    @Column(name = "default_commission_id")
-    private String defaultCommissionId;
     private String valuta;
-    @Column(name = "tracking_code")
-    private String trackingCode;
     @Column(name = "encoded_id")
     private String encodedId;
     private Double budget;
@@ -143,5 +139,9 @@ public class Campaign {
             tag.getCampaigns().remove(this);
         }
     }
+
+
+    @OneToMany(mappedBy = "campaign")
+    private Set<CampaignBudget> campaignBudgets;
 
 }

@@ -57,10 +57,12 @@ public class Dictionary {
     @OneToMany
     @JoinColumn(name = "dictionary_id")
     private Set<FileAffiliate> fileAffiliates;
-
     @OneToMany
     @JoinColumn(name = "dictionary_id")
     private Set<FilePayout> filePayouts;
+    @OneToMany
+    @JoinColumn(name = "dictionary_id")
+    private Set<FileAdvertiser> fileAdvertisers;
 
     @OneToMany
     @JoinColumn(name = "companytype_id")
