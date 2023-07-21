@@ -53,4 +53,9 @@ public class Advertiser {
     @OneToMany(mappedBy = "advertiser")
     private Set<Representative> representatives;
 
+    @OneToMany(mappedBy = "advertiser")
+    private Set<CampaignBudget> campaignBudgets;
+    @OneToMany(mappedBy = "advertiser")
+    private Set<FileAdvertiser> fileAdvertisers;
+
 }
