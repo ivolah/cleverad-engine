@@ -74,6 +74,12 @@ public class ReportController {
     @GetMapping(path = "/affiliates/top")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<ReportTopAffiliates> getAffiliatiTop(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
+        return reportBusiness.searchTopAffilaitesChannel(request, pageable);
+    }
+
+    @GetMapping(path = "/affiliates")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<ReportTopAffiliates> getAffiliati(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
         return reportBusiness.searchTopAffilaites(request, pageable);
     }
 

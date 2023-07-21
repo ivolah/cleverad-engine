@@ -14,7 +14,6 @@ import java.util.List;
 
 public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecificationExecutor<Report> {
 
-
     @Query(nativeQuery = true, value =
             "WITH w as (Select distinct vall.campaign_id                                                                                as campaignid, " +
                     "                           vall.campaign_name                                                                              as campaignname, " +
@@ -41,7 +40,7 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
                     "                                    0)                                                                                     as budgetGivenPC, " +
                     "                           COALESCE(round(CAST(tca.budget / nullif(tca.initial_budget, 0) * 100 AS numeric), 2), " +
                     "                                    0)                                                                                     as budgetPC " +
-                    "           from v_transactions_all vall " +
+                    "           from v_transactions_status vall " +
                     "                    left join t_channel tc on vall.channel_id = tc.id " +
                     "                    left join t_campaign tca on vall.campaign_id = tca.id " +
                     "           where (cast(:dateFrom as date) IS NULL OR (:dateFrom <= vall.date_time)) " +
@@ -74,7 +73,6 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
     )
     List<ReportTopCampaings> searchTopCampaigns(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid, @Param("dictionaryList") List<Long> dictionaryList);
 
-
     @Query(nativeQuery = true, value =
            " Select distinct vall.campaign_id as campaignid, " +
                    "                           vall.campaign_name                                                                              as campaignname, " +
@@ -104,7 +102,7 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
                    "                                    0)                                                                                     as budgetGivenPC, " +
                    "                           COALESCE(round(CAST(tca.budget / nullif(tca.initial_budget, 0) * 100 AS numeric), 2), " +
                    "                                    0)                                                                                     as budgetPC " +
-                   "           from v_transactions_all vall " +
+                   "           from v_transactions_status vall " +
                    "                    left join t_channel tc on vall.channel_id = tc.id " +
                    "                    left join t_campaign tca on vall.campaign_id = tca.id " +
                    "           where (cast(:dateFrom as date) IS NULL OR (:dateFrom <= vall.date_time)) " +
@@ -150,7 +148,7 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
             "                                    0)                                                                                     as budgetGivenPC, " +
             "                           COALESCE(round(CAST(tca.budget / nullif(tca.initial_budget, 0) * 100 AS numeric), 2), " +
             "                                    0)                                                                                     as budgetPC " +
-            "           from v_transactions_all vall " +
+            "           from v_transactions_status vall " +
             "                    left join t_channel tc on vall.channel_id = tc.id " +
             "                    left join t_affiliate ta on vall.affiliate_id = ta.id " +
             "                    left join t_campaign tca on vall.campaign_id = tca.id " +
@@ -185,7 +183,7 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
             "FROM w " +
             " " +
             "GROUP BY ROLLUP ((w.campaignid, w.campaignname, w.channelName, w.channelId, w.affiliateName, w.affiliateId, w.initialBudget, w.budget)) " +
-            "order by campaignname nulls last")
+            "order by affiliateName nulls last")
     List<ReportTopCampaings> searchTopCampaignsChannel(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid, @Param("dictionaryList") List<Long> dictionaryList);
 
     //=========================================================================================================================
@@ -194,35 +192,53 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
     //=========================================================================================================================
     //=========================================================================================================================
 
-    @Query(nativeQuery = true, value = "Select distinct vall.dictionary_name, " +
-            "                vall.affiliate_id                                                                                                   as affiliateId, " +
-            "                vall.affiliate_name                                                                                                 as affiliateName, " +
-            "                vall.channel_id                                                                                                     as channelId, " +
-            "                tc.name                                                                                                             as channelName, " +
-            "                COALESCE(SUM(impression_number), 0)                                                                                 as impressionNumber, " +
-            "                COALESCE(SUM(click_number), 0)                                                                                      as clickNumber, " +
-            "                COALESCE(SUM(lead_number), 0)                                                                                       as leadNumber, " +
-            "                COALESCE(round((SUM(click_number) / SUM(nullif(lead_number, 0)) * 100), 2), 0)                                      as CTR, " +
-            "                COALESCE(round(CAST((SUM(lead_number) / SUM(nullif(click_number, 0)) * 100) AS numeric), 2), 0)                     as LR, " +
-            "                COALESCE(round(CAST(SUM(commission_value) AS numeric), 2), 0)                                                       as commission, " +
-            "                COALESCE(round(CAST(SUM(revenue) AS numeric), 2), 0)                                                                  as revenue, " +
-            "                COALESCE(round(CAST((SUM(revenue) - SUM(commission_value)) AS numeric), 2), 0)                                        as margine, " +
-            "                COALESCE(round(CAST((SUM(revenue) - SUM(commission_value)) AS numeric) / CAST(SUM(nullif(revenue, 0)) AS numeric) * 100, 2), " +
-            "                         0)                                                                                                         as marginePC, " +
-            "                COALESCE(round(CAST(SUM(nullif(commission_value, 0)) / SUM(nullif(impression_number, 0)) * 1000 AS numeric), 2), 0) as ecpm, " +
-            "                COALESCE(round(CAST(SUM(commission_value) / SUM(nullif(click_number, 0)) AS numeric), 2), 0)                        as ecpc, " +
-            "                COALESCE(round(CAST(SUM(commission_value) / SUM(nullif(lead_number, 0)) AS numeric), 2), 0)                         as ecpl " +
-            "from v_transactions_all vall " +
-            "         left join t_channel tc on vall.channel_id = tc.id " +
-            "         left join t_affiliate ta on vall.affiliate_id = ta.id " +
-            "where (cast(:dateFrom as date) IS NULL OR (:dateFrom <= vall.date_time)) " +
-            "  AND (cast(:dateTo as date) IS NULL OR (:dateTo >= vall.date_time)) " +
-            "  AND ((:affiliateId) IS NULL OR (vall.affiliate_id = (:affiliateId))) " +
-            "  AND ((:campaignid) IS NULL OR (vall.campaign_id = (:campaignid))) " +
-            "  AND ((:dictionaryList) IS NULL OR (vall.dictionary_id in (:dictionaryList))) " +
-            "GROUP BY ((affiliateId, channelid, channelName, vall.affiliate_name, vall.dictionary_id)), vall.dictionary_name " +
-            "order by affiliateName DESC nulls last" +
-            " ")
+    @Query(nativeQuery = true, value = "WITH w as (Select distinct vall.affiliate_id                                                                                                   as affiliateId, " +
+            "                  vall.affiliate_name                                                                                                 as affiliateName, " +
+            "                  COALESCE(SUM(impression_number), 0)                                                                                 as impressionNumber, " +
+            "                  COALESCE(SUM(click_number), 0)                                                                                      as clickNumber, " +
+            "                  COALESCE(SUM(lead_number), 0)                                                                                       as leadNumber, " +
+            "                  COALESCE(round((SUM(click_number) / SUM(nullif(impression_number, 0)) * 100), 2), 0)                                as CTR, " +
+            "                  COALESCE(round(CAST((SUM(lead_number) / SUM(nullif(click_number, 0)) * 100) AS numeric), 2), 0)                     as LR, " +
+            "                  COALESCE(round(CAST(SUM(commission_value) AS numeric), 2), 0)                                                       as commission, " +
+            "                  COALESCE(round(CAST(SUM(revenue) AS numeric), 2), 0)                                                                as revenue, " +
+            "                  COALESCE(round(CAST((SUM(revenue) - SUM(commission_value)) AS numeric), 2), 0)                                      as margine, " +
+            "                  COALESCE(round(CAST((SUM(revenue) - SUM(commission_value)) AS numeric) / CAST(SUM(nullif(revenue, 0)) AS numeric) * 100, 2), " +
+            "                           0)                                                                                                         as marginePC, " +
+            "                  COALESCE(round(CAST(SUM(nullif(commission_value, 0)) / SUM(nullif(impression_number, 0)) * 1000 AS numeric), 2), 0) as ecpm, " +
+            "                  COALESCE(round(CAST(SUM(commission_value) / SUM(nullif(click_number, 0)) AS numeric), 2), 0)                        as ecpc, " +
+            "                  COALESCE(round(CAST(SUM(commission_value) / SUM(nullif(lead_number, 0)) AS numeric), 2), 0)                         as ecpl " +
+            "           from v_transactions_status vall " +
+            "                    left join t_channel tc on vall.channel_id = tc.id " +
+            "                    left join t_affiliate ta on vall.affiliate_id = ta.id " +
+            "           where (cast(:dateFrom as date) IS NULL OR (:dateFrom <= vall.date_time)) " +
+            "             AND (cast(:dateTo as date) IS NULL OR (:dateTo >= vall.date_time)) " +
+            "             AND ((:affiliateId) IS NULL OR (vall.affiliate_id = (:affiliateId))) " +
+            "             AND ((:campaignid) IS NULL OR (vall.campaign_id = (:campaignid))) " +
+            "             AND ((:dictionaryList) IS NULL OR (vall.dictionary_id in (:dictionaryList))) " +
+            "           group by vall.affiliate_name, vall.affiliate_id) " +
+            "Select distinct w.affiliateId, " +
+            "       w.affiliateName, " +
+            "                  COALESCE(SUM(w.impressionNumber), 0)                                                                                 as impressionNumber, " +
+            "                  COALESCE(SUM(w.clickNumber), 0)                                                                                      as clickNumber, " +
+            "                  COALESCE(SUM(w.leadNumber), 0)                                                                                       as leadNumber, " +
+            "                  COALESCE(round((SUM(w.clickNumber) / SUM(nullif(w.impressionNumber, 0)) * 100), 2), 0)                                      as CTR, " +
+            "                  COALESCE(round(CAST((SUM(w.leadNumber) / SUM(nullif(w.clickNumber, 0)) * 100) AS numeric), 2), 0)                     as LR, " +
+            "                  COALESCE(round(CAST(SUM(w.commission) AS numeric), 2), 0)                                                       as commission, " +
+            "                  COALESCE(round(CAST(SUM(revenue) AS numeric), 2), 0)                                                                as revenue, " +
+            "                  COALESCE(round(CAST((SUM(revenue) - SUM(w.commission)) AS numeric), 2), 0)                                      as margine, " +
+            "                  COALESCE(round(CAST((SUM(revenue) - SUM(w.commission)) AS numeric) / CAST(SUM(nullif(revenue, 0)) AS numeric) * 100, 2), " +
+            "                           0)                                                                                                         as marginePC, " +
+            "                  COALESCE(round(CAST(SUM(nullif(w.commission, 0)) / SUM(nullif(w.impressionNumber, 0)) * 1000 AS numeric), 2), 0) as ecpm, " +
+            "                  COALESCE(round(CAST(SUM(w.impressionNumber) / SUM(nullif(w.clickNumber, 0)) AS numeric), 2), 0)                        as ecpc, " +
+            "                  COALESCE(round(CAST(SUM(w.impressionNumber) / SUM(nullif(w.leadNumber, 0)) AS numeric), 2), 0)                         as ecpl " +
+            "FROM w " +
+            "GROUP BY ROLLUP ((w.affiliateId, w.affiliateName, w.impressionNumber, w.clickNumber, w.leadNumber, w.CTR, w.LR, " +
+            "                  w.commission, w.revenue, " +
+            "                  w.margine, w.marginePC, " +
+            "                  w.ecpc, w.ecpc, w.ecpl)) " +
+            "order by w.affiliateName ASC nulls last" +
+            "" 
+            )
     List<ReportTopAffiliates> searchTopAffilaites(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid, @Param("dictionaryList") List<Long> dictionaryList);
 
     //=========================================================================================================================
@@ -231,7 +247,66 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
     //=========================================================================================================================
     //=========================================================================================================================
 
-    @Query(nativeQuery = true, value = "WITH w as (Select distinct datadx                                                                                   as giorno, " +
+    @Query(nativeQuery = true, value = "WITH w as (Select distinct vall.affiliate_id                                                                                                   as affiliateId, " +
+            "                  vall.affiliate_name                                                                                                 as affiliateName, " +
+            "                  vall.channel_id                                                                                                     as channelId, " +
+            "                  tc.name                                                                                                             as channelName, " +
+            "                  COALESCE(SUM(impression_number), 0)                                                                                 as impressionNumber, " +
+            "                  COALESCE(SUM(click_number), 0)                                                                                      as clickNumber, " +
+            "                  COALESCE(SUM(lead_number), 0)                                                                                       as leadNumber, " +
+            "                  COALESCE(round((SUM(click_number) / SUM(nullif(impression_number, 0)) * 100), 2), 0)                                as CTR, " +
+            "                  COALESCE(round(CAST((SUM(lead_number) / SUM(nullif(click_number, 0)) * 100) AS numeric), 2), 0)                     as LR, " +
+            "                  COALESCE(round(CAST(SUM(commission_value) AS numeric), 2), 0)                                                       as commission, " +
+            "                  COALESCE(round(CAST(SUM(revenue) AS numeric), 2), 0)                                                                as revenue, " +
+            "                  COALESCE(round(CAST((SUM(revenue) - SUM(commission_value)) AS numeric), 2), 0)                                      as margine, " +
+            "                  COALESCE(round(CAST((SUM(revenue) - SUM(commission_value)) AS numeric) / CAST(SUM(nullif(revenue, 0)) AS numeric) * 100, 2), " +
+            "                           0)                                                                                                         as marginePC, " +
+            "                  COALESCE(round(CAST(SUM(nullif(commission_value, 0)) / SUM(nullif(impression_number, 0)) * 1000 AS numeric), 2), 0) as ecpm, " +
+            "                  COALESCE(round(CAST(SUM(commission_value) / SUM(nullif(click_number, 0)) AS numeric), 2), 0)                        as ecpc, " +
+            "                  COALESCE(round(CAST(SUM(commission_value) / SUM(nullif(lead_number, 0)) AS numeric), 2), 0)                         as ecpl " +
+            "           from v_transactions_status vall " +
+            "                    left join t_channel tc on vall.channel_id = tc.id " +
+            "                    left join t_affiliate ta on vall.affiliate_id = ta.id " +
+            "           where (cast(:dateFrom as date) IS NULL OR (:dateFrom <= vall.date_time)) " +
+            "             AND (cast(:dateTo as date) IS NULL OR (:dateTo >= vall.date_time)) " +
+            "             AND ((:affiliateId) IS NULL OR (vall.affiliate_id = (:affiliateId))) " +
+            "             AND ((:campaignid) IS NULL OR (vall.campaign_id = (:campaignid))) " +
+            "             AND ((:dictionaryList) IS NULL OR (vall.dictionary_id in (:dictionaryList))) " +
+            "           group by vall.affiliate_name, tc.name, vall.channel_id, vall.affiliate_id) " +
+            "Select distinct w.affiliateId, " +
+            "       w.affiliateName, " +
+            "       w.channelId, " +
+            "       w.channelName, " +
+            "                  COALESCE(SUM(w.impressionNumber), 0)                                                                                 as impressionNumber, " +
+            "                  COALESCE(SUM(w.clickNumber), 0)                                                                                      as clickNumber, " +
+            "                  COALESCE(SUM(w.leadNumber), 0)                                                                                       as leadNumber, " +
+            "                  COALESCE(round((SUM(w.clickNumber) / SUM(nullif(w.impressionNumber, 0)) * 100), 2), 0)                                      as CTR, " +
+            "                  COALESCE(round(CAST((SUM(w.leadNumber) / SUM(nullif(w.clickNumber, 0)) * 100) AS numeric), 2), 0)                     as LR, " +
+            "                  COALESCE(round(CAST(SUM(w.commission) AS numeric), 2), 0)                                                       as commission, " +
+            "                  COALESCE(round(CAST(SUM(revenue) AS numeric), 2), 0)                                                                as revenue, " +
+            "                  COALESCE(round(CAST((SUM(revenue) - SUM(w.commission)) AS numeric), 2), 0)                                      as margine, " +
+            "                  COALESCE(round(CAST((SUM(revenue) - SUM(w.commission)) AS numeric) / CAST(SUM(nullif(revenue, 0)) AS numeric) * 100, 2), " +
+            "                           0)                                                                                                         as marginePC, " +
+            "                  COALESCE(round(CAST(SUM(nullif(w.commission, 0)) / SUM(nullif(w.impressionNumber, 0)) * 1000 AS numeric), 2), 0) as ecpm, " +
+            "                  COALESCE(round(CAST(SUM(w.impressionNumber) / SUM(nullif(w.clickNumber, 0)) AS numeric), 2), 0)                        as ecpc, " +
+            "                  COALESCE(round(CAST(SUM(w.impressionNumber) / SUM(nullif(w.leadNumber, 0)) AS numeric), 2), 0)                         as ecpl " +
+            "FROM w " +
+            "GROUP BY ROLLUP ((w.affiliateId, w.affiliateName, w.channelId, w.channelName, w.impressionNumber, w.clickNumber, w.leadNumber, w.CTR, w.LR, " +
+            "                  w.commission, w.revenue, " +
+            "                  w.margine, w.marginePC, " +
+            "                  w.ecpc, w.ecpc, w.ecpl)) " +
+            "order by w.affiliateName ASC nulls last" +
+            ""
+    )
+    List<ReportTopAffiliates> searchTopAffilaitesChannel(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid, @Param("dictionaryList") List<Long> dictionaryList);
+
+    //=========================================================================================================================
+    //=========================================================================================================================
+    //=========================================================================================================================
+    //=========================================================================================================================
+    //=========================================================================================================================
+
+    @Query(nativeQuery = true, value = "WITH w as (Select distinct datadx                                                        as giorno, " +
             "                           COALESCE(SUM(dt.impressionnumber), 0)                                                    as impressionNumber, " +
             "                           COALESCE(SUM(dt.impressionnumberrigettato), 0)                                           as impressionNumberRigettato, " +
             "                           COALESCE(SUM(dt.clicknumber), 0)                                                         as clickNumber, " +

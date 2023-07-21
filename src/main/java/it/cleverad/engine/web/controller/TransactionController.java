@@ -2,7 +2,7 @@ package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.*;
 import it.cleverad.engine.web.dto.*;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin
 @RestController
 @RequestMapping(value = "/transaction")
-@Log4j2
+@Slf4j
 public class TransactionController {
 
     @Autowired
@@ -190,8 +190,7 @@ public class TransactionController {
     @PatchMapping("/update/status")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void updateStatus(@RequestBody TransactionBusiness.FilterUpdate request) {
-        log.info(request);
-        business.updateStatus(request.getId(), request.getDictionaryId(), request.getTipo(), request.getApproved());
+        business.updateStatus(request.getId(), request.getDictionaryId(), request.getTipo(), request.getApproved(), request.getStatusId());
     }
 
 
