@@ -43,5 +43,6 @@ public class Budget {
     @JoinColumn(name = "campaign_id")
     private Campaign campaign;
 
+    private String cap;
 
 }

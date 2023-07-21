@@ -32,7 +32,10 @@ public class BudgetDTO {
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
 
-    public BudgetDTO(Long id, Double budget, Double initialBudget, LocalDate startDate, LocalDate dueDate, Long affiliateId, String affiliateName, Long campaignId, String campaignName, Boolean status) {
+    private String cap;
+
+    public BudgetDTO(Long id, Double budget, Double initialBudget, LocalDate startDate, LocalDate dueDate, Long affiliateId,
+                     String affiliateName, Long campaignId, String campaignName, Boolean status, String cap) {
         this.id = id;
         this.budget = budget;
         this.initialBudget = initialBudget;
@@ -43,6 +46,7 @@ public class BudgetDTO {
         this.campaignId = campaignId;
         this.campaignName = campaignName;
         this.status = status;
+        this.cap  =cap;
     }
 
     public static BudgetDTO from(Budget budget) {
@@ -56,7 +60,7 @@ public class BudgetDTO {
                 budget.getAffiliate() != null ? budget.getAffiliate().getName() : null,
                 budget.getCampaign() != null ? budget.getCampaign().getId() : null,
                 budget.getCampaign() != null ? budget.getCampaign().getName() : null,
-                budget.getStatus()
+                budget.getStatus(), budget.getCap()
         );
     }
 
