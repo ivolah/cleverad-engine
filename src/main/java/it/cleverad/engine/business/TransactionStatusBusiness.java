@@ -115,7 +115,9 @@ public class TransactionStatusBusiness {
             if (request.getDictionaryId() != null) {
                 predicates.add(cb.equal(root.get("dictionaryId"), request.getDictionaryId()));
             }
-
+            if (request.getStatusId() != null) {
+                predicates.add(cb.equal(root.get("statusId"), request.getStatusId()));
+            }
 
             if (request.getPayoutPresent() != null) {
                 predicates.add(cb.equal(root.get("payoutPresent"), request.getPayoutPresent()));

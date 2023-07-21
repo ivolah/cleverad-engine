@@ -189,7 +189,7 @@ public class ManageCPL {
                         }
 
                         //setto pending
-                        transaction.setStatusId(42L);
+                        transaction.setStatusId(72L);
 
                         // creo la transazione
                         TransactionCPLDTO cpl = transactionBusiness.createCpl(transaction);
@@ -294,7 +294,7 @@ public class ManageCPL {
                         transaction.setLeadNumber(Long.valueOf(1));
 
                         //setto rifiutato
-                        transaction.setStatusId(40L);
+                        transaction.setStatusId(74L);
                         // setto blacklisted
                         transaction.setDictionaryId(70L);
 

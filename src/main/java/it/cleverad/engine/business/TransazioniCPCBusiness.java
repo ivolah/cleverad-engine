@@ -69,7 +69,7 @@ public class TransazioniCPCBusiness {
         not.add(70L);
         request.setNotInId(not);
         Page<TransactionAllDTO> ls = transactionAllBusiness.searchPrefiltrato(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
-        if (ls.getTotalElements() > 0) this.gestisci(ls, dataDaGestire, 42L);
+        if (ls.getTotalElements() > 0) this.gestisci(ls, dataDaGestire, 72L);
 
         // blacklisted
         request = new TransactionAllBusiness.Filter();

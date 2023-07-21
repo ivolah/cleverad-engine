@@ -265,13 +265,21 @@ public class TransactionBusiness {
     // TODO quando campbio stato devo ricalcolare i budget affilitato e campagna
     //        nuovi tre stati  : pending, approvato e rifutato
 
-    public void updateStatus(Long id, Long dictionaryId, String tipo, Boolean approved) {
+    public void updateStatus(Long id, Long dictionaryId, String tipo, Boolean approved, Long statusId) {
         if (tipo.equals("CPC")) {
             TransactionCPC cpc = cpcRepository.findById(id).get();
-            if (dictionaryId != null)
-                cpc.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", dictionaryId)));
+            if (dictionaryId != null) {
+                Long finalDictionaryId = dictionaryId;
+                cpc.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", finalDictionaryId)));
+            }
+            else dictionaryId = 0L;
+            if (statusId != null) {
+                Long finalStatusId = statusId;
+                cpc.setDictionaryStatus(dictionaryRepository.findById(statusId).orElseThrow(() -> new ElementCleveradException("Status", finalStatusId)));
+            }
+            else statusId = 0L;
             if (approved != null) cpc.setApproved(approved);
-            if (dictionaryId == 40) {
+            if (dictionaryId == 40L || statusId == 74L) {
                 // setto revenue e commission a 0
                 cpc.setRevenueId(1L);
                 cpc.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
@@ -280,10 +288,18 @@ public class TransactionBusiness {
             cpcRepository.save(cpc);
         } else if (tipo.equals("CPL")) {
             TransactionCPL cpl = cplRepository.findById(id).get();
-            if (dictionaryId != null)
-                cpl.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", dictionaryId)));
+            if (dictionaryId != null) {
+                Long finalDictionaryId1 = dictionaryId;
+                cpl.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", finalDictionaryId1)));
+            }
+            else dictionaryId = 0L;
+            if (statusId != null) {
+                Long finalStatusId1 = statusId;
+                cpl.setDictionaryStatus(dictionaryRepository.findById(statusId).orElseThrow(() -> new ElementCleveradException("Status", finalStatusId1)));
+            }
+            else statusId = 0L;
             if (approved != null) cpl.setApproved(approved);
-            if (dictionaryId == 40) {
+            if (dictionaryId == 40L || statusId == 74L) {
                 // setto revenue e commission a 0
                 cpl.setRevenueId(1L);
                 cpl.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
@@ -292,10 +308,18 @@ public class TransactionBusiness {
             cplRepository.save(cpl);
         } else if (tipo.equals("CPM")) {
             TransactionCPM cpm = cpmRepository.findById(id).get();
-            if (dictionaryId != null)
-                cpm.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", dictionaryId)));
+            if (dictionaryId != null) {
+                Long finalDictionaryId2 = dictionaryId;
+                cpm.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", finalDictionaryId2)));
+            }
+            else dictionaryId = 0L;
+            if (statusId != null) {
+                Long finalStatusId2 = statusId;
+                cpm.setDictionaryStatus(dictionaryRepository.findById(statusId).orElseThrow(() -> new ElementCleveradException("Status", finalStatusId2)));
+            }
+            else statusId = 0L;
             if (approved != null) cpm.setApproved(approved);
-            if (dictionaryId == 40) {
+            if (dictionaryId == 40L || statusId == 74L) {
                 // setto revenue e commission a 0
                 cpm.setRevenueId(1L);
                 cpm.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
@@ -304,10 +328,18 @@ public class TransactionBusiness {
             cpmRepository.save(cpm);
         } else if (tipo.equals("CPS")) {
             TransactionCPS cps = cpsRepository.findById(id).get();
-            if (dictionaryId != null)
-                cps.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", dictionaryId)));
+            if (dictionaryId != null) {
+                Long finalDictionaryId3 = dictionaryId;
+                cps.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", finalDictionaryId3)));
+            }
+            else dictionaryId = 0L;
+            if (statusId != null) {
+                Long finalStatusId3 = statusId;
+                cps.setDictionaryStatus(dictionaryRepository.findById(statusId).orElseThrow(() -> new ElementCleveradException("Status", finalStatusId3)));
+            }
+            else statusId = 0L;
             if (approved != null) cps.setApproved(approved);
-            if (dictionaryId == 40) {
+            if (dictionaryId == 40L || statusId == 74L) {
                 // setto revenue e commission a 0
                 cps.setRevenueId(1L);
                 cps.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
@@ -316,7 +348,6 @@ public class TransactionBusiness {
             cpsRepository.save(cps);
         }
     }
-
 
     // GET BY ID CPC
     public TransactionCPCDTO findByIdCPC(Long id) {
@@ -397,8 +428,7 @@ public class TransactionBusiness {
                 // aggiorno budget affiliato
                 BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
                 if (budgetAff != null) {
-                    budgetBusiness.updateBudget(budgetAff.getId(),
-                            budgetAff.getBudget() + dto.getValue());
+                    budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
                 }
 
                 // aggiorno budget campagna
@@ -419,8 +449,7 @@ public class TransactionBusiness {
                 // aggiorno budget affiliato
                 BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
                 if (budgetAff != null) {
-                    budgetBusiness.updateBudget(budgetAff.getId(),
-                            budgetAff.getBudget() + dto.getValue());
+                    budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
                 }
 
                 // aggiorno budget campagna
@@ -440,8 +469,7 @@ public class TransactionBusiness {
                 // aggiorno budget affiliato
                 BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
                 if (budgetAff != null) {
-                    budgetBusiness.updateBudget(budgetAff.getId(),
-                            budgetAff.getBudget() + dto.getValue());
+                    budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
                 }
 
                 // aggiorno budget campagna
@@ -459,8 +487,7 @@ public class TransactionBusiness {
                 // aggiorno budget affiliato
                 BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
                 if (budgetAff != null) {
-                    budgetBusiness.updateBudget(budgetAff.getId(),
-                            budgetAff.getBudget() + dto.getValue());
+                    budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
                 }
 
                 // aggiorno budget campagna

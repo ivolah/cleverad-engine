@@ -218,7 +218,7 @@ public class ManageCPC {
 
                         transaction.setAgent("");
                         //setto pending
-                        transaction.setStatusId(42L);
+                        transaction.setStatusId(72L);
 
                         // creo la transazione
                         TransactionCPCDTO tcpc = transactionBusiness.createCpc(transaction);
@@ -336,7 +336,7 @@ public class ManageCPC {
                         transaction.setAgent("");
 
                         //setto rifiutato
-                        transaction.setStatusId(40L);
+                        transaction.setStatusId(74L);
                         // setto blacklisted
                         transaction.setDictionaryId(70L);
 

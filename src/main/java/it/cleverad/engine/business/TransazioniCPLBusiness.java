@@ -37,7 +37,7 @@ public class TransazioniCPLBusiness {
     @Autowired
     private TransactionAllBusiness transactionAllBusiness;
     @Autowired
-     private WalletBusiness walletBusiness;
+    private WalletBusiness walletBusiness;
     @Autowired
     private BudgetBusiness budgetBusiness;
     @Autowired
@@ -194,8 +194,8 @@ public class TransazioniCPLBusiness {
                             }
                         }
 
-                        if (cccpl.getBlacklisted()) transaction.setStatusId(70L);
-                        else transaction.setStatusId(42L);
+                        if (cccpl.getBlacklisted() != null && cccpl.getBlacklisted()) transaction.setStatusId(74L);
+                        else transaction.setStatusId(72L);
 
                         // creo la transazione
                         TransactionCPLDTO cpl = transactionBusiness.createCpl(transaction);

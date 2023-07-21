@@ -133,6 +133,10 @@ public class TransactionAllBusiness {
                 predicates.add(cb.equal(root.get("dictionaryId"), request.getDictionaryId()));
             }
 
+            if (request.getStatusId() != null) {
+                predicates.add(cb.equal(root.get("statusId"), request.getStatusId()));
+            }
+
 /*            if (request.getCreationDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("creationDate"), request.getCreationDateFrom().atStartOfDay()));
             }
@@ -209,6 +213,7 @@ public class TransactionAllBusiness {
         private String data;
         private String tipo;
         private Long dictionaryId;
+        private Long statusId;
         private Boolean valueNotZero;
         private Boolean payoutPresent;
         public List<Long> notInId;

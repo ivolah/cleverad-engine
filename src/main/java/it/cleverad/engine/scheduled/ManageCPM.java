@@ -179,7 +179,7 @@ public class ManageCPM {
                         }
 
                         //setto pending
-                        transaction.setStatusId(42L);
+                        transaction.setStatusId(72L);
 
                         // creo la transazione
                         TransactionCPMDTO tcpm = transactionBusiness.createCpm(transaction);
@@ -271,7 +271,7 @@ public class ManageCPM {
                         transaction.setImpressionNumber(Long.valueOf(aLong));
 
                         //setto rifiutato
-                        transaction.setStatusId(40L);
+                        transaction.setStatusId(74L);
                         // setto blacklisted
                         transaction.setDictionaryId(70L);
 

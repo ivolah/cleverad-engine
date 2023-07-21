@@ -28,12 +28,8 @@ public class CpcDTO {
     private String htmlReferral;
     private String info;
     private String country;
-
-
     private Long mediaId;
-
     private Long targetId;
-
 
 
     public CpcDTO(Long id, String refferal, String ip, String agent, LocalDateTime date, Boolean read, String htmlReferral, String info, String country, Long mediaId, Long campaignId, Long affiliateId, Long channelId, Long targetId) {
