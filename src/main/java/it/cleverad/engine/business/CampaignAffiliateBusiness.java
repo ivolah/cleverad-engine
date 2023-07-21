@@ -96,7 +96,7 @@ public class CampaignAffiliateBusiness {
         Filter request = new Filter();
         request.setCampaignId(id);
         request.setFollowNull(false);
-        Page<CampaignAffiliate> page = repository.findAll(getSpecification(request), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id"))));
+        Page<CampaignAffiliate> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
         try {
             page.stream().forEach(campaignAffiliate -> {
                 repository.deleteById(campaignAffiliate.getId());
@@ -120,7 +120,7 @@ public class CampaignAffiliateBusiness {
     }
 
     public Page<CampaignAffiliateDTO> searchByAffiliateID(Long affiliateId) {
-        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id")));
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setAffiliateId(affiliateId);
         Page<CampaignAffiliate> page = repository.findAll(getSpecification(request), pageable);
@@ -141,7 +141,7 @@ public class CampaignAffiliateBusiness {
     }
 
     public Page<CampaignAffiliateDTO> searchByAffiliateIdAndCampaignId(Long affiliateId, Long campaignId) {
-        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id")));
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setAffiliateId(affiliateId);
         request.setCampaignId(campaignId);

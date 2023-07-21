@@ -159,7 +159,7 @@ public class FileUserBusiness {
         Filter rr = new Filter();
         rr.setAvatar(true);
         rr.setUserId(jwtUserDetailsService.getUserID());
-        Page<FileUser> page = repository.findAll(getSpecification(rr), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id"))));
+        Page<FileUser> page = repository.findAll(getSpecification(rr), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
         page.stream().forEach(fileUser -> repository.delete(fileUser));
 
         // salvo avatar
@@ -175,7 +175,7 @@ public class FileUserBusiness {
         Filter rr = new Filter();
         rr.setAvatar(true);
         rr.setUserId(jwtUserDetailsService.getUserID());
-        Page<FileUser> page = repository.findAll(getSpecification(rr), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id"))));
+        Page<FileUser> page = repository.findAll(getSpecification(rr), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
         page.stream().forEach(fileUser -> repository.delete(fileUser));
 
         String filename = StringUtils.cleanPath(file.getOriginalFilename());

@@ -95,7 +95,7 @@ public class TargetBusiness {
     }
 
     public Page<TargetDTO> getByMediaIdAll(Long mediaId) {
-        Pageable pageable = PageRequest.of(0, 10000, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")));
         Filter filter = new Filter();
         filter.setMediaId(mediaId);
         Page<Target> page = repository.findAll(getSpecification(filter), pageable);

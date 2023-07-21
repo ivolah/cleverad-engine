@@ -327,14 +327,8 @@ public class CampaignBusiness {
         return page.map(CampaignDTO::from);
     }
 
-    public Page<CampaignDTO> searchByMediaId(Long mediaId) {
-        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("name")));
-        Page<Campaign> page;
-        return null;
-    }
-
     public List<CampaignDTO> getCampaignsToDisable() {
-        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("name")));
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("name")));
         Filter request = new Filter();
         request.setStatus(true);
         request.setEndDateTo(LocalDate.now());
@@ -345,7 +339,7 @@ public class CampaignBusiness {
     public List<CampaignDTO> getEnabledCampaigns() {
         Filter request = new Filter();
         request.setStatus(true);
-        Page<Campaign> page = repository.findAll(getSpecification(request), PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id"))));
+        Page<Campaign> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id"))));
         return page.map(CampaignDTO::from).toList();
     }
 
@@ -446,7 +440,6 @@ public class CampaignBusiness {
         private String valuta;
         private Double budget;
         private Double initialBudget;
-        private String trackingCode;
         private String note;
         @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSz")
         private LocalDateTime startDate;
@@ -471,7 +464,6 @@ public class CampaignBusiness {
         private Long cookieId;
         private String comissions;
         private List<Long> categoryList;
-        private String trackingCode;
         private String note;
         private Instant creationDateFrom;
         private Instant creationDateTo;

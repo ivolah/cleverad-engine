@@ -29,8 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.criteria.Predicate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -127,7 +128,7 @@ public class AffiliateChannelCommissionCampaignBusiness {
             Filter request = new Filter();
             request.setCampaignId(campaignId);
             request.setCommissionId(commissionId);
-            Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id")));
+            Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")));
             Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(request), pageable);
             page.stream().spliterator().forEachRemaining(affiliateChannelCommissionCampaign -> repository.deleteById(affiliateChannelCommissionCampaign.getId()));
         } catch (ConstraintViolationException ex) {
@@ -151,6 +152,20 @@ public class AffiliateChannelCommissionCampaignBusiness {
         Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
         return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
+
+//    public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignIdDistinctAffiliate(Long campaignId, Pageable pageableRequest) {
+//        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+//        Filter filter = new Filter();
+//        filter.setCampaignId(campaignId);
+//        Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
+//
+//        Map<Long, String> list = new HashMap<>();
+//        page.stream().forEach(affiliateChannelCommissionCampaign -> list.put(affiliateChannelCommissionCampaign.getAffiliate().getId(), affiliateChannelCommissionCampaign.getAffiliate().getName()));
+//
+//        page.stream().filter(affiliateChannelCommissionCampaign -> affiliateChannelCommissionCampaign.getAffiliate().getId())
+//
+//        return page.map(AffiliateChannelCommissionCampaignDTO::from);
+//    }
 
     public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignIdAndType(Long campaignId, Long typeDictId, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));

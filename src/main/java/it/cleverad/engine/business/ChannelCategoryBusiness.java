@@ -95,7 +95,7 @@ public class ChannelCategoryBusiness {
     public void deleteByChannelID(Long id) {
         Filter request = new Filter();
         request.setChannelId(id);
-        Page<ChannelCategory> page = repository.findAll(getSpecification(request), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id"))));
+        Page<ChannelCategory> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
         try {
             page.stream().forEach(channelCategory -> repository.deleteById(channelCategory.getId()));
         } catch (javax.validation.ConstraintViolationException ex) {

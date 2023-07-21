@@ -77,7 +77,7 @@ public class ViewBusiness {
             Filter filter = new Filter();
             filter.setDoy(gg);
             if (!jwtUserDetailsService.isAdmin()) filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-            List<WidgetCampaignDayCpc> giornato = widgetCampaignDayCpcRepository.findAll(getSpecificationCampaignDayCpc(filter), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
+            List<WidgetCampaignDayCpc> giornato = widgetCampaignDayCpcRepository.findAll(getSpecificationCampaignDayCpc(filter), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
             for (WidgetCampaignDayCpc w : giornato)
                 dd = dd + w.getTotale();
 
@@ -395,7 +395,7 @@ public class ViewBusiness {
             Filter filter = new Filter();
             filter.setDoy(gg);
             if (!jwtUserDetailsService.isAdmin()) filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-            List<WidgetCampaignDayCpl> giornato = widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(filter), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
+            List<WidgetCampaignDayCpl> giornato = widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(filter), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
             for (WidgetCampaignDayCpl w : giornato) {
                 dd = dd + 1;
             }
@@ -437,7 +437,7 @@ public class ViewBusiness {
         Filter request = new Filter();
         request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 11);
         if (!jwtUserDetailsService.isAdmin()) request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-        Page<WidgetCampaignDayCpl> tutto = widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(request), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy"))));
+        Page<WidgetCampaignDayCpl> tutto = widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("doy"))));
 
         Set<Long> doys = tutto.stream().map(WidgetCampaignDayCpl::getDoy).collect(Collectors.toSet());
         Set<String> camps = tutto.stream().map(WidgetCampaignDayCpl::getCampaign).collect(Collectors.toSet());
@@ -460,7 +460,7 @@ public class ViewBusiness {
                 filter.setDoy(gg);
                 filter.setCampaign(campagna);
                 if (!jwtUserDetailsService.isAdmin()) filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-                List<WidgetCampaignDayCpl> giornato = widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(filter), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
+                List<WidgetCampaignDayCpl> giornato = widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(filter), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
                 for (WidgetCampaignDayCpl w : giornato)
                     dd = dd + w.getValore();
                 ja.put(dd);
@@ -544,7 +544,7 @@ public class ViewBusiness {
         Filter request = new Filter();
         request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 11);
         if (!jwtUserDetailsService.isAdmin()) request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-        Page<WidgetCampaignDayCps> tutto = widgetCampaignDayCpsRepository.findAll(getSpecificationCampaignDayCps(request), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy"))));
+        Page<WidgetCampaignDayCps> tutto = widgetCampaignDayCpsRepository.findAll(getSpecificationCampaignDayCps(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("doy"))));
 
         Set<Long> doys = tutto.stream().map(WidgetCampaignDayCps::getDoy).collect(Collectors.toSet());
         Set<String> camps = tutto.stream().map(WidgetCampaignDayCps::getCampaign).collect(Collectors.toSet());
@@ -568,7 +568,7 @@ public class ViewBusiness {
                 filter.setDoy(gg);
                 filter.setCampaign(campagna);
                 if (!jwtUserDetailsService.isAdmin()) filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-                List<WidgetCampaignDayCps> giornato = widgetCampaignDayCpsRepository.findAll(getSpecificationCampaignDayCps(filter), PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
+                List<WidgetCampaignDayCps> giornato = widgetCampaignDayCpsRepository.findAll(getSpecificationCampaignDayCps(filter), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
                 if (giornato.size() > 0) {
                     dd = giornato.get(0).getValore();
                 }

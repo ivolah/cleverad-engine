@@ -148,7 +148,7 @@ public class CpmBusiness {
     }
 
     public Page<CpmDTO> getUnread() {
-        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id")));
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setRead(false);
         Page<Cpm> page = repository.findAll(getSpecification(request), pageable);

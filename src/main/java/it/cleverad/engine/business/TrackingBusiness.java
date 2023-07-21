@@ -130,7 +130,7 @@ public class TrackingBusiness {
     }
 
     public Page<TrackingDTO> getUnread() {
-        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setRead(false);
         Page<Tracking> page = repository.findAll(getSpecification(request), pageable);

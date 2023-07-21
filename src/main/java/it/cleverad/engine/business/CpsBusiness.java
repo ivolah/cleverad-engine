@@ -88,7 +88,7 @@ public class CpsBusiness {
     }
 
     public Page<CpsDTO> getUnread() {
-        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id")));
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setRead(false);
         request.setDateFrom(LocalDate.now().minusDays(1));
@@ -99,7 +99,7 @@ public class CpsBusiness {
     }
 
     public Page<CpsDTO> getAllDayBefore() {
-        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Order.desc("id")));
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setDateFrom(LocalDate.now().minusDays(1));
         request.setDateTo(LocalDate.now().minusDays(1));

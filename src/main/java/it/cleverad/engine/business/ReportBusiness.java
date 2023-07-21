@@ -71,7 +71,7 @@ public class ReportBusiness {
 
     // SEARCH PAGINATED
     public Page<ReportDTO> search(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("name")));
         Page<Report> page = reportRepository.findAll(getSpecification(request), pageable);
         return page.map(ReportDTO::from);
     }
@@ -247,6 +247,37 @@ public class ReportBusiness {
         Page<ReportTopAffiliates> pages = new PageImpl<>(listaAffiliates.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, listaAffiliates.size());
         return pages;
     }
+
+    /**
+     * ============================================================================================================
+     **/
+
+    public Page<ReportTopAffiliates> searchTopAffilaitesChannel(TopFilter request, Pageable pageableRequest) {
+
+        if (request.getDictionaryIds() == null) {
+            @NotNull List<Long> ll = new ArrayList<>();
+            ll.add(39L);
+            ll.add(42L);
+            ll.add(41L);
+            ll.add(68L);
+            ll.add(49L);
+            ll.add(48L);
+            ll.add(47L);
+            ll.add(40L);
+            request.setDictionaryIds(ll);
+        }
+
+        List<ReportTopAffiliates> listaAffiliates = new ArrayList<>();
+        if (!jwtUserDetailsService.isAdmin()) {
+            listaAffiliates = reportRepository.searchTopAffilaitesChannel(request.getDateTimeFrom(), request.getDateTimeTo(), jwtUserDetailsService.getAffiliateID(), request.getCampaignid(), request.getDictionaryIds());
+        } else {
+            listaAffiliates = reportRepository.searchTopAffilaitesChannel(request.getDateTimeFrom(), request.getDateTimeTo(), request.getAffiliateid(), request.getCampaignid(), request.getDictionaryIds());
+        }
+        final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), listaAffiliates.size());
+        Page<ReportTopAffiliates> pages = new PageImpl<>(listaAffiliates.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, listaAffiliates.size());
+        return pages;
+    }
+
 
     /**
      * ============================================================================================================

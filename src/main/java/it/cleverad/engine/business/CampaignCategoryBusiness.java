@@ -98,7 +98,7 @@ public class CampaignCategoryBusiness {
     public void deleteByCampaignID(Long id) {
         Filter request = new Filter();
         request.setCampaignId(id);
-        Page<CampaignCategory> page = repository.findAll(getSpecification(request), PageRequest.of(0,1000, Sort.by(Sort.Order.asc("id"))));
+        Page<CampaignCategory> page = repository.findAll(getSpecification(request), PageRequest.of(0,Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
         try {
             page.stream().forEach(campaignCategory ->  repository.deleteById(campaignCategory.getId()));
         } catch (javax.validation.ConstraintViolationException ex) {
