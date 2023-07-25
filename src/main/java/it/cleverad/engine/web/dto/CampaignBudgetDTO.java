@@ -6,6 +6,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import javax.persistence.Column;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,6 +36,10 @@ public class CampaignBudgetDTO {
     private String materiali;
     private String note;
 
+    private LocalDateTime creationDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
+
     public static CampaignBudgetDTO from(CampaignBudget campaignBudget) {
         return new CampaignBudgetDTO(
                 campaignBudget.getId(),
@@ -40,7 +48,8 @@ public class CampaignBudgetDTO {
                 campaignBudget.getCapIniziale(), campaignBudget.getCapErogato(), campaignBudget.getCapFatturabile(),
                 campaignBudget.getBudgetIniziale(), campaignBudget.getBudgetErogato(),
                 campaignBudget.getFatturaId(),
-                campaignBudget.getFatturato(), campaignBudget.getScarto(), campaignBudget.getMateriali(), campaignBudget.getNote()
+                campaignBudget.getFatturato(), campaignBudget.getScarto(), campaignBudget.getMateriali(), campaignBudget.getNote(),
+                campaignBudget.getCreationDate(), campaignBudget.getStartDate(), campaignBudget.getEndDate()
         );
     }
 

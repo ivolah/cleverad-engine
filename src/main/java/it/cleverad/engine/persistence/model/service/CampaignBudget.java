@@ -5,6 +5,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "t_campaign_budget")
@@ -45,5 +47,13 @@ public class CampaignBudget {
     private String materiali;
 
     private String note;
+    @Column(name = "creation_date")
+    private LocalDateTime creationDate = LocalDateTime.now();
+
+    @Column(name = "start_date")
+    private LocalDate startDate;
+
+    @Column(name = "end_date")
+    private LocalDate endDate;
 
 }

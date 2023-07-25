@@ -220,7 +220,7 @@ public class BudgetBusiness {
         private LocalDate startDate;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private Date dueDate;
-        private String cap;
+        private Integer cap;
     }
 
     @Data
@@ -252,7 +252,7 @@ public class BudgetBusiness {
         private LocalDate startDateFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate startDateTo;
-        private String cap;
+        private Integer cap;
     }
 
 }

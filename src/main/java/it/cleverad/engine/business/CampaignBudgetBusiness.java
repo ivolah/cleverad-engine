@@ -21,11 +21,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.Column;
 import javax.persistence.criteria.Predicate;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -132,11 +135,18 @@ public class CampaignBudgetBusiness {
                 predicates.add(cb.equal(root.get("campaign").get("id"), request.getCampaignId()));
             }
 
-            if (request.getCreationDateFrom() != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("creationDate"), LocalDateTime.ofInstant(request.getCreationDateFrom(), ZoneOffset.UTC)));
+            if (request.getStartDateFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), LocalDateTime.ofInstant(request.getStartDateFrom(), ZoneOffset.UTC)));
             }
-            if (request.getCreationDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("creationDate"), LocalDateTime.ofInstant(request.getCreationDateTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
+            if (request.getStartDateTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), LocalDateTime.ofInstant(request.getStartDateTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
+            }
+
+            if (request.getEndDateFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("endDate"), LocalDateTime.ofInstant(request.getEndDateFrom(), ZoneOffset.UTC)));
+            }
+            if (request.getEndDateTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("endDate"), LocalDateTime.ofInstant(request.getEndDateTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -169,6 +179,10 @@ public class CampaignBudgetBusiness {
 
         private String materiali;
         private String note;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate startDate;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate endDate;
     }
 
     @Data
@@ -179,9 +193,15 @@ public class CampaignBudgetBusiness {
 
         private Long advertiserId;
         private Long campaignId;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private Instant startDateFrom;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private Instant startDateTo;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private Instant endDateFrom;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private Instant endDateTo;
 
-        private Instant creationDateFrom;
-        private Instant creationDateTo;
 
     }
 

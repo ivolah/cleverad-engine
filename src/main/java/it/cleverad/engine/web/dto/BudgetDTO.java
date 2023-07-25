@@ -32,10 +32,10 @@ public class BudgetDTO {
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
 
-    private String cap;
+    private Integer cap;
 
     public BudgetDTO(Long id, Double budget, Double initialBudget, LocalDate startDate, LocalDate dueDate, Long affiliateId,
-                     String affiliateName, Long campaignId, String campaignName, Boolean status, String cap) {
+                     String affiliateName, Long campaignId, String campaignName, Boolean status, Integer cap) {
         this.id = id;
         this.budget = budget;
         this.initialBudget = initialBudget;
