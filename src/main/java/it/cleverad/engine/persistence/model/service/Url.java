@@ -20,15 +20,13 @@ public class Url {
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Column(name = "long_url")
     private String longUrl;
-
+    private String tiny;
+    private String alias;
     @Column(name = "created_date", nullable = false)
-    private LocalDate createdDate;
-
+    private LocalDate createdDate = LocalDate.now();
     @Column(name = "expires_date")
-    private LocalDate expiresDate;
-
+    private LocalDate expiresDate = LocalDate.now();
 
 }

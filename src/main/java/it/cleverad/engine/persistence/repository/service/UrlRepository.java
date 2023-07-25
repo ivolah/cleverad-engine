@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 
-public interface UrlRepository extends JpaRepository<Url, Long>, JpaSpecificationExecutor<TransactionCPS> {
+public interface UrlRepository extends JpaRepository<Url, Long>, JpaSpecificationExecutor<Url> {
 }
