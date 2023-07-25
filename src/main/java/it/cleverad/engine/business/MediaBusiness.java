@@ -4,12 +4,15 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.Media;
+import it.cleverad.engine.persistence.model.service.Url;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.MediaRepository;
 import it.cleverad.engine.persistence.repository.service.MediaTypeRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.service.ReferralService;
+import it.cleverad.engine.service.tinyurl.TinyData;
+import it.cleverad.engine.service.tinyurl.TinyUrlService;
 import it.cleverad.engine.web.dto.MediaDTO;
 import it.cleverad.engine.web.dto.MediaTypeDTO;
 import it.cleverad.engine.web.dto.TargetDTO;
@@ -18,6 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -60,6 +64,10 @@ public class MediaBusiness {
     private ReferralService referralService;
     @Autowired
     private TargetBusiness targetBusiness;
+    @Autowired
+    private TinyUrlService tinyUrlService;
+    @Autowired
+    private UrlBusiness urlBusiness;
 
     /**
      * ============================================================================================================
@@ -80,7 +88,7 @@ public class MediaBusiness {
 
         Media map = mapper.map(request, Media.class);
         map.setMediaType(mediaTypeRepository.findById(request.typeId).orElseThrow(() -> new ElementCleveradException("Media Type", request.typeId)));
-        //map.setStatus(true);
+        map.setStatus(false);
         Media saved = repository.save(map);
         Campaign cc = campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.getCampaignId()));
         cc.addMedia(saved);
@@ -219,6 +227,8 @@ public class MediaBusiness {
         Page<Media> page = new PageImpl<>(list.stream().distinct().collect(Collectors.toList()));
         return page.map(media -> {
             MediaDTO dto = MediaDTO.from(media);
+//            if (dto.getTypeId() == 5L)
+//                dto.setTarget(setUrlTarget(dto.getTarget(), media.getId(), campaignId, 0L, 0L));
             dto.setBannerCode(generaBannerCode(dto, media.getId(), campaignId, 0L, 0L));
             return dto;
         });
@@ -227,6 +237,8 @@ public class MediaBusiness {
     public MediaDTO getByIdAndCampaignID(Long mediaId, Long campaignId) {
         Media media = repository.findById(mediaId).orElseThrow(() -> new ElementCleveradException("Media", mediaId));
         MediaDTO dto = MediaDTO.from(media);
+//        if (dto.getTypeId() == 5L)
+//            dto.setTarget(setUrlTarget(dto.getTarget(), mediaId, campaignId, 0L, 0L));
         dto.setBannerCode(generaBannerCode(dto, mediaId, campaignId, 0L, 0L));
         return dto;
     }
@@ -234,6 +246,8 @@ public class MediaBusiness {
     public MediaDTO getByIdAndCampaignIDChannelID(Long mediaId, Long campaignId, Long channelID) {
         Media media = repository.findById(mediaId).orElseThrow(() -> new ElementCleveradException("Media", mediaId));
         MediaDTO dto = MediaDTO.from(media);
+        if (dto.getTypeId() == 5L)
+            dto.setTarget(setUrlTarget(dto.getTarget(), mediaId, campaignId, channelID, 0L));
         dto.setBannerCode(generaBannerCode(dto, mediaId, campaignId, channelID, 0L));
         return dto;
     }
@@ -241,6 +255,8 @@ public class MediaBusiness {
     public MediaDTO getByIdAndCampaignIDChannelIDTargetID(Long mediaId, Long campaignId, Long channelID, Long targetId) {
         Media media = repository.findById(mediaId).orElseThrow(() -> new ElementCleveradException("Media", mediaId));
         MediaDTO dto = MediaDTO.from(media);
+        if (dto.getTypeId() == 5L)
+            dto.setTarget(setUrlTarget(dto.getTarget(), mediaId, campaignId, channelID, targetId));
         dto.setBannerCode(generaBannerCode(dto, mediaId, campaignId, channelID, targetId));
         return dto;
     }
@@ -261,7 +277,6 @@ public class MediaBusiness {
                     tt.setTarget(targetDTO.getTarget());
                 }
             });
-
             if (StringUtils.isNotBlank(tt.getTarget())) bannerCode = bannerCode.replace("{{target}}", tt.getTarget());
         }
 
@@ -270,6 +285,30 @@ public class MediaBusiness {
         }
 
         return bannerCode;
+    }
+
+    private String setUrlTarget(String target, Long mediaId, Long campaignId, Long channelID, Long targetId) {
+        target = target.replace("{{refferalId}}", referralService.creaEncoding(Long.toString(campaignId), Long.toString(mediaId), String.valueOf(jwtUserDetailsService.getAffiliateID()), Long.toString(channelID), Long.toString(targetId)));
+        Url urlRicercato = urlBusiness.findByLong(target);
+        if (urlRicercato == null || urlRicercato.getTiny() == null) {
+            // INTEGRAZIONE TINY URL
+            String alias = "CAD-" + RandomStringUtils.randomAlphanumeric(6);
+            TinyData tinyUrlData = tinyUrlService.createShort(alias, target);
+            String tiny = target;
+            if (tinyUrlData != null) {
+                tiny = tinyUrlData.getData().getTinyUrl();
+                UrlBusiness.BaseCreateRequest tinyurl = new UrlBusiness.BaseCreateRequest();
+                tinyurl.setLongUrl(target);
+                tinyurl.setTiny(tiny);
+                tinyurl.setAlias(alias);
+                urlBusiness.create(tinyurl);
+            }
+            return tiny;
+        } else {
+            log.info("TROVATO :: " + urlRicercato.getTiny());
+            return urlRicercato.getTiny();
+        }
+
     }
 
     /**
@@ -309,7 +348,7 @@ public class MediaBusiness {
             }
 
             if (request.getTarget() != null) {
-                predicates.add(cb.like(cb.upper(root.get("target")), "%"+ request.getTarget().toUpperCase() + "%"));
+                predicates.add(cb.like(cb.upper(root.get("target")), "%" + request.getTarget().toUpperCase() + "%"));
             }
             if (request.getBannerCode() != null) {
                 predicates.add(cb.equal(root.get("bannerCode"), request.getBannerCode()));
