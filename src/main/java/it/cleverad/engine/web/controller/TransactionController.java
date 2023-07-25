@@ -200,13 +200,13 @@ public class TransactionController {
 
     @GetMapping("/all")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<TransactionAllDTO> searchAll(TransactionAllBusiness.Filter request, Pageable pageable) {
+    public Page<TransactionStatusDTO> searchAll(TransactionAllBusiness.Filter request, Pageable pageable) {
         return allBusiness.searchPrefiltrato(request, pageable);
     }
 
     @GetMapping("/all/affiliate")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<TransactionAllDTO> searchAllPrefiltrato(TransactionAllBusiness.Filter request, Pageable pageable) {
+    public Page<TransactionStatusDTO> searchAllPrefiltrato(TransactionAllBusiness.Filter request, Pageable pageable) {
         return allBusiness.searchPrefiltrato(request, pageable);
     }
 

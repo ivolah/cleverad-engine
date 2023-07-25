@@ -67,11 +67,11 @@ public class TransazioniCPLBusiness {
             not.add(68L);
             request.setNotInId(not);
             request.setTipo("CPL");
-            Page<TransactionAllDTO> ls = transactionAllBusiness.searchPrefiltrato(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
+            Page<TransactionStatusDTO> ls = transactionAllBusiness.searchPrefiltrato(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
 
             log.info(">>> TOT :: " + ls.getTotalElements());
 
-            for (TransactionAllDTO tcpl : ls) {
+            for (TransactionStatusDTO tcpl : ls) {
                 log.info("CANCELLO PER RIGENERA CP :: {} : {} :: {}", tcpl.getId(), tcpl.getValue(), tcpl.getDateTime());
                 transactionBusiness.delete(tcpl.getId(), "CPL");
                 Thread.sleep(100L);

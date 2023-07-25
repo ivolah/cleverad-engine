@@ -68,7 +68,7 @@ public class TransazioniCPCBusiness {
         not.add(68L);
         not.add(70L);
         request.setNotInId(not);
-        Page<TransactionAllDTO> ls = transactionAllBusiness.searchPrefiltrato(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
+        Page<TransactionStatusDTO> ls = transactionAllBusiness.searchPrefiltrato(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
         if (ls.getTotalElements() > 0) this.gestisci(ls, dataDaGestire, 72L);
 
         // blacklisted
@@ -78,16 +78,16 @@ public class TransazioniCPCBusiness {
         request.setTipo("CPC");
 
         request.setDictionaryId(70L);
-        Page<TransactionAllDTO> black = transactionAllBusiness.searchPrefiltrato(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
+        Page<TransactionStatusDTO> black = transactionAllBusiness.searchPrefiltrato(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
         if (black.getTotalElements() > 0) this.gestisci(black, dataDaGestire, 70L);
     }
 
-    public void gestisci(Page<TransactionAllDTO> ls, LocalDate dataDaGestire, Long statusID) {
+    public void gestisci(Page<TransactionStatusDTO> ls, LocalDate dataDaGestire, Long statusID) {
         try {
 
             log.info(">>> TOT :: " + ls.getTotalElements());
 
-            for (TransactionAllDTO tcpc : ls) {
+            for (TransactionStatusDTO tcpc : ls) {
                 log.debug("CANCELLO PER RIGENERA CPC :: {} : {} :: {}", tcpc.getId(), tcpc.getClickNumber(), tcpc.getDateTime());
                 transactionBusiness.delete(tcpc.getId(), "CPC");
                 Thread.sleep(75L);

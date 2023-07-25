@@ -1,12 +1,8 @@
 package it.cleverad.engine.business;
 
-import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.service.ViewTransactionAll;
 import it.cleverad.engine.persistence.model.service.ViewTransactionStatus;
-import it.cleverad.engine.persistence.repository.service.ViewTransactionAllRepository;
 import it.cleverad.engine.persistence.repository.service.ViewTransactionStatusRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
-import it.cleverad.engine.web.dto.TransactionAllDTO;
 import it.cleverad.engine.web.dto.TransactionStatusDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
