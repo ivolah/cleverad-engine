@@ -1,9 +1,9 @@
 package it.cleverad.engine.business;
 
-import it.cleverad.engine.persistence.model.service.ViewTransactionAll;
-import it.cleverad.engine.persistence.repository.service.ViewTransactionAllRepository;
+import it.cleverad.engine.persistence.model.service.ViewTransactionStatus;
+import it.cleverad.engine.persistence.repository.service.ViewTransactionStatusRepository;
 import it.cleverad.engine.service.JwtUserDetailsService;
-import it.cleverad.engine.web.dto.TransactionAllDTO;
+import it.cleverad.engine.web.dto.TransactionStatusDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -34,29 +34,29 @@ public class TransactionAllBusiness {
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
     @Autowired
-    private ViewTransactionAllRepository repository;
+    private ViewTransactionStatusRepository repository;
 
     /**
      * ============================================================================================================
      **/
 
     // GET BY ID
-    public TransactionAllDTO findById(Long id) {
-        ViewTransactionAll transaction = null;
+    public TransactionStatusDTO findById(Long id) {
+        ViewTransactionStatus transaction = null;
         if (jwtUserDetailsService.getRole().equals("Admin")) {
             transaction = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction ALL", id));
         }
-        return TransactionAllDTO.from(transaction);
+        return TransactionStatusDTO.from(transaction);
     }
 
 
     // SEARCH PAGINATED
-    public Page<TransactionAllDTO> searchPrefiltrato(Filter request, Pageable pageableRequest) {
+    public Page<TransactionStatusDTO> searchPrefiltrato(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("dateTime")));
         if (!jwtUserDetailsService.getRole().equals("Admin"))
             request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-        Page<ViewTransactionAll> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(TransactionAllDTO::from);
+        Page<ViewTransactionStatus> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(TransactionStatusDTO::from);
     }
 
 
@@ -64,7 +64,7 @@ public class TransactionAllBusiness {
      * ============================================================================================================
      **/
 
-    private Specification<ViewTransactionAll> getSpecification(Filter request) {
+    private Specification<ViewTransactionStatus> getSpecification(Filter request) {
         return (root, query, cb) -> {
             Predicate completePredicate = null;
             List<Predicate> predicates = new ArrayList<>();
