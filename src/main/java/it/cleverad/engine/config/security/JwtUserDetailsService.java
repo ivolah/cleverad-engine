@@ -1,4 +1,4 @@
-package it.cleverad.engine.service;
+package it.cleverad.engine.config.security;
 
 
 import it.cleverad.engine.business.UserBusiness;
