@@ -48,6 +48,7 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
                     "             AND ((:affiliateId) IS NULL OR (vall.affiliate_id = (:affiliateId))) " +
                     "             AND ((:campaignid) IS NULL OR (vall.campaign_id = (:campaignid))) " +
                     "             AND ((:dictionaryList) IS NULL OR (vall.dictionary_id in (:dictionaryList))) " +
+                    "             AND ((:statusList) IS NULL OR (vall.status_id in (:statusList))) " +
                     "           group by vall.campaign_id, vall.campaign_name, tca.id_file, tca.initial_budget, tca.budget) " +
                     "SELECT distinct campaignid, " +
                     "                campaignname, " +
@@ -71,7 +72,7 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
                     "GROUP BY ROLLUP ((w.campaignid, w.campaignname, w.initialBudget, w.budget)) " +
                     "order by campaignname nulls last"
     )
-    List<ReportTopCampaings> searchTopCampaigns(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid, @Param("dictionaryList") List<Long> dictionaryList);
+    List<ReportTopCampaings> searchTopCampaigns(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid, @Param("dictionaryList") List<Long> dictionaryList, @Param("statusList") List<Long> statusList);
 
     @Query(nativeQuery = true, value =
            " Select distinct vall.campaign_id as campaignid, " +
@@ -157,6 +158,7 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
             "             AND ((:affiliateId) IS NULL OR (vall.affiliate_id = (:affiliateId))) " +
             "             AND ((:campaignid) IS NULL OR (vall.campaign_id = (:campaignid))) " +
             "             AND ((:dictionaryList) IS NULL OR (vall.dictionary_id in (:dictionaryList))) " +
+            "             AND ((:statusList) IS NULL OR (vall.status_id in (:statusList))) " +
             "           group by vall.campaign_id, vall.campaign_name, vall.channel_id, vall.affiliate_name, vall.affiliate_id, tc.name, tca.initial_budget, tca.budget) " +
             "SELECT distinct campaignid, " +
             "                campaignname, " +
@@ -184,7 +186,7 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
             " " +
             "GROUP BY ROLLUP ((w.campaignid, w.campaignname, w.channelName, w.channelId, w.affiliateName, w.affiliateId, w.initialBudget, w.budget)) " +
             "order by affiliateName nulls last")
-    List<ReportTopCampaings> searchTopCampaignsChannel(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid, @Param("dictionaryList") List<Long> dictionaryList);
+    List<ReportTopCampaings> searchTopCampaignsChannel(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid, @Param("dictionaryList") List<Long> dictionaryList, @Param("statusList") List<Long> statusList);
 
     //=========================================================================================================================
     //=========================================================================================================================
@@ -215,6 +217,7 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
             "             AND ((:affiliateId) IS NULL OR (vall.affiliate_id = (:affiliateId))) " +
             "             AND ((:campaignid) IS NULL OR (vall.campaign_id = (:campaignid))) " +
             "             AND ((:dictionaryList) IS NULL OR (vall.dictionary_id in (:dictionaryList))) " +
+            "             AND ((:statusList) IS NULL OR (vall.status_id in (:statusList))) " +
             "           group by vall.affiliate_name, vall.affiliate_id) " +
             "Select distinct w.affiliateId, " +
             "       w.affiliateName, " +
@@ -239,7 +242,7 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
             "order by w.affiliateName ASC nulls last" +
             "" 
             )
-    List<ReportTopAffiliates> searchTopAffilaites(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid, @Param("dictionaryList") List<Long> dictionaryList);
+    List<ReportTopAffiliates> searchTopAffilaites(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid, @Param("dictionaryList") List<Long> dictionaryList, @Param("statusList") List<Long> statusList);
 
     //=========================================================================================================================
     //=========================================================================================================================
@@ -272,6 +275,7 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
             "             AND ((:affiliateId) IS NULL OR (vall.affiliate_id = (:affiliateId))) " +
             "             AND ((:campaignid) IS NULL OR (vall.campaign_id = (:campaignid))) " +
             "             AND ((:dictionaryList) IS NULL OR (vall.dictionary_id in (:dictionaryList))) " +
+            "             AND ((:statusList) IS NULL OR (vall.status_id in (:statusList))) " +
             "           group by vall.affiliate_name, tc.name, vall.channel_id, vall.affiliate_id) " +
             "Select distinct w.affiliateId, " +
             "       w.affiliateName, " +
@@ -298,7 +302,7 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
             "order by w.affiliateName ASC nulls last" +
             ""
     )
-    List<ReportTopAffiliates> searchTopAffilaitesChannel(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid, @Param("dictionaryList") List<Long> dictionaryList);
+    List<ReportTopAffiliates> searchTopAffilaitesChannel(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid, @Param("dictionaryList") List<Long> dictionaryList, @Param("statusList") List<Long> statusList);
 
     //=========================================================================================================================
     //=========================================================================================================================
@@ -306,7 +310,7 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
     //=========================================================================================================================
     //=========================================================================================================================
 
-    @Query(nativeQuery = true, value = "WITH w as (Select distinct datadx                                                        as giorno, " +
+    @Query(nativeQuery = true, value = "WITH w as (Select distinct datadx                                                                                   as giorno, " +
             "                           COALESCE(SUM(dt.impressionnumber), 0)                                                    as impressionNumber, " +
             "                           COALESCE(SUM(dt.impressionnumberrigettato), 0)                                           as impressionNumberRigettato, " +
             "                           COALESCE(SUM(dt.clicknumber), 0)                                                         as clickNumber, " +
@@ -323,11 +327,13 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
             "                           COALESCE(round(SUM(dt.commission) / SUM(dt.impressionnumber) * 1000, 2), 0)              as ecpm, " +
             "                           COALESCE(round(SUM(dt.commission) / SUM(dt.clicknumber), 2), 0)                          as ecpc, " +
             "                           COALESCE(round(CAST(SUM(dt.commission) / SUM(dt.leadnumber) AS numeric), 2), 0)          as ecpl " +
-            "           from v_daily_transactions dt " +
+            "           from v_daily_transactions_all dt " +
             "           where (cast(:dateFrom as date) IS NULL OR (:dateFrom <= dt.datadx)) " +
             "             AND (cast(:dateTo as date) IS NULL OR (:dateTo >= dt.datadx + interval '24 hours')) " +
             "             AND ((:affiliateId) IS NULL OR (dt.affilaiteid = (:affiliateId))) " +
             "             AND ((:campaignid) IS NULL OR (dt.campaignid = (:campaignid))) " +
+            "             AND ((:dictionaryList) IS NULL OR (dt.dictinaryid in (:dictionaryList))) " +
+            "             AND ((:statusList) IS NULL OR (dt.statusid in (:statusList))) " +
             "           group by dt.datadx) " +
             "SELECT giorno, " +
             "       COALESCE(SUM(impressionnumber), 0)                                                                       as impressionNumber, " +
@@ -349,6 +355,8 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
             "GROUP BY ROLLUP ((giorno, impressionNumber, clickNumber, leadnumber, ctr, lr, commission, revenue, margine, marginePC, ecpm, ecpc, ecpl)) " +
             "order by giorno nulls last"
     )
-    List<ReportDaily> searchDaily(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid);
+    List<ReportDaily> searchDaily(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo,
+                                  @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid,
+                                  @Param("dictionaryList") List<Long> dictionaryList, @Param("statusList") List<Long> statusList);
 
 }
