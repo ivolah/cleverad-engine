@@ -3,6 +3,7 @@ package it.cleverad.engine.service;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import it.cleverad.engine.business.*;
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
