@@ -1,7 +1,7 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.PayoutBusiness;
-import it.cleverad.engine.service.JwtUserDetailsService;
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.PayoutDTO;
 import org.springframework.beans.factory.annotation.Autowired;

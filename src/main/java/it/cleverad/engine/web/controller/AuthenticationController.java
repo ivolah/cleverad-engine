@@ -3,7 +3,7 @@ package it.cleverad.engine.web.controller;
 import it.cleverad.engine.business.UserBusiness;
 import it.cleverad.engine.config.model.JwtRequest;
 import it.cleverad.engine.config.model.JwtResponse;
-import it.cleverad.engine.service.JwtTokenUtil;
+import it.cleverad.engine.config.security.JwtTokenUtil;
 import it.cleverad.engine.web.dto.UserDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

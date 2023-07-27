@@ -1,6 +1,6 @@
 package it.cleverad.engine.web.controller;
 
-import it.cleverad.engine.service.JwtUserDetailsService;
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.web.dto.MailDTO;
 import org.springframework.beans.factory.annotation.Autowired;

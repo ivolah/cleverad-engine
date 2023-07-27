@@ -186,13 +186,11 @@ public class TransactionController {
         return business.searchByAffiliateCps(request, null, pageable);
     }
 
-
     @PatchMapping("/update/status")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void updateStatus(@RequestBody TransactionBusiness.FilterUpdate request) {
         business.updateStatus(request.getId(), request.getDictionaryId(), request.getTipo(), request.getApproved(), request.getStatusId());
     }
-
 
     /**
      * ============================================================================================================
@@ -243,6 +241,5 @@ public class TransactionController {
     public void manageCPL(@ModelAttribute TransazioniCPCBusiness.FilterUpdate request) {
         transazioniCPCBusiness.rigenera(Integer.parseInt(request.getYear()), Integer.parseInt(request.getMonth()), Integer.parseInt(request.getDay()));
     }
-
 
 }
