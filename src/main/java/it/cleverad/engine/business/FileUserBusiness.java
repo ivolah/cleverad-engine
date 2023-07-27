@@ -6,7 +6,7 @@ import it.cleverad.engine.persistence.model.service.User;
 import it.cleverad.engine.persistence.repository.service.FileUserRepository;
 import it.cleverad.engine.persistence.repository.service.UserRepository;
 import it.cleverad.engine.service.FileStoreService;
-import it.cleverad.engine.service.JwtUserDetailsService;
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.FileUserDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresCleveradException;

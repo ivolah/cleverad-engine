@@ -4,7 +4,7 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
-import it.cleverad.engine.service.JwtUserDetailsService;
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.web.dto.AffiliateDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;

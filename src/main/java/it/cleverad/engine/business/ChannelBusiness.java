@@ -6,7 +6,7 @@ import it.cleverad.engine.persistence.model.service.ChannelCategory;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.ChannelRepository;
 import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
-import it.cleverad.engine.service.JwtUserDetailsService;
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.dto.ChannelDTO;

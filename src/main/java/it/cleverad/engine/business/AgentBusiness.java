@@ -4,7 +4,7 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Agent;
 import it.cleverad.engine.persistence.model.service.WidgetAgent;
 import it.cleverad.engine.persistence.repository.service.AgentRepository;
-import it.cleverad.engine.service.JwtUserDetailsService;
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.AgentDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;

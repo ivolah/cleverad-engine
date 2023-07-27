@@ -4,7 +4,7 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.WalletTransaction;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.persistence.repository.service.WalletTransactionRepository;
-import it.cleverad.engine.service.JwtUserDetailsService;
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.WalletDTO;
 import it.cleverad.engine.web.dto.WalletTransactionDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;

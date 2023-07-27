@@ -1,6 +1,7 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.Media;
@@ -9,7 +10,6 @@ import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.MediaRepository;
 import it.cleverad.engine.persistence.repository.service.MediaTypeRepository;
-import it.cleverad.engine.service.JwtUserDetailsService;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.service.tinyurl.TinyData;
 import it.cleverad.engine.service.tinyurl.TinyUrlService;
@@ -89,6 +89,7 @@ public class MediaBusiness {
         Media map = mapper.map(request, Media.class);
         map.setMediaType(mediaTypeRepository.findById(request.typeId).orElseThrow(() -> new ElementCleveradException("Media Type", request.typeId)));
         map.setStatus(false);
+        map.setCreationDate(LocalDateTime.now());
         Media saved = repository.save(map);
         Campaign cc = campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.getCampaignId()));
         cc.addMedia(saved);
@@ -246,8 +247,13 @@ public class MediaBusiness {
     public MediaDTO getByIdAndCampaignIDChannelID(Long mediaId, Long campaignId, Long channelID) {
         Media media = repository.findById(mediaId).orElseThrow(() -> new ElementCleveradException("Media", mediaId));
         MediaDTO dto = MediaDTO.from(media);
-        if (dto.getTypeId() == 5L)
+        if (dto.getTypeId() == 5L) {
             dto.setTarget(setUrlTarget(dto.getTarget(), mediaId, campaignId, channelID, 0L));
+            String desc = dto.getDescription();
+            desc =  desc.replace("{{shorturl}}", dto.getTarget());
+            desc =  desc.replace("{{linktoimage}}", dto.getUrl());
+            dto.setDescription(desc);
+        }
         dto.setBannerCode(generaBannerCode(dto, mediaId, campaignId, channelID, 0L));
         return dto;
     }
@@ -255,8 +261,13 @@ public class MediaBusiness {
     public MediaDTO getByIdAndCampaignIDChannelIDTargetID(Long mediaId, Long campaignId, Long channelID, Long targetId) {
         Media media = repository.findById(mediaId).orElseThrow(() -> new ElementCleveradException("Media", mediaId));
         MediaDTO dto = MediaDTO.from(media);
-        if (dto.getTypeId() == 5L)
+        if (dto.getTypeId() == 5L) {
             dto.setTarget(setUrlTarget(dto.getTarget(), mediaId, campaignId, channelID, targetId));
+            String desc = dto.getDescription();
+            desc =  desc.replace("{{shorturl}}", dto.getTarget());
+            desc =  desc.replace("{{linktoimage}}", dto.getUrl());
+            dto.setDescription(desc);
+        }
         dto.setBannerCode(generaBannerCode(dto, mediaId, campaignId, channelID, targetId));
         return dto;
     }
