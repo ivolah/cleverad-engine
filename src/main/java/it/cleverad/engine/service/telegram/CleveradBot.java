@@ -1,6 +1,5 @@
 //package it.cleverad.engine.service.telegram;
 //
-//import lombok.extern.log4j.Log4j2;
 //import lombok.extern.slf4j.Slf4j;
 //import org.springframework.beans.factory.annotation.Value;
 //import org.springframework.stereotype.Component;
@@ -13,8 +12,7 @@
 //@Slf4j
 //@Component
 //@Transactional
-//public class CleveradBot
-//extends TelegramLongPollingBot {
+//public class CleveradBot extends TelegramLongPollingBot {
 //
 //    @Value("${telegram.bot.token}")
 //    private String BOT_TOKEN;
@@ -38,7 +36,7 @@
 //    public void onUpdateReceived(Update update) {
 //        if (update.hasMessage() && update.getMessage().hasText()) {
 //            String message = update.getMessage().getText();
-//            sendMsg(update.getMessage().getChatId().toString(),"Grazie per aver scritto : " + message);
+//            sendMsg(update.getMessage().getChatId().toString(), "Grazie per aver scritto : " + message + " per qualsiasi informazione contattaci ad info@cleverad.it");
 //        }
 //    }
 //
@@ -51,4 +49,5 @@
 //    public String getBotUsername() {
 //        return BOT_USERNAME;
 //    }
+//
 //}

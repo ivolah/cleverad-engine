@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class TelegramService {
 
-//    @Autowired
-//    private CleveradBot cleveradBot;
-//
+   // @Autowired
+  //  private CleveradBot cleveradBot;
+
     public void invia(BaseCreateRequest request) {
-//        cleveradBot.sendMsg("208751791", request.getMessage());
+    //    cleveradBot.sendMsg("208751791", request.getMessage());
     }
 
     @Data
