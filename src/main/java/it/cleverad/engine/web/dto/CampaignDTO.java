@@ -68,7 +68,8 @@ public class CampaignDTO {
                 mediaDTO.setNote(media.getNote());
                 //   mediaDTO.setTarget((List<Target>) media.getTargets());
                 mediaDTO.setUrl(media.getUrl());
-                mediaDTO.setTypeId(String.valueOf(media.getMediaType().getId()));
+                if (media.getMediaType() != null && media.getMediaType().getId() != null)
+                    mediaDTO.setTypeId(String.valueOf(media.getMediaType().getId()));
                 return mediaDTO;
             }).collect(Collectors.toList());
         }

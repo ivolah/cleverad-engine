@@ -12,11 +12,9 @@ public class MediaTypeDTO {
 
     private long id;
     private String name;
-    private String description;
-    private Boolean status;
 
     public static MediaTypeDTO from(MediaType media) {
-        return new MediaTypeDTO(media.getId(), media.getName(), media.getDescription(), media.getStatus());
+        return new MediaTypeDTO(media.getId(), media.getName());
     }
 
 }
