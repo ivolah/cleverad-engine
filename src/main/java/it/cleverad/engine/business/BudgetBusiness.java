@@ -59,6 +59,7 @@ public class BudgetBusiness {
         Budget map = mapper.map(request, Budget.class);
         map.setStatus(true);
         map.setInitialBudget(request.getBudget());
+        map.setInitialCap(request.getCap());
         map.setAffiliate(affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliat", request.affiliateId)));
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
         return BudgetDTO.from(repository.save(map));
@@ -121,6 +122,13 @@ public class BudgetBusiness {
         Budget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Budget", id));
         budget.setLastModificationDate(LocalDateTime.now());
         budget.setBudget(budgetValue);
+        return BudgetDTO.from(repository.save(budget));
+    }
+
+    public BudgetDTO updateCap(Long id, Integer cap) {
+        Budget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Budget", id));
+        budget.setLastModificationDate(LocalDateTime.now());
+        budget.setCap(cap);
         return BudgetDTO.from(repository.save(budget));
     }
 
@@ -253,6 +261,7 @@ public class BudgetBusiness {
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate startDateTo;
         private Integer cap;
+        private Integer initialCap;
     }
 
 }

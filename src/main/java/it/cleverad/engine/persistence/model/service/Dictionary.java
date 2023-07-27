@@ -102,6 +102,10 @@ public class Dictionary {
     @JoinColumn(name = "status_id")
     private Set<TransactionCPS> transactionCPSstatus;
 
+    @OneToMany
+    @JoinColumn(name = "tipologia_id")
+    private Set<CampaignBudget> campaignBudgets;
+
 }
 
 

@@ -2,7 +2,7 @@ package it.cleverad.engine.business;
 
 import it.cleverad.engine.persistence.model.service.ViewTransactionStatus;
 import it.cleverad.engine.persistence.repository.service.ViewTransactionStatusRepository;
-import it.cleverad.engine.service.JwtUserDetailsService;
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.TransactionStatusDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
@@ -24,6 +24,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -51,11 +52,11 @@ public class TransactionAllBusiness {
 
 
     // SEARCH PAGINATED
-    public Page<TransactionStatusDTO> searchPrefiltrato(Filter request, Pageable pageableRequest) {
+    public Page<TransactionStatusDTO> searchPrefiltrato(Filter filter, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("dateTime")));
         if (!jwtUserDetailsService.getRole().equals("Admin"))
-            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-        Page<ViewTransactionStatus> page = repository.findAll(getSpecification(request), pageable);
+            filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+        Page<ViewTransactionStatus> page = repository.findAll(getSpecification(filter), pageable);
         return page.map(TransactionStatusDTO::from);
     }
 
@@ -167,6 +168,15 @@ public class TransactionAllBusiness {
                 predicates.add(inClauseNot.not());
             }
 
+            if (request.getDataList() != null && request.getDataList().length()>3) {
+                log.info("Dentro :: ", request.getDataList());
+                CriteriaBuilder.In<String> inClause = cb.in(root.get("data"));
+                Arrays.stream(request.getDataList().split(",")).distinct().forEach(s -> {
+                    inClause.value(s);
+                });
+                predicates.add(inClause);
+            }
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
@@ -217,6 +227,7 @@ public class TransactionAllBusiness {
         private Boolean valueNotZero;
         private Boolean payoutPresent;
         public List<Long> notInId;
+        private String dataList;
     }
 
 }

@@ -26,10 +26,7 @@ public class Channel {
     private String country;
     @Column(name = "short_description")
     private String shortDescription;
-
     private String url;
-
-
     private Boolean status = true;
     @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();

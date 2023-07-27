@@ -44,5 +44,7 @@ public class Budget {
     private Campaign campaign;
 
     private Integer cap;
+    @Column(name = "initial_cap")
+    private Integer initialCap;
 
 }

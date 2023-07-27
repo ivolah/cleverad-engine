@@ -2,6 +2,7 @@ package it.cleverad.engine.scheduled;
 
 import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
+import it.cleverad.engine.persistence.model.service.CampaignBudget;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.model.tracking.Cpl;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
@@ -17,6 +18,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,6 +48,8 @@ public class ManageCPL {
     private CpcBusiness cpcBusiness;
     @Autowired
     private CplRepository cplRepository;
+    @Autowired
+    CampaignBudgetBusiness campaignBudgetBusiness;
 
     /**
      * ============================================================================================================
@@ -170,6 +174,10 @@ public class ManageCPL {
                             Double totBudgetDecrementato = bb.getBudget() - totale;
                             budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
 
+                            // decremento cap affiliato
+                            Integer cap = bb.getCap() - 1;
+                            budgetBusiness.updateCap(bb.getId(), cap);
+
                             // setto stato transazione a ovebudget editore se totale < 0
                             if (totBudgetDecrementato < 0) {
                                 transaction.setDictionaryId(47L);
@@ -185,6 +193,17 @@ public class ManageCPL {
                             // setto stato transazione a ovebudget editore se totale < 0
                             if (budgetCampagna < 0) {
                                 transaction.setDictionaryId(48L);
+                            }
+                        }
+
+                        if (totale > 0) {
+                            // trovo CampaignBudget
+                            CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(campaignDTO.getId(), LocalDateTime.now());
+                            if (cb != null) {
+                                //incremento budget erogato
+                                campaignBudgetBusiness.incrementoBudgetErogato(cb.getId(), totale);
+                                // incremento cap
+                                campaignBudgetBusiness.incrementoCapErogato(cb.getId(), 1);
                             }
                         }
 

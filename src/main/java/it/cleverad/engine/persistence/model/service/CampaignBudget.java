@@ -56,4 +56,11 @@ public class CampaignBudget {
     @Column(name = "end_date")
     private LocalDate endDate;
 
+    @ManyToOne
+    @JoinColumn(name = "tipologia_id")
+    private Dictionary dictionary;
+
+    private Double payout;
+    private Boolean status;
+
 }

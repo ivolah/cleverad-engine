@@ -2,7 +2,7 @@ package it.cleverad.engine.business;
 
 import it.cleverad.engine.persistence.model.service.ViewTransactionStatus;
 import it.cleverad.engine.persistence.repository.service.ViewTransactionStatusRepository;
-import it.cleverad.engine.service.JwtUserDetailsService;
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.TransactionStatusDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +25,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -56,9 +58,9 @@ public class TransactionStatusBusiness {
         if (!jwtUserDetailsService.getRole().equals("Admin"))
             request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         Page<ViewTransactionStatus> page = repository.findAll(getSpecification(request), pageable);
+
         return page.map(TransactionStatusDTO::from);
     }
-
 
     /**
      * ============================================================================================================
@@ -163,6 +165,14 @@ public class TransactionStatusBusiness {
                 predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), request.getCreationDateTo()));
             }
 
+            if (request.getDataList() != null && request.getDataList().length()>3) {
+                CriteriaBuilder.In<String> inClause = cb.in(root.get("data"));
+                Arrays.stream(request.getDataList().split(",")).distinct().forEach(s -> {
+                    inClause.value(StringUtils.trim(s));
+                });
+                predicates.add(inClause);
+            }
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
@@ -227,6 +237,8 @@ public class TransactionStatusBusiness {
         public List<Long> inStausId;
         public List<Long> notInDictionaryId;
         public List<Long> notInStausId;
+
+        private String dataList;
     }
 
 }

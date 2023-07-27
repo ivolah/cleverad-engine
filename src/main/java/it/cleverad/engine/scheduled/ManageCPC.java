@@ -3,6 +3,7 @@ package it.cleverad.engine.scheduled;
 import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.Campaign;
+import it.cleverad.engine.persistence.model.service.CampaignBudget;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.model.tracking.Cpc;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
@@ -56,6 +57,8 @@ public class ManageCPC {
     private CpcRepository repository;
     @Autowired
     private CampaignRepository campaignRepository;
+    @Autowired
+    CampaignBudgetBusiness campaignBudgetBusiness;
 
     /**
      * ============================================================================================================
@@ -194,6 +197,10 @@ public class ManageCPC {
                             Double totBudgetDecrementato = bb.getBudget() - totale;
                             budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
 
+                            // decremento cap affiliato
+                            Integer cap = bb.getCap() - numer;
+                            budgetBusiness.updateCap(bb.getId(), cap);
+
                             // setto stato transazione a ovebudget editore se totale < 0
                             if (totBudgetDecrementato < 0) {
                                 transaction.setDictionaryId(47L);
@@ -213,6 +220,18 @@ public class ManageCPC {
                             // commissione scaduta
                             if (accc.getCommissionDueDate().isBefore(LocalDate.now())) {
                                 transaction.setDictionaryId(49L);
+                            }
+                        }
+
+                        if (totale > 0) {
+                            // trovo CampaignBudget
+                            CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(campaignId, LocalDateTime.now());
+                            if (cb != null) {
+                                //incremento budget erogato
+                                //   campaignBudgetBusiness.incrementoBudgetErogato(cbId, totale);
+
+                                // incremento cap
+                                //    campaignBudgetBusiness.incrementoCapErogato(cbId, numer);
                             }
                         }
 

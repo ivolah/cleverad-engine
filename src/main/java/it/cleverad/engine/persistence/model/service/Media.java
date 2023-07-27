@@ -23,9 +23,7 @@ public class Media {
     private Long id;
     private String name;
     private String url;
-
     private String target;
-
     @Column(name = "mail_subject")
     private String mailSubject;
     @Column(name = "banner_code")
@@ -36,7 +34,6 @@ public class Media {
     private String title;
     @Column(name = "id_file")
     private String idFile;
-
     private Boolean status = true;
     private Boolean visibile = true;
     @Column(name = "creation_date")

@@ -3,7 +3,7 @@ package it.cleverad.engine.business;
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.*;
 import it.cleverad.engine.persistence.repository.service.*;
-import it.cleverad.engine.service.JwtUserDetailsService;
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.*;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -37,7 +37,6 @@ public class TransactionBusiness {
 
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
-
     @Autowired
     private TransactionCPCRepository cpcRepository;
     @Autowired
@@ -48,13 +47,10 @@ public class TransactionBusiness {
     private TransactionCPSRepository cpsRepository;
     @Autowired
     private Mapper mapper;
-
     @Autowired
     private RevenueFactorBusiness revenueFactorBusiness;
-
     @Autowired
     private DictionaryBusiness dictionaryBusiness;
-
     @Autowired
     private AffiliateRepository affiliateRepository;
     @Autowired
@@ -75,6 +71,8 @@ public class TransactionBusiness {
     private BudgetBusiness budgetBusiness;
     @Autowired
     private CampaignBusiness campaignBusiness;
+    @Autowired
+    CampaignBudgetBusiness campaignBudgetBusiness;
 
     /**
      * ============================================================================================================
@@ -271,19 +269,17 @@ public class TransactionBusiness {
             if (dictionaryId != null) {
                 Long finalDictionaryId = dictionaryId;
                 cpc.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", finalDictionaryId)));
-            }
-            else dictionaryId = 0L;
+            } else dictionaryId = 0L;
             if (statusId != null) {
                 Long finalStatusId = statusId;
                 cpc.setDictionaryStatus(dictionaryRepository.findById(statusId).orElseThrow(() -> new ElementCleveradException("Status", finalStatusId)));
-            }
-            else statusId = 0L;
+            } else statusId = 0L;
             if (approved != null) cpc.setApproved(approved);
             if (dictionaryId == 40L || statusId == 74L) {
                 // setto revenue e commission a 0
                 cpc.setRevenueId(1L);
                 cpc.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
-                cpc.setValue(0D);
+               // cpc.setValue(0D);
             }
             cpcRepository.save(cpc);
         } else if (tipo.equals("CPL")) {
@@ -291,19 +287,17 @@ public class TransactionBusiness {
             if (dictionaryId != null) {
                 Long finalDictionaryId1 = dictionaryId;
                 cpl.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", finalDictionaryId1)));
-            }
-            else dictionaryId = 0L;
+            } else dictionaryId = 0L;
             if (statusId != null) {
                 Long finalStatusId1 = statusId;
                 cpl.setDictionaryStatus(dictionaryRepository.findById(statusId).orElseThrow(() -> new ElementCleveradException("Status", finalStatusId1)));
-            }
-            else statusId = 0L;
+            } else statusId = 0L;
             if (approved != null) cpl.setApproved(approved);
             if (dictionaryId == 40L || statusId == 74L) {
                 // setto revenue e commission a 0
                 cpl.setRevenueId(1L);
                 cpl.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
-                cpl.setValue(0D);
+                //cpl.setValue(0D);
             }
             cplRepository.save(cpl);
         } else if (tipo.equals("CPM")) {
@@ -311,19 +305,17 @@ public class TransactionBusiness {
             if (dictionaryId != null) {
                 Long finalDictionaryId2 = dictionaryId;
                 cpm.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", finalDictionaryId2)));
-            }
-            else dictionaryId = 0L;
+            } else dictionaryId = 0L;
             if (statusId != null) {
                 Long finalStatusId2 = statusId;
                 cpm.setDictionaryStatus(dictionaryRepository.findById(statusId).orElseThrow(() -> new ElementCleveradException("Status", finalStatusId2)));
-            }
-            else statusId = 0L;
+            } else statusId = 0L;
             if (approved != null) cpm.setApproved(approved);
             if (dictionaryId == 40L || statusId == 74L) {
                 // setto revenue e commission a 0
                 cpm.setRevenueId(1L);
                 cpm.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
-                cpm.setValue(0D);
+                //cpm.setValue(0D);
             }
             cpmRepository.save(cpm);
         } else if (tipo.equals("CPS")) {
@@ -331,19 +323,17 @@ public class TransactionBusiness {
             if (dictionaryId != null) {
                 Long finalDictionaryId3 = dictionaryId;
                 cps.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", finalDictionaryId3)));
-            }
-            else dictionaryId = 0L;
+            } else dictionaryId = 0L;
             if (statusId != null) {
                 Long finalStatusId3 = statusId;
                 cps.setDictionaryStatus(dictionaryRepository.findById(statusId).orElseThrow(() -> new ElementCleveradException("Status", finalStatusId3)));
-            }
-            else statusId = 0L;
+            } else statusId = 0L;
             if (approved != null) cps.setApproved(approved);
             if (dictionaryId == 40L || statusId == 74L) {
                 // setto revenue e commission a 0
                 cps.setRevenueId(1L);
                 cps.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
-                cps.setValue(0D);
+                //cps.setValue(0D);
             }
             cpsRepository.save(cps);
         }
@@ -425,10 +415,11 @@ public class TransactionBusiness {
             if (type.equals("CPC")) {
                 TransactionCPCDTO dto = this.findByIdCPC(id);
 
-                // aggiorno budget affiliato
+                // aggiorno budge e CAP affiliato
                 BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
                 if (budgetAff != null) {
                     budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
+                    budgetBusiness.updateCap(budgetAff.getId(), Math.toIntExact(budgetAff.getCap() + dto.getClickNumber()));
                 }
 
                 // aggiorno budget campagna
@@ -439,6 +430,15 @@ public class TransactionBusiness {
                 if (dto.getAffiliateId() != null) {
                     walletID = walletRepository.findByAffiliateId(dto.getAffiliateId()).getId();
                     walletBusiness.decrement(walletID, dto.getValue());
+                }
+
+                //aggiorno Camapign Budget
+                if (dto.getValue() > 0D) {
+                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(dto.getCampaignId(), dto.getDateTime());
+                    if (cb != null) {
+                        campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - dto.getClickNumber()));
+                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - dto.getValue());
+                    }
                 }
 
                 //cancello
@@ -450,6 +450,7 @@ public class TransactionBusiness {
                 BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
                 if (budgetAff != null) {
                     budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
+                    budgetBusiness.updateCap(budgetAff.getId(), budgetAff.getCap() + 1);
                 }
 
                 // aggiorno budget campagna
@@ -462,6 +463,15 @@ public class TransactionBusiness {
                     walletBusiness.decrement(walletID, dto.getValue());
                 }
 
+                //aggiorno Camapign Budget
+                if (dto.getValue() > 0D) {
+                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(dto.getCampaignId(), dto.getDateTime());
+                    if (cb != null) {
+                        campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - 1));
+                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - dto.getValue());
+                    }
+                }
+
                 cplRepository.delete(cplRepository.findById(id).get());
             } else if (type.equals("CPM")) {
                 TransactionCPMDTO dto = this.findByIdCPM(id);
@@ -470,6 +480,7 @@ public class TransactionBusiness {
                 BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
                 if (budgetAff != null) {
                     budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
+                    budgetBusiness.updateCap(budgetAff.getId(), Math.toIntExact(budgetAff.getCap() + dto.getImpressionNumber()));
                 }
 
                 // aggiorno budget campagna
@@ -478,6 +489,14 @@ public class TransactionBusiness {
                 // aggiorno wallet
                 Long wallerID = walletBusiness.findByIdAffilaite(dto.getAffiliateId()).stream().findFirst().get().getId();
                 walletBusiness.decrement(wallerID, dto.getValue());
+
+                if (dto.getValue() > 0D) {
+                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(dto.getCampaignId(), dto.getDateTime());
+                    if (cb != null) {
+                        campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - dto.getImpressionNumber()));
+                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - dto.getValue());
+                    }
+                }
 
                 //cancello
                 cpmRepository.deleteById(id);
@@ -496,6 +515,14 @@ public class TransactionBusiness {
                 // aggiorno wallet
                 Long wallerID = walletBusiness.findByIdAffilaite(dto.getAffiliateId()).stream().findFirst().get().getId();
                 walletBusiness.decrement(wallerID, dto.getValue());
+
+                if (dto.getValue() > 0D) {
+                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(dto.getCampaignId(), dto.getDateTime());
+                    if (cb != null) {
+                        // campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - dto.get));
+                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - dto.getValue());
+                    }
+                }
 
                 //cancello
                 cpsRepository.deleteById(id);
