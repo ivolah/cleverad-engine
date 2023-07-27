@@ -27,6 +27,7 @@ public class TransactionCPLDTO {
 
     private LocalDateTime dateTime;
     private Double value;
+    private Double initialValue;
     private Boolean approved;
 
     private String ip;
@@ -57,7 +58,7 @@ public class TransactionCPLDTO {
 
                 transaction.getMedia() != null ? transaction.getMedia().getId() : null, transaction.getMedia() != null ? transaction.getMedia().getName() : null,
 
-                transaction.getDateTime(), transaction.getValue(), transaction.getApproved(), transaction.getIp(), transaction.getAgent(), transaction.getData(),
+                transaction.getDateTime(), transaction.getValue(), transaction.getInitialValue(), transaction.getApproved(), transaction.getIp(), transaction.getAgent(), transaction.getData(),
 
                 transaction.getPayoutReference(), transaction.getPayout() != null ? transaction.getPayout().getId() : null,
 

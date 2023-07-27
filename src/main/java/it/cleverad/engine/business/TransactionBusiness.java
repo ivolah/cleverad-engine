@@ -114,6 +114,7 @@ public class TransactionBusiness {
         newCpcTransaction.setPayoutPresent(false);
 
         newCpcTransaction.setApproved(true);
+        newCpcTransaction.setInitialValue(request.getValue());
         return TransactionCPCDTO.from(cpcRepository.save(newCpcTransaction));
     }
 
@@ -162,6 +163,7 @@ public class TransactionBusiness {
 
         newCplTransaction.setPayoutPresent(false);
         newCplTransaction.setApproved(true);
+        newCplTransaction.setInitialValue(request.getValue());
 
         return TransactionCPLDTO.from(cplRepository.save(newCplTransaction));
     }
@@ -888,6 +890,7 @@ public class TransactionBusiness {
         private LocalDate manualDate;
 
         private Long statusId;
+        private Double initialValue;
     }
 
     @Data
@@ -919,6 +922,7 @@ public class TransactionBusiness {
         private LocalDateTime dateTimeTo;
 
         private Long statusId;
+        private Double initialValue;
 
         public List<Long> notInId;
     }

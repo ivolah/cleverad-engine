@@ -21,6 +21,8 @@ public class TransactionCPC {
     private Long id;
     @Column(name = "date_time")
     private LocalDateTime dateTime;
+    @Column(name = "initial_value")
+    private Double initialValue;
     private Double value;
     private Boolean approved;
 

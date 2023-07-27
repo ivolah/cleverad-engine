@@ -23,6 +23,8 @@ public class TransactionCPL {
     @Column(name = "date_time")
     private LocalDateTime dateTime;
     private Double value;
+    @Column(name = "initial_value")
+    private Double initialValue;
     private Boolean approved;
 
     private String refferal;

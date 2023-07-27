@@ -27,6 +27,7 @@ public class TransactionCPCDTO {
 
     private LocalDateTime dateTime;
     private Double value;
+    private Double initialValue;
     private Boolean approved;
 
     private String ip;
@@ -67,6 +68,7 @@ public class TransactionCPCDTO {
 
                 transaction.getDateTime(),
                 transaction.getValue(),
+                transaction.getInitialValue(),
                 transaction.getApproved(),
                 transaction.getIp(),
                 transaction.getAgent(), transaction.getClickNumber(),

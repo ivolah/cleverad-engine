@@ -36,6 +36,8 @@ import java.util.stream.Collectors;
 public class ManageCPC {
 
     @Autowired
+    CampaignBudgetBusiness campaignBudgetBusiness;
+    @Autowired
     private CpcBusiness cpcBusiness;
     @Autowired
     private TransactionBusiness transactionBusiness;
@@ -57,8 +59,6 @@ public class ManageCPC {
     private CpcRepository repository;
     @Autowired
     private CampaignRepository campaignRepository;
-    @Autowired
-    CampaignBudgetBusiness campaignBudgetBusiness;
 
     /**
      * ============================================================================================================
@@ -228,10 +228,9 @@ public class ManageCPC {
                             CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(campaignId, LocalDateTime.now());
                             if (cb != null) {
                                 //incremento budget erogato
-                                //   campaignBudgetBusiness.incrementoBudgetErogato(cbId, totale);
-
+                                campaignBudgetBusiness.incrementoBudgetErogato(cb.getId(), totale);
                                 // incremento cap
-                                //    campaignBudgetBusiness.incrementoCapErogato(cbId, numer);
+                                campaignBudgetBusiness.incrementoCapErogato(cb.getId(), numer);
                             }
                         }
 
