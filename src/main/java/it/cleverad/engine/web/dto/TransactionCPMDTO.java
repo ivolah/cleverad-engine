@@ -47,6 +47,7 @@ public class TransactionCPMDTO {
     private Boolean payoutPresent;
 
     private Long statusId;
+    private String data;
 
     public static TransactionCPMDTO from(TransactionCPM transaction) {
         return new TransactionCPMDTO(transaction.getId(),
@@ -77,7 +78,8 @@ public class TransactionCPMDTO {
                 transaction.getRevenueId(),
                 transaction.getWallet().getId(),
                 transaction.getPayoutPresent(),
-                transaction.getDictionaryStatus() != null ? transaction.getDictionaryStatus().getId() : null);
+                transaction.getDictionaryStatus() != null ? transaction.getDictionaryStatus().getId() : null,
+                transaction.getNote());
 
 
     }

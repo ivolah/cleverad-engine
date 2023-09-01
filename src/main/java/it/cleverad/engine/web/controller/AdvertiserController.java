@@ -6,6 +6,7 @@ import it.cleverad.engine.web.dto.AdvertiserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class AdvertiserController {
     @Autowired
     private AdvertiserBusiness business;
 
-    @Autowired
+        @Autowired
     private RepresentativeBusiness representativeBusiness;
 
     /**
@@ -33,7 +34,7 @@ public class AdvertiserController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<AdvertiserDTO> search(AdvertiserBusiness.Filter request, Pageable pageable) {
+    public Page<AdvertiserDTO> search(AdvertiserBusiness.Filter request, @PageableDefault(value = Integer.MAX_VALUE) Pageable pageable) {
         return business.search(request, pageable);
     }
 

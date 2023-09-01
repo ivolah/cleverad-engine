@@ -28,9 +28,6 @@ public class Payout {
     private Boolean stato;
     private LocalDate data;
 
-    @Column(name = "file_id")
-    private Long fileId;
-
     @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
     @Column(name = "last_modification_date")
