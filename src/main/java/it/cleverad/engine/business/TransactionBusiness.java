@@ -1,9 +1,9 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.*;
 import it.cleverad.engine.persistence.repository.service.*;
-import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.*;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -35,6 +36,8 @@ import java.util.List;
 @Transactional
 public class TransactionBusiness {
 
+    @Autowired
+    CampaignBudgetBusiness campaignBudgetBusiness;
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
     @Autowired
@@ -71,8 +74,6 @@ public class TransactionBusiness {
     private BudgetBusiness budgetBusiness;
     @Autowired
     private CampaignBusiness campaignBusiness;
-    @Autowired
-    CampaignBudgetBusiness campaignBudgetBusiness;
 
     /**
      * ============================================================================================================
@@ -82,17 +83,30 @@ public class TransactionBusiness {
     public TransactionCPCDTO createCpc(BaseCreateRequest request) {
         TransactionCPC newCpcTransaction = mapper.map(request, TransactionCPC.class);
 
+        newCpcTransaction.setInitialValue(request.getValue());
+        newCpcTransaction.setPayoutPresent(false);
+        newCpcTransaction.setApproved(true);
+
         if (request.getManualDate() != null) {
             newCpcTransaction.setDateTime(request.getManualDate().atStartOfDay());
             request.setDictionaryId(68L);
+            request.setStatusId(73L);
+            BigDecimal dd = BigDecimal.valueOf(request.getValue() * request.getClickNumber());
+            newCpcTransaction.setInitialValue(dd.doubleValue());
+            newCpcTransaction.setValue(dd.doubleValue());
+
+            // trovo revenue
+            RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(request.getCampaignId(), 11L);
+            if (rf != null) {
+                newCpcTransaction.setRevenueId(rf.getId());
+            } else {
+                newCpcTransaction.setRevenueId(2L);
+            }
+
         }
+
         newCpcTransaction.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
 
-        Affiliate aa = null;
-        if (request.affiliateId != null) {
-            aa = affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId));
-            newCpcTransaction.setAffiliate(aa);
-        }
         if (request.commissionId != null)
             newCpcTransaction.setCommission(commissionRepository.findById(request.commissionId).orElseThrow(() -> new ElementCleveradException("Commission", request.commissionId)));
         if (request.channelId != null)
@@ -101,6 +115,13 @@ public class TransactionBusiness {
             newCpcTransaction.setDictionary(dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", request.dictionaryId)));
         if (request.statusId != null)
             newCpcTransaction.setDictionaryStatus(dictionaryRepository.findById(request.statusId).orElseThrow(() -> new ElementCleveradException("Status", request.statusId)));
+        if (request.mediaId != null)
+            newCpcTransaction.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
+
+        Affiliate aa = null;
+        if (request.affiliateId != null)
+            aa = affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId));
+        newCpcTransaction.setAffiliate(aa);
 
         Wallet ww = null;
         if (request.walletId != null) {
@@ -109,22 +130,22 @@ public class TransactionBusiness {
             ww = aa.getWallets().stream().findFirst().get();
         }
         newCpcTransaction.setWallet(ww);
-        if (request.mediaId != null)
-            newCpcTransaction.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
-        newCpcTransaction.setPayoutPresent(false);
 
-        newCpcTransaction.setApproved(true);
-        newCpcTransaction.setInitialValue(request.getValue());
         return TransactionCPCDTO.from(cpcRepository.save(newCpcTransaction));
     }
 
     public TransactionCPLDTO createCpl(BaseCreateRequest request) {
         TransactionCPL newCplTransaction = mapper.map(request, TransactionCPL.class);
 
+        newCplTransaction.setPayoutPresent(false);
+        newCplTransaction.setApproved(true);
+        newCplTransaction.setInitialValue(request.getValue());
+
         if (request.getManualDate() != null) {
             newCplTransaction.setDateTime(request.getManualDate().atStartOfDay());
             newCplTransaction.setLeadNumber(1L);
             request.setDictionaryId(68L);
+            request.setStatusId(73L);
             newCplTransaction.setData(request.getData().trim());
 
             // trovo revenue
@@ -138,11 +159,6 @@ public class TransactionBusiness {
 
         newCplTransaction.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
 
-        Affiliate aa = null;
-        if (request.affiliateId != null) {
-            aa = affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId));
-            newCplTransaction.setAffiliate(aa);
-        }
         if (request.commissionId != null)
             newCplTransaction.setCommission(commissionRepository.findById(request.commissionId).orElseThrow(() -> new ElementCleveradException("Commission", request.commissionId)));
         if (request.channelId != null)
@@ -151,6 +167,14 @@ public class TransactionBusiness {
             newCplTransaction.setDictionary(dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", request.dictionaryId)));
         if (request.statusId != null)
             newCplTransaction.setDictionaryStatus(dictionaryRepository.findById(request.statusId).orElseThrow(() -> new ElementCleveradException("Status", request.statusId)));
+        if (request.mediaId != null)
+            newCplTransaction.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
+
+        Affiliate aa = null;
+        if (request.affiliateId != null) {
+            aa = affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId));
+        }
+        newCplTransaction.setAffiliate(aa);
 
         Wallet ww = null;
         if (request.walletId != null) {
@@ -159,18 +183,25 @@ public class TransactionBusiness {
             ww = aa.getWallets().stream().findFirst().get();
         }
         newCplTransaction.setWallet(ww);
-        //map.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
-
-        newCplTransaction.setPayoutPresent(false);
-        newCplTransaction.setApproved(true);
-        newCplTransaction.setInitialValue(request.getValue());
 
         return TransactionCPLDTO.from(cplRepository.save(newCplTransaction));
     }
 
     public TransactionCPMDTO createCpm(BaseCreateRequest request) {
         TransactionCPM map = mapper.map(request, TransactionCPM.class);
-        // request.setDictionaryId(42L);
+        if (request.getManualDate() != null) {
+            map.setDateTime(request.getManualDate().atStartOfDay());
+            request.setDictionaryId(68L);
+            request.setStatusId(73L);
+            request.setImpressionNumber(1L);
+            // trovo revenue
+            RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(request.getCampaignId(), 50L);
+            if (rf != null) {
+                map.setRevenueId(rf.getId());
+            } else {
+                map.setRevenueId(2L);
+            }
+        }
 
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
 
@@ -195,8 +226,11 @@ public class TransactionBusiness {
             ww = aa.getWallets().stream().findFirst().get();
         }
         map.setWallet(ww);
-        map.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
+        if (request.mediaId != null)
+            map.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
         map.setPayoutPresent(false);
+
+        map.setNote(request.getData());
 
         map.setApproved(true);
         return TransactionCPMDTO.from(cpmRepository.save(map));
@@ -237,7 +271,6 @@ public class TransactionBusiness {
         return TransactionCPSDTO.from(cpsRepository.save(map));
     }
 
-
     public TransactionCPCDTO updateCPCValue(Double value, Long id) {
         TransactionCPC cpc = cpcRepository.findById(id).get();
         cpc.setValue(value);
@@ -268,6 +301,41 @@ public class TransactionBusiness {
     public void updateStatus(Long id, Long dictionaryId, String tipo, Boolean approved, Long statusId) {
         if (tipo.equals("CPC")) {
             TransactionCPC cpc = cpcRepository.findById(id).get();
+
+            if ((cpc.getDictionaryStatus().getId() != 74L && statusId == 74L) || (cpc.getDictionary().getId() != 40L && dictionaryId == 40L)) {
+
+                // aggiorno budge e CAP affiliato
+                BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(cpc.getCampaign().getId(), cpc.getAffiliate().getId()).stream().findFirst().orElse(null);
+                if (budgetAff != null) {
+                    budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + cpc.getValue());
+                    budgetBusiness.updateCap(budgetAff.getId(), Math.toIntExact(budgetAff.getCap() + cpc.getClickNumber()));
+                }
+
+                // aggiorno budget campagna
+                campaignBusiness.updateBudget(cpc.getCampaign().getId(), campaignBusiness.findById(cpc.getCampaign().getId()).getBudget() + cpc.getValue());
+
+                // aggiorno wallet
+                Long walletID = null;
+                if (cpc.getAffiliate().getId() != null) {
+                    walletID = walletRepository.findByAffiliateId(cpc.getAffiliate().getId()).getId();
+                    walletBusiness.decrement(walletID, cpc.getValue());
+                }
+
+                //aggiorno Camapign Budget
+                if (cpc.getValue() > 0D) {
+                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(cpc.getCampaign().getId(), cpc.getDateTime());
+                    if (cb != null) {
+                        campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - cpc.getClickNumber()));
+                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - cpc.getValue());
+                    }
+                }
+
+            } else if (dictionaryId == 40L || statusId == 74L) {
+                // setto revenue e commission a 0
+                cpc.setRevenueId(1L);
+                cpc.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
+                cpc.setValue(0D);
+            }
             if (dictionaryId != null) {
                 Long finalDictionaryId = dictionaryId;
                 cpc.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", finalDictionaryId)));
@@ -277,15 +345,45 @@ public class TransactionBusiness {
                 cpc.setDictionaryStatus(dictionaryRepository.findById(statusId).orElseThrow(() -> new ElementCleveradException("Status", finalStatusId)));
             } else statusId = 0L;
             if (approved != null) cpc.setApproved(approved);
-            if (dictionaryId == 40L || statusId == 74L) {
-                // setto revenue e commission a 0
-                cpc.setRevenueId(1L);
-                cpc.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
-               // cpc.setValue(0D);
-            }
+
             cpcRepository.save(cpc);
         } else if (tipo.equals("CPL")) {
             TransactionCPL cpl = cplRepository.findById(id).get();
+
+            if ((cpl.getDictionaryStatus().getId() != 74L && statusId == 74L) || (cpl.getDictionary().getId() != 40L && dictionaryId == 40L)) {
+
+                // aggiorno budget affiliato
+                BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(cpl.getCampaign().getId(), cpl.getAffiliate().getId()).stream().findFirst().orElse(null);
+                if (budgetAff != null) {
+                    budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + cpl.getValue());
+                    budgetBusiness.updateCap(budgetAff.getId(), budgetAff.getCap() + 1);
+                }
+
+                // aggiorno budget campagna
+                campaignBusiness.updateBudget(cpl.getCampaign().getId(), campaignBusiness.findById(cpl.getCampaign().getId()).getBudget() + cpl.getValue());
+
+                // aggiorno wallet
+                Long walletID = null;
+                if (cpl.getAffiliate().getId() != null) {
+                    walletID = walletRepository.findByAffiliateId(cpl.getAffiliate().getId()).getId();
+                    walletBusiness.decrement(walletID, cpl.getValue());
+                }
+
+                //aggiorno Camapign Budget
+                if (cpl.getValue() > 0D) {
+                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(cpl.getCampaign().getId(), cpl.getDateTime());
+                    if (cb != null) {
+                        campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - 1));
+                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - cpl.getValue());
+                    }
+                }
+
+            } else if (dictionaryId == 40L || statusId == 74L) {
+                // setto revenue e commission a 0
+                cpl.setRevenueId(1L);
+                cpl.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
+                cpl.setValue(0D);
+            }
             if (dictionaryId != null) {
                 Long finalDictionaryId1 = dictionaryId;
                 cpl.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", finalDictionaryId1)));
@@ -295,12 +393,7 @@ public class TransactionBusiness {
                 cpl.setDictionaryStatus(dictionaryRepository.findById(statusId).orElseThrow(() -> new ElementCleveradException("Status", finalStatusId1)));
             } else statusId = 0L;
             if (approved != null) cpl.setApproved(approved);
-            if (dictionaryId == 40L || statusId == 74L) {
-                // setto revenue e commission a 0
-                cpl.setRevenueId(1L);
-                cpl.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
-                //cpl.setValue(0D);
-            }
+
             cplRepository.save(cpl);
         } else if (tipo.equals("CPM")) {
             TransactionCPM cpm = cpmRepository.findById(id).get();
@@ -317,7 +410,7 @@ public class TransactionBusiness {
                 // setto revenue e commission a 0
                 cpm.setRevenueId(1L);
                 cpm.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
-                //cpm.setValue(0D);
+                cpm.setValue(0D);
             }
             cpmRepository.save(cpm);
         } else if (tipo.equals("CPS")) {
@@ -335,7 +428,7 @@ public class TransactionBusiness {
                 // setto revenue e commission a 0
                 cps.setRevenueId(1L);
                 cps.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
-                //cps.setValue(0D);
+                cps.setValue(0D);
             }
             cpsRepository.save(cps);
         }
@@ -898,8 +991,8 @@ public class TransactionBusiness {
     @AllArgsConstructor
     @ToString
     public static class Filter {
+        public List<Long> notInId;
         private Long id;
-
         private Long affiliateId;
         private Long campaignId;
         private Long commissionId;
@@ -917,14 +1010,10 @@ public class TransactionBusiness {
         private Long leadNumber;
         private Long clickNumber;
         private Long revenueId;
-
         private LocalDateTime dateTimeFrom;
         private LocalDateTime dateTimeTo;
-
         private Long statusId;
         private Double initialValue;
-
-        public List<Long> notInId;
     }
 
     @Data

@@ -172,7 +172,7 @@ public class CommissionBusiness {
     public List<CommissionDTO> getCommissionToDisable() {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
-        request.setDueDateTo(LocalDate.now());
+        request.setDueDateTo(LocalDate.now().plusDays(1));
         request.setStatus(true);
         Page<Commission> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CommissionDTO::from).toList();

@@ -2,6 +2,7 @@ package it.cleverad.engine.business;
 
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.Campaign;
+import it.cleverad.engine.persistence.model.service.ClickMultipli;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.model.tracking.Cpc;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
@@ -92,6 +93,17 @@ public class TransazioniCPCBusiness {
                 transactionBusiness.delete(tcpc.getId(), "CPC");
                 Thread.sleep(75L);
             }
+
+            // NEL CASO NON SIA GIA' VERIFICO I CLICK MULTIPLI
+            List<ClickMultipli> listaDaDisabilitare = cpcBusiness.getListaClickMultipliDaDisabilitare(dataDaGestire);
+            // giro settaggio click multipli
+            listaDaDisabilitare.stream().forEach(clickMultipli -> {
+                log.info("Disabilito {} :: {}", clickMultipli.getId(), clickMultipli.getTotale() );
+                Cpc cccp = repository.findById(clickMultipli.getId()).orElseThrow(() -> new ElementCleveradException("Cpc", clickMultipli.getId()));
+                cccp.setRead(true);
+                cccp.setBlacklisted(true);
+                repository.save(cccp);
+            });
 
             //RIGENERO
             Map<String, Integer> mappa = new HashMap<>();

@@ -144,7 +144,7 @@ public class RevenueFactorBusiness {
     public List<RevenueFactorDTO> getRevenueToDisable() {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
-        request.setDueDateTo(LocalDate.now());
+        request.setDueDateTo(LocalDate.now().plusDays(1));
         request.setStatus(true);
         Page<RevenueFactor> page = repository.findAll(getSpecification(request), pageable);
         return page.map(RevenueFactorDTO::from).toList();

@@ -73,14 +73,14 @@ public class AdvertiserBusiness {
 
     // SEARCH PAGINATED
     public Page<AdvertiserDTO> search(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("name")));
         request.setStatus(true);
         Page<Advertiser> page = repository.findAll(getSpecification(request), pageable);
         return page.map(AdvertiserDTO::from);
     }
 
     public Page<AdvertiserDTO> searchAll(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("name")));
         Page<Advertiser> page = repository.findAll(getSpecification(request), pageable);
         return page.map(AdvertiserDTO::from);
     }

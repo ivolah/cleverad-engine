@@ -4,6 +4,7 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.Channel;
+import it.cleverad.engine.persistence.model.service.ClickMultipli;
 import it.cleverad.engine.persistence.model.tracking.Cpc;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
@@ -150,7 +151,7 @@ public class CpcBusiness {
         return page.map(CpcDTO::from);
     }
 
-    public Page<CpcDTO> getUnreadOneHourBefore() {
+    public Page<CpcDTO> getUnreadDayNotBlackilset() {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal")));
         Filter request = new Filter();
         request.setRead(false);
@@ -214,6 +215,12 @@ public class CpcBusiness {
         Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CpcDTO::from);
     }
+
+    public List<ClickMultipli> getListaClickMultipliDaDisabilitare(LocalDate date){
+        List<ClickMultipli> lista = repository.getListaClickMultipliDaDisabilitare(date);
+        return lista;
+    }
+
 
     public void setRead(long id) {
         Cpc cpc = repository.findById(id).get();

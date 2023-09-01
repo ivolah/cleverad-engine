@@ -139,21 +139,21 @@ public class BudgetBusiness {
         Page<Budget> page = repository.findAll(getSpecification(request), pageable);
         return page.map(BudgetDTO::from);
     }
-
     public Page<BudgetDTO> getByIdCampaignAndIdAffiliate(Long idCampaign, Long idAffilaite) {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setCampaignId(idCampaign);
         request.setAffiliateId(idAffilaite);
         request.setStatus(true);
-        Page<Budget> page = repository.findAll(getSpecification(request), pageable);
+        Page
+<Budget> page = repository.findAll(getSpecification(request), pageable);
         return page.map(BudgetDTO::from);
     }
 
     public List<BudgetDTO> getBudgetToDisable() {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
-        request.setDueDateTo(LocalDate.now());
+        request.setDueDateTo(LocalDate.now().plusDays(1));
         request.setStatus(true);
         Page<Budget> page = repository.findAll(getSpecification(request), pageable);
         return page.map(BudgetDTO::from).toList();

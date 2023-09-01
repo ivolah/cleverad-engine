@@ -50,14 +50,14 @@ public class TransactionAllBusiness {
         return TransactionStatusDTO.from(transaction);
     }
 
-
     // SEARCH PAGINATED
     public Page<TransactionStatusDTO> searchPrefiltrato(Filter filter, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("dateTime")));
         if (!jwtUserDetailsService.getRole().equals("Admin"))
             filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         Page<ViewTransactionStatus> page = repository.findAll(getSpecification(filter), pageable);
-        return page.map(TransactionStatusDTO::from);
+        Page<TransactionStatusDTO> ll = page.map(TransactionStatusDTO::from);
+        return ll ;
     }
 
 
@@ -170,11 +170,11 @@ public class TransactionAllBusiness {
 
             if (request.getDataList() != null && request.getDataList().length()>3) {
                 log.info("Dentro :: ", request.getDataList());
-                CriteriaBuilder.In<String> inClause = cb.in(root.get("data"));
+                CriteriaBuilder.In<String> inClause = cb.in(cb.upper(root.get("data")));
                 Arrays.stream(request.getDataList().split(",")).distinct().forEach(s -> {
-                    inClause.value(s);
+                    inClause.value(s.toUpperCase());
                 });
-                predicates.add(inClause);
+                predicates.add((inClause));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));

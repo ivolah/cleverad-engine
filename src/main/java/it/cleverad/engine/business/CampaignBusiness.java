@@ -204,7 +204,7 @@ public class CampaignBusiness {
 
     // SEARCH PAGINATED
     public Page<CampaignDTO> search(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("name")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("name")));
         Page<Campaign> page;
         if (jwtUserDetailsService.getRole().equals("Admin")) {
             page = repository.findAll(getSpecification(request), pageable);
@@ -331,7 +331,7 @@ public class CampaignBusiness {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("name")));
         Filter request = new Filter();
         request.setStatus(true);
-        request.setEndDateTo(LocalDate.now());
+        request.setEndDateTo(LocalDate.now().plusDays(1));
         Page<Campaign> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CampaignDTO::from).toList();
     }
