@@ -4,6 +4,7 @@ import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.CampaignBudget;
+import it.cleverad.engine.persistence.model.service.ClickMultipli;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.model.tracking.Cpc;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
@@ -78,9 +79,22 @@ public class ManageCPC {
     public void trasformaTrackingCPC() {
 
         try {
-            // trovo tutti i tracking con read == false
+            // trovo tutti i tracking cpc con read == false
             Map<String, Integer> mappa = new HashMap<>();
-            Page<CpcDTO> day = cpcBusiness.getUnreadOneHourBefore();
+
+            List<ClickMultipli> listaDaDisabilitare = cpcBusiness.getListaClickMultipliDaDisabilitare(LocalDate.now());
+            // giro settaggio click multipli
+            listaDaDisabilitare.stream().forEach(clickMultipli -> {
+                log.info("Disabilito {} :: {}", clickMultipli.getId(), clickMultipli.getTotale() );
+                Cpc cccp = repository.findById(clickMultipli.getId()).orElseThrow(() -> new ElementCleveradException("Cpc", clickMultipli.getId()));
+                cccp.setRead(true);
+                cccp.setBlacklisted(true);
+                repository.save(cccp);
+            });
+
+            Page<CpcDTO> day = cpcBusiness.getUnreadDayNotBlackilset();
+            log.info("CPC TOT NOT BLACKLISTED {}", day.getTotalElements());
+            // RECCUPERO REFFERAL + NUMERO TOTALE
             day.stream().filter(dto -> dto.getRefferal() != null).forEach(dto -> {
 
                 // gestisco calcolatore

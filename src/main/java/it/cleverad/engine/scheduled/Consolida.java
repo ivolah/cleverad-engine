@@ -33,14 +33,20 @@ public class Consolida {
     @Scheduled(cron = "8 58 * * * ?")
     public void ciclaCPC() {
         LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
-        consolidaCPC(oraSpaccata);
+       // consolidaCPC(oraSpaccata, true);
+       // consolidaCPC(oraSpaccata, false);
     }//trasformaTrackingCPC
 
-    public void consolidaCPC(LocalDateTime oraSpaccata) {
+    public void consolidaCPC(LocalDateTime oraSpaccata, Boolean blacklisted) {
 
         TransactionBusiness.Filter request = new TransactionBusiness.Filter();
         request.setDateTimeFrom(oraSpaccata.toLocalDate().atStartOfDay());
         request.setDateTimeTo(oraSpaccata);
+        if(blacklisted)
+            request.setValue(0D);
+        //else
+          // request.set valud not zero
+
         Page<TransactionCPCDTO> cpcs = transactionBusiness.searchCpc(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
 
         List<Triple> triples = new ArrayList<>();
@@ -96,6 +102,7 @@ public class Consolida {
                 bReq.setRevenueId(revenueId);
                 bReq.setWalletId(walletId);
                 bReq.setAgent("");
+               // bReq.setData();
                 bReq.setStatusId(statusId);
                 transactionBusiness.createCpc(bReq);
             }
@@ -117,7 +124,7 @@ public class Consolida {
     }//trasformaTrackingCPC
 
     public void consolidaCPM(LocalDateTime oraSpaccata) {
-        log.info("\n\n\nCONSOLIDA CPM " + oraSpaccata.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        log.trace("\n\n\nCONSOLIDA CPM " + oraSpaccata.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
         TransactionBusiness.Filter request = new TransactionBusiness.Filter();
         request.setDateTimeFrom(oraSpaccata.toLocalDate().atStartOfDay());
@@ -150,6 +157,7 @@ public class Consolida {
             Long revenueId = null;
             Long commissionId = null;
             Long statusId = null;
+            String data = null;
             for (TransactionCPMDTO tcpm : cpcM) {
                 impressionNumber += tcpm.getImpressionNumber();
                 value += tcpm.getValue();
@@ -159,12 +167,13 @@ public class Consolida {
                 revenueId = tcpm.getRevenueId();
                 commissionId = tcpm.getCommissionId();
                 statusId = tcpm.getStatusId();
+                data = tcpm.getNote();
                 log.trace("TRANSAZIONE CPM ID :: {} : {} :: {}", tcpm.getId(), tcpm.getImpressionNumber(), tcpm.getDateTime());
                 transactionBusiness.deleteInterno(tcpm.getId(), "CPM");
                 log.trace("DELETE {} ", tcpm.getId());
             }
             if (impressionNumber > 0) {
-                log.info("CONSOLIDATO CPM :: {} :: {} ::: {} - {} - {} ::: ", impressionNumber, value, ttt.getLeft(), ttt.getMiddle(), ttt.getRight());
+                log.trace("CONSOLIDATO CPM :: {} :: {} ::: {} - {} - {} ::: ", impressionNumber, value, ttt.getLeft(), ttt.getMiddle(), ttt.getRight());
                 TransactionBusiness.BaseCreateRequest bReq = new TransactionBusiness.BaseCreateRequest();
                 bReq.setImpressionNumber(impressionNumber);
                 bReq.setValue(value);
@@ -179,6 +188,7 @@ public class Consolida {
                 bReq.setRevenueId(revenueId);
                 bReq.setWalletId(walletId);
                 bReq.setAgent("");
+                bReq.setData(data);
                 bReq.setStatusId(statusId);
                 transactionBusiness.createCpm(bReq);
             }

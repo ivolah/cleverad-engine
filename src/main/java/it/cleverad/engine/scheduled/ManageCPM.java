@@ -155,7 +155,7 @@ public class ManageCPM {
 
                         // decremento budget Affiliato
                         BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
-                        if (bb != null) {
+                        if (bb != null && bb.getBudget() != null) {
                             Double totBudgetDecrementato = bb.getBudget() - totale;
                             budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
 
@@ -178,8 +178,8 @@ public class ManageCPM {
                             }
                         }
 
-                        //setto pending
-                        transaction.setStatusId(72L);
+                        //setto APPROVATO
+                        transaction.setStatusId(73L);
 
                         // creo la transazione
                         TransactionCPMDTO tcpm = transactionBusiness.createCpm(transaction);
