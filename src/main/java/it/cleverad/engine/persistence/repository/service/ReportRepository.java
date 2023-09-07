@@ -338,23 +338,23 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
             "             AND ((:statusList) IS NULL OR (dt.statusid in (:statusList))) " +
             "           group by dt.datadx) " +
             "SELECT giorno, " +
-            "       COALESCE(SUM(impressionnumber), 0)                                                                       as impressionNumber, " +
-            "       COALESCE(SUM(impressionnumberrigettato), 0)                                                              as impressionNumberRigettato, " +
-            "       COALESCE(SUM(clicknumber), 0)                                                                            as clickNumber, " +
-            "       COALESCE(SUM(clicknumberrigettato), 0)                                                                   as clickNumberRigettato, " +
-            "       COALESCE(SUM(leadnumber), 0)                                                                             as leadNumber, " +
-            "       COALESCE(SUM(leadnumberrigettato), 0)                                                                    as leadNumberRigettato, " +
-            "       COALESCE(round((SUM(clicknumber) / SUM(nullif(impressionnumber, 0)) * 100), 2), 0)                       as CTR, " +
-            "       COALESCE(round(CAST((SUM(leadnumber) / SUM(nullif(clicknumber, 0)) * 100) AS numeric), 2), 0)            as LR, " +
-            "       COALESCE(round(CAST(SUM(commission) AS numeric), 2), 0)                                                  as commission, " +
-            "       COALESCE(round(CAST(SUM(commissionRigettato) AS numeric), 2), 0)                                         as commissionRigettato, " +
-            "       COALESCE(round(CAST(SUM(revenue) AS numeric), 2), 0)                                                     as revenue, " +
-            "       COALESCE(round(CAST(SUM(revenueRigettato) AS numeric), 2), 0)                                            as revenueRigettato, " +
-            "       COALESCE(round(CAST((SUM(revenue) - SUM(commission)) AS numeric), 2), 0)                                 as margine, " +
-            "       COALESCE(round(CAST((SUM(revenue) - SUM(commission)) / SUM(nullif(revenue, 0)) * 100 AS numeric), 2), 0) as marginePC, " +
-            "       COALESCE(round(SUM(commission) / SUM(nullif(impressionnumber, 0)) * 1000, 2), 0)                         as ecpm, " +
-            "       COALESCE(round(SUM(commission) / SUM(nullif(clicknumber, 0)), 2), 0)                                     as ecpc, " +
-            "       COALESCE(round(CAST(SUM(commission) / SUM(nullif(leadNumber, 0)) AS numeric), 2), 0)                     as ecpl " +
+            "      SUM(impressionnumber)                                                                       as impressionNumber, " +
+            "      SUM(impressionnumberrigettato)                                                              as impressionNumberRigettato, " +
+            "      SUM(clicknumber)                                                                            as clickNumber, " +
+            "      SUM(clicknumberrigettato)                                                                   as clickNumberRigettato, " +
+            "      SUM(leadnumber)                                                                             as leadNumber, " +
+            "      SUM(leadnumberrigettato)                                                                    as leadNumberRigettato, " +
+            "      round((SUM(clicknumber) / SUM(nullif(impressionnumber, 0)) * 100), 2)                      as CTR, " +
+            "      round(CAST((SUM(leadnumber) / SUM(nullif(clicknumber, 0)) * 100) AS numeric), 2)         as LR, " +
+            "      round(CAST(SUM(commission) AS numeric), 2)                                                  as commission, " +
+            "      round(CAST(SUM(commissionRigettato) AS numeric), 2)                                         as commissionRigettato, " +
+            "      round(CAST(SUM(revenue) AS numeric), 2)                                                     as revenue, " +
+            "      round(CAST(SUM(revenueRigettato) AS numeric), 2)                                            as revenueRigettato, " +
+            "      round(CAST((SUM(revenue) - SUM(commission)) AS numeric), 2)                                 as margine, " +
+            "      round(CAST((SUM(revenue) - SUM(commission)) / SUM(nullif(revenue, 0)) * 100 AS numeric), 2) as marginePC, " +
+            "      round(SUM(commission) / SUM(nullif(impressionnumber, 0)) * 1000, 2)                         as ecpm, " +
+            "      round(SUM(commission) / SUM(nullif(clicknumber, 0)), 2)                                     as ecpc, " +
+            "      round(CAST(SUM(commission) / SUM(nullif(leadNumber, 0)) AS numeric), 2)                     as ecpl " +
             "FROM w " +
             "GROUP BY ROLLUP ((giorno, impressionNumber, clickNumber, leadnumber, ctr, lr, commission, revenue, margine, marginePC, ecpm, ecpc, ecpl)) " +
             "order by giorno nulls last"

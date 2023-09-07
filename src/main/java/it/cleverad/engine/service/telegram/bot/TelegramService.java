@@ -1,6 +1,7 @@
 package it.cleverad.engine.service.telegram.bot;
 
-import it.cleverad.engine.service.telegram.CleveradBot;
+//import it.cleverad.engine.service.telegram.CleveradBot;
+import lombok.AllArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,11 +13,11 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class TelegramService {
 
-    @Autowired
-    private CleveradBot cleveradBot;
+//    @Autowired
+//    private CleveradBot cleveradBot;
 
     public void invia(BaseCreateRequest request) {
-        cleveradBot.sendMsg("208751791", request.getMessage());
+//        cleveradBot.sendMsg("208751791", request.getMessage());
     }
 
     @Data

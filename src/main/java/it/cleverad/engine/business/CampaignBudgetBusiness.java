@@ -25,11 +25,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,15 +70,20 @@ public class CampaignBudgetBusiness {
     // UPDATE
     public CampaignBudgetDTO update(Long id, Filter filter) {
         CampaignBudget entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
+        log.info("CBDTO {}", entity);
         mapper.map(filter, entity);
-        if (filter.getAdvertiserId() != null)
-            entity.setAdvertiser(advertiserRepository.findById(filter.advertiserId).orElseThrow(() -> new ElementCleveradException("Advertiser", filter.advertiserId)));
-        if (filter.getCampaignId() != null)
-            entity.setCampaign(campaignRepository.findById(filter.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", filter.campaignId)));
-        if (filter.getTipologiaId() != null)
-            entity.setDictionary(dictionaryRepository.findById(filter.tipologiaId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.tipologiaId)));
 
-        return CampaignBudgetDTO.from(repository.save(entity));
+        CampaignBudget mappedEntity = mapper.map(entity, CampaignBudget.class);
+        if (filter.getAdvertiserId() != null)
+            mappedEntity.setAdvertiser(advertiserRepository.findById(filter.getAdvertiserId()).orElseThrow(() -> new ElementCleveradException("Advertiser", filter.getAdvertiserId())));
+        if (filter.getCampaignId() != null)
+            mappedEntity.setCampaign(campaignRepository.findById(filter.getCampaignId()).orElseThrow(() -> new ElementCleveradException("Campaign", filter.getCampaignId())));
+        if (filter.getTipologiaId() != null)
+            mappedEntity.setDictionary(dictionaryRepository.findById(filter.getTipologiaId()).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.getTipologiaId())));
+
+        log.info("CBDTO {}", mappedEntity);
+
+        return CampaignBudgetDTO.from(repository.save(mappedEntity));
     }
 
     // GET BY ID
@@ -197,17 +199,17 @@ public class CampaignBudgetBusiness {
             }
 
             if (request.getStartDateFrom() != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"),  request.getStartDateFrom()));
+                predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), request.getStartDateFrom()));
             }
             if (request.getStartDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("startDate"),  request.getStartDateTo()));
+                predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), request.getStartDateTo()));
             }
 
             if (request.getEndDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("endDate"), request.getEndDateFrom()));
             }
             if (request.getEndDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("endDate"),  request.getEndDateTo()));
+                predicates.add(cb.lessThanOrEqualTo(root.get("endDate"), request.getEndDateTo()));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -252,8 +254,21 @@ public class CampaignBudgetBusiness {
     public static class Filter {
         private Long id;
 
+        private Long tipologiaId;
         private Long advertiserId;
         private Long campaignId;
+        private Boolean status;
+
+        private Long fatturaId;
+
+        private Integer capFatturabile;
+        private Integer capErogato;
+        private Double budgetErogato;
+        private Double fatturato;
+        private Double scarto;
+        private String materiali;
+        private String note;
+
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate startDateFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -262,10 +277,6 @@ public class CampaignBudgetBusiness {
         private LocalDate endDateFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate endDateTo;
-        private Long tipologiaId;
-        private Integer capErogato;
-        private Double budgetErogato;
-        private Boolean status;
     }
 
 }

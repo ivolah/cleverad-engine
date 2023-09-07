@@ -5,9 +5,11 @@ public interface ReportDaily {
     String getGiorno();
 
     String getCommission();
+
     String getCommissionRigettato();
 
     String getRevenue();
+
     String getRevenueRigettato();
 
     String getMargine();
@@ -30,12 +32,20 @@ public interface ReportDaily {
 
     String getLR();
 
+    Long getImpressionNumberRigettato();
 
     Long getImpressionNumberrigettato();
 
-    Long getClickNumberrigettato();
 
-    Long getLeadNumberrigettato();
+    Long getLeadNumberRigettato();
+
+    //Long getLeadNumberrigettato();
+
+
+    Long getClickNumberRigettato();
+
+    //Long getClickNumberrigettato();
+
 
 
 }
