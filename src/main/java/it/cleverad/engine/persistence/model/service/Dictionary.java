@@ -106,6 +106,8 @@ public class Dictionary {
     @JoinColumn(name = "tipologia_id")
     private Set<CampaignBudget> campaignBudgets;
 
+    @OneToMany
+    @JoinColumn(name = "format_id")
+    private Set<Media> mediaFormats;
+
 }
-
-
