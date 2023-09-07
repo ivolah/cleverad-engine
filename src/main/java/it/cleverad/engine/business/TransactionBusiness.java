@@ -775,6 +775,10 @@ public class TransactionBusiness {
                 predicates.add(inClauseNot.not());
             }
 
+            if (request.getValueNotZero() != null && request.getValueNotZero()) {
+                predicates.add(cb.notEqual(root.get("value"), "0"));
+            }
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
@@ -936,6 +940,10 @@ public class TransactionBusiness {
                 predicates.add(cb.equal(root.get("dictionary").get("id"), request.getDictionaryId()));
             }
 
+            if (request.getBlacklisted() != null) {
+                predicates.add(cb.equal(root.get("blacklisted"), request.getBlacklisted()));
+            }
+
 
 //            if (request.getStatusId() != null) {
 //                predicates.add(cb.equal(root.get("dictionary").get("id"), request.getStatusId()));
@@ -1014,6 +1022,8 @@ public class TransactionBusiness {
         private LocalDateTime dateTimeTo;
         private Long statusId;
         private Double initialValue;
+        private Boolean blacklisted;
+        private Boolean valueNotZero;
     }
 
     @Data

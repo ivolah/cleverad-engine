@@ -30,11 +30,11 @@ public class Consolida {
     private TransactionBusiness transactionBusiness;
 
     @Async
-    @Scheduled(cron = "8 58 * * * ?")
+    @Scheduled(cron = "23 58 * * * ?")
     public void ciclaCPC() {
         LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
-       // consolidaCPC(oraSpaccata, true);
-       // consolidaCPC(oraSpaccata, false);
+        consolidaCPC(oraSpaccata, false);
+        consolidaCPC(oraSpaccata, true);
     }//trasformaTrackingCPC
 
     public void consolidaCPC(LocalDateTime oraSpaccata, Boolean blacklisted) {
@@ -42,10 +42,15 @@ public class Consolida {
         TransactionBusiness.Filter request = new TransactionBusiness.Filter();
         request.setDateTimeFrom(oraSpaccata.toLocalDate().atStartOfDay());
         request.setDateTimeTo(oraSpaccata);
-        if(blacklisted)
-            request.setValue(0D);
-        //else
-          // request.set valud not zero
+        if(blacklisted) {
+            // setto rifiutato
+            request.setStatusId(74L);
+            // setto blacklisted
+            request.setDictionaryId(70L);
+        }
+        else {
+            request.setStatusId(72L);
+        }
 
         Page<TransactionCPCDTO> cpcs = transactionBusiness.searchCpc(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
 

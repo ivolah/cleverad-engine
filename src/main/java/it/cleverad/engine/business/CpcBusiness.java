@@ -168,7 +168,8 @@ public class CpcBusiness {
         request.setRead(false);
         request.setBlacklisted(true);
         LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
-        request.setDatetimeFrom(oraSpaccata.toLocalDate().atStartOfDay().minusHours(3));
+       // request.setDatetimeFrom(oraSpaccata.toLocalDate().atStartOfDay().minusHours(3));
+        request.setDatetimeFrom(oraSpaccata.toLocalDate().atStartOfDay());
         request.setDatetimeTo(LocalDateTime.now());
         Page<Cpc> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(CpcDTO::from);
@@ -207,20 +208,20 @@ public class CpcBusiness {
         return page.map(CpcDTO::from);
     }
 
-    public Page<CpcDTO> getAllByDay(LocalDate data) {
+    public Page<CpcDTO> getAllByDay(LocalDate data, Boolean blacklisted) {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal")));
         Filter request = new Filter();
         request.setDateFrom(data);
         request.setDateTo(data);
+        request.setBlacklisted(blacklisted);
         Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CpcDTO::from);
     }
 
     public List<ClickMultipli> getListaClickMultipliDaDisabilitare(LocalDate date){
-        List<ClickMultipli> lista = repository.getListaClickMultipliDaDisabilitare(date);
+        List<ClickMultipli> lista = repository.getListaClickMultipliDaDisabilitare(date, date.plusDays(1));
         return lista;
     }
-
 
     public void setRead(long id) {
         Cpc cpc = repository.findById(id).get();
@@ -269,10 +270,12 @@ public class CpcBusiness {
                 predicates.add(cb.equal(root.get("campaignId"), request.getCampaignid()));
             }
 
-            if (request.getBlacklisted() != null) {
-                predicates.add(cb.equal(root.get("blacklisted"), request.getBlacklisted()));
+            if (request.getBlacklisted() != null && request.getBlacklisted()) {
+                predicates.add(cb.isTrue(root.get("blacklisted")));
             }
-
+            if (request.getBlacklisted() != null && !request.getBlacklisted()) {
+                predicates.add(cb.isFalse(root.get("blacklisted")));
+            }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;

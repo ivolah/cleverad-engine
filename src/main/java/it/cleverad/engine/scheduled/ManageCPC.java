@@ -65,11 +65,27 @@ public class ManageCPC {
      * ============================================================================================================
      **/
 
-    @Scheduled(cron = "4 */4 * * * ?")
+    @Scheduled(cron = "5 */5 * * * ?")
     @Async
     public void gestiusciTransazioni() {
+
+        // Setto a  Blacklisted i click mulipli
+        List<ClickMultipli> listaDaDisabilitare = cpcBusiness.getListaClickMultipliDaDisabilitare(LocalDate.now());
+        // giro settaggio click multipli
+        listaDaDisabilitare.stream().forEach(clickMultipli -> {
+            log.info("Disabilito {} :: {}", clickMultipli.getId(), clickMultipli.getTotale() );
+            Cpc cccp = repository.findById(clickMultipli.getId()).orElseThrow(() -> new ElementCleveradException("Cpc", clickMultipli.getId()));
+            cccp.setRead(false);
+            cccp.setBlacklisted(true);
+            repository.save(cccp);
+        });
+
+        // GESTICO I CLICK E CREO TRANSAZIONE
         trasformaTrackingCPC();
+
+        // GESTICO I CLICK BLACKLISTED
         gestisciBlacklisted();
+
     }
 
     /**
@@ -82,18 +98,8 @@ public class ManageCPC {
             // trovo tutti i tracking cpc con read == false
             Map<String, Integer> mappa = new HashMap<>();
 
-            List<ClickMultipli> listaDaDisabilitare = cpcBusiness.getListaClickMultipliDaDisabilitare(LocalDate.now());
-            // giro settaggio click multipli
-            listaDaDisabilitare.stream().forEach(clickMultipli -> {
-                log.info("Disabilito {} :: {}", clickMultipli.getId(), clickMultipli.getTotale() );
-                Cpc cccp = repository.findById(clickMultipli.getId()).orElseThrow(() -> new ElementCleveradException("Cpc", clickMultipli.getId()));
-                cccp.setRead(true);
-                cccp.setBlacklisted(true);
-                repository.save(cccp);
-            });
-
             Page<CpcDTO> day = cpcBusiness.getUnreadDayNotBlackilset();
-            log.info("CPC TOT NOT BLACKLISTED {}", day.getTotalElements());
+            log.trace("CPC TOT NOT BLACKLISTED {}", day.getTotalElements());
             // RECCUPERO REFFERAL + NUMERO TOTALE
             day.stream().filter(dto -> dto.getRefferal() != null).forEach(dto -> {
 
@@ -275,8 +281,7 @@ public class ManageCPC {
 
         try {
             Map<String, Integer> mappa = new HashMap<>();
-            Page<CpcDTO> day = cpcBusiness.getUnreadBlacklisted();
-            day.stream().filter(dto -> dto.getRefferal() != null).forEach(dto -> {
+            cpcBusiness.getUnreadBlacklisted().stream().filter(dto -> dto.getRefferal() != null).forEach(dto -> {
 
                 // gestisco calcolatore
                 Integer num = mappa.get(dto.getRefferal());

@@ -125,7 +125,6 @@ public class TransactionStatusBusiness {
                 predicates.add(cb.notEqual(root.get("value"), "0"));
             }
 
-
             if (request.getInDictionaryId() != null) {
                 CriteriaBuilder.In<Long> inClause = cb.in(root.get("dictionaryId"));
                 for (Long id : request.getInDictionaryId()) {

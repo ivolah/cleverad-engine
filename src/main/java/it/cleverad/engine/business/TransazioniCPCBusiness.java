@@ -24,7 +24,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -59,55 +62,76 @@ public class TransazioniCPCBusiness {
         LocalDate dataDaGestire = LocalDate.of(anno, mese, giorno);
         log.info(anno + "-" + mese + "-" + giorno + " >> " + dataDaGestire);
 
+        // NEL CASO NON SIA GIA' VERIFICO I CLICK MULTIPLI
+        List<ClickMultipli> listaDaDisabilitare = cpcBusiness.getListaClickMultipliDaDisabilitare(dataDaGestire);
+        // giro settaggio click multipli
+        listaDaDisabilitare.stream().forEach(clickMultipli -> {
+            log.info("Disabilito {} :: {}", clickMultipli.getId(), clickMultipli.getTotale());
+            Cpc cccp = repository.findById(clickMultipli.getId()).orElseThrow(() -> new ElementCleveradException("Cpc", clickMultipli.getId()));
+            cccp.setRead(true);
+            cccp.setBlacklisted(true);
+            repository.save(cccp);
+        });
+
         TransactionAllBusiness.Filter request = new TransactionAllBusiness.Filter();
-        request.setCreationDateFrom(dataDaGestire);
-        request.setCreationDateTo(dataDaGestire);
-        request.setTipo("CPC");
-
-        // cancello le transazioni not blacklisted e not manuali
-        List not = new ArrayList();
-        not.add(68L);
-        not.add(70L);
-        request.setNotInId(not);
-        Page<TransactionStatusDTO> ls = transactionAllBusiness.searchPrefiltrato(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
-        if (ls.getTotalElements() > 0) this.gestisci(ls, dataDaGestire, 72L);
-
-        // blacklisted
+        // GESTISCO LE TRANSAZIONi --->>> BLACKNOT BLACCKLSTED E NOT MANUALILISTED
+        request = new TransactionAllBusiness.Filter();
         request = new TransactionAllBusiness.Filter();
         request.setCreationDateFrom(dataDaGestire);
         request.setCreationDateTo(dataDaGestire);
         request.setTipo("CPC");
+        request.setStatusId(73L);
+        Page<TransactionStatusDTO> L73 = transactionAllBusiness.searchPrefiltrato(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
+        log.info("NOT BL 73 >> " + L73.getTotalElements());
+        L73.forEach(ttt -> transactionBusiness.delete(ttt.getId(), "CPC"));
 
-        request.setDictionaryId(70L);
+        // GESTISCO LE TRANSAZIONi --->>> BLACKNOT BLACCKLSTED E NOT MANUALILISTED
+        request = new TransactionAllBusiness.Filter();
+        request = new TransactionAllBusiness.Filter();
+        request.setCreationDateFrom(dataDaGestire);
+        request.setCreationDateTo(dataDaGestire);
+        request.setTipo("CPC");
+        request.setStatusId(74L);
+        Page<TransactionStatusDTO> L74 = transactionAllBusiness.searchPrefiltrato(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
+        log.info("NOT BL 74 >> " + L74.getTotalElements());
+        L74.forEach(ttt -> transactionBusiness.delete(ttt.getId(), "CPC"));
+
+        // GESTISCO LE TRANSAZIONi --->>> BLACKNOT BLACCKLSTED E NOT MANUALILISTED
+        request = new TransactionAllBusiness.Filter();
+        request = new TransactionAllBusiness.Filter();
+        request.setCreationDateFrom(dataDaGestire);
+        request.setCreationDateTo(dataDaGestire);
+        request.setTipo("CPC");
+        request.setStatusId(72L);
+        Page<TransactionStatusDTO> L72 = transactionAllBusiness.searchPrefiltrato(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
+        log.info("NOT BL 72 >> " + L72.getTotalElements());
+        L72.forEach(ttt -> {
+            log.debug(" DEL 72 >>>>>  " + ttt.getId());
+            transactionBusiness.delete(ttt.getId(), "CPC");
+        });
+        this.gestisci(cpcBusiness.getAllByDay(dataDaGestire, false), 72L, dataDaGestire);
+
+        // GESTISCO LE TRANSAZIONE --->>> BLACCKLSTED
+        request = new TransactionAllBusiness.Filter();
+        request.setCreationDateFrom(dataDaGestire);
+        request.setCreationDateTo(dataDaGestire);
+        request.setTipo("CPC");
+        request.setStatusId(70L);
         Page<TransactionStatusDTO> black = transactionAllBusiness.searchPrefiltrato(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
-        if (black.getTotalElements() > 0) this.gestisci(black, dataDaGestire, 70L);
+        log.info("BL >> " + black.getTotalElements());
+        black.forEach(transactionStatusDTO -> {
+            log.debug("CANCELLO PER RIGENERA CPC :: {} : {} :: {}", transactionStatusDTO.getId(), transactionStatusDTO.getClickNumber(), transactionStatusDTO.getDateTime());
+            transactionBusiness.delete(transactionStatusDTO.getId(), "CPC");
+        });
+        this.gestisci(cpcBusiness.getAllByDay(dataDaGestire, true), 70L, dataDaGestire);
+
     }
 
-    public void gestisci(Page<TransactionStatusDTO> ls, LocalDate dataDaGestire, Long statusID) {
+    public void gestisci(Page<CpcDTO> day, Long statusID, LocalDate dataDaGestire) {
         try {
-
-            log.info(">>> TOT :: " + ls.getTotalElements());
-
-            for (TransactionStatusDTO tcpc : ls) {
-                log.debug("CANCELLO PER RIGENERA CPC :: {} : {} :: {}", tcpc.getId(), tcpc.getClickNumber(), tcpc.getDateTime());
-                transactionBusiness.delete(tcpc.getId(), "CPC");
-                Thread.sleep(75L);
-            }
-
-            // NEL CASO NON SIA GIA' VERIFICO I CLICK MULTIPLI
-            List<ClickMultipli> listaDaDisabilitare = cpcBusiness.getListaClickMultipliDaDisabilitare(dataDaGestire);
-            // giro settaggio click multipli
-            listaDaDisabilitare.stream().forEach(clickMultipli -> {
-                log.info("Disabilito {} :: {}", clickMultipli.getId(), clickMultipli.getTotale() );
-                Cpc cccp = repository.findById(clickMultipli.getId()).orElseThrow(() -> new ElementCleveradException("Cpc", clickMultipli.getId()));
-                cccp.setRead(true);
-                cccp.setBlacklisted(true);
-                repository.save(cccp);
-            });
-
             //RIGENERO
             Map<String, Integer> mappa = new HashMap<>();
-            Page<CpcDTO> day = cpcBusiness.getAllByDay(dataDaGestire);
+            log.info(">>> :: " + day.getTotalElements() + " >>> " + statusID);
             day.stream().filter(dto -> dto.getRefferal() != null).forEach(dto -> {
 
                 // gestisco calcolatore
@@ -126,18 +150,6 @@ public class TransazioniCPCBusiness {
 
                 // setto a read
                 cpcBusiness.setRead(dto.getId());
-
-                // aggiorno dati CPC
-                Cpc cccp = repository.findById(dto.getId()).orElseThrow(() -> new ElementCleveradException("Cpc", dto.getId()));
-                Refferal refferal = referralService.decodificaReferral(dto.getRefferal());
-                if (refferal != null && refferal.getMediaId() != null) cccp.setMediaId(refferal.getMediaId());
-                if (refferal != null && refferal.getCampaignId() != null) cccp.setCampaignId(refferal.getCampaignId());
-                if (refferal != null && refferal.getAffiliateId() != null)
-                    cccp.setAffiliateId(refferal.getAffiliateId());
-                if (refferal != null && refferal.getChannelId() != null) cccp.setChannelId(refferal.getChannelId());
-                if (refferal != null && refferal.getTargetId() != null) cccp.setTargetId(refferal.getTargetId());
-                repository.save(cccp);
-
             });
 
             mappa.forEach((ref, numer) -> {
@@ -268,6 +280,5 @@ public class TransazioniCPCBusiness {
         private String month;
         private String day;
     }
-
 
 }
