@@ -6,10 +6,7 @@ import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.Media;
 import it.cleverad.engine.persistence.model.service.Url;
-import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
-import it.cleverad.engine.persistence.repository.service.CampaignRepository;
-import it.cleverad.engine.persistence.repository.service.MediaRepository;
-import it.cleverad.engine.persistence.repository.service.MediaTypeRepository;
+import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.service.tinyurl.TinyData;
 import it.cleverad.engine.service.tinyurl.TinyUrlService;
@@ -61,6 +58,8 @@ public class MediaBusiness {
     @Autowired
     private CampaignRepository campaignRepository;
     @Autowired
+    private DictionaryRepository dictionaryRepository;
+    @Autowired
     private ReferralService referralService;
     @Autowired
     private TargetBusiness targetBusiness;
@@ -93,6 +92,9 @@ public class MediaBusiness {
         Media saved = repository.save(map);
         Campaign cc = campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.getCampaignId()));
         cc.addMedia(saved);
+
+        map.setDictionary(dictionaryRepository.findById(request.formatId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.formatId)));
+
         campaignRepository.save(cc);
 
         return MediaDTO.from(saved);
@@ -149,6 +151,8 @@ public class MediaBusiness {
         media.setLastModificationDate(LocalDateTime.now());
         media.setBannerCode(bannerCode);
         //media.setStatus(true);
+        media.setDictionary(dictionaryRepository.findById(filter.formatId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.formatId)));
+
         Media saved = repository.save(media);
 
         Campaign cc = campaignRepository.findById(filter.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", filter.getCampaignId()));
@@ -411,6 +415,7 @@ public class MediaBusiness {
         private Boolean status;
         private String description;
         private String title;
+        private Long formatId;
     }
 
     @Data
@@ -438,6 +443,7 @@ public class MediaBusiness {
         private Boolean visibile;
         private String description;
         private String title;
+        private Long formatId;
     }
 
 }

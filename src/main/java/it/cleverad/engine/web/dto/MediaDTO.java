@@ -43,6 +43,8 @@ public class MediaDTO {
 
     private String description;
     private String title;
+    private Long formatId;
+    private String formatName;
 
     public MediaDTO(long id, String name, String url, String mailSubject, String bannerCode, String note, String idFile, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, Long campaignId, String campaignName, Long typeId,
                     String typeName,
@@ -51,7 +53,7 @@ public class MediaDTO {
                     String target,
                     Boolean visibile,
                     String description,
-                    String title) {
+                    String title, Long formatId, String formatName) {
         this.id = id;
         this.name = name;
         this.url = url;
@@ -72,6 +74,8 @@ public class MediaDTO {
         this.visibile = visibile;
         this.description = description;
         this.title = title;
+        this.formatId = formatId;
+        this.formatName = formatName;
     }
 
     public static MediaDTO from(Media media) {
@@ -98,9 +102,10 @@ public class MediaDTO {
                 media.getSender(),
                 media.getTarget()
                 , media.getVisibile()
-                , media.getDescription(), media.getTitle());
+                , media.getDescription(), media.getTitle(),
+                media.getDictionary() != null ? media.getDictionary().getId() : null,
+                media.getDictionary() != null ? media.getDictionary().getName() : null
+        );
     }
 
 }
-
-

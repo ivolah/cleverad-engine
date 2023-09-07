@@ -60,4 +60,8 @@ public class Media {
     @OneToMany(mappedBy = "media")
     private Set<Target> targets;
 
+    @ManyToOne
+    @JoinColumn(name = "format_id")
+    private Dictionary dictionary;
+
 }
