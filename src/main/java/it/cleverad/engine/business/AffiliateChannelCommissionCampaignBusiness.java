@@ -1,12 +1,12 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.AffiliateChannelCommissionCampaign;
 import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.Commission;
 import it.cleverad.engine.persistence.repository.service.*;
-import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -113,7 +113,9 @@ public class AffiliateChannelCommissionCampaignBusiness {
         try {
             AffiliateChannelCommissionCampaign affiliateChannelCommissionCampaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("AffiliateChannelCommissionCampaign", id));
             repository.deleteById(affiliateChannelCommissionCampaign.getId());
-            //campaignAffiliateBusiness.deleteByCampaignIdAndAffiliateId(affiliateChannelCommissionCampaign.getCampaign().getId(), affiliateChannelCommissionCampaign.getAffiliate().getId());
+            // se non ci sono altre commissioni per la campagna e l'affiliato cancello
+            if (searchByCampaignIdAffiliateId(affiliateChannelCommissionCampaign.getCampaign().getId(), affiliateChannelCommissionCampaign.getAffiliate().getId(), PageRequest.of(0, Integer.MAX_VALUE)).getTotalElements() == 0)
+                campaignAffiliateBusiness.deleteByCampaignIdAndAffiliateId(affiliateChannelCommissionCampaign.getCampaign().getId(), affiliateChannelCommissionCampaign.getAffiliate().getId());
         } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
@@ -181,6 +183,15 @@ public class AffiliateChannelCommissionCampaignBusiness {
         if (!jwtUserDetailsService.isAdmin())
             filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         filter.setNotzero(true);
+        Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
+        return page.map(AffiliateChannelCommissionCampaignDTO::from);
+    }
+
+    public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignIdAffiliateId(Long campaignId, Long affiliateId, Pageable pageableRequest) {
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Filter filter = new Filter();
+        filter.setCampaignId(campaignId);
+        filter.setAffiliateId(affiliateId);
         Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
         return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }

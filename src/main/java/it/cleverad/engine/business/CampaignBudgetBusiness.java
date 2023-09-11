@@ -68,22 +68,19 @@ public class CampaignBudgetBusiness {
     }
 
     // UPDATE
-    public CampaignBudgetDTO update(Long id, Filter filter) {
-        CampaignBudget entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
-        log.info("CBDTO {}", entity);
-        mapper.map(filter, entity);
+    public CampaignBudgetDTO update(Long id, Update filter) {
+        CampaignBudget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
 
-        CampaignBudget mappedEntity = mapper.map(entity, CampaignBudget.class);
+        mapper.map(filter, budget);
+
         if (filter.getAdvertiserId() != null)
-            mappedEntity.setAdvertiser(advertiserRepository.findById(filter.getAdvertiserId()).orElseThrow(() -> new ElementCleveradException("Advertiser", filter.getAdvertiserId())));
+            budget.setAdvertiser(advertiserRepository.findById(filter.getAdvertiserId()).orElseThrow(() -> new ElementCleveradException("Advertiser", filter.getAdvertiserId())));
         if (filter.getCampaignId() != null)
-            mappedEntity.setCampaign(campaignRepository.findById(filter.getCampaignId()).orElseThrow(() -> new ElementCleveradException("Campaign", filter.getCampaignId())));
+            budget.setCampaign(campaignRepository.findById(filter.getCampaignId()).orElseThrow(() -> new ElementCleveradException("Campaign", filter.getCampaignId())));
         if (filter.getTipologiaId() != null)
-            mappedEntity.setDictionary(dictionaryRepository.findById(filter.getTipologiaId()).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.getTipologiaId())));
+            budget.setDictionary(dictionaryRepository.findById(filter.getTipologiaId()).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.getTipologiaId())));
 
-        log.info("CBDTO {}", mappedEntity);
-
-        return CampaignBudgetDTO.from(repository.save(mappedEntity));
+        return CampaignBudgetDTO.from(repository.save(budget));
     }
 
     // GET BY ID
@@ -140,43 +137,37 @@ public class CampaignBudgetBusiness {
         return cb;
     }
 
-
     public CampaignBudgetDTO incrementoCapErogato(Long id, Integer cap) {
-        CampaignBudget entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
-        Filter filter = new Filter();
-        Integer capErogato = entity.getCapErogato() + cap;
+        CampaignBudget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
+        Integer capErogato = budget.getCapErogato() + cap;
         log.info(">>> " + capErogato);
-        filter.setCapErogato(capErogato);
-        return this.update(id, filter);
+        budget.setCapErogato(capErogato);
+        return  CampaignBudgetDTO.from(repository.save(budget));
     }
 
     public CampaignBudgetDTO decreaseCapErogatoOnDeleteTransaction(Long id, Integer cap) {
-        CampaignBudget entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
-        Filter filter = new Filter();
-        Integer capErogato = entity.getCapErogato() - cap;
+        CampaignBudget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
+        Integer capErogato = budget.getCapErogato() - cap;
         log.info(">>> " + capErogato);
-        filter.setCapErogato(capErogato);
-        return this.update(id, filter);
+        budget.setCapErogato(capErogato);
+        return  CampaignBudgetDTO.from(repository.save(budget));
     }
 
     public CampaignBudgetDTO incrementoBudgetErogato(Long id, Double budget) {
         CampaignBudget entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
-        Filter filter = new Filter();
         Double nuovoBB = entity.getBudgetErogato() + budget;
         log.info(">>> " + nuovoBB);
-        filter.setBudgetErogato(nuovoBB);
-        return this.update(id, filter);
+        entity.setBudgetErogato(nuovoBB);
+        return  CampaignBudgetDTO.from(repository.save(entity));
     }
 
     public CampaignBudgetDTO decreaseBudgetErogatoOnDeleteTransaction(Long id, Double budget) {
         CampaignBudget entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
-        Filter filter = new Filter();
         Double nuovoBB = entity.getBudgetErogato() + budget;
         log.info(">>> " + nuovoBB);
-        filter.setBudgetErogato(nuovoBB);
-        return this.update(id, filter);
+        entity.setBudgetErogato(nuovoBB);
+        return  CampaignBudgetDTO.from(repository.save(entity));
     }
-
 
     /**
      * ============================================================================================================
@@ -277,6 +268,22 @@ public class CampaignBudgetBusiness {
         private LocalDate endDateFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate endDateTo;
+    }
+
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Update {
+        private Long tipologiaId;
+        private Long advertiserId;
+        private Long campaignId;
+        private Boolean status;
+        private Integer capFatturabile;
+        private Double fatturato;
+        private Double scarto;
+        private String materiali;
+        private String note;
     }
 
 }

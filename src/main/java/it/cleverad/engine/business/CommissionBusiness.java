@@ -51,6 +51,8 @@ public class CommissionBusiness {
     private CampaignRepository campaignRepository;
     @Autowired
     private TransactionBusiness transactionBusiness;
+    @Autowired
+    CampaignAffiliateBusiness campaignAffiliateBusiness;
 
     @Autowired
     private Mapper mapper;
@@ -79,6 +81,7 @@ public class CommissionBusiness {
     public void delete(Long campaignId, Long commissionId) {
         affiliateChannelCommissionCampaignBusiness.deletebyCampaignAndCommission(campaignId, commissionId);
         repository.deleteById(commissionId);
+
     }
 
     // SEARCH PAGINATED

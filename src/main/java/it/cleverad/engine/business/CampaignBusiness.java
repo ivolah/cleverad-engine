@@ -1,12 +1,12 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.CampaignCategory;
 import it.cleverad.engine.persistence.model.service.Media;
 import it.cleverad.engine.persistence.repository.service.*;
-import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.CampaignDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -297,7 +297,6 @@ public class CampaignBusiness {
         affiliateRepository.findById(affiliateId).get().getCampaignAffiliates().stream().forEach(campaignAffiliate -> {
             listaId.add(campaignAffiliate.getCampaign().getId());
         });
-
         Filter request = new Filter();
         request.setStatus(true);
         request.setIdListIn(listaId);
@@ -306,15 +305,14 @@ public class CampaignBusiness {
     }
 
     public Page<CampaignDTO> getCampaignsNot(Long affiliateId, Pageable pageable) {
-
         List<Long> listaId = new ArrayList<>();
         affiliateRepository.findById(affiliateId).get().getCampaignAffiliates().stream().forEach(campaignAffiliate -> {
             listaId.add(campaignAffiliate.getCampaign().getId());
         });
-
         Filter requestNot = new Filter();
         requestNot.setStatus(true);
-        requestNot.setIdListNotIn(listaId);
+        if (listaId.size() > 0)
+            requestNot.setIdListNotIn(listaId);
         Page<Campaign> page = repository.findAll(getSpecification(requestNot), pageable);
         return page.map(CampaignDTO::from);
     }
