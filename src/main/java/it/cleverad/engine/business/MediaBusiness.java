@@ -90,11 +90,11 @@ public class MediaBusiness {
         map.setStatus(false);
         map.setCreationDate(LocalDateTime.now());
         Media saved = repository.save(map);
+
         Campaign cc = campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.getCampaignId()));
         cc.addMedia(saved);
-
-        map.setDictionary(dictionaryRepository.findById(request.formatId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.formatId)));
-
+        if (request.formatId != null)
+            map.setDictionary(dictionaryRepository.findById(request.formatId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.formatId)));
         campaignRepository.save(cc);
 
         return MediaDTO.from(saved);
@@ -151,7 +151,8 @@ public class MediaBusiness {
         media.setLastModificationDate(LocalDateTime.now());
         media.setBannerCode(bannerCode);
         //media.setStatus(true);
-        media.setDictionary(dictionaryRepository.findById(filter.formatId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.formatId)));
+        if (filter.formatId != null)
+            media.setDictionary(dictionaryRepository.findById(filter.formatId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.formatId)));
 
         Media saved = repository.save(media);
 
@@ -254,8 +255,8 @@ public class MediaBusiness {
         if (dto.getTypeId() == 5L) {
             dto.setTarget(setUrlTarget(dto.getTarget(), mediaId, campaignId, channelID, 0L));
             String desc = dto.getDescription();
-            desc =  desc.replace("{{shorturl}}", dto.getTarget());
-            desc =  desc.replace("{{linktoimage}}", dto.getUrl());
+            desc = desc.replace("{{shorturl}}", dto.getTarget());
+            desc = desc.replace("{{linktoimage}}", dto.getUrl());
             dto.setDescription(desc);
         }
         dto.setBannerCode(generaBannerCode(dto, mediaId, campaignId, channelID, 0L));
@@ -268,8 +269,8 @@ public class MediaBusiness {
         if (dto.getTypeId() == 5L) {
             dto.setTarget(setUrlTarget(dto.getTarget(), mediaId, campaignId, channelID, targetId));
             String desc = dto.getDescription();
-            desc =  desc.replace("{{shorturl}}", dto.getTarget());
-            desc =  desc.replace("{{linktoimage}}", dto.getUrl());
+            desc = desc.replace("{{shorturl}}", dto.getTarget());
+            desc = desc.replace("{{linktoimage}}", dto.getUrl());
             dto.setDescription(desc);
         }
         dto.setBannerCode(generaBannerCode(dto, mediaId, campaignId, channelID, targetId));
@@ -433,8 +434,6 @@ public class MediaBusiness {
         private Long campaignId;
         private Boolean status;
         private String idFile;
-        private LocalDateTime creationDate;
-        private LocalDateTime lastModificationDate;
         private Instant creationDateFrom;
         private Instant creationDateTo;
         private Instant lastModificationDateFrom;
