@@ -38,15 +38,8 @@ public class AffiliateDTO {
     private String firstName;
     private String lastName;
 
-    private String nomeSitoSocial;
-    private String urlSitoSocial;
-
     private Long companytypeId;
     private String companytypeNome;
-    private Long channeltypeId;
-    private String channeltypeNome;
-
-    private String contenutoSito;
 
     private Boolean status;
     private Long statusId;
@@ -58,6 +51,7 @@ public class AffiliateDTO {
     private List<FileAffiliateDTO> fileAffiliates;
 
     private Boolean cb;
+    private Boolean brandbuddies;
 
 
     public static AffiliateDTO from(Affiliate affiliate) {
@@ -92,16 +86,13 @@ public class AffiliateDTO {
             }).collect(Collectors.toList());
         }
 
-        return new AffiliateDTO(affiliate.getId(), affiliate.getName(), affiliate.getVatNumber(), affiliate.getStreet(), affiliate.getStreetNumber(), affiliate.getCity(), affiliate.getProvince(), affiliate.getZipCode(), affiliate.getPrimaryMail(), affiliate.getSecondaryMail(), affiliate.getCountry(), affiliate.getPhonePrefix(), affiliate.getPhoneNumber(), affiliate.getNote(), affiliate.getBank(), affiliate.getIban(), affiliate.getSwift(), affiliate.getPaypal(), affiliate.getFirstName(), affiliate.getLastName(), affiliate.getNomeSitoSocial(), affiliate.getUrlSitoSocial(),
+        return new AffiliateDTO(affiliate.getId(), affiliate.getName(), affiliate.getVatNumber(), affiliate.getStreet(), affiliate.getStreetNumber(), affiliate.getCity(), affiliate.getProvince(), affiliate.getZipCode(), affiliate.getPrimaryMail(), affiliate.getSecondaryMail(), affiliate.getCountry(), affiliate.getPhonePrefix(), affiliate.getPhoneNumber(), affiliate.getNote(), affiliate.getBank(), affiliate.getIban(), affiliate.getSwift(), affiliate.getPaypal(), affiliate.getFirstName(), affiliate.getLastName(),
                 affiliate.getDictionaryCompanyType() != null ? affiliate.getDictionaryCompanyType().getId() : null,
                 affiliate.getDictionaryCompanyType() != null ? affiliate.getDictionaryCompanyType().getName() : null,
-                affiliate.getDictionaryChannelType() != null ? affiliate.getDictionaryChannelType().getId() : null,
-                affiliate.getDictionaryChannelType() != null ? affiliate.getDictionaryChannelType().getName() : null,
-                affiliate.getContenutoSito(),
                 affiliate.getStatus(),
                 affiliate.getDictionaryStatusType() != null ? affiliate.getDictionaryStatusType().getId() : null,
                 affiliate.getDictionaryStatusType() != null ? affiliate.getDictionaryStatusType().getName() : null,
-                affiliate.getCreationDate(), affiliate.getLastModificationDate(), listaCam, listaFile, affiliate.getCb());
+                affiliate.getCreationDate(), affiliate.getLastModificationDate(), listaCam, listaFile, affiliate.getCb(), affiliate.getBrandbuddies());
     }
 
 }

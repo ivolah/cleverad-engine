@@ -57,6 +57,8 @@ public class CampaignDTO {
     private List<AffiliateChannelCommissionCampaignDTO> affiliateChannelCommissionCampaigns;
     private List<Long> categoryList;
 
+    private Boolean checkPhoneNumber;
+
     public static CampaignDTO from(Campaign campaign) {
 
         List<BasicMediaDTO> medias = null;
@@ -184,7 +186,8 @@ public class CampaignDTO {
                 campaign.getPlanner() != null ? campaign.getPlanner().getName() : null,
                 campaign.getPlanner() != null ? campaign.getPlanner().getEmail() : null,
 
-                medias, affiliateDTOList, commissions, categoryDTOS, revenues, accc, categoryList);
+                medias, affiliateDTOList, commissions, categoryDTOS, revenues, accc, categoryList,
+                campaign.getCheckPhoneNumber());
     }
 
 }
