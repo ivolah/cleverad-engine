@@ -8,7 +8,9 @@ import it.cleverad.engine.persistence.model.service.CampaignCategory;
 import it.cleverad.engine.persistence.model.service.Media;
 import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.service.ReferralService;
+import it.cleverad.engine.web.dto.CampaignBrandBuddiesDTO;
 import it.cleverad.engine.web.dto.CampaignDTO;
+import it.cleverad.engine.web.dto.MediaDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -67,6 +69,8 @@ public class CampaignBusiness {
     private CommissionBusiness commissionBusiness;
     @Autowired
     private CampaignAffiliateBusiness campaignAffiliateBusiness;
+    @Autowired
+    private AffiliateChannelCommissionCampaignBusiness affiliateChannelCommissionCampaignBusiness;
     @Autowired
     private MediaBusiness mediaBusiness;
 //    @Autowired
@@ -229,7 +233,7 @@ public class CampaignBusiness {
         Campaign campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
 
         Double newBB = null;
-        if (!campaign.getInitialBudget().equals(filter.getInitialBudget())) {
+        if (campaign.getBudget() != null && campaign.getInitialBudget() != null && filter.getInitialBudget() != null && !campaign.getInitialBudget().equals(filter.getInitialBudget())) {
             newBB = campaign.getBudget() + (filter.getInitialBudget()) - campaign.getInitialBudget();
             campaign.setInitialBudget(filter.getInitialBudget());
         }
@@ -341,6 +345,51 @@ public class CampaignBusiness {
         return page.map(CampaignDTO::from).toList();
     }
 
+    public Page<CampaignBrandBuddiesDTO> getCampaignsActiveBrandBuddies(Filter req, Pageable pageable) {
+
+        //lista media brandbuddies
+        MediaBusiness.Filter ff = new MediaBusiness.Filter();
+        ff.setTypeId(6L);
+        List<Long> listaId = mediaBusiness.search(ff, Pageable.ofSize(Integer.MAX_VALUE)).stream().map(MediaDTO::getCampaignId).distinct().collect(Collectors.toList());
+        listaId.forEach(aLong -> log.info("Campagna BB : " + aLong));
+
+
+        Page<Campaign> page = null;
+        Filter request = new Filter();
+        if (req.getBbtipo() == null && req.getCategoryId() == null) {
+            request.setIdListIn(listaId.stream().distinct().collect(Collectors.toList()));
+            page = repository.findAll(getSpecification(request), pageable);
+        } else if (req.getBbtipo() != null && req.getCategoryId() == null) {
+            List<Long> listaIdPulita = new ArrayList<>();
+            listaId.forEach(campaignId -> {
+                log.info(campaignId + " - check - " + req.getBbtipo());
+                if (req.getBbtipo() != null && req.getBbtipo().contains("CPC") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, 84L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0)
+                    listaIdPulita.add(campaignId);
+                if (req.getBbtipo() != null && req.getBbtipo().contains("CPL") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, 85L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0)
+                    listaIdPulita.add(campaignId);
+            });
+            request.setIdListIn(listaIdPulita.stream().distinct().collect(Collectors.toList()));
+            page = repository.findAll(getSpecification(request), pageable);
+        } else if (req.getBbtipo() == null && req.getCategoryId() != null) {
+            log.info("GG " + req.getCategoryId());
+            page = repository.findByCampaignCategories_CampaignIdInAndCampaignCategories_CategoryId(listaId, req.getCategoryId(), pageable);
+        } else if (req.getBbtipo() != null && req.getCategoryId() != null) {
+            List<Long> listaIdPulita = new ArrayList<>();
+            listaId.forEach(campaignId -> {
+                log.info(campaignId + " - check - " + req.getBbtipo());
+                if (req.getBbtipo() != null && req.getBbtipo().contains("CPC") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, 84L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0) {
+                    listaIdPulita.add(campaignId);
+                }
+                if (req.getBbtipo() != null && req.getBbtipo().contains("CPL") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, 85L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0) {
+                    listaIdPulita.add(campaignId);
+                }
+            });
+            page = repository.findByCampaignCategories_CampaignIdInAndCampaignCategories_CategoryId(listaIdPulita.stream().distinct().collect(Collectors.toList()), req.getCategoryId(), pageable);
+        }
+
+        return page.map(CampaignBrandBuddiesDTO::from);
+    }
+
     /**
      * ============================================================================================================
      **/
@@ -364,7 +413,6 @@ public class CampaignBusiness {
             if (request.getStatus() != null) {
                 predicates.add(cb.equal(root.get("status"), request.getStatus()));
             }
-
             if (request.getCreationDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("creationDate"), LocalDateTime.ofInstant(request.getCreationDateFrom(), ZoneOffset.UTC)));
             }
@@ -409,6 +457,14 @@ public class CampaignBusiness {
                 predicates.add(inClauseNot.not());
             }
 
+            if (request.getCheckPhoneNumber() != null) {
+                predicates.add(cb.equal(root.get("checkPhoneNumber"), request.getCheckPhoneNumber()));
+            }
+
+            if (request.getCategoryId() != null) {
+                CriteriaBuilder.In<Long> inClause = cb.in(root.get("campaigncategory").get("id"));
+                predicates.add(inClause.value(request.getCategoryId()));
+            }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 
@@ -444,6 +500,7 @@ public class CampaignBusiness {
         @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSz")
         private LocalDateTime endDate;
         private String cap;
+        private Boolean checkPhoneNumber = false;
     }
 
     @Data
@@ -485,6 +542,9 @@ public class CampaignBusiness {
         private String cap;
         private List<Long> idListIn;
         private List<Long> idListNotIn;
+        private Boolean checkPhoneNumber;
+        private String bbtipo;
+        private Long categoryId;
     }
 
 }

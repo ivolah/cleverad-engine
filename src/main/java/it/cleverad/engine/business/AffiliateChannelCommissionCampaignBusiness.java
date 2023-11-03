@@ -187,6 +187,17 @@ public class AffiliateChannelCommissionCampaignBusiness {
         return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
 
+    public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignIdAffiliateWithZero(Long campaignId, Pageable pageableRequest) {
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Filter filter = new Filter();
+        filter.setCampaignId(campaignId);
+        if (!jwtUserDetailsService.isAdmin())
+            filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+
+        Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
+        return page.map(AffiliateChannelCommissionCampaignDTO::from);
+    }
+
     public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignIdAffiliateId(Long campaignId, Long affiliateId, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Filter filter = new Filter();

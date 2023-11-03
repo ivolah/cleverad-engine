@@ -55,25 +55,15 @@ public class Affiliate {
     @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "nome_sito_social")
-    private String nomeSitoSocial;
-    @Column(name = "url_sito_social")
-    private String urlSitoSocial;
-
     @ManyToOne
     @JoinColumn(name = "companytype_id")
     private Dictionary dictionaryCompanyType;
     @ManyToOne
-    @JoinColumn(name = "channeltype_id")
-    private Dictionary dictionaryChannelType;
-    @ManyToOne
     @JoinColumn(name = "status_id")
     private Dictionary dictionaryStatusType;
 
-    @Column(name = "contenuto_sito")
-    private String contenutoSito;
-
     private Boolean cb;
+    private Boolean brandbuddies;
 
     @Column(nullable = false)
     private Boolean status = true;

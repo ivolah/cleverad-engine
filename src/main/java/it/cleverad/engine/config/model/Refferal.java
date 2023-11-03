@@ -9,6 +9,8 @@ import lombok.ToString;
 @ToString
 public class Refferal {
 
+    private String refferal;
+
     private Long mediaId;
     private Long campaignId;
     private Long affiliateId;
@@ -16,6 +18,3 @@ public class Refferal {
     private Long targetId;
 
 }
-
-
-

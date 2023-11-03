@@ -51,6 +51,9 @@ public class Campaign {
     @Column(name = "last_modification_date")
     private LocalDateTime lastModificationDate = LocalDateTime.now();
 
+    @Column(name = "check_phone_number")
+    private Boolean checkPhoneNumber = false;
+
     // ONE TO MANY
 
     @OneToMany(mappedBy = "campaign")

@@ -7,33 +7,28 @@ import lombok.Setter;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "t_campaign_affiliate")
+@Table(name = "t_bb_link")
 @Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
 @NoArgsConstructor
-public class CampaignAffiliate {
+public class BBLink {
 
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String link;
+    private String generated;
+    private String referral;
+
     @ManyToOne
-    @JoinColumn(name = "affiliate_id")
+    @JoinColumn(name = "brandbuddies_id")
     private Affiliate affiliate;
 
     @ManyToOne
     @JoinColumn(name = "campaign_id")
     private Campaign campaign;
-
-    @Column(name = "follow_through")
-    private String followThrough;
-
-    @ManyToOne
-    @JoinColumn(name = "status_id")
-    private Dictionary dictionaryStatusCampaignAffiliate;
-
-    private Boolean brandbuddies;
 
 }

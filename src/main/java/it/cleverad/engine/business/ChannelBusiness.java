@@ -1,12 +1,12 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.Channel;
 import it.cleverad.engine.persistence.model.service.ChannelCategory;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.ChannelRepository;
 import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
-import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.dto.ChannelDTO;
@@ -79,9 +79,11 @@ public class ChannelBusiness {
 
         Channel map = mapper.map(request, Channel.class);
         map.setDictionary(dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
-        map.setDictionaryType(dictionaryRepository.findById(request.typeId).orElseThrow(() -> new ElementCleveradException("Type", request.typeId)));
+        if (request.typeId != null)
+            map.setDictionaryType(dictionaryRepository.findById(request.typeId).orElseThrow(() -> new ElementCleveradException("Type", request.typeId)));
         if (request.businessTypeId != null)
             map.setDictionaryBusinessType(dictionaryRepository.findById(request.businessTypeId).orElseThrow(() -> new ElementCleveradException("Business Type", request.businessTypeId)));
+
         map.setDictionaryOwner(dictionaryRepository.findById(request.ownerId).orElseThrow(() -> new ElementCleveradException("Owner", request.ownerId)));
 
         if (request.affiliateId != null) {
@@ -219,8 +221,6 @@ public class ChannelBusiness {
 
         // SET Category - cancello precedenti
         channelCategoryBusiness.deleteByChannelID(id);
-        // log.info("" + filter.getCategoryList().isEmpty());
-        //  log.info(filter.getCategoryList().size() + "");
 
         // setto nuvoi
         if (filter.getCategoryList() != null && !filter.getCategoryList().isEmpty()) {
@@ -232,14 +232,10 @@ public class ChannelBusiness {
     }
 
     public Page<ChannelDTO> getbyIdAffiliateChannelCommissionTemplate(Long id, Pageable pageableRequest) {
-
         AffiliateChannelCommissionCampaignBusiness.Filter rr = new AffiliateChannelCommissionCampaignBusiness.Filter();
         rr.setAffiliateId(id);
         Page<AffiliateChannelCommissionCampaignDTO> search = accc.search(rr, pageableRequest);
-
         List<Channel> channelList = search.stream().map(affiliateChannelCommissionCampaignDTO -> repository.findById(affiliateChannelCommissionCampaignDTO.getChannelId()).get()).collect(Collectors.toList());
-
-        //list to page
         Page<Channel> page = new PageImpl<>(channelList.stream().distinct().collect(Collectors.toList()));
         return page.map(ChannelDTO::from);
     }
@@ -284,6 +280,11 @@ public class ChannelBusiness {
 
         Page<Channel> page = new PageImpl<>(channelList.stream().distinct().collect(Collectors.toList()));
         return page.map(ChannelDTO::from);
+    }
+
+    public List<Long> getBrandBuddies(Long affiliateId) {
+        Page<Channel> page = repository.findByAffiliateIdAndStatus(affiliateId, true, PageRequest.of(0, Integer.MAX_VALUE));
+        return page.map(ChannelDTO::from).stream().map(channelDTO -> channelDTO.getId()).collect(Collectors.toList());
     }
 
     public Page<ChannelDTO> getbyIdCampaignPrefiltrato(Long campaignId, Pageable pageableRequest) {

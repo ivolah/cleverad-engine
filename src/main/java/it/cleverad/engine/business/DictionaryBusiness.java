@@ -131,6 +131,10 @@ public class DictionaryBusiness {
         return this.getStatusTypes("FILEPAYOUT");
     }
 
+    public Page<DictionaryDTO> getPlatfromBB() {
+        return this.getStatusTypes("BBCHANNEL");
+    }
+
     public Page<DictionaryDTO> getAffiliateStatusTypes() {
         return this.getStatusTypes("AFFILIATESTATUS");
     }

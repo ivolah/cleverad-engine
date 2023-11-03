@@ -31,10 +31,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         final String requestTokenHeader = request.getHeader("Authorization");
         String uri = request.getRequestURI();
-        if (!uri.contains("encoded"))
-            if (!uri.contains("target"))
-                if (!uri.contains("cleverad/file"))
-                    log.info(">>> " + request.getMethod() + " > " + uri);
+        if (!uri.contains("encoded") && !uri.contains("target") && !uri.contains("cleverad/file")
+                && !uri.contains("cleverad/cpc/refferal") && !uri.contains("cleverad/cpm/refferal"))
+            log.info("> " + request.getMethod() + " > " + uri);
 
         String username = null;
         String jwtToken = null;

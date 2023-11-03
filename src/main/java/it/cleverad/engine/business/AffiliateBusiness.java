@@ -1,10 +1,10 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
-import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.web.dto.AffiliateDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
@@ -16,6 +16,7 @@ import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Slf4j
 @Component
 @Transactional
 public class AffiliateBusiness {
@@ -98,6 +98,7 @@ public class AffiliateBusiness {
         return page.map(AffiliateDTO::from);
     }
 
+    // UPADTE
     public AffiliateDTO update(Filter filter) {
         Affiliate affiliate = repository.findById(jwtUserDetailsService.getAffiliateID()).orElseThrow(() -> new ElementCleveradException("Affiliate", jwtUserDetailsService.getAffiliateID()));
         affiliate.setCountry(filter.getCountry());
@@ -180,8 +181,11 @@ public class AffiliateBusiness {
     public AffiliateDTO create(BaseCreateRequest request) {
         Affiliate map = mapper.map(request, Affiliate.class);
         request.statusId = 5L;
+        if(request.getBrandbuddies() == null)
+            request.setBrandbuddies(false);
+
         map.setDictionaryStatusType(dictionaryRepository.findById(request.statusId).orElseThrow(() -> new ElementCleveradException("Status", request.statusId)));
-        if (request.companytypeId != null)
+        if (request.companytypeId != null && request.companytypeId != 0)
             map.setDictionaryCompanyType(dictionaryRepository.findById(request.companytypeId).orElseThrow(() -> new ElementCleveradException("Company Type", request.companytypeId)));
 
         AffiliateDTO dto = AffiliateDTO.from(repository.save(map));
@@ -291,9 +295,7 @@ public class AffiliateBusiness {
             if (request.getSecondaryMail() != null) {
                 predicates.add(cb.like(cb.upper(root.get("secondaryMail")), "%" + request.getSecondaryMail().toUpperCase() + "%"));
             }
-            if (request.getStatusId() != null) {
-                predicates.add(cb.equal(root.get("dictionaryStatusType").get("id"), request.getStatusId()));
-            }
+
             if (request.getStatus() != null) {
                 predicates.add(cb.equal(root.get("status"), request.getStatus()));
             }
@@ -310,6 +312,9 @@ public class AffiliateBusiness {
             if (request.getLastModificationDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("lastModificationDate"), LocalDateTime.ofInstant(request.getLastModificationDateTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
             }
+            if (request.getBrandbuddies() != null) {
+                predicates.add(cb.equal(root.get("brandbuddies"), request.getBrandbuddies()));
+            }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 
@@ -324,6 +329,7 @@ public class AffiliateBusiness {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @ToString
     public static class BaseCreateRequest {
 
         private String name;
@@ -349,13 +355,10 @@ public class AffiliateBusiness {
 
         private String firstName;
         private String lastName;
-        private String nomeSitoSocial;
-        private String urlSitoSocial;
         private Long companytypeId;
-        private Long categorytypeId;
-        private String contenutoSito;
 
         private Boolean cb;
+        private Boolean brandbuddies;
 
         private String channelName;
         private String channelUrl;
@@ -366,6 +369,8 @@ public class AffiliateBusiness {
         private Long channelTypeId;
         private Long businessTypeId;
 
+        private Long brandbuddiesPlatformId;
+        private String brandbuddiesPlatformName;
     }
 
     @Data
@@ -400,13 +405,10 @@ public class AffiliateBusiness {
 
         private String firstName;
         private String lastName;
-        private String nomeSitoSocial;
-        private String urlSitoSocial;
         private Long companytypeId;
-        private Long categorytypeId;
-        private String contenutoSito;
 
         private Boolean cb;
+        private Boolean brandbuddies;
     }
 
 }

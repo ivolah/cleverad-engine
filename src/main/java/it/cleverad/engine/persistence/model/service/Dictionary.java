@@ -69,10 +69,6 @@ public class Dictionary {
     private Set<Affiliate> affiliateCompanyTypes;
 
     @OneToMany
-    @JoinColumn(name = "channeltype_id")
-    private Set<Affiliate> affiliateChannelType;
-
-    @OneToMany
     @JoinColumn(name = "status_id")
     private Set<CampaignAffiliate> campaignAffiliates;
 
