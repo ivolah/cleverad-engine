@@ -29,24 +29,28 @@ public class AffiliateController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public AffiliateDTO create(@ModelAttribute AffiliateBusiness.BaseCreateRequest request) {
+        request.setBrandbuddies(false);
         return business.create(request);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<AffiliateDTO> search(AffiliateBusiness.Filter request, @PageableDefault(value = Integer.MAX_VALUE) Pageable pageable) {
+        request.setBrandbuddies(false);
         return business.search(request, pageable);
     }
 
     @PatchMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public AffiliateDTO update(@PathVariable Long id, @RequestBody AffiliateBusiness.Filter request) {
+        request.setBrandbuddies(false);
         return business.update(id, request);
     }
 
     @PatchMapping("/affiliate/update")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public AffiliateDTO updatebyAffiliate(@RequestBody AffiliateBusiness.Filter request) {
+        request.setBrandbuddies(false);
         return business.update(request);
     }
 
@@ -79,6 +83,7 @@ public class AffiliateController {
     public Page<AffiliateDTO> daApprovare(Pageable pageable) {
         AffiliateBusiness.Filter request = new AffiliateBusiness.Filter();
         request.setStatus(true);
+        request.setBrandbuddies(false);
         return business.search(request, pageable);
     }
 

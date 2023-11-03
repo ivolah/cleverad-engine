@@ -12,7 +12,6 @@ import java.util.List;
 
 public interface CpcRepository extends JpaRepository<Cpc, Long>, JpaSpecificationExecutor<Cpc> {
 
-
     @Query(nativeQuery = true, value =
             "         WITH click_univoci as (SELECT id, count(*) Over (partition by agent, ip, refferal, info) as totale, date, blacklisted " +
                     "                                          from t_cpc " +
@@ -24,6 +23,5 @@ public interface CpcRepository extends JpaRepository<Cpc, Long>, JpaSpecificatio
                     " from click_univoci " +
                     " where totale > 2 and blacklisted = false")
     List<ClickMultipli> getListaClickMultipliDaDisabilitare(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo);
-
 
 }

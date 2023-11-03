@@ -33,26 +33,30 @@ public class ScheduledStatusActivities {
 
         // aggiorno Stato Budget
         List<BudgetDTO> listaBudget = budgetBusiness.getBudgetToDisable();
-        listaBudget.stream().forEach(campaignDTO -> {
-            budgetBusiness.disable(campaignDTO.getId());
+        listaBudget.stream().forEach(budgetDTO -> {
+            budgetBusiness.disable(budgetDTO.getId());
+            log.info("Disable Budget : {}", budgetDTO.getId());
         });
 
         // aggiorao sato commission
         List<CommissionDTO> listaCommission = commissionBusiness.getCommissionToDisable();
         listaCommission.stream().forEach(comm -> {
             commissionBusiness.disable(comm.getId());
+            log.info("Disable Commission : {}", comm.getId());
         });
 
         // aggiorno stato revenue
         List<RevenueFactorDTO> listaRevenu = revenueFactorBusiness.getRevenueToDisable();
         listaRevenu.stream().forEach(rr -> {
             revenueFactorBusiness.disable(rr.getId());
+            log.info("Disable Revenue : {}", rr.getId());
         });
 
         // aggiorno Stato Campagne
         List<CampaignDTO> listaCampagne = campaignBusiness.getCampaignsToDisable();
         listaCampagne.stream().forEach(campaignDTO -> {
             campaignBusiness.disable(campaignDTO.getId());
+            log.info("Disable Campaign : {}", campaignDTO.getId());
         });
 
     }

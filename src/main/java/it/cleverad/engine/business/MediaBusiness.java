@@ -240,6 +240,41 @@ public class MediaBusiness {
         });
     }
 
+    public Page<MediaDTO> getByCampaignIdBrandBuddies(Long campaignId) {
+        Campaign cc = campaignRepository.findById(campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", campaignId));
+        Set<Media> list = cc.getMedias().stream().filter(media -> media.getStatus().booleanValue()).filter(media -> media.getMediaType().getId() == 6L).collect(Collectors.toSet());
+        Page<Media> page = new PageImpl<>(list.stream().distinct().collect(Collectors.toList()));
+        return page.map(media -> {
+            MediaDTO dto = MediaDTO.from(media);
+            dto.setBannerCode(generaBannerCode(dto, media.getId(), campaignId, 0L, 0L));
+            return dto;
+        });
+    }
+
+    public Page<MediaDTO> searchBB() {
+        Affiliate cc = affiliateRepository.findById(jwtUserDetailsService.getAffiliateID()).orElseThrow(() -> new ElementCleveradException("Affiliate", jwtUserDetailsService.getAffiliateID()));
+
+        List<Campaign> campaigns = new ArrayList<>();
+        if (cc.getCampaignAffiliates() != null) {
+            campaigns = cc.getCampaignAffiliates().stream().filter(campaignAffiliate -> campaignAffiliate.getCampaign().getStatus()).map(campaignAffiliate -> {
+                Campaign ccc = campaignAffiliate.getCampaign();
+                return ccc;
+            }).collect(Collectors.toList());
+        }
+
+        Set<Long> ids = new HashSet<>();
+        campaigns.stream().spliterator().forEachRemaining(campaign -> {
+            campaign.getMedias().stream().filter(media -> media.getStatus().equals(true)).forEach(media -> {
+                ids.add(media.getId());
+            });
+        });
+
+        Page<Media> page = repository.findByIdIn(ids, Pageable.ofSize(Integer.MAX_VALUE));
+        List<Media> ll = page.filter(media -> media.getMediaType().getId() == 6L).stream().collect(Collectors.toList());
+        page = new PageImpl<>(ll);
+        return page.map(MediaDTO::from);
+    }
+
     public MediaDTO getByIdAndCampaignID(Long mediaId, Long campaignId) {
         Media media = repository.findById(mediaId).orElseThrow(() -> new ElementCleveradException("Media", mediaId));
         MediaDTO dto = MediaDTO.from(media);

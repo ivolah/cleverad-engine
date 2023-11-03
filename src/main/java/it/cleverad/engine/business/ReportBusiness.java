@@ -136,13 +136,16 @@ public class ReportBusiness {
         } else {
             listaCampaigns = reportRepository.searchTopCampaignsImp(null, null, null);
         }
-        final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), listaCampaigns.size());
+        Integer end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), listaCampaigns.size());
+        Integer offset = Math.toIntExact(pageableRequest.getOffset());
+        if (offset > end)
+            offset = end;
         Page<ReportTopCampaings> pages =
                 new PageImpl<>(
                         listaCampaigns.stream()
                                 .distinct()
                                 .collect(Collectors.toList())
-                                .subList((int) pageableRequest.getOffset(), end), pageableRequest, listaCampaigns.size()
+                                .subList(offset, end), pageableRequest, listaCampaigns.size()
                 );
         return pages;
     }

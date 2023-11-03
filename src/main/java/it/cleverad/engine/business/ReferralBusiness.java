@@ -22,9 +22,17 @@ public class ReferralBusiness {
      * ============================================================================================================
      **/
 
-    // UPDATE
+    // DECODE
     public Refferal decode(Filter filter) {
         return referralService.decodificaReferral(filter.getReferral());
+    }
+
+    // GENERATE
+    public Refferal generate(FilterGenerate filter) {
+        String referral = referralService.creaEncoding(filter.getCampaignId(), filter.getMediaId(), filter.getAffiliateId(), filter.getChannelId(), filter.getTargetId());
+        Refferal r = new Refferal();
+        r.setRefferal(referral);
+        return r;
     }
 
     /**
@@ -36,6 +44,17 @@ public class ReferralBusiness {
     @AllArgsConstructor
     public static class Filter {
         private String referral;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class FilterGenerate {
+        private String mediaId;
+        private String campaignId;
+        private String affiliateId;
+        private String channelId;
+        private String targetId;
     }
 
 }

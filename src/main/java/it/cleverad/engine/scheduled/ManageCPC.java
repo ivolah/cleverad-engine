@@ -73,7 +73,7 @@ public class ManageCPC {
         List<ClickMultipli> listaDaDisabilitare = cpcBusiness.getListaClickMultipliDaDisabilitare(LocalDate.now());
         // giro settaggio click multipli
         listaDaDisabilitare.stream().forEach(clickMultipli -> {
-            log.info("Disabilito {} :: {}", clickMultipli.getId(), clickMultipli.getTotale() );
+            log.info("Disabilito {} :: {}", clickMultipli.getId(), clickMultipli.getTotale());
             Cpc cccp = repository.findById(clickMultipli.getId()).orElseThrow(() -> new ElementCleveradException("Cpc", clickMultipli.getId()));
             cccp.setRead(false);
             cccp.setBlacklisted(true);
@@ -139,7 +139,6 @@ public class ManageCPC {
             mappa.forEach((ref, numer) -> {
 
                 Refferal refferal = referralService.decodificaReferral(ref);
-                log.trace(">>>> T-CPC :: {} -> {} - {}", numer, ref, refferal);
                 if (refferal != null && refferal.getCampaignId() != null && !Objects.isNull(refferal.getAffiliateId())) {
                     Long campaignId = refferal.getCampaignId();
 
@@ -213,7 +212,7 @@ public class ManageCPC {
 
                         // decremento budget Affiliato
                         BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(campaignId, affiliateId).stream().findFirst().orElse(null);
-                        if (bb != null) {
+                        if (bb != null && bb.getBudget() != null) {
                             Double totBudgetDecrementato = bb.getBudget() - totale;
                             budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
 

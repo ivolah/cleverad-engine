@@ -89,7 +89,7 @@ public class TransazioniCPLBusiness {
                 Refferal refferal = referralService.decodificaReferral(cplDTO.getRefferal());
 
                 if (refferal != null && refferal.getAffiliateId() != null) {
-                    log.debug("RELEAD :: {} :: ", cplDTO);
+                    //log.debug("RELEAD :: {} :: ", cplDTO);
 
                     //aggiorno dati CPL
                     Cpl cccpl = cplRepository.findById(cplDTO.getId()).orElseThrow(() -> new ElementCleveradException("Cpl", cplDTO.getId()));
@@ -172,7 +172,7 @@ public class TransazioniCPLBusiness {
 
                         // decremento budget Affiliato
                         BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
-                        if (bb != null) {
+                        if (bb != null && bb.getBudget() != null){
                             Double totBudgetDecrementato = bb.getBudget() - totale;
                             budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
 

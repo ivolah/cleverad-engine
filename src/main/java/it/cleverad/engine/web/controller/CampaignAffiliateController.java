@@ -52,6 +52,12 @@ public class CampaignAffiliateController {
         return business.searchByCampaignID(id, pageable);
     }
 
+    @GetMapping("/{id}/campaign/brandbuddies")
+    @ResponseStatus(HttpStatus.OK)
+    public Page<CampaignAffiliateDTO> getByIdCampaignBrandBuddies(@PathVariable Long id, Pageable pageable) {
+        return business.searchByCampaignIDBrandBuddies(id, pageable);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void delete(@PathVariable Long id) {

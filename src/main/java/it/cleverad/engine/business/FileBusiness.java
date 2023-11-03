@@ -137,7 +137,7 @@ public class FileBusiness {
             try {
                 data = fileStoreService.retrieveFile(ele.getPath());
             } catch (IOException e) {
-               log.warn("Eccezione in cariamento file {}", ele.getPath());
+               log.trace("Eccezione in cariamento file {}", ele.getPath());
             }
             // trovo media id collegato e campaign id a cui e colelgato il media
             Media mm = mediaBusiness.getByFileId(ele.getId());

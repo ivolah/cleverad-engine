@@ -70,7 +70,6 @@ public class CampaignBudgetBusiness {
     // UPDATE
     public CampaignBudgetDTO update(Long id, Update filter) {
         CampaignBudget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
-
         mapper.map(filter, budget);
 
         if (filter.getAdvertiserId() != null)

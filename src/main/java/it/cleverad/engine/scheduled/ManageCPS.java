@@ -123,7 +123,7 @@ public class ManageCPS {
 
                 // decremento budget Affiliato
                 BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
-                if (bb != null) {
+                if (bb != null && bb.getBudget() != null) {
                     Double totBudgetDecrementato = bb.getBudget() - totale;
                     budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
 

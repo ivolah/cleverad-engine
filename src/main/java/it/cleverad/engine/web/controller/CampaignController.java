@@ -2,6 +2,7 @@ package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.CampaignBusiness;
 import it.cleverad.engine.config.security.JwtUserDetailsService;
+import it.cleverad.engine.web.dto.CampaignBrandBuddiesDTO;
 import it.cleverad.engine.web.dto.CampaignDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -68,6 +69,11 @@ public class CampaignController {
     @GetMapping("/affiliate/not")
     public Page<CampaignDTO> getCampaignsNot( @PageableDefault(value = Integer.MAX_VALUE)Pageable pageable) {
         return business.getCampaignsNot(jwtUserDetailsService.getAffiliateID(), pageable);
+    }
+
+    @GetMapping("/brandbuddies")
+    public Page<CampaignBrandBuddiesDTO> getCampaignsBB(CampaignBusiness.Filter request, @PageableDefault(value = Integer.MAX_VALUE)Pageable pageable) {
+        return business.getCampaignsActiveBrandBuddies(request,pageable);
     }
 
 //    @GetMapping("/affiliate")

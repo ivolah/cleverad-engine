@@ -24,6 +24,11 @@ public class ReferralController {
         return business.decode(request);
     }
 
+    @PatchMapping(path = "/generate")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Refferal generate(@RequestBody ReferralBusiness.FilterGenerate request) {
+        return business.generate(request);
+    }
     /**
      * ============================================================================================================
      **/

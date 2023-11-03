@@ -12,6 +12,7 @@ import it.cleverad.engine.web.dto.*;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.decimal4j.util.DoubleRounder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -162,7 +163,7 @@ public class ManageCPL {
                         }
 
                         Double totale = commVal * 1;
-                        transaction.setValue(totale);
+                        transaction.setValue(DoubleRounder.round(totale, 2));
                         transaction.setLeadNumber(Long.valueOf(1));
 
                         // incemento valore
@@ -170,7 +171,7 @@ public class ManageCPL {
 
                         // decremento budget Affiliato
                         BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
-                        if (bb != null) {
+                        if (bb != null && bb.getBudget() != null) {
                             Double totBudgetDecrementato = bb.getBudget() - totale;
                             budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
 

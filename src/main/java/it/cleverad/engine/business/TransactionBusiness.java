@@ -12,6 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -107,16 +108,31 @@ public class TransactionBusiness {
 
         newCpcTransaction.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
 
-        if (request.commissionId != null)
+        if (request.commissionId != null) try {
             newCpcTransaction.setCommission(commissionRepository.findById(request.commissionId).orElseThrow(() -> new ElementCleveradException("Commission", request.commissionId)));
-        if (request.channelId != null)
+        } catch (Exception ex) {
+            log.error("ECCEZIONE commissionId  - " + ex.getMessage(), ex);
+        }
+        if (request.commissionId != null) try {
             newCpcTransaction.setChannel(channelRepository.findById(request.channelId).orElseThrow(() -> new ElementCleveradException("Channel", request.channelId)));
-        if (request.dictionaryId != null)
+        } catch (Exception ex) {
+            log.error("ECCEZIONE commissionId  - " + ex.getMessage(), ex);
+        }
+        if (request.dictionaryId != null) try {
             newCpcTransaction.setDictionary(dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", request.dictionaryId)));
-        if (request.statusId != null)
+        } catch (Exception ex) {
+            log.error("ECCEZIONE dictionaryId  - " + ex.getMessage(), ex);
+        }
+        if (request.statusId != null) try {
             newCpcTransaction.setDictionaryStatus(dictionaryRepository.findById(request.statusId).orElseThrow(() -> new ElementCleveradException("Status", request.statusId)));
-        if (request.mediaId != null)
+        } catch (Exception ex) {
+            log.error("ECCEZIONE statusId  - " + ex.getMessage(), ex);
+        }
+        if (request.mediaId != null) try {
             newCpcTransaction.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
+        } catch (Exception ex) {
+            log.error("ECCEZIONE MEDIA  - " + ex.getMessage(), ex);
+        }
 
         Affiliate aa = null;
         if (request.affiliateId != null)
@@ -139,6 +155,7 @@ public class TransactionBusiness {
 
         newCplTransaction.setPayoutPresent(false);
         newCplTransaction.setApproved(true);
+        newCplTransaction.setPhoneVerified(false);
         newCplTransaction.setInitialValue(request.getValue());
 
         if (request.getManualDate() != null) {
@@ -302,7 +319,10 @@ public class TransactionBusiness {
         if (tipo.equals("CPC")) {
             TransactionCPC cpc = cpcRepository.findById(id).get();
 
-            if ((cpc.getDictionaryStatus().getId() != 74L && statusId == 74L) || (cpc.getDictionary().getId() != 40L && dictionaryId == 40L)) {
+            if (statusId == null && cpc.getDictionaryStatus() != null) statusId = cpc.getDictionaryStatus().getId();
+            if (dictionaryId == null && cpc.getDictionary() != null) dictionaryId = cpc.getDictionary().getId();
+
+            if (statusId == 74L || dictionaryId == 40L) {
 
                 // aggiorno budge e CAP affiliato
                 BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(cpc.getCampaign().getId(), cpc.getAffiliate().getId()).stream().findFirst().orElse(null);
@@ -349,8 +369,10 @@ public class TransactionBusiness {
             cpcRepository.save(cpc);
         } else if (tipo.equals("CPL")) {
             TransactionCPL cpl = cplRepository.findById(id).get();
+            if (statusId == null && cpl.getDictionaryStatus() != null) statusId = cpl.getDictionaryStatus().getId();
+            if (dictionaryId == null && cpl.getDictionary() != null) dictionaryId = cpl.getDictionary().getId();
 
-            if ((cpl.getDictionaryStatus().getId() != 74L && statusId == 74L) || (cpl.getDictionary().getId() != 40L && dictionaryId == 40L)) {
+            if (statusId == 74L || dictionaryId == 40L) {
 
                 // aggiorno budget affiliato
                 BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(cpl.getCampaign().getId(), cpl.getAffiliate().getId()).stream().findFirst().orElse(null);
@@ -390,6 +412,7 @@ public class TransactionBusiness {
             } else dictionaryId = 0L;
             if (statusId != null) {
                 Long finalStatusId1 = statusId;
+                log.info("SETTO STATUS :: {}", statusId);
                 cpl.setDictionaryStatus(dictionaryRepository.findById(statusId).orElseThrow(() -> new ElementCleveradException("Status", finalStatusId1)));
             } else statusId = 0L;
             if (approved != null) cpl.setApproved(approved);
@@ -432,6 +455,58 @@ public class TransactionBusiness {
             }
             cpsRepository.save(cps);
         }
+    }
+
+    public void updatePhoneStatus(Long id, String number, Boolean verified) {
+
+        TransactionCPL cpl = cplRepository.findById(id).get();
+        cpl.setPhoneVerified(verified);
+        cpl.setPhoneNumber(number);
+        cplRepository.save(cpl);
+
+        // Setto a rigettato  se stato false e numero non nullo
+        if (!verified && StringUtils.isNotBlank(number)) {
+
+            // aggiorno budget affiliato
+            BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(cpl.getCampaign().getId(), cpl.getAffiliate().getId()).stream().findFirst().orElse(null);
+            if (budgetAff != null) {
+                budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + cpl.getValue());
+                budgetBusiness.updateCap(budgetAff.getId(), budgetAff.getCap() + 1);
+            }
+
+            // aggiorno budget campagna
+            campaignBusiness.updateBudget(cpl.getCampaign().getId(), campaignBusiness.findById(cpl.getCampaign().getId()).getBudget() + cpl.getValue());
+
+            // aggiorno wallet
+            Long walletID = null;
+            if (cpl.getAffiliate().getId() != null) {
+                walletID = walletRepository.findByAffiliateId(cpl.getAffiliate().getId()).getId();
+                walletBusiness.decrement(walletID, cpl.getValue());
+            }
+
+            //aggiorno Camapign Budget
+            if (cpl.getValue() > 0D) {
+                CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(cpl.getCampaign().getId(), cpl.getDateTime());
+                if (cb != null) {
+                    campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - 1));
+                    campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - cpl.getValue());
+                }
+            }
+        }
+
+        cplRepository.save(cpl);
+    }
+
+    public TransactionCPLDTO updateCPLPhoneNumber(String number, Long id) {
+        TransactionCPL cpl = cplRepository.findById(id).get();
+        cpl.setPhoneNumber(number);
+        return TransactionCPLDTO.from(cplRepository.save(cpl));
+    }
+
+    public TransactionCPLDTO updateCPLPhoneStatus(Boolean status, Long id) {
+        TransactionCPL cpl = cplRepository.findById(id).get();
+        cpl.setPhoneVerified(status);
+        return TransactionCPLDTO.from(cplRepository.save(cpl));
     }
 
     // GET BY ID CPC
@@ -512,7 +587,7 @@ public class TransactionBusiness {
 
                 // aggiorno budge e CAP affiliato
                 BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
-                if (budgetAff != null) {
+                if (budgetAff != null && budgetAff.getId() != null && budgetAff.getBudget() != null) {
                     budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
                     budgetBusiness.updateCap(budgetAff.getId(), Math.toIntExact(budgetAff.getCap() + dto.getClickNumber()));
                 }
@@ -949,6 +1024,10 @@ public class TransactionBusiness {
 //                predicates.add(cb.equal(root.get("dictionary").get("id"), request.getStatusId()));
 //            }
 
+            if (request.getPhoneVerifiedNull() != null) {
+                predicates.add(cb.isNull(root.get("phoneVerified")));
+            }
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
@@ -1024,6 +1103,7 @@ public class TransactionBusiness {
         private Double initialValue;
         private Boolean blacklisted;
         private Boolean valueNotZero;
+        private Boolean phoneVerifiedNull;
     }
 
     @Data

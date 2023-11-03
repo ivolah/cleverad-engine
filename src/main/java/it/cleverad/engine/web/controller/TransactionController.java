@@ -205,9 +205,9 @@ public class TransactionController {
     @GetMapping("/all/affiliate")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<TransactionStatusDTO> searchAllPrefiltrato(TransactionAllBusiness.Filter request, Pageable pageable) {
+        request.setValueNotZero(true);
         return allBusiness.searchPrefiltrato(request, pageable);
     }
-
 
     /**
      * ============================================================================================================
@@ -224,7 +224,6 @@ public class TransactionController {
     public Page<TransactionStatusDTO> searchAllPrefiltrato(TransactionStatusBusiness.Filter request, Pageable pageable) {
         return statusBusiness.searchPrefiltrato(request, pageable);
     }
-
 
     /**
      * ============================================================================================================

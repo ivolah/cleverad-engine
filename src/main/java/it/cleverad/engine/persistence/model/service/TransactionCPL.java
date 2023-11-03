@@ -86,4 +86,10 @@ public class TransactionCPL {
     @ManyToOne
     @JoinColumn(name = "status_id")
     private Dictionary dictionaryStatus;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
+    @Column(name = "phone_verified")
+    private Boolean phoneVerified = false;
+
 }

@@ -89,7 +89,6 @@ public class CplBusiness {
         return page.map(CplDTO::from);
     }
 
-
     public Page<CplDTO> searchWithReferral(CplBusiness.Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Page<Cpl> page = repository.findAll(getSpecification(request), pageable);

@@ -60,7 +60,7 @@ public class BudgetBusiness {
         map.setStatus(true);
         map.setInitialBudget(request.getBudget());
         map.setInitialCap(request.getCap());
-        map.setAffiliate(affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliat", request.affiliateId)));
+        map.setAffiliate(affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId)));
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
         return BudgetDTO.from(repository.save(map));
     }
