@@ -15,49 +15,52 @@ public class ReferralService {
     public Refferal decodificaReferral(String refferalString) {
         if (StringUtils.isNotBlank(refferalString) && !refferalString.contains("{{refferalId}}")) {
             Refferal refferal = new Refferal();
-            if (StringUtils.isNotBlank(refferalString)) {
-                String[] tokens = refferalString.split("-");
-                if (tokens[0] != null) {
-                    try {
-                        refferal.setCampaignId(Long.valueOf(decodifica(tokens[0])));
-                    } catch (Exception nf) {
-                        log.warn("Error decoding campaign id : {}", tokens[0]);
-                    }
-                }
-                if (tokens.length > 1 && tokens[1] != null) {
-                    try {
-                        refferal.setMediaId(Long.valueOf(decodifica(tokens[1])));
-                    } catch (Exception nf) {
-                        log.warn("Error decoding media id : {}", tokens[1]);
-                    }
-                }
-                if (tokens.length > 2 && tokens[2] != null) {
-                    try {
-                        refferal.setAffiliateId(Long.valueOf(decodifica(tokens[2])));
-                    } catch (Exception nf) {
-                        log.warn("Error decoding affiliate id : {}", tokens[2]);
-                    }
-                }
-                if (tokens.length > 3 && tokens[3] != null) {
-                    try {
-                        Long cahanneID =Long.valueOf(decodifica(tokens[3]));
-                        refferal.setChannelId(cahanneID);
-                    } catch (Exception nf) {
-                        log.warn("Error decoding channel id : {}", tokens[3]);
-                    }
-                }
+
+            refferal.setRefferal(refferalString);
+
+            String[] tokens = refferalString.split("-");
+            if (tokens[0] != null) {
                 try {
-                    if (tokens.length > 4 && tokens[4] != null) {
-                        try {
-                            refferal.setTargetId(Long.valueOf(decodifica(tokens[4])));
-                        } catch (Exception nf) {
-                            log.warn("Error decoding target id : {}", tokens[4]);
-                        }
-                    }
-                }catch (Exception cc){
-                    log.warn("Eccezione token 4 :: {}", cc);
+                    refferal.setCampaignId(Long.valueOf(decodifica(tokens[0])));
+                } catch (Exception nf) {
+                    log.warn("Error decoding campaign id : {}", tokens[0]);
                 }
             }
+            if (tokens.length > 1 && tokens[1] != null) {
+                try {
+                    refferal.setMediaId(Long.valueOf(decodifica(tokens[1])));
+                } catch (Exception nf) {
+                    log.warn("Error decoding media id : {}", tokens[1]);
+                }
+            }
+            if (tokens.length > 2 && tokens[2] != null) {
+                try {
+                    refferal.setAffiliateId(Long.valueOf(decodifica(tokens[2])));
+                } catch (Exception nf) {
+                    log.warn("Error decoding affiliate id : {}", tokens[2]);
+                }
+            }
+            if (tokens.length > 3 && tokens[3] != null) {
+                try {
+                    Long cahanneID = Long.valueOf(decodifica(tokens[3]));
+                    refferal.setChannelId(cahanneID);
+                } catch (Exception nf) {
+                    log.warn("Error decoding channel id : {}", tokens[3]);
+                }
+            }
+            try {
+                if (tokens.length > 4 && tokens[4] != null) {
+                    try {
+                        refferal.setTargetId(Long.valueOf(decodifica(tokens[4])));
+                    } catch (Exception nf) {
+                        log.warn("Error decoding target id : {}", tokens[4]);
+                        refferal.setTargetId(0L);
+                    }
+                }
+            } catch (Exception cc) {
+                log.warn("Eccezione token 4 :: {}", cc);
+            }
+
             return refferal;
         }
         return null;

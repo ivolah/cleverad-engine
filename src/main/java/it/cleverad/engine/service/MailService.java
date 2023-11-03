@@ -150,7 +150,6 @@ public class MailService {
         return null;
     }
 
-
     public MailDTO invioTemplate(BaseCreateRequest request) {
         return this.invio(request);
     }
@@ -179,7 +178,6 @@ public class MailService {
         this.invio(request);
         return null;
     }
-
 
     public MailDTO confermaAffiliato(BaseCreateRequest request) {
         request.setTemplateId(7L);
