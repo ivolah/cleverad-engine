@@ -8,6 +8,7 @@ import it.cleverad.engine.persistence.model.service.CampaignCategory;
 import it.cleverad.engine.persistence.model.service.Media;
 import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.service.ReferralService;
+import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.dto.CampaignBrandBuddiesDTO;
 import it.cleverad.engine.web.dto.CampaignDTO;
 import it.cleverad.engine.web.dto.MediaDTO;
@@ -47,8 +48,7 @@ public class CampaignBusiness {
     private JwtUserDetailsService jwtUserDetailsService;
     @Autowired
     private CampaignRepository repository;
-    @Autowired
-    private Mapper mapper;
+
     @Autowired
     private CampaignCategoryBusiness campaignCategoryBusiness;
     @Autowired
@@ -72,9 +72,12 @@ public class CampaignBusiness {
     @Autowired
     private AffiliateChannelCommissionCampaignBusiness affiliateChannelCommissionCampaignBusiness;
     @Autowired
+    private MediaRepository mediaRepository;
+    @Autowired
     private MediaBusiness mediaBusiness;
-//    @Autowired
-//    TelegramService telegramService;
+
+    @Autowired
+    private Mapper mapper;
 
     /**
      * ============================================================================================================
@@ -347,47 +350,57 @@ public class CampaignBusiness {
 
     public Page<CampaignBrandBuddiesDTO> getCampaignsActiveBrandBuddies(Filter req, Pageable pageable) {
 
+       List<Long> listaId = affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAffiliateBrandBuddies(Pageable.ofSize(Integer.MAX_VALUE)).stream().map(AffiliateChannelCommissionCampaignDTO::getCampaignId).distinct().collect(Collectors.toList());
+
         //lista media brandbuddies
-        MediaBusiness.Filter ff = new MediaBusiness.Filter();
-        ff.setTypeId(6L);
-        List<Long> listaId = mediaBusiness.search(ff, Pageable.ofSize(Integer.MAX_VALUE)).stream().map(MediaDTO::getCampaignId).distinct().collect(Collectors.toList());
-        listaId.forEach(aLong -> log.info("Campagna BB : " + aLong));
+//        MediaBusiness.Filter ff = new MediaBusiness.Filter();
+//        ff.setTypeId(6L);
+//        Page<Media> medias = mediaRepository.findAll(mediaBusiness.getSpecification(ff), Pageable.ofSize(Integer.MAX_VALUE));
+//        List<Long> listaId = medias.map(media -> MediaDTO.from(media)).stream().map(MediaDTO::getCampaignId).distinct().collect(Collectors.toList());
 
+        if (listaId.size() > 0) {
 
-        Page<Campaign> page = null;
-        Filter request = new Filter();
-        if (req.getBbtipo() == null && req.getCategoryId() == null) {
-            request.setIdListIn(listaId.stream().distinct().collect(Collectors.toList()));
-            page = repository.findAll(getSpecification(request), pageable);
-        } else if (req.getBbtipo() != null && req.getCategoryId() == null) {
-            List<Long> listaIdPulita = new ArrayList<>();
-            listaId.forEach(campaignId -> {
-                log.info(campaignId + " - check - " + req.getBbtipo());
-                if (req.getBbtipo() != null && req.getBbtipo().contains("CPC") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, 84L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0)
-                    listaIdPulita.add(campaignId);
-                if (req.getBbtipo() != null && req.getBbtipo().contains("CPL") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, 85L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0)
-                    listaIdPulita.add(campaignId);
-            });
-            request.setIdListIn(listaIdPulita.stream().distinct().collect(Collectors.toList()));
-            page = repository.findAll(getSpecification(request), pageable);
-        } else if (req.getBbtipo() == null && req.getCategoryId() != null) {
-            log.info("GG " + req.getCategoryId());
-            page = repository.findByCampaignCategories_CampaignIdInAndCampaignCategories_CategoryId(listaId, req.getCategoryId(), pageable);
-        } else if (req.getBbtipo() != null && req.getCategoryId() != null) {
-            List<Long> listaIdPulita = new ArrayList<>();
-            listaId.forEach(campaignId -> {
-                log.info(campaignId + " - check - " + req.getBbtipo());
-                if (req.getBbtipo() != null && req.getBbtipo().contains("CPC") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, 84L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0) {
-                    listaIdPulita.add(campaignId);
-                }
-                if (req.getBbtipo() != null && req.getBbtipo().contains("CPL") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, 85L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0) {
-                    listaIdPulita.add(campaignId);
-                }
-            });
-            page = repository.findByCampaignCategories_CampaignIdInAndCampaignCategories_CategoryId(listaIdPulita.stream().distinct().collect(Collectors.toList()), req.getCategoryId(), pageable);
+            Page<Campaign> page = null;
+            Filter request = new Filter();
+            request.setStatus(true);
+
+            if (StringUtils.isBlank(req.getBbtipo()) && req.getCategoryId() == null) {
+                request.setIdListIn(listaId.stream().distinct().collect(Collectors.toList()));
+                page = repository.findAll(getSpecification(request), pageable);
+            } else if (StringUtils.isNotBlank(req.getBbtipo()) && req.getCategoryId() == null) {
+                List<Long> listaIdPulita = new ArrayList<>();
+                listaId.forEach(campaignId -> {
+                    if (req.getBbtipo().contains("CPC") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, 84L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0) {
+                        listaIdPulita.add(campaignId);
+                        log.info("CPC");
+                    }
+                    if (req.getBbtipo().contains("CPL") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, 85L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0) {
+                        listaIdPulita.add(campaignId);
+                        log.info("CPL");
+                    }
+                });
+                request.setIdListIn(listaIdPulita.stream().distinct().collect(Collectors.toList()));
+                page = repository.findAll(getSpecification(request), pageable);
+            } else if (StringUtils.isBlank(req.getBbtipo()) && req.getCategoryId() != null) {
+                page = repository.findByCampaignCategories_CampaignIdInAndCampaignCategories_CategoryId(listaId, req.getCategoryId(), pageable);
+            } else if (StringUtils.isNotBlank(req.getBbtipo()) && req.getCategoryId() != null) {
+                List<Long> listaIdPulita = new ArrayList<>();
+                listaId.forEach(campaignId -> {
+                    log.info(campaignId + " - check - " + req.getBbtipo());
+                    if (req.getBbtipo() != null && req.getBbtipo().contains("CPC") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, 84L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0) {
+                        listaIdPulita.add(campaignId);
+                    }
+                    if (req.getBbtipo() != null && req.getBbtipo().contains("CPL") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, 85L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0) {
+                        listaIdPulita.add(campaignId);
+                    }
+                });
+                page = repository.findByCampaignCategories_CampaignIdInAndCampaignCategories_CategoryId(listaIdPulita.stream().distinct().collect(Collectors.toList()), req.getCategoryId(), pageable);
+            }
+            return page.map(CampaignBrandBuddiesDTO::from);
+        } else {
+            return null;
         }
 
-        return page.map(CampaignBrandBuddiesDTO::from);
     }
 
     /**

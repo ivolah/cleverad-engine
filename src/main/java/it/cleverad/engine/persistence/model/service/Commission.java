@@ -56,4 +56,7 @@ public class Commission {
     @OneToMany(mappedBy = "commission")
     private Set<TransactionCPL> transactionCPLS;
 
+    @OneToMany(mappedBy = "commission")
+    private Set<BBLink> bbLinks;
+
 }

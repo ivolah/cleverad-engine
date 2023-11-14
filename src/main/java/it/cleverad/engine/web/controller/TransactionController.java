@@ -120,6 +120,12 @@ public class TransactionController {
         return business.searchCpc(request, pageable);
     }
 
+    @GetMapping("/cpc/list")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<TransactionCPCDTO> getbyCampaignCPCS(TransactionBusiness.Filter request, Pageable pageable) {
+        return business.searchCpc(request, pageable);
+    }
+
     @GetMapping("/{id}/campaign/cpl")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<TransactionCPLDTO> getbyCampaignCPL(@PathVariable Long id, Pageable pageable) {
@@ -205,7 +211,6 @@ public class TransactionController {
     @GetMapping("/all/affiliate")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<TransactionStatusDTO> searchAllPrefiltrato(TransactionAllBusiness.Filter request, Pageable pageable) {
-        request.setValueNotZero(true);
         return allBusiness.searchPrefiltrato(request, pageable);
     }
 
@@ -237,7 +242,7 @@ public class TransactionController {
 
     @PostMapping("/manage/cpc")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void manageCPL(@ModelAttribute TransazioniCPCBusiness.FilterUpdate request) {
+    public void manageCPC(@ModelAttribute TransazioniCPCBusiness.FilterUpdate request) {
         transazioniCPCBusiness.rigenera(Integer.parseInt(request.getYear()), Integer.parseInt(request.getMonth()), Integer.parseInt(request.getDay()));
     }
 

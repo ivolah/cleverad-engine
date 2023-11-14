@@ -3,9 +3,11 @@ package it.cleverad.engine.business;
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.BBLink;
+import it.cleverad.engine.persistence.model.service.Commission;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.BBLinkRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
+import it.cleverad.engine.persistence.repository.service.CommissionRepository;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.service.tinyurl.TinyData;
 import it.cleverad.engine.service.tinyurl.TinyUrlService;
@@ -29,13 +31,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * ============================================================================================================
  **/
-
 
 @Slf4j
 @Component
@@ -53,6 +56,8 @@ public class BBLinkBusiness {
     @Autowired
     private ChannelBusiness channelBusiness;
     @Autowired
+    private CommissionRepository commissionRepository;
+    @Autowired
     private TinyUrlService tinyUrlService;
     @Autowired
     private ReferralService referralService;
@@ -60,7 +65,6 @@ public class BBLinkBusiness {
     private JwtUserDetailsService jwtUserDetailsService;
     @Autowired
     private Mapper mapper;
-
 
     /**
      * ============================================================================================================
@@ -70,43 +74,62 @@ public class BBLinkBusiness {
     public BBLinkDTO create(BaseCreateRequest request) {
 
         final BBLinkDTO[] dto = {new BBLinkDTO()};
-        String link = request.getLink().replace("http://", "").replace("https://", "").replace("www.", "");
 
+        AtomicReference<Boolean> salta = new AtomicReference<>(true);
         // trova media
         mediaBusiness.searchBB().stream().forEach(mediaDTO -> {
-            log.info("MEDIA ID :: {}", mediaDTO.getId());
 
             // trova target
-            String url = mediaDTO.getTarget().replace("http://", "").replace("https://", "").replace("www.", "");
             List<Long> chanelBBs = channelBusiness.getBrandBuddies(jwtUserDetailsService.getAffiliateID());
             String channelId = "0";
-            if (chanelBBs.size()>0)
-                channelId = String.valueOf(chanelBBs.get(0));
+            if (chanelBBs.size() > 0) channelId = String.valueOf(chanelBBs.get(0));
+
+            // pulisco indirizzi
+            String link = request.getLink().replace("http://", "").replace("https://", "").replace("www.", "");
+            String url = mediaDTO.getTarget().replace("http://", "").replace("https://", "").replace("www.", "");
+
             //verifica se link viene accettato
             if (link.startsWith(url)) {
-                log.info("LINK {} :: >>> TARGET :: {}", link, url);
+                //log.info("LINK {} :: >>> TARGET :: {}", link, url);
                 Long campaignId = mediaDTO.getCampaignId();
                 String referral = referralService.creaEncoding(Long.toString(campaignId), String.valueOf(mediaDTO.getId()), String.valueOf(jwtUserDetailsService.getAffiliateID()), channelId, "0");
                 //generazione short link
                 String alias = "BB-" + RandomStringUtils.randomAlphanumeric(6);
                 TinyData tinyUrlData = tinyUrlService.createShort(alias, "https://tracking.cleveradserver.com/click?refId=" + referral + "&urlRef=" + request.getLink());
                 if (tinyUrlData != null) {
+
                     BBLink map = mapper.map(request, BBLink.class);
                     map.setGenerated(tinyUrlData.getData().getTinyUrl());
                     map.setLink(request.getLink());
                     map.setReferral(referral);
+                    map.setCreationDate(LocalDateTime.now());
+
+                    if (campaignRepository.findByIdAndCommissionCampaigns_Dictionary_Id(campaignId, 84L).size() > 0 || campaignRepository.findByIdAndCommissionCampaigns_Dictionary_Id(campaignId, 85L).size() > 0) {
+                        Long comid = null;
+                        comid = campaignRepository.findById(campaignId).get().getCommissionCampaigns().stream().filter(commission -> {
+                            if (commission.getDictionary().getId().equals(84L) || commission.getDictionary().getId().equals(85L))
+                                return true;
+                            else return false;
+                        }).findFirst().get().getId();
+                        Commission commission = commissionRepository.findById(comid).get();
+                        map.setCommission(commission);
+                    }
+
                     map.setAffiliate(affiliateRepository.findById(jwtUserDetailsService.getAffiliateID()).orElseThrow(() -> new ElementCleveradException("Affilaite", jwtUserDetailsService.getAffiliateID())));
                     map.setCampaign(campaignRepository.findById(campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", campaignId)));
+
                     dto[0] = BBLinkDTO.from(repository.save(map));
+                    salta.set(false);
+
                 } else {
                     log.warn("TINYURL VUOTO {}:{}", link, url);
                     throw new BrandBuddiesMediaTargetException("TINYURL VUOTO " + link + ":" + url);
-                }
-            } else {
-                log.warn("LINK {} != TARGET {}", link, url);
-                throw new BrandBuddiesMediaTargetException("LINK " + link + " != TARGET " + url);
-            }
+                }// else
+            } // if
         });
+
+        if (salta.get())
+            throw new BrandBuddiesMediaTargetException("LINK " + request.link + " != TUTTI TARGET");
 
         return dto[0];
     }
@@ -130,7 +153,7 @@ public class BBLinkBusiness {
 
     // SEARCH PAGINATED
     public Page<BBLinkDTO> search(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("creationDate")));
         Page<BBLink> page = repository.findAll(getSpecification(request), pageable);
         return page.map(BBLinkDTO::from);
     }

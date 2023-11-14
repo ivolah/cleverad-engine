@@ -1,6 +1,7 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.Channel;
@@ -10,7 +11,6 @@ import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.ChannelRepository;
 import it.cleverad.engine.persistence.repository.tracking.CpcRepository;
-import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.CpcDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -30,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -168,7 +167,7 @@ public class CpcBusiness {
         request.setRead(false);
         request.setBlacklisted(true);
         LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
-       // request.setDatetimeFrom(oraSpaccata.toLocalDate().atStartOfDay().minusHours(3));
+        // request.setDatetimeFrom(oraSpaccata.toLocalDate().atStartOfDay().minusHours(3));
         request.setDatetimeFrom(oraSpaccata.toLocalDate().atStartOfDay());
         request.setDatetimeTo(LocalDateTime.now());
         Page<Cpc> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
@@ -218,7 +217,7 @@ public class CpcBusiness {
         return page.map(CpcDTO::from);
     }
 
-    public List<ClickMultipli> getListaClickMultipliDaDisabilitare(LocalDate date){
+    public List<ClickMultipli> getListaClickMultipliDaDisabilitare(LocalDate date) {
         List<ClickMultipli> lista = repository.getListaClickMultipliDaDisabilitare(date, date.plusDays(1));
         return lista;
     }
@@ -253,7 +252,7 @@ public class CpcBusiness {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("date"), request.getDateFrom().atStartOfDay()));
             }
             if (request.getDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("date"), request.getDateTo().atTime(LocalTime.MAX)));
+                predicates.add(cb.lessThanOrEqualTo(root.get("date"), request.getDateTo().plusDays(1).atStartOfDay()));
             }
 
             if (request.getDatetimeFrom() != null) {
@@ -268,6 +267,9 @@ public class CpcBusiness {
             }
             if (request.getCampaignid() != null) {
                 predicates.add(cb.equal(root.get("campaignId"), request.getCampaignid()));
+            }
+            if (request.getChannelId() != null) {
+                predicates.add(cb.equal(root.get("channelId"), request.getChannelId()));
             }
 
             if (request.getBlacklisted() != null && request.getBlacklisted()) {
@@ -318,7 +320,9 @@ public class CpcBusiness {
         private LocalDate dateFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dateTo;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDateTime datetimeFrom;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDateTime datetimeTo;
 
         //dati referral

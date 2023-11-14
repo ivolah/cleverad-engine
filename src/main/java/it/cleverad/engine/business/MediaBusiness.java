@@ -17,6 +17,7 @@ import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -178,6 +179,8 @@ public class MediaBusiness {
     // SEARCH PAGINATED
     public Page<MediaDTO> search(Filter request, Pageable pageableRequest) {
 
+        log.info(">>> " + request);
+
         if (jwtUserDetailsService.getRole().equals("Admin")) {
             if (request.getCampaignId() != null) {
                 Campaign cc = campaignRepository.findById(request.getCampaignId()).orElseThrow(() -> new ElementCleveradException("Campaign", request.getCampaignId()));
@@ -252,6 +255,7 @@ public class MediaBusiness {
     }
 
     public Page<MediaDTO> searchBB() {
+
         Affiliate cc = affiliateRepository.findById(jwtUserDetailsService.getAffiliateID()).orElseThrow(() -> new ElementCleveradException("Affiliate", jwtUserDetailsService.getAffiliateID()));
 
         List<Campaign> campaigns = new ArrayList<>();
@@ -366,7 +370,7 @@ public class MediaBusiness {
      * ============================================================================================================
      **/
 
-    private Specification<Media> getSpecification(Filter request) {
+    public Specification<Media> getSpecification(Filter request) {
         return (root, query, cb) -> {
             Predicate completePredicate = null;
             List<Predicate> predicates = new ArrayList<>();
@@ -457,6 +461,7 @@ public class MediaBusiness {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @ToString
     public static class Filter {
         private Long id;
         private String name;

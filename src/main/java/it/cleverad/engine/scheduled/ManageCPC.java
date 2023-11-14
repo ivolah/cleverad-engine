@@ -73,7 +73,7 @@ public class ManageCPC {
         List<ClickMultipli> listaDaDisabilitare = cpcBusiness.getListaClickMultipliDaDisabilitare(LocalDate.now());
         // giro settaggio click multipli
         listaDaDisabilitare.stream().forEach(clickMultipli -> {
-            log.info("Disabilito {} :: {}", clickMultipli.getId(), clickMultipli.getTotale());
+            // log.info("Disabilito {} :: {}", clickMultipli.getId(), clickMultipli.getTotale());
             Cpc cccp = repository.findById(clickMultipli.getId()).orElseThrow(() -> new ElementCleveradException("Cpc", clickMultipli.getId()));
             cccp.setRead(false);
             cccp.setBlacklisted(true);
@@ -126,12 +126,21 @@ public class ManageCPC {
                 // aggiorno dati CPC
                 Cpc cccp = repository.findById(dto.getId()).orElseThrow(() -> new ElementCleveradException("Cpc", dto.getId()));
                 Refferal refferal = referralService.decodificaReferral(dto.getRefferal());
-                if (refferal != null && refferal.getMediaId() != null) cccp.setMediaId(refferal.getMediaId());
-                if (refferal != null && refferal.getCampaignId() != null) cccp.setCampaignId(refferal.getCampaignId());
-                if (refferal != null && refferal.getAffiliateId() != null)
+                if (refferal != null && refferal.getMediaId() != null) {
+                    cccp.setMediaId(refferal.getMediaId());
+                }
+                if (refferal != null && refferal.getCampaignId() != null) {
+                    cccp.setCampaignId(refferal.getCampaignId());
+                }
+                if (refferal != null && refferal.getAffiliateId() != null) {
                     cccp.setAffiliateId(refferal.getAffiliateId());
-                if (refferal != null && refferal.getChannelId() != null) cccp.setChannelId(refferal.getChannelId());
-                if (refferal != null && refferal.getTargetId() != null) cccp.setTargetId(refferal.getTargetId());
+                }
+                if (refferal != null && refferal.getChannelId() != null) {
+                    cccp.setChannelId(refferal.getChannelId());
+                }
+                if (refferal != null && refferal.getTargetId() != null) {
+                    cccp.setTargetId(refferal.getTargetId());
+                }
                 repository.save(cccp);
 
             });

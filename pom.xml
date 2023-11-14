@@ -37,13 +37,6 @@
             <optional>true</optional>
         </dependency>
 
-        <!--SPRING TEST -->
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-test</artifactId>-->
-<!--            <scope>test</scope>-->
-<!--        </dependency>-->
-
         <!-- PERSISTENCE -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -60,17 +53,11 @@
             <artifactId>spring-boot-starter-freemarker</artifactId>
         </dependency>
 
-        <!-- REDIS-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
-        </dependency>
-
         <!-- DOZER dependencies -->
         <dependency>
             <groupId>com.github.dozermapper</groupId>
             <artifactId>dozer-spring-boot-starter</artifactId>
-            <version>6.5.0</version>
+            <version>6.5.2</version>
         </dependency>
 
         <!--HIKARI-->

@@ -58,7 +58,6 @@ public class TransactionStatusBusiness {
         if (!jwtUserDetailsService.getRole().equals("Admin"))
             request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         Page<ViewTransactionStatus> page = repository.findAll(getSpecification(request), pageable);
-
         return page.map(TransactionStatusDTO::from);
     }
 

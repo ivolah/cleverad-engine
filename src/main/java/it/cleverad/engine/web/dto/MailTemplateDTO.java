@@ -20,10 +20,9 @@ public class MailTemplateDTO {
     private String content;
 
     private Boolean status;
-    private LocalDateTime creationDate;
 
     public static MailTemplateDTO from(MailTemplate mailTemplate) {
-        return new MailTemplateDTO(mailTemplate.getId(), mailTemplate.getName(), mailTemplate.getSubject(), mailTemplate.getContent(), mailTemplate.getStatus(), mailTemplate.getCreationDate());
+        return new MailTemplateDTO(mailTemplate.getId(), mailTemplate.getName(), mailTemplate.getSubject(), mailTemplate.getContent(), mailTemplate.getStatus());
     }
 
 }

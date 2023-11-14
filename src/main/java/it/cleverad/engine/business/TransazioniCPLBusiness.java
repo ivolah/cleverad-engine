@@ -72,7 +72,7 @@ public class TransazioniCPLBusiness {
             log.info(">>> TOT :: " + ls.getTotalElements());
 
             for (TransactionStatusDTO tcpl : ls) {
-                log.info("CANCELLO PER RIGENERA CP :: {} : {} :: {}", tcpl.getId(), tcpl.getValue(), tcpl.getDateTime());
+                // log.info("CANCELLO PER RIGENERA CP :: {} : {} :: {}", tcpl.getId(), tcpl.getValue(), tcpl.getDateTime());
                 transactionBusiness.delete(tcpl.getId(), "CPL");
                 Thread.sleep(100L);
             }
@@ -172,7 +172,7 @@ public class TransazioniCPLBusiness {
 
                         // decremento budget Affiliato
                         BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
-                        if (bb != null && bb.getBudget() != null){
+                        if (bb != null && bb.getBudget() != null) {
                             Double totBudgetDecrementato = bb.getBudget() - totale;
                             budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
 

@@ -15,14 +15,10 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
-import java.util.HashMap;
 
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages = "it.cleverad.engine.persistence.repository.service",
-        entityManagerFactoryRef = "serviceEntityManagerFactory",
-        transactionManagerRef = "serviceTransactionManager"
-)
+@EnableJpaRepositories(basePackages = "it.cleverad.engine.persistence.repository.service", entityManagerFactoryRef = "serviceEntityManagerFactory", transactionManagerRef = "serviceTransactionManager")
 public class ServiceJpaConfiguration {
 
     @Bean("serviceDataSourceProperties")
@@ -41,8 +37,7 @@ public class ServiceJpaConfiguration {
 
     @Primary
     @Bean("serviceEntityManagerFactory")
-    public LocalContainerEntityManagerFactoryBean serviceEntityManagerFactory(@Qualifier("serviceDataSource") DataSource serviceDataSource,
-                                                                              EntityManagerFactoryBuilder builder) {
+    public LocalContainerEntityManagerFactoryBean serviceEntityManagerFactory(@Qualifier("serviceDataSource") DataSource serviceDataSource, EntityManagerFactoryBuilder builder) {
         return builder.dataSource(serviceDataSource).packages("it.cleverad.engine.persistence.model.service").build();
     }
 

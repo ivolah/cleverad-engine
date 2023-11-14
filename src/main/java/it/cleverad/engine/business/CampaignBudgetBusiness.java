@@ -141,7 +141,7 @@ public class CampaignBudgetBusiness {
         Integer capErogato = budget.getCapErogato() + cap;
         log.info(">>> " + capErogato);
         budget.setCapErogato(capErogato);
-        return  CampaignBudgetDTO.from(repository.save(budget));
+        return CampaignBudgetDTO.from(repository.save(budget));
     }
 
     public CampaignBudgetDTO decreaseCapErogatoOnDeleteTransaction(Long id, Integer cap) {
@@ -149,7 +149,7 @@ public class CampaignBudgetBusiness {
         Integer capErogato = budget.getCapErogato() - cap;
         log.info(">>> " + capErogato);
         budget.setCapErogato(capErogato);
-        return  CampaignBudgetDTO.from(repository.save(budget));
+        return CampaignBudgetDTO.from(repository.save(budget));
     }
 
     public CampaignBudgetDTO incrementoBudgetErogato(Long id, Double budget) {
@@ -157,7 +157,7 @@ public class CampaignBudgetBusiness {
         Double nuovoBB = entity.getBudgetErogato() + budget;
         log.info(">>> " + nuovoBB);
         entity.setBudgetErogato(nuovoBB);
-        return  CampaignBudgetDTO.from(repository.save(entity));
+        return CampaignBudgetDTO.from(repository.save(entity));
     }
 
     public CampaignBudgetDTO decreaseBudgetErogatoOnDeleteTransaction(Long id, Double budget) {
@@ -165,7 +165,7 @@ public class CampaignBudgetBusiness {
         Double nuovoBB = entity.getBudgetErogato() + budget;
         log.info(">>> " + nuovoBB);
         entity.setBudgetErogato(nuovoBB);
-        return  CampaignBudgetDTO.from(repository.save(entity));
+        return CampaignBudgetDTO.from(repository.save(entity));
     }
 
     /**
@@ -235,7 +235,6 @@ public class CampaignBudgetBusiness {
         private Long tipologiaId;
         private Double payout;
         private Boolean status;
-
     }
 
     @Data

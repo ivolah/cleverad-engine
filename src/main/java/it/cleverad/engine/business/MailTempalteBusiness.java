@@ -70,7 +70,6 @@ public class MailTempalteBusiness {
         mapper.map(filter, mediaDTOfrom);
         MailTemplate mappedEntity = mapper.map(media, MailTemplate.class);
         mapper.map(mediaDTOfrom, mappedEntity);
-        mappedEntity.setLastModificationDate(LocalDateTime.now());
         return MailTemplateDTO.from(repository.save(mappedEntity));
     }
 

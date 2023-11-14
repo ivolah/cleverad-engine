@@ -198,8 +198,7 @@ public class CampaignAffiliateBusiness {
                 predicates.add(cb.equal(root.get("brandbuddies"), request.getBrandbuddies()));
             }
 
-            if (request.getFollowNull())
-                predicates.add(cb.isNotNull(root.get("followThrough")));
+            if (request.getFollowNull()) predicates.add(cb.isNotNull(root.get("followThrough")));
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 

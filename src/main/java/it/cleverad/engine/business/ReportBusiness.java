@@ -246,12 +246,12 @@ public class ReportBusiness {
             ll.add(48L);
             ll.add(47L);
             ll.add(40L);
+            ll.add(70L);
             request.setDictionaryIds(ll);
         }
 
         if (request.getStatusIds() == null) {
             List<Long> ll = new ArrayList<>();
-            ll.add(70L);
             ll.add(72L);
             ll.add(73L);
             ll.add(74L);

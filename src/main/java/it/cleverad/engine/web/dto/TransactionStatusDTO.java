@@ -69,13 +69,14 @@ public class TransactionStatusDTO {
                 transaction.getMediaName(),
                 transaction.getCommissionId(),
                 transaction.getCommissionName(),
-                transaction.getCommissionValue(),
+                transaction.getDictionaryId() == 70L ? transaction.getCommissionValueRigettato() :transaction.getCommissionValue(),
 
-                transaction.getValue(),
+                transaction.getDictionaryId() == 70L ? transaction.getValueRigettato() :transaction.getValue(),
                 transaction.getRevenueId(),
-                transaction.getRevenue(),
+                transaction.getDictionaryId() == 70L ? transaction.getRevenueRigettato() :transaction.getRevenue(),
 
-                transaction.getClickNumber(),
+                transaction.getDictionaryId() == 70L ? transaction.getClickNumberRigettato() :transaction.getClickNumber(),
+
                 transaction.getImpressionNumber(),
                 transaction.getLeadNumber(),
                 transaction.getData(),

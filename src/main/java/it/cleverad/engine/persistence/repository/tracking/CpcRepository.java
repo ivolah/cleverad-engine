@@ -21,7 +21,7 @@ public interface CpcRepository extends JpaRepository<Cpc, Long>, JpaSpecificatio
                     " ) " +
                     " select * " +
                     " from click_univoci " +
-                    " where totale > 2 and blacklisted = false")
+                    " where totale > 3 and blacklisted = false")
     List<ClickMultipli> getListaClickMultipliDaDisabilitare(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo);
 
 }

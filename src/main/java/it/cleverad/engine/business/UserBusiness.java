@@ -184,13 +184,17 @@ public class UserBusiness {
         log.info("username " + username);
 
         if (u != null) {
+            AffiliateDTO affiliate = affiliateBusiness.findById(u.getAffiliateId());
+
             // invio mail USER
             MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
-            mailRequest.setTemplateId(3L);
+            if (affiliate.getBrandbuddies()) mailRequest.setTemplateId(23L);
+            else mailRequest.setTemplateId(3L);
             mailRequest.setAffiliateId(u.getAffiliateId());
             mailRequest.setUserId(u.getId());
             mailRequest.setEmail(u.getEmail());
             mailService.invio(mailRequest);
+
         }
         return null;
     }

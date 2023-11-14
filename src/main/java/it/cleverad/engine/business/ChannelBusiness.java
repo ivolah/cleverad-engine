@@ -190,18 +190,21 @@ public class ChannelBusiness {
     // UPDATE
     public ChannelDTO update(Long id, Filter filter) {
         Channel channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Channel", id));
-        ChannelDTO campaignDTOfrom = ChannelDTO.from(channel);
         filter.setStatus(true);
-        mapper.map(filter, campaignDTOfrom);
+        mapper.map(filter, channel);
+        log.info("1");
 
         Channel mappedEntity = mapper.map(channel, Channel.class);
         mappedEntity.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.dictionaryId)));
+        log.info("2");
+
         mappedEntity.setDictionaryType(dictionaryRepository.findById(filter.typeId).orElseThrow(() -> new ElementCleveradException("Type", filter.typeId)));
+        log.info("3");
         mappedEntity.setDictionaryOwner(dictionaryRepository.findById(filter.ownerId).orElseThrow(() -> new ElementCleveradException("Owner", filter.ownerId)));
+        log.info("4");
         mappedEntity.setDictionaryBusinessType(dictionaryRepository.findById(filter.businessTypeId).orElseThrow(() -> new ElementCleveradException("Business Type", filter.businessTypeId)));
 
         mappedEntity.setLastModificationDate(LocalDateTime.now());
-        mapper.map(campaignDTOfrom, mappedEntity);
 
         MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
         mailRequest.setChannelId(filter.getId());
@@ -218,16 +221,17 @@ public class ChannelBusiness {
             mailRequest.setTemplateId(10L);
             mailService.invio(mailRequest);
         }
+        log.info("5");
 
         // SET Category - cancello precedenti
         channelCategoryBusiness.deleteByChannelID(id);
-
+        log.info("6");
         // setto nuvoi
         if (filter.getCategoryList() != null && !filter.getCategoryList().isEmpty()) {
             Set<ChannelCategory> collect = filter.getCategoryList().stream().map(ss -> channelCategoryBusiness.createEntity(new ChannelCategoryBusiness.BaseCreateRequest(id, ss))).collect(Collectors.toSet());
             mappedEntity.setChannelCategories(collect);
         }
-
+        log.info("7");
         return ChannelDTO.from(repository.save(mappedEntity));
     }
 

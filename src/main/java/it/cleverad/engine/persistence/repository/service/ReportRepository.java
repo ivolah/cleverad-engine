@@ -344,8 +344,8 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
             "      SUM(clicknumberrigettato)                                                                   as clickNumberRigettato, " +
             "      SUM(leadnumber)                                                                             as leadNumber, " +
             "      SUM(leadnumberrigettato)                                                                    as leadNumberRigettato, " +
-            "      round((SUM(clicknumber) / SUM(nullif(impressionnumber, 0)) * 100), 2)                      as CTR, " +
-            "      round(CAST((SUM(leadnumber) / SUM(nullif(clicknumber, 0)) * 100) AS numeric), 2)         as LR, " +
+            "      round((SUM(clicknumber) / SUM(nullif(impressionnumber, 0)) * 100), 2)                       as CTR, " +
+            "      round(CAST((SUM(leadnumber) / SUM(nullif(clicknumber, 0)) * 100) AS numeric), 2)            as LR, " +
             "      round(CAST(SUM(commission) AS numeric), 2)                                                  as commission, " +
             "      round(CAST(SUM(commissionRigettato) AS numeric), 2)                                         as commissionRigettato, " +
             "      round(CAST(SUM(revenue) AS numeric), 2)                                                     as revenue, " +

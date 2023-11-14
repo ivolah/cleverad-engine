@@ -47,10 +47,10 @@ public class RegisterController {
     @PostMapping(path = "/brandbuddies", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public AffiliateDTO createBrandBuddy(@ModelAttribute AffiliateBusiness.BaseCreateRequest request) {
+
         request.setStatus(true);
         request.setStatusId(12L);
         request.setBrandbuddies(true);
-        request.setCompanytypeId(71L);
         request.setChannelTypeId(30L);
         request.setChannelOwnerId(43L);
         request.setBusinessTypeId(53L);
@@ -58,8 +58,8 @@ public class RegisterController {
         request.setChannelUrl("");
         request.setName(request.getFirstName().toUpperCase() + " " + request.getLastName().toUpperCase());
         request.setChannelName("Canale BrandBuddies " + request.getFirstName().toUpperCase() + " " + request.getLastName().toUpperCase());
-
         AffiliateDTO dt = business.create(request);
+
         if (request.getBrandbuddiesPlatformId() != null) {
             BBPlatformBusiness.BaseCreateRequest BBPrequest = new BBPlatformBusiness.BaseCreateRequest();
             BBPrequest.setBrandbuddiesId(dt.getId());

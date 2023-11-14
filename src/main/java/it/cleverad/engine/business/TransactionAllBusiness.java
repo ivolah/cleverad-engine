@@ -53,11 +53,47 @@ public class TransactionAllBusiness {
     // SEARCH PAGINATED
     public Page<TransactionStatusDTO> searchPrefiltrato(Filter filter, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("dateTime")));
-        if (!jwtUserDetailsService.getRole().equals("Admin"))
+
+        // gestione api .../all/affiliate
+        if (!jwtUserDetailsService.getRole().equals("Admin")) {
+            filter.setValueNotZero(true);
+            List<Long> listD = new ArrayList<>();
+            listD.add(39L);
+            listD.add(42L);
+            listD.add(68L);
+            filter.setDictionaryIdIn(listD);
+            List<Long> listStatus = new ArrayList<>();
+            listStatus.add(72L);
+            listStatus.add(73L);
+            filter.setStatusIdIn(listStatus);
             filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+        }
+
         Page<ViewTransactionStatus> page = repository.findAll(getSpecification(filter), pageable);
-        Page<TransactionStatusDTO> ll = page.map(TransactionStatusDTO::from);
-        return ll ;
+        return page.map(TransactionStatusDTO::from);
+    }
+
+    public Page<TransactionStatusDTO> searchStatusIdAndDate(Long statusId, LocalDate dataDaGestire, String tipo) {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
+        Filter request = new Filter();
+        request.setCreationDateFrom(dataDaGestire);
+        request.setCreationDateTo(dataDaGestire);
+        request.setTipo(tipo);
+        request.setStatusId(statusId);
+        Page<ViewTransactionStatus> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(TransactionStatusDTO::from);
+    }
+
+    public Page<TransactionStatusDTO> searchStatusIdAndDicIdAndDate(Long statusId, Long dicId, LocalDate dataDaGestire, String tipo) {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
+        Filter request = new Filter();
+        request.setCreationDateFrom(dataDaGestire);
+        request.setCreationDateTo(dataDaGestire);
+        request.setTipo(tipo);
+        request.setStatusId(statusId);
+        request.setDictionaryId(dicId);
+        Page<ViewTransactionStatus> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(TransactionStatusDTO::from);
     }
 
 
@@ -138,13 +174,6 @@ public class TransactionAllBusiness {
                 predicates.add(cb.equal(root.get("statusId"), request.getStatusId()));
             }
 
-/*            if (request.getCreationDateFrom() != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("creationDate"), request.getCreationDateFrom().atStartOfDay()));
-            }
-            if (request.getCreationDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("creationDate"), request.getCreationDateTo().plus(1, ChronoUnit.DAYS).atStartOfDay()));
-            }*/
-
             if (request.getCreationDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("dateTime"), request.getCreationDateFrom()));
             }
@@ -168,12 +197,28 @@ public class TransactionAllBusiness {
                 predicates.add(inClauseNot.not());
             }
 
-            if (request.getDataList() != null && request.getDataList().length()>3) {
+            if (request.getDataList() != null && request.getDataList().length() > 3) {
                 log.info("Dentro :: ", request.getDataList());
                 CriteriaBuilder.In<String> inClause = cb.in(cb.upper(root.get("data")));
                 Arrays.stream(request.getDataList().split(",")).distinct().forEach(s -> {
                     inClause.value(s.toUpperCase());
                 });
+                predicates.add((inClause));
+            }
+
+            if (request.getStatusIdIn() != null) {
+                CriteriaBuilder.In<Long> inClause = cb.in(root.get("statusId"));
+                for (Long id : request.getStatusIdIn()) {
+                    inClause.value(id);
+                }
+                predicates.add((inClause));
+            }
+
+            if (request.getDictionaryIdIn() != null) {
+                CriteriaBuilder.In<Long> inClause = cb.in(root.get("dictionaryId"));
+                for (Long id : request.getDictionaryIdIn()) {
+                    inClause.value(id);
+                }
                 predicates.add((inClause));
             }
 
@@ -191,20 +236,18 @@ public class TransactionAllBusiness {
     @AllArgsConstructor
     @ToString
     public static class Filter {
+        public List<Long> notInId;
         private Long id;
         private String agent;
         private Boolean approved;
-
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate creationDateFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate creationDateTo;
-
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dateTimeFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dateTimeTo;
-
         private String ip;
         private String note;
         private String payoutReference;
@@ -226,8 +269,11 @@ public class TransactionAllBusiness {
         private Long statusId;
         private Boolean valueNotZero;
         private Boolean payoutPresent;
-        public List<Long> notInId;
         private String dataList;
+
+        public List<Long> statusIdIn;
+        public List<Long> dictionaryIdIn;
+
     }
 
 }

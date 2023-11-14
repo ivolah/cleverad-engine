@@ -854,6 +854,11 @@ public class TransactionBusiness {
                 predicates.add(cb.notEqual(root.get("value"), "0"));
             }
 
+            if (request.getBlacklisted() != null) {
+                predicates.add(cb.equal(root.get("blacklisted"), request.getBlacklisted()));
+            }
+
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };

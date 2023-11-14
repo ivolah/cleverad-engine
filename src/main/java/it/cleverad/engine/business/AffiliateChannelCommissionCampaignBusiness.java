@@ -153,6 +153,18 @@ public class AffiliateChannelCommissionCampaignBusiness {
         return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
 
+
+    // GET BY ID CAMPAIGN
+    public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignIdAffiliateBrandBuddies(Pageable pageableRequest) {
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Filter filter = new Filter();
+        if (!jwtUserDetailsService.isAdmin())
+            filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+        filter.setBb(true);
+        Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
+        return page.map(AffiliateChannelCommissionCampaignDTO::from);
+    }
+
 //    public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignIdDistinctAffiliate(Long campaignId, Pageable pageableRequest) {
 //        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
 //        Filter filter = new Filter();
@@ -267,6 +279,14 @@ public class AffiliateChannelCommissionCampaignBusiness {
                 predicates.add(cb.notEqual(root.get("commission").get("value"), "0"));
             }
 
+            if (request.getBb() != null) {
+                predicates.add(cb.or(
+                        cb.equal(root.get("commission").get("dictionary").get("id"), 84L),
+                        cb.equal(root.get("commission").get("dictionary").get("id"), 85L)
+                ));
+                predicates.add(cb.equal(root.get("campaign").get("status"), true));
+            }
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 
             return completePredicate;
@@ -299,6 +319,7 @@ public class AffiliateChannelCommissionCampaignBusiness {
         private Long channelId;
         private Long commissionId;
         private Boolean notzero;
+        private Boolean bb;
         private Long commissionDicId;
     }
 

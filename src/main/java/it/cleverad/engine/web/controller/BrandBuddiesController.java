@@ -30,7 +30,6 @@ public class BrandBuddiesController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public AffiliateDTO create(@ModelAttribute AffiliateBusiness.BaseCreateRequest request) {
         request.setBrandbuddies(true);
-        request.setCompanytypeId(71L);
         request.setChannelTypeId(30L);
         request.setChannelOwnerId(43L);
         request.setBusinessTypeId(53L);
@@ -51,7 +50,6 @@ public class BrandBuddiesController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public AffiliateDTO update(@PathVariable Long id, @RequestBody AffiliateBusiness.Filter request) {
         request.setBrandbuddies(true);
-        request.setCompanytypeId(71L);
         return business.update(id, request);
     }
 

@@ -5,6 +5,7 @@ import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
+import it.cleverad.engine.persistence.repository.service.FileAdvertiserRepository;
 import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.web.dto.AffiliateDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
@@ -37,9 +38,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Component
 @Transactional
 public class AffiliateBusiness {
+    @Autowired
+    private FileAdvertiserRepository fileAdvertiserRepository;
 
     @Autowired
     private AffiliateRepository repository;
@@ -74,16 +78,21 @@ public class AffiliateBusiness {
     public void delete(Long id) {
         try {
             Page<WalletDTO> dd = walletBusiness.findByIdAffilaite(id);
-            WalletDTO walletDTO = dd.stream().findFirst().get();
-            if (walletDTO.getTotal() > 0) {
-                // invio messaggio specifico su lfatto che c'è un wallet con contenuto
-                throw new PostgresCleveradException("Impossibile cancellare affiliato " + walletDTO.getNome() + " perchè associato ad un wallet.");
-            } else {
-                channelBusiness.deleteByIdAffiliate(id);
-                walletBusiness.delete(walletDTO.getId());
-                userBusiness.deleteByIdAffiliate(id);
-                repository.deleteById(id);
+            if (dd.getTotalElements() > 0) {
+                WalletDTO walletDTO = dd.stream().findFirst().get();
+                if (walletDTO.getTotal() > 0) {
+                    // invio messaggio specifico su lfatto che c'è un wallet con contenuto
+                    throw new PostgresCleveradException("Impossibile cancellare affiliato " + walletDTO.getNome() + " perchè associato ad un wallet.");
+                } else {
+                    channelBusiness.deleteByIdAffiliate(id);
+                    userBusiness.deleteByIdAffiliate(id);
+                    repository.deleteById(id);
+                    if (dd.getTotalElements() > 0) {
+                        walletBusiness.delete(walletDTO.getId());
+                    }
+                }
             }
+
         } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
@@ -101,6 +110,7 @@ public class AffiliateBusiness {
     // UPADTE
     public AffiliateDTO update(Filter filter) {
         Affiliate affiliate = repository.findById(jwtUserDetailsService.getAffiliateID()).orElseThrow(() -> new ElementCleveradException("Affiliate", jwtUserDetailsService.getAffiliateID()));
+
         affiliate.setCountry(filter.getCountry());
         affiliate.setPhoneNumber(filter.getPhoneNumber());
         affiliate.setPrimaryMail(filter.getPrimaryMail());
@@ -115,34 +125,47 @@ public class AffiliateBusiness {
         affiliate.setBank(filter.getBank());
         affiliate.setSwift(filter.getSwift());
         affiliate.setStatus(true);
+
         return AffiliateDTO.from(repository.save(affiliate));
     }
 
     // UPDATE
     public AffiliateDTO update(Long id, Filter filter) {
-
+        log.info("filter 1 ");
         Long finalId = id;
         Affiliate affiliate = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Affiliate", finalId));
         mapper.map(filter, affiliate);
+        log.info("filter 2 " + id);
 
         Affiliate mappedEntity = mapper.map(affiliate, Affiliate.class);
+
+        log.info("filter 3 " + id);
+
         mappedEntity.setLastModificationDate(LocalDateTime.now());
+        log.info("filter 3.... " + id);
         mappedEntity.setDictionaryStatusType(dictionaryRepository.findById(filter.statusId).orElseThrow(() -> new ElementCleveradException("Status", filter.statusId)));
+        log.info("filter 4 " + id);
         mappedEntity.setDictionaryCompanyType(dictionaryRepository.findById(filter.companytypeId).orElseThrow(() -> new ElementCleveradException("Company Type", filter.companytypeId)));
+        log.info("filter 5 " + id);
 
         MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
         Long statusID = filter.statusId;
+        log.info("status  " + statusID);
         if (statusID == 6 && !affiliate.getDictionaryStatusType().getId().equals(statusID)) {
             // invio mail approvato
-            mailRequest.setTemplateId(7L);
+            if (affiliate.getBrandbuddies()) mailRequest.setTemplateId(21L);
+            else mailRequest.setTemplateId(7L);
             mailRequest.setAffiliateId(id);
             mailService.invio(mailRequest);
         } else if (statusID == 7 && !affiliate.getDictionaryStatusType().getId().equals(statusID)) {
             // invio mail non approvato
-            mailRequest.setTemplateId(8L);
+            if (affiliate.getBrandbuddies()) mailRequest.setTemplateId(22L);
+            else mailRequest.setTemplateId(8L);
             mailRequest.setAffiliateId(id);
             mailService.invio(mailRequest);
         }
+
+        log.info("gg " + id);
 
 //        Boolean status = affiliate.getStatus();
 //        if (!status && filter.status) {
@@ -181,22 +204,16 @@ public class AffiliateBusiness {
     public AffiliateDTO create(BaseCreateRequest request) {
         Affiliate map = mapper.map(request, Affiliate.class);
         request.statusId = 5L;
-        if(request.getBrandbuddies() == null)
-            request.setBrandbuddies(false);
+        if (request.getBrandbuddies() == null) request.setBrandbuddies(false);
 
         map.setDictionaryStatusType(dictionaryRepository.findById(request.statusId).orElseThrow(() -> new ElementCleveradException("Status", request.statusId)));
         if (request.companytypeId != null && request.companytypeId != 0)
             map.setDictionaryCompanyType(dictionaryRepository.findById(request.companytypeId).orElseThrow(() -> new ElementCleveradException("Company Type", request.companytypeId)));
 
-        AffiliateDTO dto = AffiliateDTO.from(repository.save(map));
+        if (request.getBrandbuddies() == null)
+            map.setBrandbuddies(false);
 
-        // invio mail Affiliate
-        MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
-//        mailRequest.setTemplateId(6L);
-//        mailRequest.setAffiliateId(dto.getId());
-//        mailRequest.setEmail(request.primaryMail);
-//        //mailRequest.setUserId();
-//        mailService.invio(mailRequest);
+        AffiliateDTO dto = AffiliateDTO.from(repository.save(map));
 
         // creo wallet associato
         WalletBusiness.BaseCreateRequest wal = new WalletBusiness.BaseCreateRequest();
@@ -224,20 +241,20 @@ public class AffiliateBusiness {
         channelRequest.setRegistrazione(true);
         channelBusiness.create(channelRequest);
 
-        // creo user associato
+        // crea user associato
         UserBusiness.BaseCreateRequest nuovoUser = new UserBusiness.BaseCreateRequest();
         nuovoUser.setAffiliateId(dto.getId());
         nuovoUser.setStatus(false);
         nuovoUser.setName(request.firstName);
-        nuovoUser.setEmail(request.primaryMail);
         nuovoUser.setSurname(request.getLastName());
+        nuovoUser.setEmail(request.primaryMail);
         nuovoUser.setRoleId(4L);
         String uuid = UUID.randomUUID().toString();
         nuovoUser.setUsername(uuid);
         nuovoUser.setPassword("piciulin");
         UserDTO userDto = userBusiness.create(nuovoUser);
 
-        //cre utente shadow
+        // crea utente shadow
         UserBusiness.BaseCreateRequest uenteOmbra = new UserBusiness.BaseCreateRequest();
         uenteOmbra.setAffiliateId(dto.getId());
         uenteOmbra.setStatus(true);
@@ -249,12 +266,22 @@ public class AffiliateBusiness {
         uenteOmbra.setPassword("2!3_ClEvEr_2!3");
         userBusiness.create(uenteOmbra);
 
+        MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
+
         // invio mail USER
         mailRequest = new MailService.BaseCreateRequest();
-        mailRequest.setTemplateId(2L);
         mailRequest.setAffiliateId(dto.getId());
         mailRequest.setUserId(userDto.getId());
+        if (request.brandbuddies) mailRequest.setTemplateId(20L);
+        else mailRequest.setTemplateId(2L);
         mailService.invio(mailRequest);
+
+        // invio mail Affiliate
+//        mailRequest.setTemplateId(6L);
+//        mailRequest.setAffiliateId(dto.getId());
+//        mailRequest.setEmail(request.primaryMail);
+//        //mailRequest.setUserId();
+//        mailService.invio(mailRequest);
 
         return dto;
     }

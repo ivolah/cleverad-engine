@@ -62,15 +62,23 @@ public class ViewTransactionStatus {
     private String commissionName;
     @Column(name = "commission_value")
     private Double commissionValue;
+    @Column(name = "commission_value_rigettato")
+    private Double commissionValueRigettato;
 
     private Double value;
+    @Column(name = "value_rigettato")
+    private Double valueRigettato;
     @Column(name = "revenue_id")
     private Long revenueId;
     @Column(name = "revenue")
     private Long revenue;
+    @Column(name = "revenue_rigettato")
+    private Long revenueRigettato;
 
     @Column(name = "click_number")
     private Long clickNumber;
+    @Column(name = "click_number_rigettato")
+    private Long clickNumberRigettato;
     @Column(name = "impression_number")
     private Long impressionNumber;
     @Column(name = "lead_number")

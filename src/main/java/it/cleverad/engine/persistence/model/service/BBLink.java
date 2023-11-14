@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "t_bb_link")
@@ -18,10 +19,15 @@ public class BBLink {
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String link;
     private String generated;
     private String referral;
+    @Column(name = "creation_date")
+    private LocalDateTime creationDate = LocalDateTime.now();
+
+    @ManyToOne
+    @JoinColumn(name = "commission_id")
+    private Commission commission;
 
     @ManyToOne
     @JoinColumn(name = "brandbuddies_id")

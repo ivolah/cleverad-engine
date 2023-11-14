@@ -13,9 +13,11 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long>, JpaSp
 
     Page<Campaign> findByCampaignCategories_CategoryId(Long idCa, Pageable page);
     List<Campaign> findByCampaignCategories_CampaignIdAndCampaignCategories_CategoryId(Long idCam, Long idCa);
-    Page<Campaign> findByCampaignCategories_CampaignIdInAndCampaignCategories_CategoryId(List<Long> ids, Long idCa, Pageable pageable);
-
     List<Campaign> findByIdInAndCampaignCategories_CampaignId(List<Long> ids, Long id);
     List<Campaign> findByIdIn(List<Long> ids);
+
+    Page<Campaign> findByCampaignCategories_CampaignIdInAndCampaignCategories_CategoryId(List<Long> ids, Long idCa, Pageable pageable);
+
+    List<Campaign> findByIdAndCommissionCampaigns_Dictionary_Id(Long idC, Long idD);
 
 }
