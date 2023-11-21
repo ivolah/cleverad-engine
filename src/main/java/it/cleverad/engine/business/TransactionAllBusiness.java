@@ -1,8 +1,8 @@
 package it.cleverad.engine.business;
 
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.ViewTransactionStatus;
 import it.cleverad.engine.persistence.repository.service.ViewTransactionStatusRepository;
-import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.TransactionStatusDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
@@ -57,15 +57,7 @@ public class TransactionAllBusiness {
         // gestione api .../all/affiliate
         if (!jwtUserDetailsService.getRole().equals("Admin")) {
             filter.setValueNotZero(true);
-            List<Long> listD = new ArrayList<>();
-            listD.add(39L);
-            listD.add(42L);
-            listD.add(68L);
-            filter.setDictionaryIdIn(listD);
-            List<Long> listStatus = new ArrayList<>();
-            listStatus.add(72L);
-            listStatus.add(73L);
-            filter.setStatusIdIn(listStatus);
+            filter.setForAffiliate(true);
             filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         }
 
@@ -181,6 +173,13 @@ public class TransactionAllBusiness {
                 predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), request.getCreationDateTo()));
             }
 
+            if (request.getDateTimeFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("dateTime"), request.getDateTimeFrom()));
+            }
+            if (request.getDateTimeTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), request.getDateTimeTo()));
+            }
+
             if (request.getValueNotZero() != null && request.getValueNotZero()) {
                 predicates.add(cb.notEqual(root.get("value"), "0"));
             }
@@ -206,20 +205,15 @@ public class TransactionAllBusiness {
                 predicates.add((inClause));
             }
 
-            if (request.getStatusIdIn() != null) {
-                CriteriaBuilder.In<Long> inClause = cb.in(root.get("statusId"));
-                for (Long id : request.getStatusIdIn()) {
-                    inClause.value(id);
-                }
-                predicates.add((inClause));
-            }
-
-            if (request.getDictionaryIdIn() != null) {
-                CriteriaBuilder.In<Long> inClause = cb.in(root.get("dictionaryId"));
-                for (Long id : request.getDictionaryIdIn()) {
-                    inClause.value(id);
-                }
-                predicates.add((inClause));
+            // filtro solo per affiliati transazioni non mostrate
+            if (request.getForAffiliate()) {
+                // prendo gli approvati
+                // o i pending + pending // pending + approvato // pending + manuale
+                Predicate apporvato = cb.equal(root.get("statusId"),73L);
+                Predicate pendingApprovato = cb.and(cb.equal(root.get("statusId"), 72L), cb.equal(root.get("dictionaryId"), 39L));
+                Predicate pendingPending =    cb.and(cb.equal(root.get("statusId"), 72L), cb.equal(root.get("dictionaryId"), 42L));
+                Predicate pendingManuale =  cb.and(cb.equal(root.get("statusId"), 72L), cb.equal(root.get("dictionaryId"), 68L));
+                predicates.add(cb.or(apporvato,pendingApprovato, pendingPending, pendingManuale ));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -237,6 +231,8 @@ public class TransactionAllBusiness {
     @ToString
     public static class Filter {
         public List<Long> notInId;
+        public List<Long> statusIdIn;
+        public List<Long> dictionaryIdIn;
         private Long id;
         private String agent;
         private Boolean approved;
@@ -270,9 +266,7 @@ public class TransactionAllBusiness {
         private Boolean valueNotZero;
         private Boolean payoutPresent;
         private String dataList;
-
-        public List<Long> statusIdIn;
-        public List<Long> dictionaryIdIn;
+        private Boolean forAffiliate = false;
 
     }
 

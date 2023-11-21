@@ -93,14 +93,16 @@ public class ChannelCategoryBusiness {
     }
 
     public void deleteByChannelID(Long id) {
-        Filter request = new Filter();
-        request.setChannelId(id);
-        Page<ChannelCategory> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
         try {
+            Filter request = new Filter();
+            request.setChannelId(id);
+            Page<ChannelCategory> page = repository.findAll(getSpecification(request), PageRequest.ofSize(Integer.MAX_VALUE));
+
             page.stream().forEach(channelCategory -> repository.deleteById(channelCategory.getId()));
         } catch (javax.validation.ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
+            log.error(">>> " + ee.getMessage(), ee);
             throw new PostgresDeleteCleveradException(ee);
         }
     }

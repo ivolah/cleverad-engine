@@ -6,6 +6,7 @@ import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.*;
+import it.cleverad.engine.web.dto.tracking.CpmDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;

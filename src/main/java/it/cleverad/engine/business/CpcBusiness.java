@@ -11,7 +11,7 @@ import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.ChannelRepository;
 import it.cleverad.engine.persistence.repository.tracking.CpcRepository;
-import it.cleverad.engine.web.dto.CpcDTO;
+import it.cleverad.engine.web.dto.tracking.CpcDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;

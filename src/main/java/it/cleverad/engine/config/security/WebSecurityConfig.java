@@ -59,12 +59,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/target",
                         "/file/encoded",
                         "/file/*/download",
-                        "/register","/register/brandbuddies",
+                        "/register", "/register/brandbuddies",
                         "/register/types/*",
                         "/register/types/brandbuddies/platform",
                         "/register/user/",
                         "/register/user/*",
                         "/register/user/confirm",
+                        "/register/user/request",
+                        "/user/reset/request",
                         "/reset/request", "/reset/user", "/short/*"
                 ).permitAll().
                 // TUTTE LE ALTRE RICHIESTO SONO AUTENTICATE

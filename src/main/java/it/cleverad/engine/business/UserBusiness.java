@@ -8,6 +8,7 @@ import it.cleverad.engine.persistence.repository.service.UserRepository;
 import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.web.dto.AffiliateDTO;
 import it.cleverad.engine.web.dto.UserDTO;
+import it.cleverad.engine.web.exception.ApiError;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -23,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +36,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -70,7 +73,9 @@ public class UserBusiness {
         map.setPassword(bcryptEncoder.encode(request.getPassword()));
         map.setAffiliate(affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId)));
         map.setDictionary(dictionaryRepository.findById(request.roleId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.roleId)));
-        return UserDTO.from(repository.save(map));
+        UserDTO dto = UserDTO.from(repository.save(map));
+        log.info("CREATO UTENTE  :: " + dto);
+        return dto;
     }
 
     // GET BY ID
@@ -91,16 +96,21 @@ public class UserBusiness {
                 Filter request = new Filter();
                 request.setUsername(username);
                 Page<User> page = repository.findAll(getSpecification(request), PageRequest.of(0, 1, Sort.by(Sort.Order.asc("id"))));
-                UserDTO dto = UserDTO.from(page.stream().findFirst().get());
+                if (page.getTotalElements() > 0) {
+                    UserDTO dto = UserDTO.from(page.stream().findFirst().get());
 
-                if (dto.getRoleId() == 3) {
-                    dto.setRole("Admin");
+                    if (dto.getRoleId() == 3) {
+                        dto.setRole("Admin");
+                    } else {
+                        dto.setRole("User");
+                        AffiliateDTO affiliate = affiliateBusiness.findById(dto.getAffiliateId());
+                        dto.setAffiliateName(affiliate.getName());
+                    }
+                    return dto;
                 } else {
-                    dto.setRole("User");
-                    AffiliateDTO affiliate = affiliateBusiness.findById(dto.getAffiliateId());
-                    dto.setAffiliateName(affiliate.getName());
+                    log.warn("No username found :: {}", username);
+                    return null;
                 }
-                return dto;
             } else {
                 UserDTO dto = new UserDTO();
                 dto.setRole("Admin");
@@ -180,23 +190,36 @@ public class UserBusiness {
     }
 
     public UserDTO requestResetPassword(String username) throws Exception {
-        UserDTO u = this.findByUsername(username);
-        log.info("username " + username);
 
-        if (u != null) {
-            AffiliateDTO affiliate = affiliateBusiness.findById(u.getAffiliateId());
+        if (StringUtils.isNotBlank(username)) {
+            UserDTO u = this.findByUsername(username);
 
-            // invio mail USER
-            MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
-            if (affiliate.getBrandbuddies()) mailRequest.setTemplateId(23L);
-            else mailRequest.setTemplateId(3L);
-            mailRequest.setAffiliateId(u.getAffiliateId());
-            mailRequest.setUserId(u.getId());
-            mailRequest.setEmail(u.getEmail());
-            mailService.invio(mailRequest);
+            String uuid = UUID.randomUUID().toString();
+            log.info("RESET PASSWORD sostituisco nome utenza  " + username + " in uuid " + uuid);
 
+            User wser = repository.findById(u.getId()).orElseThrow(() -> new ElementCleveradException("User", u.getId()));
+            wser.setUsername(uuid);
+            repository.save(wser);
+
+            if (u != null) {
+                AffiliateDTO affiliate = affiliateBusiness.findById(u.getAffiliateId());
+
+                // invio mail USER
+                MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
+                if (affiliate.getBrandbuddies()) mailRequest.setTemplateId(23L);
+                else mailRequest.setTemplateId(3L);
+                mailRequest.setAffiliateId(u.getAffiliateId());
+                mailRequest.setUserId(u.getId());
+                mailRequest.setEmail(u.getEmail());
+                mailService.invio(mailRequest);
+
+            }
+            return null;
         }
-        return null;
+        else {
+            log.warn("Username empty or null!");
+            throw new Exception();
+        }
     }
 
     public UserDTO disableUser(Long id) throws Exception {
@@ -215,7 +238,6 @@ public class UserBusiness {
 
         log.info(rr.toString());
         User user = repository.findByUsername(rr.uuid);
-        log.info(user.toString());
 
         BaseCreateRequest request = new BaseCreateRequest();
         request.setUsername(rr.getUsername());
@@ -293,6 +315,7 @@ public class UserBusiness {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @ToString
     public static class BaseCreateRequest {
         private String name;
         private String username;

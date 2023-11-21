@@ -3,6 +3,7 @@ package it.cleverad.engine.web.dto;
 import it.cleverad.engine.persistence.model.service.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
+@ToString
 public class UserDTO {
 
     private long id;
@@ -24,10 +26,9 @@ public class UserDTO {
     private String affiliateName;
     private Boolean status;
     private LocalDateTime creationDate;
-    private LocalDateTime lastLogin;
     private List<FileUserDTO> fileUser;
 
-    public UserDTO(long id, String username, String password, String name, String surname, String email, Long affiliateId, String affiliateName, Long roleId, String role, Boolean status, LocalDateTime creationDate, LocalDateTime lastLogin, List<FileUserDTO> fileUsers) {
+    public UserDTO(long id, String username, String password, String name, String surname, String email, Long affiliateId, String affiliateName, Long roleId, String role, Boolean status, LocalDateTime creationDate, List<FileUserDTO> fileUsers) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -40,7 +41,6 @@ public class UserDTO {
         this.role = role;
         this.status = status;
         this.creationDate = creationDate;
-        this.lastLogin = lastLogin;
         this.fileUser = fileUsers;
     }
 
@@ -71,7 +71,6 @@ public class UserDTO {
                 user.getDictionary().getId(), user.getDictionary().getName(),
                 user.getStatus(),
                 user.getCreationDate() != null ? user.getCreationDate() : null,
-                user.getLastLogin(),
                 listaFile);
     }
 

@@ -1,4 +1,4 @@
-package it.cleverad.engine.web.dto;
+package it.cleverad.engine.web.dto.tracking;
 
 import it.cleverad.engine.persistence.model.tracking.Cpl;
 import lombok.Data;
@@ -32,8 +32,17 @@ public class CplDTO {
     private Long targetId;
     private Long mediaId;
 
+    private Boolean blacklisted;
+    private Boolean multiple;
 
-    public CplDTO(long id, String refferal, String ip, String agent, String data, LocalDateTime date, Boolean read, String info, String country, Long mediaId, Long campaignId, Long affiliateId, Long channelId, Long targetId) {
+    private Long cpcId;
+    private Long actionId;
+
+    public CplDTO(long id, String refferal, String ip, String agent, String data, LocalDateTime date,
+                  Boolean read, String info, String country, Long mediaId, Long campaignId, Long affiliateId, Long channelId, Long targetId,
+                  Boolean blacklisted,Boolean multiple,
+                  Long cpcId, Long actionId
+                  ) {
         this.id = id;
         this.refferal = refferal;
         this.ip = ip;
@@ -48,11 +57,16 @@ public class CplDTO {
         this.affiliateId = affiliateId;
         this.channelId = channelId;
         this.targetId = targetId;
+        this.blacklisted = blacklisted;
+        this.multiple = multiple;
+        this.cpcId = cpcId;
+        this.actionId = actionId;
     }
 
     public static CplDTO from(Cpl cpl) {
-        return new CplDTO(cpl.getId(), cpl.getRefferal(), cpl.getIp(), cpl.getAgent(), cpl.getData(), cpl.getDate(), cpl.getRead(), cpl.getInfo(), cpl.getCountry(),  cpl.getMediaId(), cpl.getCampaignId(), cpl.getAffiliateId(), cpl.getChannelId(), cpl.getTargetId());
+        return new CplDTO(cpl.getId(), cpl.getRefferal(), cpl.getIp(), cpl.getAgent(), cpl.getData(), cpl.getDate(), cpl.getRead(), cpl.getInfo(), cpl.getCountry(),
+                cpl.getMediaId(), cpl.getCampaignId(), cpl.getAffiliateId(), cpl.getChannelId(), cpl.getTargetId(),
+                cpl.getBlacklisted(), cpl.getMultiple(), cpl.getCpcId(), cpl.getActionId());
     }
-
 
 }

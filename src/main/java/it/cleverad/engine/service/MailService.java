@@ -29,6 +29,7 @@ import java.util.Map;
 @Configurable
 public class MailService {
 
+    private static String MAIL_INFO = "info@cleverad.it";
     @Autowired
     MailTempalteBusiness mailTempalteBusiness;
     @Autowired
@@ -49,8 +50,6 @@ public class MailService {
     private JavaMailSender emailSender;
     @Autowired
     private CampaignAffiliateRequestBusiness campaignAffiliateRequestBusiness;
-
-    private static String MAIL_INFO = "info@cleverad.it";
 
     /**
      * ============================================================================================================
@@ -99,22 +98,16 @@ public class MailService {
         log.info("INVIO {} - {}", request.getTemplateId(), request);
         MailTemplateDTO mailTemplate = mailTempalteBusiness.findById(request.templateId);
 
-        AffiliateDTO affiliate = null;
-        CampaignDTO campaign = null;
-        UserDTO user = null;
-        ChannelDTO channelDTO = null;
-        PlannerDTO plannerDTO = null;
-        PayoutDTO payoutDTO = null;
-        if (request.affiliateId != null) affiliate = affiliateBusiness.findById(request.affiliateId);
-        if (request.campaignId != null) campaign = campaignBusiness.findById(request.campaignId);
-        if (request.userId != null) user = userBusiness.findById(request.userId);
-        if (request.channelId != null) channelDTO = channelBusiness.findById(request.channelId);
-        if (request.plannerId != null) plannerDTO = plannerBusiness.findById(request.plannerId);
-        if (request.payoutId != null) payoutDTO = payoutBusiness.findById(request.payoutId);
+        AffiliateDTO affiliate = request.affiliateId != null ? affiliateBusiness.findById(request.affiliateId) : null;
+        CampaignDTO campaign = request.campaignId != null ? campaign = campaignBusiness.findById(request.campaignId) : null;
+        UserDTO user = request.userId != null ? userBusiness.findById(request.userId) : null;
+        ChannelDTO channelDTO = request.channelId != null ? channelBusiness.findById(request.channelId) : null;
+        PlannerDTO plannerDTO = request.plannerId != null ? plannerBusiness.findById(request.plannerId) : null;
+        PayoutDTO payoutDTO = request.payoutId != null ? payoutBusiness.findById(request.payoutId) : null;
 
-        if(StringUtils.isBlank(affiliate.getIban()))
+        if (affiliate != null && StringUtils.isBlank(affiliate.getIban()))
             affiliate.setIban(">>> INSERISCI IL TUO IBAN <<<");
-        if(StringUtils.isBlank(affiliate.getSwift()))
+        if (affiliate != null && StringUtils.isBlank(affiliate.getSwift()))
             affiliate.setSwift(">>> INSERISCI IL TUO SWIFT <<<");
 
         Template t = new Template(mailTemplate.getName(), new StringReader(mailTemplate.getContent()), new Configuration());

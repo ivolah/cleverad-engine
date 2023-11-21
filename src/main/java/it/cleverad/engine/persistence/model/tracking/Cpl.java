@@ -44,4 +44,12 @@ public class Cpl {
     private Long targetId;
 
     private Boolean blacklisted = false;
+    private Boolean multiple = false;
+
+    @Column(name = "cpc_id")
+    private Long cpcId;
+
+    @Column(name = "action_id")
+    private Long actionId;
+
 }

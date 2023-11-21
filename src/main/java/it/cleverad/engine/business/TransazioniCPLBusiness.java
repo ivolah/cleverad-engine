@@ -6,6 +6,7 @@ import it.cleverad.engine.persistence.model.tracking.Cpl;
 import it.cleverad.engine.persistence.repository.tracking.CplRepository;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.*;
+import it.cleverad.engine.web.dto.tracking.CpcDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;

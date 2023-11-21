@@ -1,4 +1,4 @@
-package it.cleverad.engine.web.dto;
+package it.cleverad.engine.web.dto.tracking;
 
 import it.cleverad.engine.persistence.model.tracking.Cpc;
 import lombok.Data;

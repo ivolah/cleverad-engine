@@ -45,5 +45,6 @@ public class Cpc {
     private Long targetId;
 
     private Boolean blacklisted = false;
+    private Boolean multiple = false;
 
 }

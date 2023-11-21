@@ -1,7 +1,7 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.CpsBusiness;
-import it.cleverad.engine.web.dto.CpsDTO;
+import it.cleverad.engine.web.dto.tracking.CpsDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -1,7 +1,7 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.CpmBusiness;
-import it.cleverad.engine.web.dto.CpmDTO;
+import it.cleverad.engine.web.dto.tracking.CpmDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

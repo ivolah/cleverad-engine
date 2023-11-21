@@ -204,7 +204,6 @@ public class AffiliateBusiness {
     public AffiliateDTO create(BaseCreateRequest request) {
         Affiliate map = mapper.map(request, Affiliate.class);
         request.statusId = 5L;
-        if (request.getBrandbuddies() == null) request.setBrandbuddies(false);
 
         map.setDictionaryStatusType(dictionaryRepository.findById(request.statusId).orElseThrow(() -> new ElementCleveradException("Status", request.statusId)));
         if (request.companytypeId != null && request.companytypeId != 0)
@@ -213,7 +212,12 @@ public class AffiliateBusiness {
         if (request.getBrandbuddies() == null)
             map.setBrandbuddies(false);
 
+        if (request.getStatus() == null)
+            map.setStatus(false);
+
         AffiliateDTO dto = AffiliateDTO.from(repository.save(map));
+
+        log.info("CREATO AFFILAITE :: " + dto.getId());
 
         // creo wallet associato
         WalletBusiness.BaseCreateRequest wal = new WalletBusiness.BaseCreateRequest();
@@ -245,12 +249,20 @@ public class AffiliateBusiness {
         UserBusiness.BaseCreateRequest nuovoUser = new UserBusiness.BaseCreateRequest();
         nuovoUser.setAffiliateId(dto.getId());
         nuovoUser.setStatus(false);
-        nuovoUser.setName(request.firstName);
-        nuovoUser.setSurname(request.getLastName());
+
+        if (request.firstName == null)
+            nuovoUser.setName("Aggiorna");
+        else
+            nuovoUser.setName(request.firstName);
+
+        if (request.lastName == null)
+            nuovoUser.setSurname("Aggiorna");
+        else
+            nuovoUser.setSurname(request.lastName);
+
         nuovoUser.setEmail(request.primaryMail);
         nuovoUser.setRoleId(4L);
-        String uuid = UUID.randomUUID().toString();
-        nuovoUser.setUsername(uuid);
+        nuovoUser.setUsername(UUID.randomUUID().toString());
         nuovoUser.setPassword("piciulin");
         UserDTO userDto = userBusiness.create(nuovoUser);
 
@@ -272,7 +284,7 @@ public class AffiliateBusiness {
         mailRequest = new MailService.BaseCreateRequest();
         mailRequest.setAffiliateId(dto.getId());
         mailRequest.setUserId(userDto.getId());
-        if (request.brandbuddies) mailRequest.setTemplateId(20L);
+        if (request.brandbuddies != null && request.brandbuddies) mailRequest.setTemplateId(20L);
         else mailRequest.setTemplateId(2L);
         mailService.invio(mailRequest);
 

@@ -9,6 +9,7 @@ import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.persistence.repository.tracking.CplRepository;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.*;
+import it.cleverad.engine.web.dto.tracking.CpcDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

@@ -13,7 +13,7 @@ import it.cleverad.engine.persistence.repository.tracking.CpcRepository;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.dto.BudgetDTO;
-import it.cleverad.engine.web.dto.CpcDTO;
+import it.cleverad.engine.web.dto.tracking.CpcDTO;
 import it.cleverad.engine.web.dto.TransactionCPCDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.extern.slf4j.Slf4j;
@@ -100,7 +100,7 @@ public class ManageCPC {
 
             Page<CpcDTO> day = cpcBusiness.getUnreadDayNotBlackilset();
             log.trace("CPC TOT NOT BLACKLISTED {}", day.getTotalElements());
-            // RECCUPERO REFFERAL + NUMERO TOTALE
+            // RECUPERO REFFERAL + NUMERO TOTALE
             day.stream().filter(dto -> dto.getRefferal() != null).forEach(dto -> {
 
                 // gestisco calcolatore

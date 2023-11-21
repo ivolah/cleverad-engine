@@ -63,7 +63,7 @@ public class AuthenticationController {
         } catch (DisabledException e) {
             throw new DisabledException("USER_DISABLED", e);
         } catch (BadCredentialsException e) {
-            throw new BadCredentialsException("INVALID_CREDENTIALS", e);
+            throw new BadCredentialsException("INVALID_CREDENTIALS");
         }
     }
 }
