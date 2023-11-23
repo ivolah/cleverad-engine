@@ -1,6 +1,7 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
+import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.Planner;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.PlannerRepository;
@@ -46,7 +47,6 @@ public class PlannerBusiness {
     // CREATE
     public PlannerDTO create(BaseCreateRequest request) {
         Planner map = mapper.map(request, Planner.class);
-//        map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
         map.setStatus(true);
         return PlannerDTO.from(repository.save(map));
     }
@@ -75,26 +75,18 @@ public class PlannerBusiness {
         return page.map(PlannerDTO::from);
     }
 
-    public Page<PlannerDTO> findByIdCampaign(Long id) {
-        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
-        Filter request = new Filter();
-//        request.setCampaignId(id);
-        Page<Planner> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(PlannerDTO::from);
+    public PlannerDTO findByIdCampaign(Long id) {
+        Campaign camp = campaignRepository.findById(id).get();
+        return this.findById(camp.getPlanner().getId());
     }
 
     // UPDATE
     public PlannerDTO update(Long id, Filter filter) {
         Planner channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Planner", id));
-        PlannerDTO campaignDTOfrom = PlannerDTO.from(channel);
-
-        mapper.map(filter, campaignDTOfrom);
-
-        Planner mappedEntity = mapper.map(channel, Planner.class);
-        mapper.map(campaignDTOfrom, mappedEntity);
-        mappedEntity.setStatus(true);
-//        mappedEntity.setCampaign(campaignRepository.findById(filter.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", filter.campaignId)));
-        return PlannerDTO.from(repository.save(mappedEntity));
+        filter.setId(id);
+        filter.setStatus(true);
+        mapper.map(filter, channel);
+        return PlannerDTO.from(repository.save(channel));
     }
 
     /**
@@ -124,9 +116,7 @@ public class PlannerBusiness {
             if (request.getStatus() != null) {
                 predicates.add(cb.equal(root.get("status"), request.getStatus()));
             }
-//            if (request.getCampaignId() != null) {
-//                predicates.add(cb.equal(root.get("campaign").get("id"), request.getCampaignId()));
-//            }
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
@@ -148,8 +138,8 @@ public class PlannerBusiness {
         private String phone;
         private String mobilePrefix;
         private String mobile;
+        private String skype;
 
-//        private Long campaignId;
     }
 
     @Data
@@ -165,9 +155,7 @@ public class PlannerBusiness {
         private String phone;
         private String mobilePrefix;
         private String mobile;
-
-//        private Long campaignId;
-
+        private String skype;
         private Boolean status;
     }
 
