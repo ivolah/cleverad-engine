@@ -20,6 +20,7 @@ public class PlannerDTO {
     private String phone;
     private String mobilePrefix;
     private String mobile;
+    private String skype;
 
     private Boolean status;
     private LocalDateTime creationDate;
@@ -27,7 +28,7 @@ public class PlannerDTO {
     public static PlannerDTO from(Planner planner) {
         return new PlannerDTO(planner.getId(),
                 planner.getName(), planner.getSurname(), planner.getEmail(), planner.getPhonePrefix(), planner.getPhone(), planner.getMobilePrefix(), planner.getMobile(),
-                planner.getStatus(), planner.getCreationDate());
+                planner.getSkype(), planner.getStatus(), planner.getCreationDate());
     }
 
 }
