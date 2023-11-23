@@ -166,6 +166,8 @@ public class CampaignAffiliateBusiness {
     // UPDATE
     public CampaignAffiliateDTO update(Long id, Filter filter) {
         CampaignAffiliate channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignAffiliate", id));
+        if(filter.brandbuddies == null)
+            filter.setBrandbuddies(false);
         mapper.map(filter, channel);
         return CampaignAffiliateDTO.from(repository.save(channel));
     }

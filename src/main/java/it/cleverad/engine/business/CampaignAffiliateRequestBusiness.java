@@ -1,11 +1,11 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.service.Affiliate;
-import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.CampaignAffiliateRequest;
-import it.cleverad.engine.persistence.model.service.Dictionary;
+import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignAffiliateRequestRepository;
+import it.cleverad.engine.persistence.repository.service.CampaignRepository;
+import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
 import it.cleverad.engine.web.dto.CampaignAffiliateRequestDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -38,6 +38,12 @@ public class CampaignAffiliateRequestBusiness {
 
     @Autowired
     private DictionaryBusiness dictionaryBusiness;
+    @Autowired
+    private AffiliateRepository affiliateRepository;
+    @Autowired
+    private CampaignRepository campaignRepository;
+    @Autowired
+    private DictionaryRepository dictionaryRepository;
 
     @Autowired
     private Mapper mapper;
@@ -50,17 +56,9 @@ public class CampaignAffiliateRequestBusiness {
     public CampaignAffiliateRequestDTO create(BaseCreateRequest request) {
         CampaignAffiliateRequest map = mapper.map(request, CampaignAffiliateRequest.class);
 
-        Affiliate cat = new Affiliate();
-        cat.setId(request.getAffiliateId());
-        map.setAffiliate(cat);
-
-        Campaign campaign = new Campaign();
-        campaign.setId(request.getCampaignId());
-        map.setCampaign(campaign);
-
-        Dictionary dict = new Dictionary();
-        dict.setId(request.getStatusId());
-        map.setDictionaryStatusCampaignAffiliateRequest(dict);
+        map.setAffiliate(affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId)));
+        map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
+        map.setDictionaryStatusCampaignAffiliateRequest(dictionaryRepository.findById(request.statusId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.statusId)));
 
         return CampaignAffiliateRequestDTO.from(repository.save(map));
     }
@@ -89,14 +87,6 @@ public class CampaignAffiliateRequestBusiness {
         return page.map(CampaignAffiliateRequestDTO::from);
     }
 
-    public Page<CampaignAffiliateRequestDTO> searchByAffiliateID(Long affiliateId) {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
-        Filter request = new Filter();
-        request.setAffiliateId(affiliateId);
-        Page<CampaignAffiliateRequest> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(CampaignAffiliateRequestDTO::from);
-    }
-
     public Page<CampaignAffiliateRequestDTO> searchByCampaignID(Long campaignId, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
@@ -114,17 +104,25 @@ public class CampaignAffiliateRequestBusiness {
         return page.map(CampaignAffiliateRequestDTO::from);
     }
 
+    public Page<CampaignAffiliateRequestDTO> searchByAffiliateID(Long affiliateId, Pageable pageable) {
+        Filter request = new Filter();
+        request.setAffiliateId(affiliateId);
+        Page<CampaignAffiliateRequest> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(CampaignAffiliateRequestDTO::from);
+    }
+
     // UPDATE
     public CampaignAffiliateRequestDTO update(Long id, Filter filter) {
-        CampaignAffiliateRequest channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignAffiliateRequest", id));
-        CampaignAffiliateRequestDTO campaignDTOfrom = CampaignAffiliateRequestDTO.from(channel);
-
-        mapper.map(filter, campaignDTOfrom);
-
-        CampaignAffiliateRequest mappedEntity = mapper.map(channel, CampaignAffiliateRequest.class);
-        mapper.map(campaignDTOfrom, mappedEntity);
-
-        return CampaignAffiliateRequestDTO.from(repository.save(mappedEntity));
+        CampaignAffiliateRequest campaignAffiliateRequest = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignAffiliateRequest", id));
+        filter.setId(id);
+        mapper.map(filter, campaignAffiliateRequest);
+        if (filter.getAffiliateId() != null)
+            campaignAffiliateRequest.setAffiliate(affiliateRepository.findById(filter.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", filter.affiliateId)));
+        if (filter.getCampaignId() != null)
+            campaignAffiliateRequest.setCampaign(campaignRepository.findById(filter.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", filter.campaignId)));
+        if (filter.getStatusId() != null)
+            campaignAffiliateRequest.setDictionaryStatusCampaignAffiliateRequest(dictionaryRepository.findById(filter.statusId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.statusId)));
+        return CampaignAffiliateRequestDTO.from(repository.save(campaignAffiliateRequest));
     }
 
     public Page<DictionaryDTO> getTypes() {
