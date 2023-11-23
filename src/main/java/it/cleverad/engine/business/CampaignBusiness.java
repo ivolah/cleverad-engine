@@ -11,7 +11,6 @@ import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.dto.CampaignBrandBuddiesDTO;
 import it.cleverad.engine.web.dto.CampaignDTO;
-import it.cleverad.engine.web.dto.MediaDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -243,8 +242,7 @@ public class CampaignBusiness {
 
         mapper.map(filter, campaign);
 
-        if (newBB != null)
-            campaign.setBudget(newBB);
+        if (newBB != null) campaign.setBudget(newBB);
 
         // SET
         if (filter.getCookieId() != null)
@@ -283,7 +281,7 @@ public class CampaignBusiness {
     }
 
     // TROVA LE CAMPAGNE DELL AFFILIATE
-    public Page<CampaignDTO> getCampaigns(Long affiliateId) {
+    public Page<CampaignDTO> getCampaignsAffiliate(Long affiliateId) {
         Affiliate cc = affiliateRepository.findById(affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", affiliateId));
 
         List<Campaign> campaigns = new ArrayList<>();
@@ -298,28 +296,70 @@ public class CampaignBusiness {
         return page.map(CampaignDTO::from);
     }
 
-    public Page<CampaignDTO> getCampaignsActive(Long affiliateId, Pageable pageable) {
+    public Page<CampaignDTO> getCampaignsActive(Filter req, Pageable pageable) {
 
+        Long affiliateId = jwtUserDetailsService.getAffiliateID();
         List<Long> listaId = new ArrayList<>();
-        affiliateRepository.findById(affiliateId).get().getCampaignAffiliates().stream().forEach(campaignAffiliate -> {
-            listaId.add(campaignAffiliate.getCampaign().getId());
-        });
+        affiliateRepository.findById(affiliateId).get().getCampaignAffiliates().stream().filter(campaignAffiliate -> campaignAffiliate.getCampaign().getStatus()).forEach(campaignAffiliate -> listaId.add(campaignAffiliate.getCampaign().getId()));
+
+        if (req.getCategoryId() != null && req.getCategoryId() == 0L) req.setCategoryId(null);
+        if (req.getBbtipo() != null && req.getBbtipo().equals("my")) req.setBbtipo(null);
+
+        Page<Campaign> page = null;
         Filter request = new Filter();
         request.setStatus(true);
-        request.setIdListIn(listaId);
-        Page<Campaign> page = repository.findAll(getSpecification(request), pageable);
+
+        if (StringUtils.isBlank(req.getBbtipo()) && req.getCategoryId() == null) {
+            request.setIdListIn(listaId.stream().distinct().collect(Collectors.toList()));
+            page = repository.findAll(getSpecification(request), pageable);
+        } else if (StringUtils.isNotBlank(req.getBbtipo()) && req.getCategoryId() == null) {
+            List<Long> listaIdPulita = new ArrayList<>();
+            listaId.forEach(campaignId -> {
+                if (req.getBbtipo().contains("CPC") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, affiliateId, 10L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0) {
+                    listaIdPulita.add(campaignId);
+                    log.info("CPC");
+                }
+                if (req.getBbtipo().contains("CPL") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, affiliateId, 11L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0) {
+                    listaIdPulita.add(campaignId);
+                    log.info("CPL");
+                }
+                if (req.getBbtipo().contains("CPA") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, affiliateId, 50L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0) {
+                    listaIdPulita.add(campaignId);
+                    log.info("CPA");
+                }
+            });
+            request.setIdListIn(listaIdPulita.stream().distinct().collect(Collectors.toList()));
+            page = repository.findAll(getSpecification(request), pageable);
+        } else if (StringUtils.isBlank(req.getBbtipo()) && req.getCategoryId() != null) {
+            page = repository.findByCampaignCategories_CampaignIdInAndCampaignCategories_CategoryId(listaId, req.getCategoryId(), pageable);
+        } else if (StringUtils.isNotBlank(req.getBbtipo()) && req.getCategoryId() != null) {
+            List<Long> listaIdPulita = new ArrayList<>();
+            listaId.forEach(campaignId -> {
+                log.info(campaignId + " - check - " + req.getBbtipo());
+                if (req.getBbtipo() != null) {
+                    if (req.getBbtipo().contains("CPC") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, affiliateId, 10L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0) {
+                        listaIdPulita.add(campaignId);
+                    }
+                    if (req.getBbtipo().contains("CPL") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, affiliateId, 11L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0) {
+                        listaIdPulita.add(campaignId);
+                    }
+                    if (req.getBbtipo().contains("CPA") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, affiliateId, 50L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0) {
+                        listaIdPulita.add(campaignId);
+                    }
+                }
+            });
+            page = repository.findByCampaignCategories_CampaignIdInAndCampaignCategories_CategoryId(listaIdPulita.stream().distinct().collect(Collectors.toList()), req.getCategoryId(), pageable);
+        }
+
         return page.map(CampaignDTO::from);
     }
 
-    public Page<CampaignDTO> getCampaignsNot(Long affiliateId, Pageable pageable) {
+    public Page<CampaignDTO> getCampaignsNot(Pageable pageable) {
         List<Long> listaId = new ArrayList<>();
-        affiliateRepository.findById(affiliateId).get().getCampaignAffiliates().stream().forEach(campaignAffiliate -> {
-            listaId.add(campaignAffiliate.getCampaign().getId());
-        });
+        affiliateRepository.findById(jwtUserDetailsService.getAffiliateID()).get().getCampaignAffiliates().stream().forEach(campaignAffiliate -> listaId.add(campaignAffiliate.getCampaign().getId()));
         Filter requestNot = new Filter();
         requestNot.setStatus(true);
-        if (listaId.size() > 0)
-            requestNot.setIdListNotIn(listaId);
+        if (listaId.size() > 0) requestNot.setIdListNotIn(listaId);
         Page<Campaign> page = repository.findAll(getSpecification(requestNot), pageable);
         return page.map(CampaignDTO::from);
     }
@@ -350,7 +390,7 @@ public class CampaignBusiness {
 
     public Page<CampaignBrandBuddiesDTO> getCampaignsActiveBrandBuddies(Filter req, Pageable pageable) {
 
-       List<Long> listaId = affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAffiliateBrandBuddies(Pageable.ofSize(Integer.MAX_VALUE)).stream().map(AffiliateChannelCommissionCampaignDTO::getCampaignId).distinct().collect(Collectors.toList());
+        List<Long> listaId = affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAffiliateBrandBuddies(Pageable.ofSize(Integer.MAX_VALUE)).stream().map(AffiliateChannelCommissionCampaignDTO::getCampaignId).distinct().collect(Collectors.toList());
 
         //lista media brandbuddies
 //        MediaBusiness.Filter ff = new MediaBusiness.Filter();
@@ -359,6 +399,8 @@ public class CampaignBusiness {
 //        List<Long> listaId = medias.map(media -> MediaDTO.from(media)).stream().map(MediaDTO::getCampaignId).distinct().collect(Collectors.toList());
 
         if (listaId.size() > 0) {
+
+            Long affiliateId = jwtUserDetailsService.getAffiliateID();
 
             Page<Campaign> page = null;
             Filter request = new Filter();
@@ -370,11 +412,11 @@ public class CampaignBusiness {
             } else if (StringUtils.isNotBlank(req.getBbtipo()) && req.getCategoryId() == null) {
                 List<Long> listaIdPulita = new ArrayList<>();
                 listaId.forEach(campaignId -> {
-                    if (req.getBbtipo().contains("CPC") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, 84L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0) {
+                    if (req.getBbtipo().contains("CPC") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, affiliateId, 84L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0) {
                         listaIdPulita.add(campaignId);
                         log.info("CPC");
                     }
-                    if (req.getBbtipo().contains("CPL") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, 85L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0) {
+                    if (req.getBbtipo().contains("CPL") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, affiliateId, 85L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0) {
                         listaIdPulita.add(campaignId);
                         log.info("CPL");
                     }
@@ -387,10 +429,10 @@ public class CampaignBusiness {
                 List<Long> listaIdPulita = new ArrayList<>();
                 listaId.forEach(campaignId -> {
                     log.info(campaignId + " - check - " + req.getBbtipo());
-                    if (req.getBbtipo() != null && req.getBbtipo().contains("CPC") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, 84L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0) {
+                    if (req.getBbtipo() != null && req.getBbtipo().contains("CPC") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, affiliateId, 84L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0) {
                         listaIdPulita.add(campaignId);
                     }
-                    if (req.getBbtipo() != null && req.getBbtipo().contains("CPL") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, 85L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0) {
+                    if (req.getBbtipo() != null && req.getBbtipo().contains("CPL") && affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAndType(campaignId, affiliateId, 85L, Pageable.ofSize(Integer.MAX_VALUE)).getTotalElements() > 0) {
                         listaIdPulita.add(campaignId);
                     }
                 });

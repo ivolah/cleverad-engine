@@ -32,6 +32,7 @@ public class Planner {
     @Column(name = "mobile_prefix")
     private String mobilePrefix;
     private String mobile;
+    private String skype;
 
     @Column(nullable = false)
     private Boolean status = true;

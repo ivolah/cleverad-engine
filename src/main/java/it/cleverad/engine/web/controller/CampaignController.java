@@ -58,22 +58,22 @@ public class CampaignController {
 
     @GetMapping("/{affiliateId}/affiliate")
     public Page<CampaignDTO> getCampaigns(@PathVariable Long affiliateId) {
-        return business.getCampaigns(affiliateId);
+        return business.getCampaignsAffiliate(affiliateId);
     }
 
     @GetMapping("/affiliate")
-    public Page<CampaignDTO> getCampaigns(@PageableDefault(value = Integer.MAX_VALUE)Pageable pageable) {
-        return business.getCampaignsActive(jwtUserDetailsService.getAffiliateID(), pageable);
+    public Page<CampaignDTO> getCampaigns(CampaignBusiness.Filter request, @PageableDefault(value = Integer.MAX_VALUE) Pageable pageable) {
+        return business.getCampaignsActive(request, pageable);
     }
 
     @GetMapping("/affiliate/not")
-    public Page<CampaignDTO> getCampaignsNot( @PageableDefault(value = Integer.MAX_VALUE)Pageable pageable) {
-        return business.getCampaignsNot(jwtUserDetailsService.getAffiliateID(), pageable);
+    public Page<CampaignDTO> getCampaignsNot(@PageableDefault(value = Integer.MAX_VALUE) Pageable pageable) {
+        return business.getCampaignsNot(pageable);
     }
 
     @GetMapping("/brandbuddies")
-    public Page<CampaignBrandBuddiesDTO> getCampaignsBB(CampaignBusiness.Filter request, @PageableDefault(value = Integer.MAX_VALUE)Pageable pageable) {
-        return business.getCampaignsActiveBrandBuddies(request,pageable);
+    public Page<CampaignBrandBuddiesDTO> getCampaignsBB(CampaignBusiness.Filter request, @PageableDefault(value = Integer.MAX_VALUE) Pageable pageable) {
+        return business.getCampaignsActiveBrandBuddies(request, pageable);
     }
 
 //    @GetMapping("/affiliate")

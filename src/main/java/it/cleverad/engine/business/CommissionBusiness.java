@@ -209,40 +209,39 @@ public class CommissionBusiness {
             if (request.getBase() != null) {
                 predicates.add(cb.equal(root.get("base"), request.getBase()));
             }
-
             if (request.getCampaignId() != null) {
                 predicates.add(cb.equal(root.get("campaign").get("id"), request.getCampaignId()));
             }
             if (request.getDictionaryId() != null) {
                 predicates.add(cb.equal(root.get("dictionary").get("id"), request.getDictionaryId()));
             }
-
             if (request.getCreationDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("creationDate"), LocalDateTime.ofInstant(request.getCreationDateFrom(), ZoneOffset.UTC)));
             }
             if (request.getCreationDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("creationDate"), LocalDateTime.ofInstant(request.getCreationDateTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
             }
-
             if (request.getLastModificationDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("lastModificationDate"), LocalDateTime.ofInstant(request.getLastModificationDateFrom(), ZoneOffset.UTC)));
             }
             if (request.getLastModificationDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("lastModificationDate"), LocalDateTime.ofInstant(request.getLastModificationDateTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
             }
-
             if (request.getStartDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), request.getStartDateFrom()));
             }
             if (request.getStartDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), (request.getStartDateTo().plus(1, ChronoUnit.DAYS))));
             }
-
             if (request.getDueDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("dueDate"), (request.getDueDateFrom())));
             }
             if (request.getDueDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), (request.getDueDateTo().plus(1, ChronoUnit.DAYS))));
+            }
+
+            if (request.getActionId() != null) {
+                predicates.add(cb.equal(root.get("action_id"), request.getActionId()));
             }
 
 
@@ -275,6 +274,7 @@ public class CommissionBusiness {
         private Long campaignId;
         private Long dictionaryId;
 
+        private String actionId;
     }
 
     @Data
@@ -303,6 +303,8 @@ public class CommissionBusiness {
         private LocalDate startDateTo;
         private Long campaignId;
         private Long dictionaryId;
+
+        private String actionId;
 
         private Instant creationDateFrom;
         private Instant creationDateTo;

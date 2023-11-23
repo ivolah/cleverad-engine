@@ -57,7 +57,7 @@ public class PlannerController {
 
     @GetMapping("/{id}/campaign")
     @ResponseStatus(HttpStatus.OK)
-    public Page<PlannerDTO> findByIdCampaign(@PathVariable Long id) {
+    public PlannerDTO findByIdCampaign(@PathVariable Long id) {
         return business.findByIdCampaign(id);
     }
 
