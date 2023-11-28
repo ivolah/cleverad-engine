@@ -312,8 +312,8 @@ public class TransactionBusiness {
         return TransactionCPMDTO.from(cpmRepository.save(cpm));
     }
 
-    // TODO quando campbio stato devo ricalcolare i budget affilitato e campagna
-    //        nuovi tre stati  : pending, approvato e rifutato
+    //  quando campbio stato devo ricalcolare i budget affilitato e campagna
+    //  nuovi tre stati  : pending, approvato e rifutato
 
     public void updateStatus(Long id, Long dictionaryId, String tipo, Boolean approved, Long statusId) {
         if (tipo.equals("CPC")) {
@@ -600,6 +600,8 @@ public class TransactionBusiness {
                 if (dto.getAffiliateId() != null) {
                     walletID = walletRepository.findByAffiliateId(dto.getAffiliateId()).getId();
                     walletBusiness.decrement(walletID, dto.getValue());
+                } else {
+                    log.warn("WALLET NON TROVATO :: {}", dto.getAffiliateId());
                 }
 
                 //aggiorno Camapign Budget
@@ -631,6 +633,8 @@ public class TransactionBusiness {
                 if (dto.getAffiliateId() != null) {
                     walletID = walletRepository.findByAffiliateId(dto.getAffiliateId()).getId();
                     walletBusiness.decrement(walletID, dto.getValue());
+                } else {
+                    log.warn("WALLET NON TROVATO :: {}", dto.getAffiliateId());
                 }
 
                 //aggiorno Camapign Budget
@@ -1033,6 +1037,22 @@ public class TransactionBusiness {
                 predicates.add(cb.isNull(root.get("phoneVerified")));
             }
 
+            if (request.getDictionaryIdIn() != null) {
+                CriteriaBuilder.In<Long> inClause = cb.in(root.get("dictionaryId"));
+                for (Long id : request.getDictionaryIdIn()) {
+                    inClause.value(id);
+                }
+                predicates.add(inClause);
+            }
+
+            if (request.getStatusIdIn() != null) {
+                CriteriaBuilder.In<Long> inClause = cb.in(root.get("statusId"));
+                for (Long id : request.getStatusIdIn()) {
+                    inClause.value(id);
+                }
+                predicates.add(inClause);
+            }
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
@@ -1084,6 +1104,8 @@ public class TransactionBusiness {
     @ToString
     public static class Filter {
         public List<Long> notInId;
+        public List<Long> statusIdIn;
+        public List<Long> dictionaryIdIn;
         private Long id;
         private Long affiliateId;
         private Long campaignId;

@@ -65,26 +65,26 @@ public class TransactionAllBusiness {
         return page.map(TransactionStatusDTO::from);
     }
 
-    public Page<TransactionStatusDTO> searchStatusIdAndDate(Long statusId, LocalDate dataDaGestire, String tipo) {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
+    public Page<TransactionStatusDTO> searchStatusIdAndDate(Long statusId, LocalDate dataDaGestireStart, LocalDate dataDaGestireEnd, String tipo, Long affiliateId) {
         Filter request = new Filter();
-        request.setCreationDateFrom(dataDaGestire);
-        request.setCreationDateTo(dataDaGestire);
+        request.setCreationDateFrom(dataDaGestireStart);
+        request.setCreationDateTo(dataDaGestireEnd);
         request.setTipo(tipo);
         request.setStatusId(statusId);
-        Page<ViewTransactionStatus> page = repository.findAll(getSpecification(request), pageable);
+        request.setAffiliateId(affiliateId);
+        Page<ViewTransactionStatus> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(TransactionStatusDTO::from);
     }
 
-    public Page<TransactionStatusDTO> searchStatusIdAndDicIdAndDate(Long statusId, Long dicId, LocalDate dataDaGestire, String tipo) {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
+    public Page<TransactionStatusDTO> searchStatusIdAndDicIdAndDate(Long statusId, Long dicId, LocalDate dataDaGestireStart, LocalDate dataDaGestireEnd, String tipo, Long affiliateId) {
         Filter request = new Filter();
-        request.setCreationDateFrom(dataDaGestire);
-        request.setCreationDateTo(dataDaGestire);
+        request.setCreationDateFrom(dataDaGestireStart);
+        request.setCreationDateTo(dataDaGestireEnd);
         request.setTipo(tipo);
         request.setStatusId(statusId);
         request.setDictionaryId(dicId);
-        Page<ViewTransactionStatus> page = repository.findAll(getSpecification(request), pageable);
+        request.setAffiliateId(affiliateId);
+        Page<ViewTransactionStatus> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(TransactionStatusDTO::from);
     }
 
@@ -188,9 +188,33 @@ public class TransactionAllBusiness {
                 predicates.add(cb.equal(root.get("payoutPresent"), request.getPayoutPresent()));
             }
 
-            if (request.getNotInId() != null) {
+            if (request.getDictionaryIdIn() != null) {
+                CriteriaBuilder.In<Long> inClause = cb.in(root.get("dictionaryId"));
+                for (Long id : request.getDictionaryIdIn()) {
+                    inClause.value(id);
+                }
+                predicates.add(inClause);
+            }
+
+            if (request.getStatusIdIn() != null) {
+                CriteriaBuilder.In<Long> inClause = cb.in(root.get("statusId"));
+                for (Long id : request.getStatusIdIn()) {
+                    inClause.value(id);
+                }
+                predicates.add(inClause);
+            }
+
+            if (request.getNotInDictionaryId() != null) {
                 CriteriaBuilder.In<Long> inClauseNot = cb.in(root.get("dictionaryId"));
-                for (Long id : request.getNotInId()) {
+                for (Long id : request.getNotInDictionaryId()) {
+                    inClauseNot.value(id);
+                }
+                predicates.add(inClauseNot.not());
+            }
+
+            if (request.getNotInStatusId() != null) {
+                CriteriaBuilder.In<Long> inClauseNot = cb.in(root.get("statusId"));
+                for (Long id : request.getNotInStatusId()) {
                     inClauseNot.value(id);
                 }
                 predicates.add(inClauseNot.not());
@@ -209,11 +233,11 @@ public class TransactionAllBusiness {
             if (request.getForAffiliate()) {
                 // prendo gli approvati
                 // o i pending + pending // pending + approvato // pending + manuale
-                Predicate apporvato = cb.equal(root.get("statusId"),73L);
+                Predicate apporvato = cb.equal(root.get("statusId"), 73L);
                 Predicate pendingApprovato = cb.and(cb.equal(root.get("statusId"), 72L), cb.equal(root.get("dictionaryId"), 39L));
-                Predicate pendingPending =    cb.and(cb.equal(root.get("statusId"), 72L), cb.equal(root.get("dictionaryId"), 42L));
-                Predicate pendingManuale =  cb.and(cb.equal(root.get("statusId"), 72L), cb.equal(root.get("dictionaryId"), 68L));
-                predicates.add(cb.or(apporvato,pendingApprovato, pendingPending, pendingManuale ));
+                Predicate pendingPending = cb.and(cb.equal(root.get("statusId"), 72L), cb.equal(root.get("dictionaryId"), 42L));
+                Predicate pendingManuale = cb.and(cb.equal(root.get("statusId"), 72L), cb.equal(root.get("dictionaryId"), 68L));
+                predicates.add(cb.or(apporvato, pendingApprovato, pendingPending, pendingManuale));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -230,7 +254,8 @@ public class TransactionAllBusiness {
     @AllArgsConstructor
     @ToString
     public static class Filter {
-        public List<Long> notInId;
+        public List<Long> notInStatusId;
+        public List<Long> notInDictionaryId;
         public List<Long> statusIdIn;
         public List<Long> dictionaryIdIn;
         private Long id;

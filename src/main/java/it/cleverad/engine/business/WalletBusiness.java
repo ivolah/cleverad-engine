@@ -80,7 +80,6 @@ public class WalletBusiness {
         return page.map(WalletDTO::from);
     }
 
-
     // UPDATE
     public WalletDTO update(Long id, Filter filter) {
         Wallet channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Wallet", id));
@@ -96,55 +95,20 @@ public class WalletBusiness {
 
     public WalletDTO incement(Long id, Double value) {
         Wallet wallet = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Wallet", id));
-
-        log.trace("Increment {} by :: {}", id, value);
-
-        // savo storicizzazione wallet
-        WalletTransactionBusiness.BaseCreateRequest req = new WalletTransactionBusiness.BaseCreateRequest();
-        req.setWalletId(id);
-        req.setTotalBefore(wallet.getTotal());
-        req.setPayedBefore(wallet.getPayed());
-        req.setResidualBefore(wallet.getResidual());
-        req.setPayedAfter(wallet.getPayed());
-
-        Double totale = wallet.getTotal() + value;
-        Double residual = wallet.getResidual() + value;
-        //  if ((!wallet.getTotal().equals(totale)) || (!wallet.getResidual().equals(residual))) {
-        req.setTotalAfter(totale);
-        req.setResidualAfter(residual);
-        walletTransactionBusiness.create(req);
-        //  }
-
-        wallet.setResidual(residual);
-        wallet.setTotal(totale);
+        wallet.setResidual(wallet.getResidual() + value);
+        wallet.setTotal(wallet.getTotal() + value);
         return WalletDTO.from(repository.save(wallet));
     }
 
     public WalletDTO decrement(Long id, Double value) {
         Wallet wallet = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Wallet", id));
-
-        log.trace("Decrement by :: {}", value);
-
-        WalletTransactionBusiness.BaseCreateRequest req = new WalletTransactionBusiness.BaseCreateRequest();
-        req.setWalletId(id);
-        req.setTotalBefore(wallet.getTotal());
-        req.setResidualBefore(wallet.getResidual());
-        req.setPayedBefore(wallet.getPayed());
-
-        Double residual = wallet.getResidual() - value;
-        Double payed = wallet.getPayed() + value;
-        // if (!wallet.getPayed().equals(payed) || !wallet.getResidual().equals(residual)) {
-        req.setPayedAfter(payed);
-        req.setTotalAfter(wallet.getTotal() - value);
-        req.setResidualAfter(residual);
-        walletTransactionBusiness.create(req);
-        //   }
-
-        wallet.setPayed(payed);
-        wallet.setTotal(residual);
-
-
-        return WalletDTO.from(repository.saveAndFlush(wallet));
+        if (wallet.getResidual() != 0D)
+            wallet.setResidual(wallet.getResidual() - value);
+        if (wallet.getTotal() != 0D)
+            wallet.setTotal(wallet.getTotal() - value);
+        WalletDTO dto = WalletDTO.from(repository.saveAndFlush(wallet));
+        log.trace("Decrement by :: {} - {} --> ", id, value, dto.getTotal());
+        return dto;
     }
 
     /**
