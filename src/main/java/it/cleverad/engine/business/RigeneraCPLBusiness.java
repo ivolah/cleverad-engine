@@ -97,11 +97,17 @@ public class RigeneraCPLBusiness {
             for (int gg = start; gg <= end; gg++) {
                 cplBusiness.getAllDay(anno, mese, gg, affiliateId).stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
 
-                    if (cplDTO.getRefferal().length() < 6) {
-                        List<CpcDTO> ips = cpcBusiness.findByIp24HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal()).stream().collect(Collectors.toList());
-                        for (CpcDTO dto : ips)
-                            if (StringUtils.isNotBlank(dto.getRefferal())) cplDTO.setRefferal(dto.getRefferal());
-                    }
+                    // leggo sempre i cpc precedenti per trovare il click riferito alla lead
+                    cpcBusiness.findByIp24HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal())
+                            .stream()
+                            .filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal()))
+                            .forEach(cpcDTO -> {
+                                log.info("R ORIG {} --> R CPC {}", cplDTO.getRefferal(), cpcDTO.getRefferal());
+                                cplDTO.setRefferal(cpcDTO.getRefferal());
+                                cplDTO.setCpcId(cpcDTO.getId());
+                            });
+                    log.info("Refferal :: {} con ID CPC {}", cplDTO.getRefferal(), cplDTO.getCpcId());
+                    cplBusiness.setCpcId(cplDTO.getId(), cplDTO.getCpcId());
 
                     // prendo reffereal e lo leggo
                     Refferal refferal = referralService.decodificaReferral(cplDTO.getRefferal());
@@ -228,6 +234,7 @@ public class RigeneraCPLBusiness {
 
                             // setto a gestito
                             cplBusiness.setRead(cplDTO.getId());
+
                         } catch (Exception ecc) {
                             log.error("ECCEZIONE CPL :> ", ecc);
                         }
