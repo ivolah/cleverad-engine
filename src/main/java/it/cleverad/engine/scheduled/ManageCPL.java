@@ -79,15 +79,17 @@ public class ManageCPL {
         try {
             cplBusiness.getUnreadOneHourBefore().stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
 
-                if (cplDTO.getRefferal().length() < 6) {
-                    log.trace("Referral con solo Campaign Id :: {}", cplDTO.getRefferal());
-                    // cerco da cpc
-                    List<CpcDTO> ips = cpcBusiness.findByIp24HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal()).stream().collect(Collectors.toList());
-                    // prendo ultimo ip
-                    for (CpcDTO dto : ips)
-                        if (StringUtils.isNotBlank(dto.getRefferal())) cplDTO.setRefferal(dto.getRefferal());
-                    log.trace("Nuovo refferal :: {} ", cplDTO.getRefferal());
-                }
+                // leggo sempre i cpc precedenti per trovare il click riferito alla lead
+                cpcBusiness.findByIp24HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal())
+                        .stream()
+                        .filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal()))
+                        .forEach(cpcDTO -> {
+                            log.info("R ORIG {} --> R CPC {}", cplDTO.getRefferal(), cpcDTO.getRefferal());
+                            cplDTO.setRefferal(cpcDTO.getRefferal());
+                            cplDTO.setCpcId(cpcDTO.getId());
+                        });
+                log.info("Refferal :: {} con ID CPC {}", cplDTO.getRefferal(), cplDTO.getCpcId());
+                cplBusiness.setCpcId(cplDTO.getId(), cplDTO.getCpcId());
 
                 // prendo reffereal e lo leggo
                 Refferal refferal = referralService.decodificaReferral(cplDTO.getRefferal());

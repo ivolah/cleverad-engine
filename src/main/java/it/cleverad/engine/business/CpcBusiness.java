@@ -176,46 +176,41 @@ public class CpcBusiness {
     }
 
     public Page<CpcDTO> findByIp24HoursBefore(String ip, LocalDateTime dateTime, String referral) {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal")));
         Filter request = new Filter();
         request.setIp(ip);
-        //       request.setDatetimeFrom(dateTime.minusMonths(24));
         request.setDatetimeFrom(dateTime.minusHours(24));
         request.setDatetimeTo(dateTime);
         request.setRefferal(referral);
-        Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
+        Page<Cpc> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(CpcDTO::from);
     }
 
     public Page<CpcDTO> findByIpTwoHoursBefore(String ip, LocalDateTime dateTime) {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal")));
         Filter request = new Filter();
         request.setIp(ip);
         request.setDatetimeFrom(dateTime.minusHours(2));
         request.setDatetimeTo(dateTime);
-        Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
+        Page<Cpc> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         log.trace("FIND IP CPC :: {}", page.getTotalElements());
         return page.map(CpcDTO::from);
     }
 
     public Page<CpcDTO> getAllDayBefore() {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal")));
         Filter request = new Filter();
         request.setDateFrom(LocalDate.now().minusDays(1));
         request.setDateTo(LocalDate.now().minusDays(1));
-        Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
+        Page<Cpc> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         log.info("UNREAD CPC :: {}", page.getTotalElements());
         return page.map(CpcDTO::from);
     }
 
     public Page<CpcDTO> getAllByDay(LocalDate dataFrom, LocalDate datato, Boolean blacklisted, Long affiliateId) {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal")));
         Filter request = new Filter();
         request.setDateFrom(dataFrom);
         request.setDateTo(datato);
         request.setBlacklisted(blacklisted);
         request.setAffiliateid(affiliateId);
-        Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
+        Page<Cpc> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(CpcDTO::from);
     }
 

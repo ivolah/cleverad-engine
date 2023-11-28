@@ -139,6 +139,12 @@ public class CplBusiness {
         repository.save(media);
     }
 
+    public void setCpcId(Long id, Long cpcId) {
+        Cpl media = repository.findById(id).get();
+        media.setCpcId(cpcId);
+        repository.save(media);
+    }
+
     public Page<CplDTO> getUnreadOneHourBefore() {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
