@@ -68,7 +68,6 @@ public class AffiliateChannelCommissionCampaignBusiness {
             channelBusiness.getbyIdAffiliateAllActive(request.getAffiliateId()).forEach(idCanale -> {
                 AffiliateChannelCommissionCampaign map = mapper.map(request, AffiliateChannelCommissionCampaign.class);
                 map.setCreationDate(LocalDateTime.now());
-                map.setLastModificationDate(LocalDateTime.now());
 
                 Affiliate affiliate = affiliateRepository.findById(request.getAffiliateId()).orElseThrow(() -> new ElementCleveradException("Affilirte", request.getAffiliateId()));
                 map.setAffiliate(affiliate);
@@ -83,7 +82,6 @@ public class AffiliateChannelCommissionCampaignBusiness {
         } else {
             AffiliateChannelCommissionCampaign map = mapper.map(request, AffiliateChannelCommissionCampaign.class);
             map.setCreationDate(LocalDateTime.now());
-            map.setLastModificationDate(LocalDateTime.now());
 
             Affiliate affiliate = affiliateRepository.findById(request.getAffiliateId()).orElseThrow(() -> new ElementCleveradException("Affilirte", request.getAffiliateId()));
             map.setAffiliate(affiliate);
@@ -179,11 +177,12 @@ public class AffiliateChannelCommissionCampaignBusiness {
 //        return page.map(AffiliateChannelCommissionCampaignDTO::from);
 //    }
 
-    public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignIdAndType(Long campaignId, Long typeDictId, Pageable pageableRequest) {
+    public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignIdAndType(Long campaignId, Long affiliateId, Long typeDictId, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Filter filter = new Filter();
         filter.setCampaignId(campaignId);
         filter.setCommissionDicId(typeDictId);
+        filter.setAffiliateId(affiliateId);
         Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
         return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
@@ -306,7 +305,7 @@ public class AffiliateChannelCommissionCampaignBusiness {
         private Long affiliateId;
         private Long channelId;
         private Long commissionId;
-
+        private String actionId;
     }
 
     @Data
@@ -321,6 +320,7 @@ public class AffiliateChannelCommissionCampaignBusiness {
         private Boolean notzero;
         private Boolean bb;
         private Long commissionDicId;
+        private String actionId;
     }
 
 }

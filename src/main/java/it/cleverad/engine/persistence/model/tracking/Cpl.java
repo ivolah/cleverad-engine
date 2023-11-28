@@ -50,6 +50,6 @@ public class Cpl {
     private Long cpcId;
 
     @Column(name = "action_id")
-    private Long actionId;
+    private String actionId;
 
 }

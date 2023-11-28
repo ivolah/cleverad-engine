@@ -18,10 +18,6 @@ public class TransactionController {
 
     @Autowired
     private TransactionBusiness business;
-    @Autowired
-    private TransazioniCPCBusiness transazioniCPCBusiness;
-    @Autowired
-    private TransazioniCPLBusiness transazioniCPLBusiness;
 
     @Autowired
     private TransactionAllBusiness allBusiness;
@@ -55,20 +51,6 @@ public class TransactionController {
     public TransactionCPMDTO createcpm(@ModelAttribute TransactionBusiness.BaseCreateRequest request) {
         return business.createCpm(request);
     }
-
-//    @Operation(summary = "Lists the Transactions", description = "Lists the Transactions, searched and paginated")
-//    @GetMapping
-//    @ResponseStatus(HttpStatus.ACCEPTED)
-//    public Page<TransactionDTO> search(TransactionBusiness.Filter request, Pageable pageable) {
-//        return business.search(request, pageable);
-//    }
-
-//    @Operation(summary = "Update the Transaction", description = "Update the specific Transaction")
-//    @PatchMapping(path = "/{id}")
-//    @ResponseStatus(HttpStatus.ACCEPTED)
-//    public TransactionDTO update(@PathVariable Long id, @RequestBody TransactionBusiness.Filter request) {
-//        return business.update(id, request);
-//    }
 
     // GET BY ID
 
@@ -233,17 +215,5 @@ public class TransactionController {
     /**
      * ============================================================================================================
      **/
-
-    @PostMapping("/manage/cpl")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public void manageCPL(@ModelAttribute TransazioniCPLBusiness.FilterUpdate request) {
-        transazioniCPLBusiness.rigenera(Integer.parseInt(request.getYear()), Integer.parseInt(request.getMonth()), Integer.parseInt(request.getDay()));
-    }
-
-    @PostMapping("/manage/cpc")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public void manageCPC(@ModelAttribute TransazioniCPCBusiness.FilterUpdate request) {
-        transazioniCPCBusiness.rigenera(Integer.parseInt(request.getYear()), Integer.parseInt(request.getMonth()), Integer.parseInt(request.getDay()));
-    }
 
 }

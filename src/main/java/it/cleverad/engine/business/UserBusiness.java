@@ -8,7 +8,6 @@ import it.cleverad.engine.persistence.repository.service.UserRepository;
 import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.web.dto.AffiliateDTO;
 import it.cleverad.engine.web.dto.UserDTO;
-import it.cleverad.engine.web.exception.ApiError;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -24,7 +23,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -123,6 +121,38 @@ public class UserBusiness {
         }
     }
 
+    public UserDTO findByPassword(String passw) {
+        try {
+            if (StringUtils.isNotBlank(passw.trim())) {
+                Filter request = new Filter();
+                request.setPassword(passw);
+                Page<User> page = repository.findAll(getSpecification(request), PageRequest.of(0, 1));
+                if (page.getTotalElements() > 0) {
+                    UserDTO dto = UserDTO.from(page.stream().findFirst().get());
+
+                    if (dto.getRoleId() == 3) {
+                        dto.setRole("Admin");
+                    } else {
+                        dto.setRole("User");
+                        AffiliateDTO affiliate = affiliateBusiness.findById(dto.getAffiliateId());
+                        dto.setAffiliateName(affiliate.getName());
+                    }
+                    return dto;
+                } else {
+                    log.warn("No username found :: {}", passw);
+                    return null;
+                }
+            } else {
+                log.warn("Passw:: {}", passw);
+                return null;
+            }
+        } catch (Exception e) {
+            log.error("Errore in findByPassword", e);
+            return null;
+        }
+    }
+
+
     // DELETE BY ID
     public void delete(Long id) {
         try {
@@ -136,7 +166,7 @@ public class UserBusiness {
 
     public void deleteByIdAffiliate(Long affiliateId) {
         try {
-            Page<UserDTO> page = this.searchByAffiliateID(affiliateId, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id"))));
+            Page<UserDTO> page = this.searchByAffiliateID(affiliateId, PageRequest.of(0, Integer.MAX_VALUE));
             page.stream().forEach(userDTO -> {
                 repository.deleteById(userDTO.getId());
             });
@@ -146,7 +176,6 @@ public class UserBusiness {
             throw new PostgresDeleteCleveradException(ee);
         }
     }
-
 
     // SEARCH PAGINATED
     public Page<UserDTO> search(Filter request, Pageable pageableRequest) {
@@ -183,7 +212,7 @@ public class UserBusiness {
     }
 
     public UserDTO resetPasswordUsername(String username, String password) throws Exception {
-        UserDTO u = this.findByUsername(username);
+        UserDTO u = this.findByPassword(username);
         User wser = repository.findById(u.getId()).orElseThrow(() -> new ElementCleveradException("User", u.getId()));
         wser.setPassword(bcryptEncoder.encode(password));
         return UserDTO.from(repository.save(wser));
@@ -195,10 +224,10 @@ public class UserBusiness {
             UserDTO u = this.findByUsername(username);
 
             String uuid = UUID.randomUUID().toString();
-            log.info("RESET PASSWORD sostituisco nome utenza  " + username + " in uuid " + uuid);
+            log.info("RESET PASSWORD sostituisco nome utenza  " + username + "(" + u.getId() + ") in uuid " + uuid);
 
             User wser = repository.findById(u.getId()).orElseThrow(() -> new ElementCleveradException("User", u.getId()));
-            wser.setUsername(uuid);
+            wser.setPassword(uuid);
             repository.save(wser);
 
             if (u != null) {
@@ -211,12 +240,12 @@ public class UserBusiness {
                 mailRequest.setAffiliateId(u.getAffiliateId());
                 mailRequest.setUserId(u.getId());
                 mailRequest.setEmail(u.getEmail());
+
                 mailService.invio(mailRequest);
 
             }
             return null;
-        }
-        else {
+        } else {
             log.warn("Username empty or null!");
             throw new Exception();
         }
@@ -275,6 +304,9 @@ public class UserBusiness {
             }
             if (request.getUsername() != null) {
                 predicates.add(cb.equal(root.get("username"), request.getUsername()));
+            }
+            if (request.getPassword() != null) {
+                predicates.add(cb.equal(root.get("password"), request.getPassword()));
             }
             if (request.getName() != null) {
                 predicates.add(cb.equal(root.get("name"), request.getName()));
@@ -343,6 +375,7 @@ public class UserBusiness {
         private Instant lastLoginFrom;
         private Instant lastLoginTo;
         private String uuid;
+        private String password;
     }
 
     @Data

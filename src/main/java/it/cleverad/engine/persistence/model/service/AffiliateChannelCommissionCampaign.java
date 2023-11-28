@@ -22,8 +22,6 @@ public class AffiliateChannelCommissionCampaign {
 
     @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
-    @Column(name = "last_modification_date")
-    private LocalDateTime lastModificationDate = LocalDateTime.now();
 
     @ManyToOne
     @JoinColumn(name = "affiliate_id")
@@ -40,5 +38,8 @@ public class AffiliateChannelCommissionCampaign {
     @ManyToOne
     @JoinColumn(name = "campaign_id")
     private Campaign campaign;
+
+    @Column(name = "action_id")
+    private String actionId;
 
 }

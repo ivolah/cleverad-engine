@@ -138,6 +138,7 @@ public class DictionaryBusiness {
     public Page<DictionaryDTO> getAffiliateStatusTypes() {
         return this.getStatusTypes("AFFILIATESTATUS");
     }
+
     public Page<DictionaryDTO> getAffiliateCampaignRequestStatusTypes() {
         return this.getStatusTypes("AFFILIATEREQUESTSTATUS");
     }

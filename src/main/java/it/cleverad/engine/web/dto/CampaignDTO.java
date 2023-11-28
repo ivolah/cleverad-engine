@@ -164,8 +164,7 @@ public class CampaignDTO {
                 dto.setCommissionId(acccc.getCommission().getId());
                 dto.setCommissionName(acccc.getCommission().getName());
                 dto.setCreationDate(acccc.getCreationDate());
-                dto.setLastModificationDate(acccc.getLastModificationDate());
-                return dto;
+                 return dto;
             }).collect(Collectors.toList());
         }
 

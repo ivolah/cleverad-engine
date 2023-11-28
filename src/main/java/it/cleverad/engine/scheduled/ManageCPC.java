@@ -18,6 +18,7 @@ import it.cleverad.engine.web.dto.TransactionCPCDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.decimal4j.util.DoubleRounder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.Async;
@@ -70,7 +71,7 @@ public class ManageCPC {
     public void gestiusciTransazioni() {
 
         // Setto a  Blacklisted i click mulipli
-        List<ClickMultipli> listaDaDisabilitare = cpcBusiness.getListaClickMultipliDaDisabilitare(LocalDate.now());
+        List<ClickMultipli> listaDaDisabilitare = cpcBusiness.getListaClickMultipliDaDisabilitare(LocalDate.now(), LocalDate.now());
         // giro settaggio click multipli
         listaDaDisabilitare.stream().forEach(clickMultipli -> {
             // log.info("Disabilito {} :: {}", clickMultipli.getId(), clickMultipli.getTotale());
@@ -375,7 +376,7 @@ public class ManageCPC {
                         }
 
                         // calcolo valore
-                        transaction.setValue(commVal * numer);
+                        transaction.setValue(DoubleRounder.round(commVal * numer, 2));
                         transaction.setClickNumber(Long.valueOf(numer));
 
                         transaction.setAgent("");

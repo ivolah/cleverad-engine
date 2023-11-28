@@ -3,12 +3,17 @@ package it.cleverad.engine.scheduled;
 import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.CampaignBudget;
+import it.cleverad.engine.persistence.model.service.Commission;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.model.tracking.Cpl;
+import it.cleverad.engine.persistence.repository.service.CommissionRepository;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.persistence.repository.tracking.CplRepository;
 import it.cleverad.engine.service.ReferralService;
-import it.cleverad.engine.web.dto.*;
+import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
+import it.cleverad.engine.web.dto.BudgetDTO;
+import it.cleverad.engine.web.dto.CampaignDTO;
+import it.cleverad.engine.web.dto.TransactionCPLDTO;
 import it.cleverad.engine.web.dto.tracking.CpcDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +32,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class ManageCPL {
-
+    @Autowired
+    CampaignBudgetBusiness campaignBudgetBusiness;
+    @Autowired
+    private CommissionRepository commissionRepository;
     @Autowired
     private CplBusiness cplBusiness;
     @Autowired
@@ -50,8 +58,6 @@ public class ManageCPL {
     private CpcBusiness cpcBusiness;
     @Autowired
     private CplRepository cplRepository;
-    @Autowired
-    CampaignBudgetBusiness campaignBudgetBusiness;
 
     /**
      * ============================================================================================================
@@ -147,21 +153,33 @@ public class ManageCPL {
 
                         // gesione commisione
                         Double commVal = 0D;
-
+                        Long commissionId = 0L;
                         AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
-                        req.setAffiliateId(refferal.getAffiliateId());
-                        req.setChannelId(refferal.getChannelId());
-                        req.setCampaignId(refferal.getCampaignId());
-                        req.setCommissionDicId(11L);
-                        AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
-
-                        if (acccFirst != null) {
-                            commVal = acccFirst.getCommissionValue();
-                            transaction.setCommissionId(acccFirst.getCommissionId());
+                        if (StringUtils.isNotBlank(cplDTO.getActionId())) {
+                            // con action Id settanto in cpl vado a cercare la commissione associata
+                            req.setAffiliateId(refferal.getAffiliateId());
+                            req.setChannelId(refferal.getChannelId());
+                            req.setCampaignId(refferal.getCampaignId());
+                            req.setActionId(cplDTO.getActionId().trim());
+                            AffiliateChannelCommissionCampaignDTO accc = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
+                            Commission cm = commissionRepository.findById(accc.getCommissionId()).get();
+                            commVal = cm.getValue();
+                            commissionId = cm.getId();
+                            log.warn("Commissione >{}< trovata da action ID >{}<", cm.getId(), cplDTO.getActionId());
                         } else {
-                            log.warn("Non trovato Commission di tipo 10 per campagna {}, setto default", refferal.getCampaignId());
-                            transaction.setCommissionId(0L);
+                            // non è settato l'actionId allora faccio il solito giro
+                            req.setAffiliateId(refferal.getAffiliateId());
+                            req.setChannelId(refferal.getChannelId());
+                            req.setCampaignId(refferal.getCampaignId());
+                            req.setCommissionDicId(11L);
+                            AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
+                            if (acccFirst != null) {
+                                commVal = acccFirst.getCommissionValue();
+                                commissionId = acccFirst.getCommissionId();
+                            } else
+                                log.warn("Non trovato Commission di tipo 10 per campagna {}, setto default", refferal.getCampaignId());
                         }
+                        transaction.setCommissionId(commissionId);
 
                         Double totale = commVal * 1;
                         transaction.setValue(DoubleRounder.round(totale, 2));

@@ -240,11 +240,6 @@ public class CommissionBusiness {
                 predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), (request.getDueDateTo().plus(1, ChronoUnit.DAYS))));
             }
 
-            if (request.getActionId() != null) {
-                predicates.add(cb.equal(root.get("action_id"), request.getActionId()));
-            }
-
-
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 
             return completePredicate;
@@ -273,8 +268,6 @@ public class CommissionBusiness {
 
         private Long campaignId;
         private Long dictionaryId;
-
-        private String actionId;
     }
 
     @Data
@@ -303,8 +296,6 @@ public class CommissionBusiness {
         private LocalDate startDateTo;
         private Long campaignId;
         private Long dictionaryId;
-
-        private String actionId;
 
         private Instant creationDateFrom;
         private Instant creationDateTo;

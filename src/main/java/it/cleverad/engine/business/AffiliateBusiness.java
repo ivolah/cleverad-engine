@@ -131,22 +131,19 @@ public class AffiliateBusiness {
 
     // UPDATE
     public AffiliateDTO update(Long id, Filter filter) {
-        log.info("filter 1 ");
-        Long finalId = id;
-        Affiliate affiliate = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Affiliate", finalId));
+
+        Affiliate affiliate = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Affiliate", id));
+        filter.setId(id);
         mapper.map(filter, affiliate);
-        log.info("filter 2 " + id);
+        log.info("filter  " + id);
 
-        Affiliate mappedEntity = mapper.map(affiliate, Affiliate.class);
-
-        log.info("filter 3 " + id);
-
-        mappedEntity.setLastModificationDate(LocalDateTime.now());
+        affiliate.setLastModificationDate(LocalDateTime.now());
         log.info("filter 3.... " + id);
-        mappedEntity.setDictionaryStatusType(dictionaryRepository.findById(filter.statusId).orElseThrow(() -> new ElementCleveradException("Status", filter.statusId)));
+        affiliate.setDictionaryStatusType(dictionaryRepository.findById(filter.statusId).orElseThrow(() -> new ElementCleveradException("Status", filter.statusId)));
         log.info("filter 4 " + id);
-        mappedEntity.setDictionaryCompanyType(dictionaryRepository.findById(filter.companytypeId).orElseThrow(() -> new ElementCleveradException("Company Type", filter.companytypeId)));
+        affiliate.setDictionaryCompanyType(dictionaryRepository.findById(filter.companytypeId).orElseThrow(() -> new ElementCleveradException("Company Type", filter.companytypeId)));
         log.info("filter 5 " + id);
+        AffiliateDTO dto =  AffiliateDTO.from(repository.save(affiliate));
 
         MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
         Long statusID = filter.statusId;
@@ -164,8 +161,7 @@ public class AffiliateBusiness {
             mailRequest.setAffiliateId(id);
             mailService.invio(mailRequest);
         }
-
-        log.info("gg " + id);
+        log.info("Concluso ::  " + id);
 
 //        Boolean status = affiliate.getStatus();
 //        if (!status && filter.status) {
@@ -180,7 +176,7 @@ public class AffiliateBusiness {
 //            mailService.invio(mailRequest);
 //        }
 
-        return AffiliateDTO.from(repository.save(mappedEntity));
+        return dto;
     }
 
     //  GET TIPI

@@ -36,13 +36,13 @@ public class CplDTO {
     private Boolean multiple;
 
     private Long cpcId;
-    private Long actionId;
+    private String actionId;
 
     public CplDTO(long id, String refferal, String ip, String agent, String data, LocalDateTime date,
-                  Boolean read, String info, String country, Long mediaId, Long campaignId, Long affiliateId, Long channelId, Long targetId,
-                  Boolean blacklisted,Boolean multiple,
-                  Long cpcId, Long actionId
-                  ) {
+                  Boolean read, String info, String country,
+                  Long mediaId, Long campaignId, Long affiliateId, Long channelId, Long targetId,
+                  Boolean blacklisted, Boolean multiple,
+                  Long cpcId, String actionId) {
         this.id = id;
         this.refferal = refferal;
         this.ip = ip;
