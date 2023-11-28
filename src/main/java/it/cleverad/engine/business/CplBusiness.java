@@ -1,6 +1,7 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.Channel;
@@ -9,7 +10,6 @@ import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.ChannelRepository;
 import it.cleverad.engine.persistence.repository.tracking.CplRepository;
-import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.tracking.CplDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -173,11 +174,13 @@ public class CplBusiness {
         return page.map(CplDTO::from);
     }
 
-    public Page<CplDTO> getAllDay(Integer anno, Integer mese, Integer giorno) {
+    public Page<CplDTO> getAllDay(Integer anno, Integer mese, Integer giorno, Long affilaiteId) {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setDateFrom(LocalDate.of(anno, mese, giorno));
         request.setDateTo(LocalDate.of(anno, mese, giorno));
+        if (affilaiteId != null)
+            request.setAffiliateid(affilaiteId);
         Page<Cpl> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CplDTO::from);
     }
@@ -229,7 +232,7 @@ public class CplBusiness {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("date"), request.getDateFrom().atStartOfDay()));
             }
             if (request.getDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("date"), request.getDateTo().plus(1, ChronoUnit.DAYS).atStartOfDay()));
+                predicates.add(cb.lessThanOrEqualTo(root.get("date"), LocalDateTime.of(request.getDateTo(), LocalTime.MAX)));
             }
 
             if (request.getDatetimeFrom() != null) {

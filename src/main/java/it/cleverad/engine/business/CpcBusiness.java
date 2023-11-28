@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -207,18 +208,19 @@ public class CpcBusiness {
         return page.map(CpcDTO::from);
     }
 
-    public Page<CpcDTO> getAllByDay(LocalDate data, Boolean blacklisted) {
+    public Page<CpcDTO> getAllByDay(LocalDate dataFrom, LocalDate datato, Boolean blacklisted, Long affiliateId) {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal")));
         Filter request = new Filter();
-        request.setDateFrom(data);
-        request.setDateTo(data);
+        request.setDateFrom(dataFrom);
+        request.setDateTo(datato);
         request.setBlacklisted(blacklisted);
+        request.setAffiliateid(affiliateId);
         Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CpcDTO::from);
     }
 
-    public List<ClickMultipli> getListaClickMultipliDaDisabilitare(LocalDate date) {
-        List<ClickMultipli> lista = repository.getListaClickMultipliDaDisabilitare(date, date.plusDays(1));
+    public List<ClickMultipli> getListaClickMultipliDaDisabilitare(LocalDate dateFrom, LocalDate dateTo) {
+        List<ClickMultipli> lista = repository.getListaClickMultipliDaDisabilitare(dateFrom, dateTo.plusDays(1));
         return lista;
     }
 
@@ -252,7 +254,7 @@ public class CpcBusiness {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("date"), request.getDateFrom().atStartOfDay()));
             }
             if (request.getDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("date"), request.getDateTo().plusDays(1).atStartOfDay()));
+                predicates.add(cb.lessThanOrEqualTo(root.get("date"), LocalDateTime.of(request.getDateTo(), LocalTime.MAX)));
             }
 
             if (request.getDatetimeFrom() != null) {
