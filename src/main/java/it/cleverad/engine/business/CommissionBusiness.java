@@ -92,8 +92,7 @@ public class CommissionBusiness {
     }
 
     public Page<CommissionDTO> search(Filter request) {
-        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
-        Page<Commission> page = repository.findAll(getSpecification(request), pageable);
+        Page<Commission> page = repository.findAll(getSpecification(request), PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id"))));
         return page.map(CommissionDTO::from);
     }
 
@@ -146,38 +145,33 @@ public class CommissionBusiness {
 
     // GET CCOMMISION BY CAMPAIGN
     public Page<CommissionDTO> getByIdCampaign(Long id) {
-        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setCampaignId(id);
-        Page<Commission> page = repository.findAll(getSpecification(request), pageable);
+        Page<Commission> page = repository.findAll(getSpecification(request), PageRequest.of(0, 100, Sort.by(Sort.Order.desc("id"))));
         return page.map(CommissionDTO::from);
     }
 
     public Commission getByIdCampaignDictionary(Long idC, Long idD) {
-        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setCampaignId(idC);
         request.setDictionaryId(idD);
-        Page<Commission> page = repository.findAll(getSpecification(request), pageable);
+        Page<Commission> page = repository.findAll(getSpecification(request), PageRequest.of(0, 100, Sort.by(Sort.Order.desc("id"))));
         return page.stream().findFirst().orElse(null);
     }
 
     public Page<CommissionDTO> getByIdCampaignAttive(Long id) {
-        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setCampaignId(id);
         request.setStatus(true);
-        Page<Commission> page = repository.findAll(getSpecification(request), pageable);
+        Page<Commission> page = repository.findAll(getSpecification(request), PageRequest.of(0, 100, Sort.by(Sort.Order.desc("id"))));
         return page.map(CommissionDTO::from);
     }
 
-
     public List<CommissionDTO> getCommissionToDisable() {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
-        request.setDueDateTo(LocalDate.now().plusDays(1));
+        request.setDisableDueDateTo(LocalDate.now());
         request.setStatus(true);
-        Page<Commission> page = repository.findAll(getSpecification(request), pageable);
+        Page<Commission> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(CommissionDTO::from).toList();
     }
 
@@ -238,6 +232,10 @@ public class CommissionBusiness {
             }
             if (request.getDueDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), (request.getDueDateTo().plus(1, ChronoUnit.DAYS))));
+            }
+
+            if (request.getDisableDueDateTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), request.getDisableDueDateTo()));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -301,6 +299,9 @@ public class CommissionBusiness {
         private Instant creationDateTo;
         private Instant lastModificationDateFrom;
         private Instant lastModificationDateTo;
+
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate disableDueDateTo;
     }
 
 }

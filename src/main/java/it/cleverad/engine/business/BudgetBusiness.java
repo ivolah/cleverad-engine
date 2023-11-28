@@ -44,8 +44,6 @@ public class BudgetBusiness {
     @Autowired
     private CampaignRepository campaignRepository;
     @Autowired
-    private AffiliateBusiness affiliateBusiness;
-    @Autowired
     private BudgetRepository repository;
     @Autowired
     private Mapper mapper;
@@ -84,7 +82,7 @@ public class BudgetBusiness {
 
     // SEARCH PAGINATED
     public Page<BudgetDTO> search(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Page<Budget> page = repository.findAll(getSpecification(request), pageable);
         return page.map(BudgetDTO::from);
     }
@@ -133,35 +131,33 @@ public class BudgetBusiness {
     }
 
     public Page<BudgetDTO> getByIdCampaign(Long id) {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setCampaignId(id);
-        Page<Budget> page = repository.findAll(getSpecification(request), pageable);
+        Page<Budget> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(BudgetDTO::from);
     }
 
     public Page<BudgetDTO> getByIdCampaignAndIdAffiliate(Long idCampaign, Long idAffilaite) {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
         request.setCampaignId(idCampaign);
         request.setAffiliateId(idAffilaite);
         request.setStatus(true);
-        Page<Budget> page = repository.findAll(getSpecification(request), pageable);
+        Page<Budget> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(BudgetDTO::from);
     }
 
     public List<BudgetDTO> getBudgetToDisable() {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
-        request.setDueDateTo(LocalDate.now().plusDays(1));
+        request.setDisableDueDateTo(LocalDate.now());
         request.setStatus(true);
-        Page<Budget> page = repository.findAll(getSpecification(request), pageable);
+        Page<Budget> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(BudgetDTO::from).toList();
     }
 
     /**
      * ============================================================================================================
      **/
+
     private Specification<Budget> getSpecification(Filter request) {
         return (root, query, cb) -> {
             Predicate completePredicate = null;
@@ -205,6 +201,10 @@ public class BudgetBusiness {
             }
             if (request.getDueDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), (request.getDueDateTo().plus(1, ChronoUnit.DAYS))));
+            }
+
+            if (request.getDisableDueDateTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), request.getDisableDueDateTo()));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -262,6 +262,10 @@ public class BudgetBusiness {
         private LocalDate startDateTo;
         private Integer cap;
         private Integer initialCap;
+
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate disableDueDateTo;
+
     }
 
 }

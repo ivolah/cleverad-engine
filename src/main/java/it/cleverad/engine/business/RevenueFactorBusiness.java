@@ -142,11 +142,10 @@ public class RevenueFactorBusiness {
     }
 
     public List<RevenueFactorDTO> getRevenueToDisable() {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
-        request.setDueDateTo(LocalDate.now().plusDays(1));
+        request.setDisableDueDateTo(LocalDate.now());
         request.setStatus(true);
-        Page<RevenueFactor> page = repository.findAll(getSpecification(request), pageable);
+        Page<RevenueFactor> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(RevenueFactorDTO::from).toList();
     }
 
@@ -198,6 +197,10 @@ public class RevenueFactorBusiness {
             }
             if (request.getDueDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), (request.getDueDateTo().plus(1, ChronoUnit.DAYS))));
+            }
+
+            if (request.getDisableDueDateTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), request.getDisableDueDateTo()));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -253,6 +256,9 @@ public class RevenueFactorBusiness {
         private Instant creationDateTo;
         private Instant lastModificationDateFrom;
         private Instant lastModificationDateTo;
+
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate disableDueDateTo;
     }
 
 }

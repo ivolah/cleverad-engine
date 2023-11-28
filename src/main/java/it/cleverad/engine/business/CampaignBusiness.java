@@ -373,11 +373,10 @@ public class CampaignBusiness {
     }
 
     public List<CampaignDTO> getCampaignsToDisable() {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("name")));
         Filter request = new Filter();
         request.setStatus(true);
-        request.setEndDateTo(LocalDate.now().plusDays(1));
-        Page<Campaign> page = repository.findAll(getSpecification(request), pageable);
+        request.setDisableDueDateTo(LocalDate.now());
+        Page<Campaign> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(CampaignDTO::from).toList();
     }
 
@@ -521,6 +520,10 @@ public class CampaignBusiness {
                 predicates.add(inClause.value(request.getCategoryId()));
             }
 
+            if (request.getDisableDueDateTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), request.getDisableDueDateTo()));
+            }
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 
             return completePredicate;
@@ -600,6 +603,9 @@ public class CampaignBusiness {
         private Boolean checkPhoneNumber;
         private String bbtipo;
         private Long categoryId;
+
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate disableDueDateTo;
     }
 
 }
