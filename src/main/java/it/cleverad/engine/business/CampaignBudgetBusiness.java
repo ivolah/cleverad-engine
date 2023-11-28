@@ -132,8 +132,7 @@ public class CampaignBudgetBusiness {
         request.setCampaignId(campaignId);
         request.setStartDateFrom(data.toLocalDate());
         request.setEndDateTo(data.toLocalDate());
-        CampaignBudget cb = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE)).stream().findFirst().orElse(null);
-        return cb;
+        return repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE)).stream().findFirst().orElse(null);
     }
 
     public CampaignBudgetDTO incrementoCapErogato(Long id, Integer cap) {
@@ -180,21 +179,18 @@ public class CampaignBudgetBusiness {
             if (request.getId() != null) {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
-
             if (request.getAdvertiserId() != null) {
                 predicates.add(cb.equal(root.get("advertiser").get("id"), request.getAdvertiserId()));
             }
             if (request.getCampaignId() != null) {
                 predicates.add(cb.equal(root.get("campaign").get("id"), request.getCampaignId()));
             }
-
             if (request.getStartDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), request.getStartDateFrom()));
             }
             if (request.getStartDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), request.getStartDateTo()));
             }
-
             if (request.getEndDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("endDate"), request.getEndDateFrom()));
             }
@@ -242,14 +238,11 @@ public class CampaignBudgetBusiness {
     @AllArgsConstructor
     public static class Filter {
         private Long id;
-
         private Long tipologiaId;
         private Long advertiserId;
         private Long campaignId;
         private Boolean status;
-
         private Long fatturaId;
-
         private Integer capFatturabile;
         private Integer capErogato;
         private Double budgetErogato;
@@ -257,7 +250,6 @@ public class CampaignBudgetBusiness {
         private Double scarto;
         private String materiali;
         private String note;
-
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate startDateFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -267,7 +259,6 @@ public class CampaignBudgetBusiness {
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate endDateTo;
     }
-
 
     @Data
     @NoArgsConstructor

@@ -524,6 +524,10 @@ public class CampaignBusiness {
                 predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), request.getDisableDueDateTo()));
             }
 
+            if (request.getAdvertiserId() != null) {
+                predicates.add(cb.equal(root.get("advertiser").get("id"), request.getAdvertiserId()));
+            }
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 
             return completePredicate;
@@ -606,6 +610,8 @@ public class CampaignBusiness {
 
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate disableDueDateTo;
+
+        private Long advertiserId;
     }
 
 }
