@@ -72,7 +72,8 @@ public class CategoryBusiness {
 
     // SEARCH PAGINATED
     public Page<CategoryDTO> search(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("name")));
+        log.info("ORID " + pageable.getSort());
         Page<Category> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CategoryDTO::from);
     }
@@ -80,17 +81,11 @@ public class CategoryBusiness {
     // UPDATE
     public CategoryDTO update(Long id, Filter filter) {
         Category category = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Category", id));
-        CategoryDTO categoryDTO = CategoryDTO.from(category);
-
-        mapper.map(filter, categoryDTO);
-
-        Category mappedEntity = mapper.map(category, Category.class);
-        mappedEntity.setLastModificationDate(LocalDateTime.now());
-        mapper.map(categoryDTO, mappedEntity);
-
-        return CategoryDTO.from(repository.save(mappedEntity));
+        filter.setId(id);
+        mapper.map(filter, category);
+        category.setLastModificationDate(LocalDateTime.now());
+        return CategoryDTO.from(repository.save(category));
     }
-
 
     /**
      * ============================================================================================================

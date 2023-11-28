@@ -92,7 +92,7 @@ public class RigeneraWalletBusiness {
         }
     }
 
-    public void decrementaPayout(Long affiliateId){
+    public void decrementaPayout(Long affiliateId) {
 
         // 1 - cerco eventuali Payout
         Page<PayoutDTO> payouts = payoutBusiness.findByIdAffilaite(affiliateId, Pageable.ofSize(Integer.MAX_VALUE));

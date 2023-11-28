@@ -88,7 +88,7 @@ public class ManageCPL {
                             cplDTO.setRefferal(cpcDTO.getRefferal());
                             cplDTO.setCpcId(cpcDTO.getId());
                         });
-                log.info("Refferal :: {} con ID CPC {}", cplDTO.getRefferal(), cplDTO.getCpcId());
+                log.trace("Refferal :: {} con ID CPC {}", cplDTO.getRefferal(), cplDTO.getCpcId());
                 cplBusiness.setCpcId(cplDTO.getId(), cplDTO.getCpcId());
 
                 // prendo reffereal e lo leggo

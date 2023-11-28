@@ -156,26 +156,12 @@ public class AffiliateChannelCommissionCampaignBusiness {
     public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignIdAffiliateBrandBuddies(Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Filter filter = new Filter();
-        if (!jwtUserDetailsService.isAdmin())
+        if (Boolean.FALSE.equals(jwtUserDetailsService.isAdmin()))
             filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         filter.setBb(true);
         Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
         return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
-
-//    public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignIdDistinctAffiliate(Long campaignId, Pageable pageableRequest) {
-//        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-//        Filter filter = new Filter();
-//        filter.setCampaignId(campaignId);
-//        Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
-//
-//        Map<Long, String> list = new HashMap<>();
-//        page.stream().forEach(affiliateChannelCommissionCampaign -> list.put(affiliateChannelCommissionCampaign.getAffiliate().getId(), affiliateChannelCommissionCampaign.getAffiliate().getName()));
-//
-//        page.stream().filter(affiliateChannelCommissionCampaign -> affiliateChannelCommissionCampaign.getAffiliate().getId())
-//
-//        return page.map(AffiliateChannelCommissionCampaignDTO::from);
-//    }
 
     public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignIdAndType(Long campaignId, Long affiliateId, Long typeDictId, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
@@ -191,7 +177,7 @@ public class AffiliateChannelCommissionCampaignBusiness {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Filter filter = new Filter();
         filter.setCampaignId(campaignId);
-        if (!jwtUserDetailsService.isAdmin())
+        if (Boolean.FALSE.equals(jwtUserDetailsService.isAdmin()))
             filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         filter.setNotzero(true);
         Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
@@ -202,7 +188,7 @@ public class AffiliateChannelCommissionCampaignBusiness {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Filter filter = new Filter();
         filter.setCampaignId(campaignId);
-        if (!jwtUserDetailsService.isAdmin())
+        if (Boolean.FALSE.equals(jwtUserDetailsService.isAdmin()))
             filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
 
         Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
