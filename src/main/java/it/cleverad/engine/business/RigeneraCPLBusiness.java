@@ -91,7 +91,7 @@ public class RigeneraCPLBusiness {
             for (TransactionStatusDTO tcpl : ls) {
                 log.trace("CANCELLO PER RIGENERA CP :: {} : {} :: {}", tcpl.getId(), tcpl.getValue(), tcpl.getDateTime());
                 transactionBusiness.delete(tcpl.getId(), "CPL");
-                Thread.sleep(100L);
+                Thread.sleep(50L);
             }
 
             for (int gg = start; gg <= end; gg++) {
