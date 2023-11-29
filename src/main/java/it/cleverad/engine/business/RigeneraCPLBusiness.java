@@ -8,7 +8,6 @@ import it.cleverad.engine.persistence.repository.service.CommissionRepository;
 import it.cleverad.engine.persistence.repository.tracking.CplRepository;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.*;
-import it.cleverad.engine.web.dto.tracking.CpcDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -61,15 +59,12 @@ public class RigeneraCPLBusiness {
     public void rigenera(Integer anno, Integer mese, Integer giorno, Long affiliateId) {
         try {
 
-            Integer start = giorno;
-            Integer end = giorno;
-            if (giorno == null) {
-                start = 1;
-                end = LocalDate.of(anno, mese, 1).lengthOfMonth();
-            }
+            int start = (giorno == null) ? 1 : giorno;
+            int end = (giorno == null) ? LocalDate.of(anno, mese, 1).lengthOfMonth() : giorno;
 
             LocalDate dataDaGestireStart = LocalDate.of(anno, mese, start);
             LocalDate dataDaGestireEnd = LocalDate.of(anno, mese, end);
+
             log.info(anno + "-" + mese + "-" + giorno + " >> " + dataDaGestireStart + " || " + dataDaGestireEnd + " per " + affiliateId);
 
             // cancello le transazioni
@@ -102,11 +97,10 @@ public class RigeneraCPLBusiness {
                             .stream()
                             .filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal()))
                             .forEach(cpcDTO -> {
-                                log.info("R ORIG {} --> R CPC {}", cplDTO.getRefferal(), cpcDTO.getRefferal());
                                 cplDTO.setRefferal(cpcDTO.getRefferal());
                                 cplDTO.setCpcId(cpcDTO.getId());
                             });
-                    log.info("Refferal :: {} con ID CPC {}", cplDTO.getRefferal(), cplDTO.getCpcId());
+                    log.trace("Refferal :: {} con ID CPC {}", cplDTO.getRefferal(), cplDTO.getCpcId());
                     cplBusiness.setCpcId(cplDTO.getId(), cplDTO.getCpcId());
 
                     // prendo reffereal e lo leggo
@@ -130,13 +124,13 @@ public class RigeneraCPLBusiness {
                         transaction.setDateTime(cplDTO.getDate());
                         transaction.setApproved(true);
                         transaction.setPayoutPresent(false);
-
-                        if (StringUtils.isNotBlank(cplDTO.getAgent())) transaction.setAgent(cplDTO.getAgent());
-                        else transaction.setAgent("");
-
                         transaction.setIp(cplDTO.getIp());
                         transaction.setData(cplDTO.getData());
                         transaction.setMediaId(refferal.getMediaId());
+                        transaction.setCpcId(cplDTO.getCpcId());
+
+                        if (StringUtils.isNotBlank(cplDTO.getAgent())) transaction.setAgent(cplDTO.getAgent());
+                        else transaction.setAgent("");
 
                         // controlla data scadneza camapgna
                         try {
@@ -197,8 +191,8 @@ public class RigeneraCPLBusiness {
                             }
                             transaction.setCommissionId(commissionId);
 
-                            Double totale = commVal * 1;
-                            transaction.setValue(DoubleRounder.round(totale, 2));
+                            Double totale = DoubleRounder.round(commVal * 1, 2);
+                            transaction.setValue(totale);
                             transaction.setLeadNumber(1L);
 
                             // incemento valore

@@ -66,15 +66,12 @@ public class RigeneraCPCBusiness {
 
     public void rigenera(Integer anno, Integer mese, Integer giorno, Long affiliateId, Long campaignId) {
 
-        Integer start = giorno;
-        Integer end = giorno;
-        if (giorno == null) {
-            start = 1;
-            end = LocalDate.of(anno, mese, 1).lengthOfMonth();
-        }
+        int start = (giorno == null) ? 1 : giorno;
+        int end = (giorno == null) ? LocalDate.of(anno, mese, 1).lengthOfMonth() : giorno;
 
         LocalDate dataDaGestireStart = LocalDate.of(anno, mese, start);
         LocalDate dataDaGestireEnd = LocalDate.of(anno, mese, end);
+
         log.info(anno + "-" + mese + "-" + giorno + " >> " + dataDaGestireStart + " || " + dataDaGestireEnd + " per " + affiliateId);
 
         // ==========================================================================================================================================
@@ -135,15 +132,8 @@ public class RigeneraCPCBusiness {
     public void gestisci(Integer anno, Integer mese, Integer giorno, Long affId, Long campId, Long statusID, Boolean blacklisted) {
         try {
 
-            Integer start;
-            Integer end;
-            if (giorno == null) {
-                start = 1;
-                end = LocalDate.of(anno, mese, 1).lengthOfMonth();
-            } else {
-                end = giorno;
-                start = giorno;
-            }
+            int start = (giorno == null) ? 1 : giorno;
+            int end = (giorno == null) ? LocalDate.of(anno, mese, 1).lengthOfMonth() : giorno;
 
             LocalDate dataDaGestireStart = LocalDate.of(anno, mese, start);
             LocalDate dataDaGestireEnd = LocalDate.of(anno, mese, end);
@@ -214,23 +204,6 @@ public class RigeneraCPCBusiness {
                         if (totaleClick > 0) {
                             TransactionBusiness.BaseCreateRequest transaction = new TransactionBusiness.BaseCreateRequest();
 
-                            transaction.setClickNumber(totaleClick);
-
-                            transaction.setCampaignId(campaignId);
-                            transaction.setAffiliateId(affiliateId);
-                            transaction.setChannelId(channelID);
-                            transaction.setMediaId(mediaId);
-
-                            transaction.setApproved(true);
-                            transaction.setPayoutPresent(false);
-
-                            transaction.setDateTime(data.atTime(3, 0, 0));
-
-                            transaction.setAgent("");
-
-                            transaction.setStatusId(statusID);
-
-
                             Campaign campaign = campaignRepository.findById(campaignId).orElse(null);
                             if (campaign != null) {
                                 if (campaign.getEndDate().isBefore(data)) {
@@ -274,8 +247,8 @@ public class RigeneraCPCBusiness {
                                 }
 
                                 // calcolo valore
-                                Double totale = commVal * totaleClick;
-                                transaction.setValue(DoubleRounder.round(totale, 2));
+                                double totale = DoubleRounder.round(commVal * totaleClick, 2);
+                                transaction.setValue(totale);
                                 transaction.setClickNumber(totaleClick);
 
                                 // incemento valore
@@ -298,24 +271,32 @@ public class RigeneraCPCBusiness {
                                 campaignBusiness.updateBudget(campaign.getId(), budgetCampagna);
 
                                 // setto stato transazione a ovebudget editore se totale < 0
-                                if (budgetCampagna < 0) {
+                                if (budgetCampagna < 0)
                                     transaction.setDictionaryId(48L);
-                                }
 
                                 // commissione scaduta
-                                if (accc != null && accc.getCommissionDueDate() != null && accc.getCommissionDueDate().isBefore(data)) {
+                                if (accc != null && accc.getCommissionDueDate() != null && accc.getCommissionDueDate().isBefore(data))
                                     transaction.setDictionaryId(49L);
-                                }
 
-                                if (blacklisted) {
+                                if (blacklisted)
                                     transaction.setDictionaryId(70L);
-                                }
 
                             }
 
+                            transaction.setClickNumber(totaleClick);
+                            transaction.setCampaignId(campaignId);
+                            transaction.setAffiliateId(affiliateId);
+                            transaction.setChannelId(channelID);
+                            transaction.setMediaId(mediaId);
+                            transaction.setApproved(true);
+                            transaction.setPayoutPresent(false);
+                            transaction.setDateTime(data.atTime(3, 0, 0));
+                            transaction.setAgent("");
+                            transaction.setStatusId(statusID);
+
                             // creo la transazione
                             TransactionCPCDTO tcpc = transactionBusiness.createCpc(transaction);
-                            log.info(">>>RI-CLICK :: {} - {}-{} = {}", tcpc.getId(), campaignId, affiliateId, transaction.getClickNumber());
+                            log.trace(">>>RI-CLICK :: {} - {}-{} = {}", tcpc.getId(), campaignId, affiliateId, transaction.getClickNumber());
 
                         }// if totale click > 0
                         else {

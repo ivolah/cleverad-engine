@@ -14,6 +14,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.decimal4j.util.DoubleRounder;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -103,8 +104,7 @@ public class PayoutBusiness {
             Payout payout = repository.findById(payoutId).orElseThrow(() -> new ElementCleveradException("PAYOUT CPC", payoutId));
 
             //aumento il valore
-            Double totale = payout.getTotale();
-            totale = totale + transaction.getValue();
+            Double totale = DoubleRounder.round(payout.getTotale() + transaction.getValue(), 2);
 
             //aggiorno payout
             payout.setTotale(totale);
@@ -162,8 +162,7 @@ public class PayoutBusiness {
             Payout payout = repository.findById(payoutId).orElseThrow(() -> new ElementCleveradException("PAYOUT CPL", payoutId));
 
             //aumento il valore
-            Double totale = payout.getTotale();
-            totale = totale + transaction.getValue();
+            Double totale = DoubleRounder.round(payout.getTotale() + transaction.getValue(), 2);
 
             //aggiorno payout
             payout.setTotale(totale);
@@ -217,8 +216,7 @@ public class PayoutBusiness {
             Payout payout = repository.findById(payoutId).orElseThrow(() -> new ElementCleveradException("PAYOUT CPs", payoutId));
 
             //aumento il valore
-            Double totale = payout.getTotale();
-            totale = totale + transaction.getValue();
+            Double totale = DoubleRounder.round(payout.getTotale() + transaction.getValue(), 2);
 
             //aggiorno payout
             payout.setTotale(totale);
