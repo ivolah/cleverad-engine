@@ -70,7 +70,7 @@ public class CampaignBaseDTO {
                     }).collect(Collectors.toList());
         }
 
-        List<Long> listaIDS = (List<Long>) accc.stream().mapToLong(value -> value.getCampaignId());
+        List<Long> listaIDS = accc.stream().mapToLong(value -> value.getCampaignId()).boxed().collect(Collectors.toList());;
         List<CommissionDTO> commissions = null;
         if (campaign.getCommissionCampaigns() != null) {
             commissions = campaign.getCommissionCampaigns().stream()
