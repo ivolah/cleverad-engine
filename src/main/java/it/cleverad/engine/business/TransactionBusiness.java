@@ -1096,6 +1096,8 @@ public class TransactionBusiness {
 
         private Long statusId;
         private Double initialValue;
+
+        private Long cpcId;
     }
 
     @Data

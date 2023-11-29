@@ -92,4 +92,7 @@ public class TransactionCPL {
     @Column(name = "phone_verified")
     private Boolean phoneVerified = false;
 
+    @Column(name = "cpc_id")
+    private Long cpcId;
+
 }

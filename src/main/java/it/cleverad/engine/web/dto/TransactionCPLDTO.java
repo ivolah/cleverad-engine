@@ -50,6 +50,8 @@ public class TransactionCPLDTO {
     private String phoneNumber;
     private Boolean phoneVerified;
 
+    private Long cpcId;
+
     public static TransactionCPLDTO from(TransactionCPL transaction) {
         return new TransactionCPLDTO(transaction.getId(), transaction.getAffiliate() != null ? transaction.getAffiliate().getId() : null, transaction.getAffiliate() != null ? transaction.getAffiliate().getName() : null,
 
@@ -70,7 +72,8 @@ public class TransactionCPLDTO {
                 transaction.getDictionary().getId(), transaction.getDictionary().getName(), transaction.getLeadNumber(),
                 transaction.getPayoutPresent(),
                 transaction.getDictionaryStatus() != null ? transaction.getDictionaryStatus().getId() : null,
-                transaction.getPhoneNumber(), transaction.getPhoneVerified()
+                transaction.getPhoneNumber(), transaction.getPhoneVerified(),
+                transaction.getCpcId()
         );
     }
 

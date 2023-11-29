@@ -96,8 +96,6 @@ public class ReportBusiness {
      **/
 
     public Page<ReportTopCampaings> searchTopCampaigns(TopFilter request, Pageable pageableRequest) {
-        log.info("FILTER {}", request);
-
         request = prepareRequest(request);
         List<ReportTopCampaings> listaCampaigns;
         if (Boolean.FALSE.equals(jwtUserDetailsService.isAdmin())) {

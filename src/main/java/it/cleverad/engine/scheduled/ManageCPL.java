@@ -84,18 +84,19 @@ public class ManageCPL {
                         .stream()
                         .filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal()))
                         .forEach(cpcDTO -> {
-                            log.info("R ORIG {} --> R CPC {}", cplDTO.getRefferal(), cpcDTO.getRefferal());
+                            log.trace("R ORIG {} --> R CPC {}", cplDTO.getRefferal(), cpcDTO.getRefferal());
                             cplDTO.setRefferal(cpcDTO.getRefferal());
                             cplDTO.setCpcId(cpcDTO.getId());
                         });
-                log.trace("Refferal :: {} con ID CPC {}", cplDTO.getRefferal(), cplDTO.getCpcId());
-                cplBusiness.setCpcId(cplDTO.getId(), cplDTO.getCpcId());
+                Long idCpc = cplDTO.getCpcId();
+                log.trace("Refferal :: {} con ID CPC {}", cplDTO.getRefferal(),idCpc);
+                cplBusiness.setCpcId(cplDTO.getId(), idCpc);
 
                 // prendo reffereal e lo leggo
                 Refferal refferal = referralService.decodificaReferral(cplDTO.getRefferal());
 
                 if (refferal != null && refferal.getAffiliateId() != null) {
-                    log.debug(">>>> T-CPL :: {} :: ", cplDTO, refferal);
+                    log.trace(">>>> T-CPL :: {} :: ", cplDTO, refferal);
 
                     //aggiorno dati CPL
                     Cpl cccpl = cplRepository.findById(cplDTO.getId()).orElseThrow(() -> new ElementCleveradException("Cpl", cplDTO.getId()));
@@ -231,6 +232,9 @@ public class ManageCPL {
 
                         //setto pending
                         transaction.setStatusId(72L);
+
+                        // setto id CPC
+                        transaction.setCpcId(idCpc);
 
                         // creo la transazione
                         TransactionCPLDTO cpl = transactionBusiness.createCpl(transaction);
