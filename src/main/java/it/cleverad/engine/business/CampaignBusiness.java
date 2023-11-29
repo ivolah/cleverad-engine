@@ -9,6 +9,7 @@ import it.cleverad.engine.persistence.model.service.Media;
 import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
+import it.cleverad.engine.web.dto.CampaignBaseDTO;
 import it.cleverad.engine.web.dto.CampaignBrandBuddiesDTO;
 import it.cleverad.engine.web.dto.CampaignDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -296,7 +297,7 @@ public class CampaignBusiness {
         return page.map(CampaignDTO::from);
     }
 
-    public Page<CampaignDTO> getCampaignsActive(Filter req, Pageable pageable) {
+    public Page<CampaignBaseDTO> getCampaignsActive(Filter req, Pageable pageable) {
 
         Long affiliateId = jwtUserDetailsService.getAffiliateID();
         List<Long> listaId = new ArrayList<>();
@@ -351,17 +352,19 @@ public class CampaignBusiness {
             page = repository.findByCampaignCategories_CampaignIdInAndCampaignCategories_CategoryId(listaIdPulita.stream().distinct().collect(Collectors.toList()), req.getCategoryId(), pageable);
         }
 
-        return page.map(CampaignDTO::from);
+        return page.map(campaign -> CampaignBaseDTO.from(campaign, affiliateId));
     }
 
-    public Page<CampaignDTO> getCampaignsNot(Pageable pageable) {
+    public Page<CampaignBaseDTO> getCampaignsNot(Pageable pageable) {
         List<Long> listaId = new ArrayList<>();
-        affiliateRepository.findById(jwtUserDetailsService.getAffiliateID()).get().getCampaignAffiliates().stream().forEach(campaignAffiliate -> listaId.add(campaignAffiliate.getCampaign().getId()));
+        Long affiliateId = jwtUserDetailsService.getAffiliateID();
+        affiliateRepository.findById(affiliateId).get().getCampaignAffiliates().stream()
+                .forEach(campaignAffiliate -> listaId.add(campaignAffiliate.getCampaign().getId()));
         Filter requestNot = new Filter();
         requestNot.setStatus(true);
         if (listaId.size() > 0) requestNot.setIdListNotIn(listaId);
         Page<Campaign> page = repository.findAll(getSpecification(requestNot), pageable);
-        return page.map(CampaignDTO::from);
+        return page.map(campaign -> CampaignBaseDTO.from(campaign, affiliateId));
     }
 
     // TROVA LE CAMPAGNE DELL AFFILIATE filtrate per ID AFFIALIseTE DAL USER
@@ -521,7 +524,7 @@ public class CampaignBusiness {
             }
 
             if (request.getDisableDueDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), request.getDisableDueDateTo()));
+                predicates.add(cb.lessThanOrEqualTo(root.get("endDate"), request.getDisableDueDateTo()));
             }
 
             if (request.getAdvertiserId() != null) {
