@@ -73,7 +73,6 @@ public class CategoryBusiness {
     // SEARCH PAGINATED
     public Page<CategoryDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("name")));
-        log.info("ORID " + pageable.getSort());
         Page<Category> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CategoryDTO::from);
     }

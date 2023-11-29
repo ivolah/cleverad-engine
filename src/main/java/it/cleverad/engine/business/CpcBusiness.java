@@ -204,12 +204,13 @@ public class CpcBusiness {
         return page.map(CpcDTO::from);
     }
 
-    public Page<CpcDTO> getAllByDay(LocalDate dataFrom, LocalDate datato, Boolean blacklisted, Long affiliateId) {
+    public Page<CpcDTO> getAllByDay(LocalDate dataFrom, LocalDate datato, Boolean blacklisted, Long affiliateId, Long campaignId) {
         Filter request = new Filter();
         request.setDateFrom(dataFrom);
         request.setDateTo(datato);
         request.setBlacklisted(blacklisted);
         request.setAffiliateid(affiliateId);
+        request.setCampaignid(campaignId);
         Page<Cpc> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(CpcDTO::from);
     }

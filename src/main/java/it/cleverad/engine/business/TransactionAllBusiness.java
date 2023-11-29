@@ -65,18 +65,19 @@ public class TransactionAllBusiness {
         return page.map(TransactionStatusDTO::from);
     }
 
-    public Page<TransactionStatusDTO> searchStatusIdAndDate(Long statusId, LocalDate dataDaGestireStart, LocalDate dataDaGestireEnd, String tipo, Long affiliateId) {
+    public Page<TransactionStatusDTO> searchStatusIdAndDate(Long statusId, LocalDate dataDaGestireStart, LocalDate dataDaGestireEnd, String tipo, Long affiliateId, Long campaignId) {
         Filter request = new Filter();
         request.setCreationDateFrom(dataDaGestireStart);
         request.setCreationDateTo(dataDaGestireEnd);
         request.setTipo(tipo);
         request.setStatusId(statusId);
         request.setAffiliateId(affiliateId);
+        request.setCampaignId(campaignId);
         Page<ViewTransactionStatus> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(TransactionStatusDTO::from);
     }
 
-    public Page<TransactionStatusDTO> searchStatusIdAndDicIdAndDate(Long statusId, Long dicId, LocalDate dataDaGestireStart, LocalDate dataDaGestireEnd, String tipo, Long affiliateId) {
+    public Page<TransactionStatusDTO> searchStatusIdAndDicIdAndDate(Long statusId, Long dicId, LocalDate dataDaGestireStart, LocalDate dataDaGestireEnd, String tipo, Long affiliateId, Long campaignId) {
         Filter request = new Filter();
         request.setCreationDateFrom(dataDaGestireStart);
         request.setCreationDateTo(dataDaGestireEnd);
@@ -84,6 +85,7 @@ public class TransactionAllBusiness {
         request.setStatusId(statusId);
         request.setDictionaryId(dicId);
         request.setAffiliateId(affiliateId);
+        request.setCampaignId(campaignId);
         Page<ViewTransactionStatus> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(TransactionStatusDTO::from);
     }

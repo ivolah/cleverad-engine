@@ -31,9 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -66,7 +64,7 @@ public class RigeneraCPCBusiness {
     @Autowired
     private TransactionAllBusiness transactionAllBusiness;
 
-    public void rigenera(Integer anno, Integer mese, Integer giorno, Long affiliateId) {
+    public void rigenera(Integer anno, Integer mese, Integer giorno, Long affiliateId, Long campaignId) {
 
         Integer start = giorno;
         Integer end = giorno;
@@ -90,8 +88,8 @@ public class RigeneraCPCBusiness {
         log.info("DA DISABILIATRE :: {}", listaDaDisabilitare.size());
 
         // giro settaggio click multipli
-        listaDaDisabilitare.stream().forEach(clickMultipli -> {
-            //  log.info("Disabilito {} :: {}", clickMultipli.getId(), clickMultipli.getTotale());
+        listaDaDisabilitare.forEach(clickMultipli -> {
+            log.trace("Disabilito {} :: {}", clickMultipli.getId(), clickMultipli.getTotale());
             Cpc cccp = repository.findById(clickMultipli.getId()).orElseThrow(() -> new ElementCleveradException("Cpc", clickMultipli.getId()));
             cccp.setRead(true);
             cccp.setBlacklisted(true);
@@ -103,38 +101,38 @@ public class RigeneraCPCBusiness {
         // CANCELLO LE TRANSAZIONI NON BLACKLISTED
 
         // GESTISCO LE TRANSAZIONI --->>> RIGETTATE E NOT MANUALILISTED
-        Page<TransactionStatusDTO> L74 = transactionAllBusiness.searchStatusIdAndDate(74L, dataDaGestireStart, dataDaGestireEnd, "CPC", affiliateId);
-        log.info("RIGETTATE --> 74 >> " + L74.getTotalElements());
-        L74.forEach(ttt -> transactionBusiness.delete(ttt.getId(), "CPC"));
+        Page<TransactionStatusDTO> transazioni74 = transactionAllBusiness.searchStatusIdAndDate(74L, dataDaGestireStart, dataDaGestireEnd, "CPC", affiliateId, campaignId);
+        log.info("RIGETTATE --> 74 >> " + transazioni74.getTotalElements());
+        transazioni74.forEach(ttt -> transactionBusiness.delete(ttt.getId(), "CPC"));
 
         // GESTISCO LE TRANSAZIONI --->>> APPROVATE E NOT MANUALILISTED
-        Page<TransactionStatusDTO> L73 = transactionAllBusiness.searchStatusIdAndDate(73L, dataDaGestireStart, dataDaGestireEnd, "CPC", affiliateId);
-        log.info("APPROVATE --> 73 >> " + L73.getTotalElements());
-        L73.forEach(ttt -> transactionBusiness.delete(ttt.getId(), "CPC"));
+        Page<TransactionStatusDTO> transazioni73 = transactionAllBusiness.searchStatusIdAndDate(73L, dataDaGestireStart, dataDaGestireEnd, "CPC", affiliateId, campaignId);
+        log.info("APPROVATE --> 73 >> " + transazioni73.getTotalElements());
+        transazioni73.forEach(ttt -> transactionBusiness.delete(ttt.getId(), "CPC"));
 
         // GESTISCO LE TRANSAZIONI --->>> PENDING E NOT MANUALILISTED
-        Page<TransactionStatusDTO> L72 = transactionAllBusiness.searchStatusIdAndDate(72L, dataDaGestireStart, dataDaGestireEnd, "CPC", affiliateId);
-        log.info("PENDING --> 72 >> " + L72.getTotalElements());
-        L72.forEach(ttt -> transactionBusiness.delete(ttt.getId(), "CPC"));
+        Page<TransactionStatusDTO> transazioni72 = transactionAllBusiness.searchStatusIdAndDate(72L, dataDaGestireStart, dataDaGestireEnd, "CPC", affiliateId, campaignId);
+        log.info("PENDING --> 72 >> " + transazioni72.getTotalElements());
+        transazioni72.forEach(ttt -> transactionBusiness.delete(ttt.getId(), "CPC"));
 
         // RIPASSO TUTTE LE CPC PENDING
-        this.gestisci(anno, mese, giorno, affiliateId, 72L, false);
+        this.gestisci(anno, mese, giorno, affiliateId, campaignId, 72L, false);
 
         // ==========================================================================================================================================
         // ==========================================================================================================================================
         // GESTISCO BLACKLISTED A PARTE
 
         // GESTISCO LE TRANSAZIONI --->>> BLACKLSTED
-        Page<TransactionStatusDTO> black = transactionAllBusiness.searchStatusIdAndDicIdAndDate(74L, 70L, dataDaGestireStart, dataDaGestireEnd, "CPC", affiliateId);
+        Page<TransactionStatusDTO> black = transactionAllBusiness.searchStatusIdAndDicIdAndDate(74L, 70L, dataDaGestireStart, dataDaGestireEnd, "CPC", affiliateId, campaignId);
         log.info("BLACKLISTED >> " + black.getTotalElements());
         black.forEach(transactionStatusDTO -> transactionBusiness.delete(transactionStatusDTO.getId(), "CPC"));
 
         // RIPASSO TUTTE LE CPC BLACKLISTED
-        this.gestisci(anno, mese, giorno, affiliateId, 74L, true);
+        this.gestisci(anno, mese, giorno, affiliateId, campaignId, 74L, true);
 
     }
 
-    public void gestisci(Integer anno, Integer mese, Integer giorno, Long affId, Long statusID, Boolean blacklisted) {
+    public void gestisci(Integer anno, Integer mese, Integer giorno, Long affId, Long campId, Long statusID, Boolean blacklisted) {
         try {
 
             Integer start;
@@ -151,8 +149,7 @@ public class RigeneraCPCBusiness {
             LocalDate dataDaGestireEnd = LocalDate.of(anno, mese, end);
 
             //RIGENERO
-            Map<String, Integer> mappa = new HashMap<>();
-            Page<CpcDTO> day = cpcBusiness.getAllByDay(dataDaGestireStart, dataDaGestireEnd, blacklisted, affId);
+            Page<CpcDTO> day = cpcBusiness.getAllByDay(dataDaGestireStart, dataDaGestireEnd, blacklisted, affId, campId);
             log.info(">>> RIGENERO :: " + day.getTotalElements() + " >>> con status ::" + statusID);
 
             // trovo tutti i refferal
@@ -186,7 +183,7 @@ public class RigeneraCPCBusiness {
                 triples.add(triple);
             });
 
-            triples.stream().distinct().collect(Collectors.toList()).stream().forEach(triple -> {
+            triples.stream().distinct().collect(Collectors.toList()).forEach(triple -> {
 
                 Long campaignId = (Long) triple.getLeft();
                 Long affiliateId = (Long) triple.getMiddle();
@@ -195,7 +192,7 @@ public class RigeneraCPCBusiness {
                 if (campaignId != null) {
 
                     for (int gg = start; gg <= end; gg++) {
-                         data = LocalDate.of(anno, mese, gg);
+                        data = LocalDate.of(anno, mese, gg);
 
                         CpcBusiness.Filter rq = new CpcBusiness.Filter();
                         rq.setDateFrom(data);
@@ -212,7 +209,7 @@ public class RigeneraCPCBusiness {
                             totaleClick += 1;
                             mediaId = tcpc.getMediaId();
                         }
-                        // log.info("TRI {}-{}-{} :: {}", campaignId, affiliateId, channelID, totaleClick);
+                        log.trace("TRI {}-{}-{} :: {}", campaignId, affiliateId, channelID, totaleClick);
 
                         if (totaleClick > 0) {
                             TransactionBusiness.BaseCreateRequest transaction = new TransactionBusiness.BaseCreateRequest();
@@ -269,7 +266,7 @@ public class RigeneraCPCBusiness {
 
                                 AffiliateChannelCommissionCampaignDTO accc = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
                                 if (accc != null) {
-                                    // log.info(accc.getCommissionId() + " " + accc.getCommissionValue());
+                                    log.trace(accc.getCommissionId() + " " + accc.getCommissionValue());
                                     commVal = accc.getCommissionValue();
                                     transaction.setCommissionId(accc.getCommissionId());
                                 } else {
@@ -279,7 +276,7 @@ public class RigeneraCPCBusiness {
                                 // calcolo valore
                                 Double totale = commVal * totaleClick;
                                 transaction.setValue(DoubleRounder.round(totale, 2));
-                                transaction.setClickNumber(Long.valueOf(totaleClick));
+                                transaction.setClickNumber(totaleClick);
 
                                 // incemento valore
                                 if (walletID != null && totale > 0D) walletBusiness.incement(walletID, totale);
@@ -322,7 +319,7 @@ public class RigeneraCPCBusiness {
 
                         }// if totale click > 0
                         else {
-//                    log.warn("Totale click == 0 - verifica problema {}-{} : {} : {} : {}", dataDaGestire.getMonthValue(), dataDaGestire.getDayOfMonth(), campaignId, affiliateId, channelID);
+                            log.trace("Totale click == 0 - verifica problema {}-{} : {} : {} : {}", dataDaGestireStart.getMonthValue(), dataDaGestireStart.getDayOfMonth(), campaignId, affiliateId, channelID);
                         }
 
                     }
@@ -343,10 +340,11 @@ public class RigeneraCPCBusiness {
     @AllArgsConstructor
     @ToString
     public static class FilterUpdate {
-        private String year;
-        private String month;
-        private String day;
+        private Integer year;
+        private Integer month;
+        private Integer day;
         private Long affiliateId;
+        private Long campaignId;
     }
 
 }
