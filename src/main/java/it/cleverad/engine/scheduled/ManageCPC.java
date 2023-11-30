@@ -252,16 +252,16 @@ public class ManageCPC {
                             }
                         }
 
-                        if (totale > 0) {
-                            // trovo CampaignBudget
-                            CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(campaignId, LocalDateTime.now());
-                            if (cb != null) {
-                                //incremento budget erogato
-                                campaignBudgetBusiness.incrementoBudgetErogato(cb.getId(), totale);
-                                // incremento cap
-                                campaignBudgetBusiness.incrementoCapErogato(cb.getId(), numer);
-                            }
-                        }
+//                        if (totale > 0) {
+//                            // trovo CampaignBudget
+//                            CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(campaignId, LocalDateTime.now());
+//                            if (cb != null) {
+//                                //incremento budget erogato
+//                                campaignBudgetBusiness.incrementoBudgetErogato(cb.getId(), totale);
+//                                // incremento cap
+//                                campaignBudgetBusiness.incrementoCapErogato(cb.getId(), numer);
+//                            }
+//                        }
 
                         transaction.setAgent("");
                         //setto pending

@@ -342,13 +342,13 @@ public class TransactionBusiness {
                 }
 
                 //aggiorno Camapign Budget
-                if (cpc.getValue() > 0D) {
-                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(cpc.getCampaign().getId(), cpc.getDateTime());
-                    if (cb != null) {
-                        campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - cpc.getClickNumber()));
-                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - cpc.getValue());
-                    }
-                }
+//                if (cpc.getValue() > 0D) {
+//                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(cpc.getCampaign().getId(), cpc.getDateTime());
+//                    if (cb != null) {
+//                        campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - cpc.getClickNumber()));
+//                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - cpc.getValue());
+//                    }
+//                }
 
             } else if (dictionaryId == 40L || statusId == 74L) {
                 // setto revenue e commission a 0
@@ -392,13 +392,13 @@ public class TransactionBusiness {
                 }
 
                 //aggiorno Camapign Budget
-                if (cpl.getValue() > 0D) {
-                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(cpl.getCampaign().getId(), cpl.getDateTime());
-                    if (cb != null) {
-                        campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - 1));
-                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - cpl.getValue());
-                    }
-                }
+//                if (cpl.getValue() > 0D) {
+//                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(cpl.getCampaign().getId(), cpl.getDateTime());
+//                    if (cb != null) {
+//                        campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - 1));
+//                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - cpl.getValue());
+//                    }
+//                }
 
             } else if (dictionaryId == 40L || statusId == 74L) {
                 // setto revenue e commission a 0
@@ -485,13 +485,13 @@ public class TransactionBusiness {
             }
 
             //aggiorno Camapign Budget
-            if (cpl.getValue() > 0D) {
-                CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(cpl.getCampaign().getId(), cpl.getDateTime());
-                if (cb != null) {
-                    campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - 1));
-                    campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - cpl.getValue());
-                }
-            }
+//            if (cpl.getValue() > 0D) {
+//                CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(cpl.getCampaign().getId(), cpl.getDateTime());
+//                if (cb != null) {
+//                    campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - 1));
+//                    campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - cpl.getValue());
+//                }
+//            }
         }
 
         cplRepository.save(cpl);
@@ -605,13 +605,13 @@ public class TransactionBusiness {
                 }
 
                 //aggiorno Camapign Budget
-                if (dto.getValue() > 0D) {
-                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(dto.getCampaignId(), dto.getDateTime());
-                    if (cb != null) {
-                        campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - dto.getClickNumber()));
-                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - dto.getValue());
-                    }
-                }
+//                if (dto.getValue() > 0D) {
+//                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(dto.getCampaignId(), dto.getDateTime());
+//                    if (cb != null) {
+//                        campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - dto.getClickNumber()));
+//                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - dto.getValue());
+//                    }
+//                }
 
                 //cancello
                 cpcRepository.delete(cpcRepository.findById(id).get());
@@ -638,13 +638,13 @@ public class TransactionBusiness {
                 }
 
                 //aggiorno Camapign Budget
-                if (dto.getValue() > 0D) {
-                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(dto.getCampaignId(), dto.getDateTime());
-                    if (cb != null) {
-                        campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - 1));
-                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - dto.getValue());
-                    }
-                }
+//                if (dto.getValue() > 0D) {
+//                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(dto.getCampaignId(), dto.getDateTime());
+//                    if (cb != null) {
+//                        campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - 1));
+//                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - dto.getValue());
+//                    }
+//                }
 
                 cplRepository.delete(cplRepository.findById(id).get());
             } else if (type.equals("CPM")) {
@@ -664,13 +664,13 @@ public class TransactionBusiness {
                 Long wallerID = walletBusiness.findByIdAffilaite(dto.getAffiliateId()).stream().findFirst().get().getId();
                 walletBusiness.decrement(wallerID, dto.getValue());
 
-                if (dto.getValue() > 0D) {
-                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(dto.getCampaignId(), dto.getDateTime());
-                    if (cb != null) {
-                        campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - dto.getImpressionNumber()));
-                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - dto.getValue());
-                    }
-                }
+//                if (dto.getValue() > 0D) {
+//                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(dto.getCampaignId(), dto.getDateTime());
+//                    if (cb != null) {
+//                        campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - dto.getImpressionNumber()));
+//                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - dto.getValue());
+//                    }
+//                }
 
                 //cancello
                 cpmRepository.deleteById(id);
@@ -690,13 +690,13 @@ public class TransactionBusiness {
                 Long wallerID = walletBusiness.findByIdAffilaite(dto.getAffiliateId()).stream().findFirst().get().getId();
                 walletBusiness.decrement(wallerID, dto.getValue());
 
-                if (dto.getValue() > 0D) {
-                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(dto.getCampaignId(), dto.getDateTime());
-                    if (cb != null) {
-                        // campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - dto.get));
-                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - dto.getValue());
-                    }
-                }
+//                if (dto.getValue() > 0D) {
+//                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(dto.getCampaignId(), dto.getDateTime());
+//                    if (cb != null) {
+                // campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - dto.get));
+//                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - dto.getValue());
+//                    }
+//                }
 
                 //cancello
                 cpsRepository.deleteById(id);

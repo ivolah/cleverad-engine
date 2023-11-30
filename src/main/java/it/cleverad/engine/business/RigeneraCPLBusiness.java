@@ -224,7 +224,7 @@ public class RigeneraCPLBusiness {
 
                             // creo la transazione
                             TransactionCPLDTO cpl = transactionBusiness.createCpl(transaction);
-                            log.info(">>>RIGENERATO LEAD :::: {} ", cpl.getId());
+                            log.trace(">>>RIGENERATO LEAD :::: {} ", cpl.getId());
 
                             // setto a gestito
                             cplBusiness.setRead(cplDTO.getId());

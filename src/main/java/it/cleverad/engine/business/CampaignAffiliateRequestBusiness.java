@@ -35,7 +35,6 @@ public class CampaignAffiliateRequestBusiness {
 
     @Autowired
     private CampaignAffiliateRequestRepository repository;
-
     @Autowired
     private DictionaryBusiness dictionaryBusiness;
     @Autowired
@@ -44,7 +43,6 @@ public class CampaignAffiliateRequestBusiness {
     private CampaignRepository campaignRepository;
     @Autowired
     private DictionaryRepository dictionaryRepository;
-
     @Autowired
     private Mapper mapper;
 
@@ -95,15 +93,6 @@ public class CampaignAffiliateRequestBusiness {
         return page.map(CampaignAffiliateRequestDTO::from);
     }
 
-    public Page<CampaignAffiliateRequestDTO> searchByAffiliateIdAndCampaignId(Long affiliateId, Long campaignId) {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
-        Filter request = new Filter();
-        request.setAffiliateId(affiliateId);
-        request.setCampaignId(campaignId);
-        Page<CampaignAffiliateRequest> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(CampaignAffiliateRequestDTO::from);
-    }
-
     public Page<CampaignAffiliateRequestDTO> searchByAffiliateID(Long affiliateId, Pageable pageable) {
         Filter request = new Filter();
         request.setAffiliateId(affiliateId);
@@ -135,7 +124,7 @@ public class CampaignAffiliateRequestBusiness {
 
     private Specification<CampaignAffiliateRequest> getSpecification(Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {

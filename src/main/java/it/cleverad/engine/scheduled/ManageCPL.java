@@ -219,16 +219,16 @@ public class ManageCPL {
                             }
                         }
 
-                        if (totale > 0) {
-                            // trovo CampaignBudget
-                            CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(campaignDTO.getId(), LocalDateTime.now());
-                            if (cb != null) {
-                                //incremento budget erogato
-                                campaignBudgetBusiness.incrementoBudgetErogato(cb.getId(), totale);
-                                // incremento cap
-                                campaignBudgetBusiness.incrementoCapErogato(cb.getId(), 1);
-                            }
-                        }
+//                        if (totale > 0) {
+//                            // trovo CampaignBudget
+//                            CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(campaignDTO.getId(), LocalDateTime.now());
+//                            if (cb != null) {
+//                                //incremento budget erogato
+//                                campaignBudgetBusiness.incrementoBudgetErogato(cb.getId(), totale);
+//                                // incremento cap
+//                                campaignBudgetBusiness.incrementoCapErogato(cb.getId(), 1);
+//                            }
+//                        }
 
                         //setto pending
                         transaction.setStatusId(72L);

@@ -2,10 +2,7 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.CampaignBudget;
-import it.cleverad.engine.persistence.repository.service.AdvertiserRepository;
-import it.cleverad.engine.persistence.repository.service.CampaignBudgetRepository;
-import it.cleverad.engine.persistence.repository.service.CampaignRepository;
-import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
+import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.web.dto.CampaignBudgetDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -44,6 +41,8 @@ public class CampaignBudgetBusiness {
     @Autowired
     private DictionaryRepository dictionaryRepository;
     @Autowired
+    private PlannerRepository plannerRepository;
+    @Autowired
     private Mapper mapper;
 
     /**
@@ -56,14 +55,8 @@ public class CampaignBudgetBusiness {
         map.setAdvertiser(advertiserRepository.findById(request.advertiserId).orElseThrow(() -> new ElementCleveradException("Advertiser", request.advertiserId)));
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
         map.setDictionary(dictionaryRepository.findById(request.tipologiaId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.tipologiaId)));
-
-        map.setBudgetErogato(0D);
-        map.setCapErogato(0);
-        map.setCapFatturabile(0);
-        map.setFatturato(0D);
-        map.setScarto(0D);
-        map.setStatus(false);
-
+        map.setCanali(dictionaryRepository.findById(request.canaleId).orElseThrow(() -> new ElementCleveradException("Dictionary-canale", request.canaleId)));
+        map.setPlanner(plannerRepository.findById(request.plannerId).orElseThrow(() -> new ElementCleveradException("Planner", request.plannerId)));
         return CampaignBudgetDTO.from(repository.save(map));
     }
 
@@ -78,6 +71,12 @@ public class CampaignBudgetBusiness {
             budget.setCampaign(campaignRepository.findById(filter.getCampaignId()).orElseThrow(() -> new ElementCleveradException("Campaign", filter.getCampaignId())));
         if (filter.getTipologiaId() != null)
             budget.setDictionary(dictionaryRepository.findById(filter.getTipologiaId()).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.getTipologiaId())));
+        if (filter.getCanaleId() != null)
+            budget.setCanali(dictionaryRepository.findById(filter.getCanaleId()).orElseThrow(() -> new ElementCleveradException("Dictionary-canale", filter.getCanaleId())));
+        if (filter.getPlannerId() != null)
+            budget.setPlanner(plannerRepository.findById(filter.getPlannerId()).orElseThrow(() -> new ElementCleveradException("Planner", filter.getPlannerId())));
+
+        // TODO calcolo percentuali
 
         return CampaignBudgetDTO.from(repository.save(budget));
     }
@@ -93,19 +92,6 @@ public class CampaignBudgetBusiness {
         try {
             repository.deleteById(id);
         } catch (ConstraintViolationException ex) {
-            throw ex;
-        } catch (Exception ee) {
-            throw new PostgresDeleteCleveradException(ee);
-        }
-    }
-
-    public void deleteByCampaignID(Long id) {
-        Filter request = new Filter();
-        request.setCampaignId(id);
-        Page<CampaignBudget> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
-        try {
-            page.stream().forEach(campaignBudget -> repository.deleteById(campaignBudget.getId()));
-        } catch (javax.validation.ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
@@ -135,37 +121,37 @@ public class CampaignBudgetBusiness {
         return repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE)).stream().findFirst().orElse(null);
     }
 
-    public CampaignBudgetDTO incrementoCapErogato(Long id, Integer cap) {
-        CampaignBudget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
-        Integer capErogato = budget.getCapErogato() + cap;
-        log.info(">>> " + capErogato);
-        budget.setCapErogato(capErogato);
-        return CampaignBudgetDTO.from(repository.save(budget));
-    }
-
-    public CampaignBudgetDTO decreaseCapErogatoOnDeleteTransaction(Long id, Integer cap) {
-        CampaignBudget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
-        Integer capErogato = budget.getCapErogato() - cap;
-        log.info(">>> " + capErogato);
-        budget.setCapErogato(capErogato);
-        return CampaignBudgetDTO.from(repository.save(budget));
-    }
-
-    public CampaignBudgetDTO incrementoBudgetErogato(Long id, Double budget) {
-        CampaignBudget entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
-        Double nuovoBB = entity.getBudgetErogato() + budget;
-        log.info(">>> " + nuovoBB);
-        entity.setBudgetErogato(nuovoBB);
-        return CampaignBudgetDTO.from(repository.save(entity));
-    }
-
-    public CampaignBudgetDTO decreaseBudgetErogatoOnDeleteTransaction(Long id, Double budget) {
-        CampaignBudget entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
-        Double nuovoBB = entity.getBudgetErogato() + budget;
-        log.info(">>> " + nuovoBB);
-        entity.setBudgetErogato(nuovoBB);
-        return CampaignBudgetDTO.from(repository.save(entity));
-    }
+//    public CampaignBudgetDTO incrementoCapErogato(Long id, Integer cap) {
+//        CampaignBudget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
+//        Integer capErogato = budget.getCapErogato() + cap;
+//        log.info(">>> " + capErogato);
+//        budget.setCapErogato(capErogato);
+//        return CampaignBudgetDTO.from(repository.save(budget));
+//    }
+//
+//    public CampaignBudgetDTO decreaseCapErogatoOnDeleteTransaction(Long id, Integer cap) {
+//        CampaignBudget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
+//        Integer capErogato = budget.getCapErogato() - cap;
+//        log.info(">>> " + capErogato);
+//        budget.setCapErogato(capErogato);
+//        return CampaignBudgetDTO.from(repository.save(budget));
+//    }
+//
+//    public CampaignBudgetDTO incrementoBudgetErogato(Long id, Double budget) {
+//        CampaignBudget entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
+//        Double nuovoBB = entity.getBudgetErogato() + budget;
+//        log.info(">>> " + nuovoBB);
+//        entity.setBudgetErogato(nuovoBB);
+//        return CampaignBudgetDTO.from(repository.save(entity));
+//    }
+//
+//    public CampaignBudgetDTO decreaseBudgetErogatoOnDeleteTransaction(Long id, Double budget) {
+//        CampaignBudget entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
+//        Double nuovoBB = entity.getBudgetErogato() + budget;
+//        log.info(">>> " + nuovoBB);
+//        entity.setBudgetErogato(nuovoBB);
+//        return CampaignBudgetDTO.from(repository.save(entity));
+//    }
 
     /**
      * ============================================================================================================
@@ -212,24 +198,36 @@ public class CampaignBudgetBusiness {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class BaseCreateRequest {
-        private Long advertiserId;
-        private Long campaignId;
-        private Integer capIniziale;
-        private Integer capErogato;
-        private Integer capFatturabile;
-        private Double budgetIniziale;
-        private Double budgetErogato;
-        private Long fatturaId;
-        private Double fatturato;
-        private Double scarto;
-        private String materiali;
-        private String note;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate startDate;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate endDate;
+        private Long campaignId;
+        private Long advertiserId;
+        private Long plannerId;
+        private Long canaleId;
+        private Boolean prenotato;
         private Long tipologiaId;
+        private Integer capIniziale;
         private Double payout;
+        private Double budgetIniziale;
+        private Integer capErogato;
+        private Double capPc;
+        private Double budgetErogato;
+        private Double commissioniErogate;
+        private Double revenuePC;
+        private Double revenue;
+        private Double scarto;
+        private Double budgetErogatoPS;
+        private Double commissioniErogatePS;
+        private Double revenuePCPS;
+        private Double revenuePS;
+        private Double revenueDay;
+        private String materiali;
+        private String note;
+        private Integer capFatturabile;
+        private Double fatturato;
+        private Long fatturaId;
         private Boolean status;
     }
 
@@ -238,18 +236,6 @@ public class CampaignBudgetBusiness {
     @AllArgsConstructor
     public static class Filter {
         private Long id;
-        private Long tipologiaId;
-        private Long advertiserId;
-        private Long campaignId;
-        private Boolean status;
-        private Long fatturaId;
-        private Integer capFatturabile;
-        private Integer capErogato;
-        private Double budgetErogato;
-        private Double fatturato;
-        private Double scarto;
-        private String materiali;
-        private String note;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate startDateFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -258,6 +244,33 @@ public class CampaignBudgetBusiness {
         private LocalDate endDateFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate endDateTo;
+        private Long campaignId;
+        private Long advertiserId;
+        private Long plannerId;
+        private Long canaleId;
+        private Boolean prenotato;
+        private Long tipologiaId;
+        private Integer capIniziale;
+        private Double payout;
+        private Double budgetIniziale;
+        private Integer capErogato;
+        private Double capPc;
+        private Double budgetErogato;
+        private Double commissioniErogate;
+        private Double revenuePC;
+        private Double revenue;
+        private Double scarto;
+        private Double budgetErogatoPS;
+        private Double commissioniErogatePS;
+        private Double revenuePCPS;
+        private Double revenuePS;
+        private Double revenueDay;
+        private String materiali;
+        private String note;
+        private Integer capFatturabile;
+        private Double fatturato;
+        private Long fatturaId;
+        private Boolean status;
     }
 
     @Data
@@ -267,6 +280,8 @@ public class CampaignBudgetBusiness {
         private Long tipologiaId;
         private Long advertiserId;
         private Long campaignId;
+        private Long plannerId;
+        private Long canaleId;
         private Boolean status;
         private Integer capFatturabile;
         private Double fatturato;
