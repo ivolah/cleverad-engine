@@ -1064,6 +1064,7 @@ public class TransactionBusiness {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @ToString
     public static class BaseCreateRequest {
 
         private Long affiliateId;

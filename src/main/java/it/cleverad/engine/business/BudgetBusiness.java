@@ -148,7 +148,7 @@ public class BudgetBusiness {
 
     public List<BudgetDTO> getBudgetToDisable() {
         Filter request = new Filter();
-        request.setDisableDueDateTo(LocalDate.now());
+        request.setDisableDueDateTo(LocalDate.now().plusDays(1));
         request.setStatus(true);
         Page<Budget> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(BudgetDTO::from).toList();

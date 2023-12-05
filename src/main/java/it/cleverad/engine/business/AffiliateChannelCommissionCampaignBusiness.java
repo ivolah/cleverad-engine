@@ -297,6 +297,7 @@ public class AffiliateChannelCommissionCampaignBusiness {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @ToString
     public static class Filter {
         private Long id;
         private Long campaignId;

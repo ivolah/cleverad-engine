@@ -76,10 +76,29 @@ public class CampaignBudgetBusiness {
         if (filter.getPlannerId() != null)
             budget.setPlanner(plannerRepository.findById(filter.getPlannerId()).orElseThrow(() -> new ElementCleveradException("Planner", filter.getPlannerId())));
 
-        // TODO calcolo percentuali
+        return CampaignBudgetDTO.from(repository.save(budget));
+    }
+
+    // ENABLE E DISABLE
+    public CampaignBudgetDTO enable(Long id) {
+        CampaignBudget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
+        budget.setStatus(true);
+        return CampaignBudgetDTO.from(repository.save(budget));
+    }
+    public CampaignBudgetDTO disable(Long id) {
+        CampaignBudget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
+        budget.setStatus(false);
+        return CampaignBudgetDTO.from(repository.save(budget));
+    }
+
+    public CampaignBudgetDTO aggiornoCalcoli(Long id) {
+        CampaignBudget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
+
+
 
         return CampaignBudgetDTO.from(repository.save(budget));
     }
+
 
     // GET BY ID
     public CampaignBudgetDTO findById(Long id) {
@@ -113,13 +132,13 @@ public class CampaignBudgetBusiness {
         return page.map(CampaignBudgetDTO::from);
     }
 
-    public CampaignBudget findByCampaignIdAndDate(Long campaignId, LocalDateTime data) {
-        Filter request = new Filter();
-        request.setCampaignId(campaignId);
-        request.setStartDateFrom(data.toLocalDate());
-        request.setEndDateTo(data.toLocalDate());
-        return repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE)).stream().findFirst().orElse(null);
-    }
+//    public CampaignBudget findByCampaignIdAndDate(Long campaignId, LocalDateTime data) {
+//        Filter request = new Filter();
+//        request.setCampaignId(campaignId);
+//        request.setStartDateFrom(data.toLocalDate());
+//        request.setEndDateTo(data.toLocalDate());
+//        return repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE)).stream().findFirst().orElse(null);
+//    }
 
 //    public CampaignBudgetDTO incrementoCapErogato(Long id, Integer cap) {
 //        CampaignBudget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
@@ -282,12 +301,28 @@ public class CampaignBudgetBusiness {
         private Long campaignId;
         private Long plannerId;
         private Long canaleId;
-        private Boolean status;
-        private Integer capFatturabile;
-        private Double fatturato;
+        private Boolean prenotato;
+        private Integer capIniziale;
+        private Double payout;
+        private Double budgetIniziale;
+        private Integer capErogato;
+        private Double capPc;
+        private Double budgetErogato;
+        private Double commissioniErogate;
+        private Double revenuePC;
+        private Double revenue;
         private Double scarto;
+        private Double budgetErogatoPS;
+        private Double commissioniErogatePS;
+        private Double revenuePCPS;
+        private Double revenuePS;
+        private Double revenueDay;
         private String materiali;
         private String note;
+        private Integer capFatturabile;
+        private Double fatturato;
+        private Long fatturaId;
+        private Boolean status;
     }
 
 }

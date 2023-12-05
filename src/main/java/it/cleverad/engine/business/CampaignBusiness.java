@@ -151,7 +151,7 @@ public class CampaignBusiness {
 //        comReq.setDictionaryId(51L);
 //        commissionBusiness.create(comReq);
 
-        // INVIO NOTIFICA CANALE
+        // INVIO NOTIFICA CANALE TELEGRAM
         //telegramService.sendNotification("Nuova CAMPAGNA  " + campaign.getName() + "!!!! \n Accedi alla piattaforma e richiedi di partecipare!");
 
 
@@ -378,7 +378,7 @@ public class CampaignBusiness {
     public List<CampaignDTO> getCampaignsToDisable() {
         Filter request = new Filter();
         request.setStatus(true);
-        request.setDisableDueDateTo(LocalDate.now());
+        request.setDisableDueDateTo(LocalDate.now().plusDays(1));
         Page<Campaign> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(CampaignDTO::from).toList();
     }

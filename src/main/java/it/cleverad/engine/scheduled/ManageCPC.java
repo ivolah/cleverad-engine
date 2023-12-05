@@ -3,7 +3,6 @@ package it.cleverad.engine.scheduled;
 import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.Campaign;
-import it.cleverad.engine.persistence.model.service.CampaignBudget;
 import it.cleverad.engine.persistence.model.service.ClickMultipli;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.model.tracking.Cpc;
@@ -13,8 +12,8 @@ import it.cleverad.engine.persistence.repository.tracking.CpcRepository;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.dto.BudgetDTO;
-import it.cleverad.engine.web.dto.tracking.CpcDTO;
 import it.cleverad.engine.web.dto.TransactionCPCDTO;
+import it.cleverad.engine.web.dto.tracking.CpcDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -126,21 +125,26 @@ public class ManageCPC {
 
                 // aggiorno dati CPC
                 Cpc cccp = repository.findById(dto.getId()).orElseThrow(() -> new ElementCleveradException("Cpc", dto.getId()));
-                Refferal refferal = referralService.decodificaReferral(dto.getRefferal());
-                if (refferal != null && refferal.getMediaId() != null) {
-                    cccp.setMediaId(refferal.getMediaId());
-                }
-                if (refferal != null && refferal.getCampaignId() != null) {
-                    cccp.setCampaignId(refferal.getCampaignId());
-                }
-                if (refferal != null && refferal.getAffiliateId() != null) {
-                    cccp.setAffiliateId(refferal.getAffiliateId());
-                }
-                if (refferal != null && refferal.getChannelId() != null) {
-                    cccp.setChannelId(refferal.getChannelId());
-                }
-                if (refferal != null && refferal.getTargetId() != null) {
-                    cccp.setTargetId(refferal.getTargetId());
+                if (dto.getRefferal().equals("{{refferalId}}")) {
+                    log.info(" <<<< VUOTO >>>>>> " + dto.getRefferal());
+                    cccp.setRefferal("");
+                } else {
+                    Refferal refferal = referralService.decodificaReferral(dto.getRefferal());
+                    if (refferal != null && refferal.getMediaId() != null) {
+                        cccp.setMediaId(refferal.getMediaId());
+                    }
+                    if (refferal != null && refferal.getCampaignId() != null) {
+                        cccp.setCampaignId(refferal.getCampaignId());
+                    }
+                    if (refferal != null && refferal.getAffiliateId() != null) {
+                        cccp.setAffiliateId(refferal.getAffiliateId());
+                    }
+                    if (refferal != null && refferal.getChannelId() != null) {
+                        cccp.setChannelId(refferal.getChannelId());
+                    }
+                    if (refferal != null && refferal.getTargetId() != null) {
+                        cccp.setTargetId(refferal.getTargetId());
+                    }
                 }
                 repository.save(cccp);
 

@@ -140,12 +140,12 @@ public class RigeneraCPCBusiness {
 
             //RIGENERO
             Page<CpcDTO> day = cpcBusiness.getAllByDay(dataDaGestireStart, dataDaGestireEnd, blacklisted, affId, campId);
-            log.info(">>> RIGENERO :: " + day.getTotalElements() + " >>> con status ::" + statusID);
+            log.trace(">>> RIGENERO :: " + day.getTotalElements() + " >>> con status ::" + statusID);
 
             // trovo tutti i refferal
             List<Triple> triples = new ArrayList<>();
             day.stream().filter(dto -> dto.getRefferal() != null).forEach(cpcDTO -> {
-
+                log.trace("|>>>>>>| " + cpcDTO.getRefferal());
                 // gestisco i refferal troppo corti
                 if (cpcDTO.getRefferal().length() < 5) {
                     // cerco da cpc
@@ -156,18 +156,31 @@ public class RigeneraCPCBusiness {
                 }
 
                 //gestisco i casi dove i dati non sono tutti valorizzati
-                if (StringUtils.isNotBlank(cpcDTO.getRefferal()) && cpcDTO.getCampaignId() == null) {
+                //if (StringUtils.isNotBlank(cpcDTO.getRefferal()) && cpcDTO.getCampaignId() == null) {
                     Cpc cccp = repository.findById(cpcDTO.getId()).get();
-                    Refferal refferal = referralService.decodificaReferral(cpcDTO.getRefferal());
-                    if (refferal != null) {
-                        if (refferal.getMediaId() != null) cccp.setMediaId(refferal.getMediaId());
-                        if (refferal.getCampaignId() != null) cccp.setCampaignId(refferal.getCampaignId());
-                        if (refferal.getAffiliateId() != null) cccp.setAffiliateId(refferal.getAffiliateId());
-                        if (refferal.getChannelId() != null) cccp.setChannelId(refferal.getChannelId());
-                        if (refferal.getTargetId() != null) cccp.setTargetId(refferal.getTargetId());
+                    if (cpcDTO.getRefferal().equals("{{refferalId}}")) {
+                        log.trace(" <<<< REFERRAL VUOTO >>>>>> " + cpcDTO.getRefferal());
+                        cccp.setRefferal("");
+                    } else {
+                        Refferal refferal = referralService.decodificaReferral(cpcDTO.getRefferal());
+                        if (refferal != null && refferal.getMediaId() != null) {
+                            cccp.setMediaId(refferal.getMediaId());
+                        }
+                        if (refferal != null && refferal.getCampaignId() != null) {
+                            cccp.setCampaignId(refferal.getCampaignId());
+                        }
+                        if (refferal != null && refferal.getAffiliateId() != null) {
+                            cccp.setAffiliateId(refferal.getAffiliateId());
+                        }
+                        if (refferal != null && refferal.getChannelId() != null) {
+                            cccp.setChannelId(refferal.getChannelId());
+                        }
+                        if (refferal != null && refferal.getTargetId() != null) {
+                            cccp.setTargetId(refferal.getTargetId());
+                        }
                     }
                     repository.save(cccp);
-                }
+                //}
 
                 Triple<Long, Long, Long> triple = new ImmutableTriple<>(cpcDTO.getCampaignId(), cpcDTO.getAffiliateId(), cpcDTO.getChannelId());
                 triples.add(triple);
@@ -199,7 +212,7 @@ public class RigeneraCPCBusiness {
                             totaleClick += 1;
                             mediaId = tcpc.getMediaId();
                         }
-                        log.trace("TRI {}-{}-{} :: {}", campaignId, affiliateId, channelID, totaleClick);
+                        log.info("TRI {}-{}-{} :: {}", campaignId, affiliateId, channelID, totaleClick);
 
                         if (totaleClick > 0) {
                             TransactionBusiness.BaseCreateRequest transaction = new TransactionBusiness.BaseCreateRequest();
@@ -236,13 +249,16 @@ public class RigeneraCPCBusiness {
                                 req.setChannelId(channelID);
                                 req.setCampaignId(campaignId);
                                 req.setCommissionDicId(10L);
+                                log.trace("------------------ " + req.toString());
 
                                 AffiliateChannelCommissionCampaignDTO accc = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
                                 if (accc != null) {
                                     log.trace(accc.getCommissionId() + " " + accc.getCommissionValue());
                                     commVal = accc.getCommissionValue();
                                     transaction.setCommissionId(accc.getCommissionId());
+
                                 } else {
+                                    log.info("COMMISSION = 0");
                                     transaction.setCommissionId(0L);
                                 }
 
@@ -271,15 +287,13 @@ public class RigeneraCPCBusiness {
                                 campaignBusiness.updateBudget(campaign.getId(), budgetCampagna);
 
                                 // setto stato transazione a ovebudget editore se totale < 0
-                                if (budgetCampagna < 0)
-                                    transaction.setDictionaryId(48L);
+                                if (budgetCampagna < 0) transaction.setDictionaryId(48L);
 
                                 // commissione scaduta
                                 if (accc != null && accc.getCommissionDueDate() != null && accc.getCommissionDueDate().isBefore(data))
                                     transaction.setDictionaryId(49L);
 
-                                if (blacklisted)
-                                    transaction.setDictionaryId(70L);
+                                if (blacklisted) transaction.setDictionaryId(70L);
 
                             }
 
@@ -295,6 +309,7 @@ public class RigeneraCPCBusiness {
                             transaction.setStatusId(statusID);
 
                             // creo la transazione
+                            log.trace(">>>>>> " + transaction.toString());
                             TransactionCPCDTO tcpc = transactionBusiness.createCpc(transaction);
                             log.trace(">>>RI-CLICK :: {} - {}-{} = {}", tcpc.getId(), campaignId, affiliateId, transaction.getClickNumber());
 
