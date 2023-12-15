@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -33,8 +34,6 @@ public class RigeneraCPLBusiness {
 
     @Autowired
     private CplBusiness cplBusiness;
-    @Autowired
-    private TransactionBusiness transactionBusiness;
     @Autowired
     private TransactionAllBusiness transactionAllBusiness;
     @Autowired
@@ -55,6 +54,8 @@ public class RigeneraCPLBusiness {
     private CplRepository cplRepository;
     @Autowired
     private CommissionRepository commissionRepository;
+    @Autowired
+    private TransactionCPLBusiness transactionCPLBusiness;
 
     public void rigenera(Integer anno, Integer mese, Integer giorno, Long affiliateId) {
         try {
@@ -85,7 +86,7 @@ public class RigeneraCPLBusiness {
 
             for (TransactionStatusDTO tcpl : ls) {
                 log.trace("CANCELLO PER RIGENERA CP :: {} : {} :: {}", tcpl.getId(), tcpl.getValue(), tcpl.getDateTime());
-                transactionBusiness.delete(tcpl.getId(), "CPL");
+                transactionCPLBusiness.delete(tcpl.getId());
                 Thread.sleep(50L);
             }
 
@@ -116,7 +117,7 @@ public class RigeneraCPLBusiness {
                         cplRepository.save(cccpl);
 
                         // setta transazione
-                        TransactionBusiness.BaseCreateRequest transaction = new TransactionBusiness.BaseCreateRequest();
+                        TransactionCPLBusiness.BaseCreateRequest transaction = new TransactionCPLBusiness.BaseCreateRequest();
                         transaction.setAffiliateId(refferal.getAffiliateId());
                         transaction.setCampaignId(refferal.getCampaignId());
                         transaction.setChannelId(refferal.getChannelId());
@@ -172,7 +173,7 @@ public class RigeneraCPLBusiness {
                                 req.setCampaignId(refferal.getCampaignId());
                                 req.setActionId(cplDTO.getActionId().trim());
                                 AffiliateChannelCommissionCampaignDTO accc = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
-                                Commission cm = commissionRepository.findById(accc.getCommissionId()).get();
+                                Commission cm = commissionRepository.findById(Objects.requireNonNull(accc).getCommissionId()).get();
                                 commVal = cm.getValue();
                                 commissionId = cm.getId();
                                 log.warn("Commissione >{}< trovata da action ID >{}<", cm.getId(), cplDTO.getActionId());
@@ -201,7 +202,7 @@ public class RigeneraCPLBusiness {
                             // decremento budget Affiliato
                             BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
                             if (bb != null && bb.getBudget() != null) {
-                                Double totBudgetDecrementato = bb.getBudget() - totale;
+                                double totBudgetDecrementato = bb.getBudget() - totale;
                                 budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
 
                                 // setto stato transazione a ovebudget editore se totale < 0
@@ -211,7 +212,7 @@ public class RigeneraCPLBusiness {
                             }
 
                             // decremento budget Campagna
-                            Double budgetCampagna = campaignDTO.getBudget() - totale;
+                            double budgetCampagna = campaignDTO.getBudget() - totale;
                             campaignBusiness.updateBudget(campaignDTO.getId(), budgetCampagna);
 
                             // setto stato transazione a ovebudget editore se totale < 0
@@ -223,7 +224,7 @@ public class RigeneraCPLBusiness {
                             else transaction.setStatusId(72L);
 
                             // creo la transazione
-                            TransactionCPLDTO cpl = transactionBusiness.createCpl(transaction);
+                            TransactionCPLDTO cpl = transactionCPLBusiness.createCpl(transaction);
                             log.trace(">>>RIGENERATO LEAD :::: {} ", cpl.getId());
 
                             // setto a gestito

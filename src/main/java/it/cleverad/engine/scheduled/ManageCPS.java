@@ -24,7 +24,7 @@ public class ManageCPS {
     @Autowired
     private CpsBusiness cpsBusiness;
     @Autowired
-    private TransactionBusiness transactionBusiness;
+    private TransactionCPSBusiness transactionCPSBusiness;
     @Autowired
     private WalletRepository walletRepository;
     @Autowired
@@ -53,7 +53,7 @@ public class ManageCPS {
                 log.info("CPS :: {} - {}", cpsDTO, refferal);
 
                 // setta transazione
-                TransactionBusiness.BaseCreateRequest rr = new TransactionBusiness.BaseCreateRequest();
+                TransactionCPSBusiness.BaseCreateRequest rr = new TransactionCPSBusiness.BaseCreateRequest();
                 rr.setAffiliateId(refferal.getAffiliateId());
                 rr.setCampaignId(refferal.getCampaignId());
                 rr.setChannelId(refferal.getChannelId());
@@ -151,7 +151,7 @@ public class ManageCPS {
                 rr.setStatusId(72L);
 
                 // creo la transazione
-                transactionBusiness.createCps(rr);
+                transactionCPSBusiness.createCps(rr);
 
                 // setto a gestito
                 cpsBusiness.setRead(cpsDTO.getId());

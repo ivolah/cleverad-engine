@@ -16,13 +16,20 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class TransactionController {
 
-    @Autowired
-    private TransactionBusiness business;
+
 
     @Autowired
     private TransactionAllBusiness allBusiness;
     @Autowired
     private TransactionStatusBusiness statusBusiness;
+    @Autowired
+    private TransactionCPLBusiness transactionCPLBusiness;
+    @Autowired
+    private TransactionCPCBusiness transactionCPCBusiness;
+    @Autowired
+    private TransactionCPMBusiness transactionCPMBusiness;
+    @Autowired
+    private TransactionCPSBusiness transactionCPSBusiness;
 
     /**
      * ============================================================================================================
@@ -31,25 +38,25 @@ public class TransactionController {
     @GetMapping("/types")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<DictionaryDTO> status() {
-        return this.business.getTypes();
+        return this.transactionCPLBusiness.getTypes();
     }
 
     @PostMapping(path = "/cpc", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public TransactionCPCDTO createcpc(@ModelAttribute TransactionBusiness.BaseCreateRequest request) {
-        return business.createCpc(request);
+    public TransactionCPCDTO createcpc(@ModelAttribute TransactionCPCBusiness.BaseCreateRequest request) {
+        return transactionCPCBusiness.createCpc(request);
     }
 
     @PostMapping(path = "/cpl", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public TransactionCPLDTO createcpl(@ModelAttribute TransactionBusiness.BaseCreateRequest request) {
-        return business.createCpl(request);
+    public TransactionCPLDTO createcpl(@ModelAttribute TransactionCPLBusiness.BaseCreateRequest request) {
+        return transactionCPLBusiness.createCpl(request);
     }
 
     @PostMapping(path = "/cpm", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public TransactionCPMDTO createcpm(@ModelAttribute TransactionBusiness.BaseCreateRequest request) {
-        return business.createCpm(request);
+    public TransactionCPMDTO createcpm(@ModelAttribute TransactionCPMBusiness.BaseCreateRequest request) {
+        return transactionCPMBusiness.createCpm(request);
     }
 
     // GET BY ID
@@ -57,19 +64,19 @@ public class TransactionController {
     @GetMapping("/{id}/cpc")
     @ResponseStatus(HttpStatus.OK)
     public TransactionCPCDTO findByIdCPC(@PathVariable Long id) {
-        return business.findByIdCPC(id);
+        return transactionCPCBusiness.findByIdCPC(id);
     }
 
     @GetMapping("/{id}/cpl")
     @ResponseStatus(HttpStatus.OK)
     public TransactionCPLDTO findByIdCPL(@PathVariable Long id) {
-        return business.findByIdCPL(id);
+        return transactionCPLBusiness.findByIdCPL(id);
     }
 
     @GetMapping("/{id}/cpm")
     @ResponseStatus(HttpStatus.OK)
     public TransactionCPMDTO findByIdCPM(@PathVariable Long id) {
-        return business.findByIdCPM(id);
+        return transactionCPMBusiness.findByIdCPM(id);
     }
 
     //DELETE
@@ -77,19 +84,19 @@ public class TransactionController {
     @DeleteMapping("/{id}/cpc")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void deleteCpc(@PathVariable Long id) {
-        this.business.delete(id, "CPC");
+        this.transactionCPCBusiness.delete(id);
     }
 
     @DeleteMapping("/{id}/cpl")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void deleteCpl(@PathVariable Long id) {
-        this.business.delete(id, "CPL");
+        this.transactionCPLBusiness.delete(id);
     }
 
     @DeleteMapping("/{id}/cpm")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void deleteCpm(@PathVariable Long id) {
-        this.business.delete(id, "cpm");
+        this.transactionCPMBusiness.delete(id, "cpm");
     }
 
     //SEARCH BY CAPAOIGN ID
@@ -97,88 +104,86 @@ public class TransactionController {
     @GetMapping("/{id}/campaign/cpc")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<TransactionCPCDTO> getbyCampaignCPC(@PathVariable Long id, Pageable pageable) {
-        TransactionBusiness.Filter request = new TransactionBusiness.Filter();
+        TransactionCPCBusiness.Filter request = new TransactionCPCBusiness.Filter();
         request.setCampaignId(id);
-        return business.searchCpc(request, pageable);
+        return transactionCPCBusiness.searchCpc(request, pageable);
     }
 
     @GetMapping("/cpc/list")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<TransactionCPCDTO> getbyCampaignCPCS(TransactionBusiness.Filter request, Pageable pageable) {
-        return business.searchCpc(request, pageable);
+    public Page<TransactionCPCDTO> getbyCampaignCPCS(TransactionCPCBusiness.Filter request, Pageable pageable) {
+        return transactionCPCBusiness.searchCpc(request, pageable);
     }
 
     @GetMapping("/{id}/campaign/cpl")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<TransactionCPLDTO> getbyCampaignCPL(@PathVariable Long id, Pageable pageable) {
-        TransactionBusiness.Filter request = new TransactionBusiness.Filter();
-        request.setCampaignId(id);
-        return business.searchCpl(request, pageable);
+        return transactionCPLBusiness.searchByCampaign(id, pageable);
     }
 
     @GetMapping("/{id}/campaign/cpm")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<TransactionCPMDTO> getbyCampaignCPM(@PathVariable Long id, Pageable pageable) {
-        TransactionBusiness.Filter request = new TransactionBusiness.Filter();
+        TransactionCPMBusiness.Filter request = new TransactionCPMBusiness.Filter();
         request.setCampaignId(id);
-        return business.searchCpm(request, pageable);
+        return transactionCPMBusiness.searchCpm(request, pageable);
     }
 
     //search by id affiliate x ADMIN
     @GetMapping("/{id}/affiliate/cpc")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<TransactionCPCDTO> getbyAffiliateCpc(@PathVariable Long id, Pageable pageable) {
-        TransactionBusiness.Filter request = new TransactionBusiness.Filter();
+        TransactionCPCBusiness.Filter request = new TransactionCPCBusiness.Filter();
         request.setAffiliateId(id);
-        return business.searchByAffiliateCpc(request, id, pageable);
+        return transactionCPCBusiness.searchByAffiliateCpc(request, id, pageable);
     }
 
-    @GetMapping("/{id}/affiliate/cpl")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<TransactionCPLDTO> getbyAffiliateCpl(@PathVariable Long id, Pageable pageable) {
-        TransactionBusiness.Filter request = new TransactionBusiness.Filter();
-        request.setAffiliateId(id);
-        return business.searchByAffiliateCpl(request, id, pageable);
-    }
+//    @GetMapping("/{id}/affiliate/cpl")
+//    @ResponseStatus(HttpStatus.ACCEPTED)
+//    public Page<TransactionCPLDTO> getbyAffiliateCpl(@PathVariable Long id, Pageable pageable) {
+//        TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
+//        request.setAffiliateId(id);
+//        return transactionCPLBusiness.searchByAffiliateCpl(request, id, pageable);
+//    }
 
     @GetMapping("/{id}/affiliate/cpm")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<TransactionCPMDTO> getbyAffiliateCpm(@PathVariable Long id, Pageable pageable) {
-        TransactionBusiness.Filter request = new TransactionBusiness.Filter();
+        TransactionCPMBusiness.Filter request = new TransactionCPMBusiness.Filter();
         request.setAffiliateId(id);
-        return business.searchByAffiliateCpm(request, id, pageable);
+        return transactionCPMBusiness.searchByAffiliateCpm(request, id, pageable);
     }
 
     // SEARCH BY AFFILIATE
     @GetMapping("/affiliate/cpc")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<TransactionCPCDTO> searchByAffiliateCpc(TransactionBusiness.Filter request, Pageable pageable) {
-        return business.searchByAffiliateCpc(request, null, pageable);
+    public Page<TransactionCPCDTO> searchByAffiliateCpc(TransactionCPCBusiness.Filter request, Pageable pageable) {
+        return transactionCPCBusiness.searchByAffiliateCpc(request, null, pageable);
     }
 
     @GetMapping("/affiliate/cpm")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<TransactionCPMDTO> searchByAffiliateCpm(TransactionBusiness.Filter request, Pageable pageable) {
-        return business.searchByAffiliateCpm(request, null, pageable);
+    public Page<TransactionCPMDTO> searchByAffiliateCpm(TransactionCPMBusiness.Filter request, Pageable pageable) {
+        return transactionCPMBusiness.searchByAffiliateCpm(request, null, pageable);
     }
 
     @GetMapping("/affiliate/cpl")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<TransactionCPLDTO> searchByAffiliateCpl(TransactionBusiness.Filter request, Pageable pageable) {
-        return business.searchByAffiliateCpl(request, null, pageable);
+    public Page<TransactionCPLDTO> searchByAffiliateCpl(TransactionCPLBusiness.Filter request, Pageable pageable) {
+        return transactionCPLBusiness.searchByAffiliateCpl(request, null, pageable);
     }
 
     @GetMapping("/affiliate/cps")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<TransactionCPSDTO> searchByAffiliateCps(TransactionBusiness.Filter request, Pageable pageable) {
-        return business.searchByAffiliateCps(request, null, pageable);
+    public Page<TransactionCPSDTO> searchByAffiliateCps(TransactionCPSBusiness.Filter request, Pageable pageable) {
+        return transactionCPSBusiness.searchByAffiliateCps(request, null, pageable);
     }
 
-    @PatchMapping("/update/status")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public void updateStatus(@RequestBody TransactionBusiness.FilterUpdate request) {
-        business.updateStatus(request.getId(), request.getDictionaryId(), request.getTipo(), request.getApproved(), request.getStatusId());
-    }
+//    @PatchMapping("/update/status")
+//    @ResponseStatus(HttpStatus.ACCEPTED)
+//    public void updateStatus(@RequestBody TransactionBusiness.FilterUpdate request) {
+//        business.updateStatus(request.getId(), request.getDictionaryId(), request.getTipo(), request.getApproved(), request.getStatusId());
+//    }
 
     /**
      * ============================================================================================================

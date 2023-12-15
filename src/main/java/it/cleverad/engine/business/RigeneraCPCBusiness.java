@@ -45,7 +45,7 @@ public class RigeneraCPCBusiness {
     private CpcRepository repository;
 
     @Autowired
-    private TransactionBusiness transactionBusiness;
+    private TransactionCPCBusiness transactionCPCBusiness;
     @Autowired
     private WalletBusiness walletBusiness;
     @Autowired
@@ -100,17 +100,17 @@ public class RigeneraCPCBusiness {
         // GESTISCO LE TRANSAZIONI --->>> RIGETTATE E NOT MANUALILISTED
         Page<TransactionStatusDTO> transazioni74 = transactionAllBusiness.searchStatusIdAndDate(74L, dataDaGestireStart, dataDaGestireEnd, "CPC", affiliateId, campaignId);
         log.info("RIGETTATE --> 74 >> " + transazioni74.getTotalElements());
-        transazioni74.forEach(ttt -> transactionBusiness.delete(ttt.getId(), "CPC"));
+        transazioni74.forEach(ttt -> transactionCPCBusiness.delete(ttt.getId()));
 
         // GESTISCO LE TRANSAZIONI --->>> APPROVATE E NOT MANUALILISTED
         Page<TransactionStatusDTO> transazioni73 = transactionAllBusiness.searchStatusIdAndDate(73L, dataDaGestireStart, dataDaGestireEnd, "CPC", affiliateId, campaignId);
         log.info("APPROVATE --> 73 >> " + transazioni73.getTotalElements());
-        transazioni73.forEach(ttt -> transactionBusiness.delete(ttt.getId(), "CPC"));
+        transazioni73.forEach(ttt -> transactionCPCBusiness.delete(ttt.getId()));
 
         // GESTISCO LE TRANSAZIONI --->>> PENDING E NOT MANUALILISTED
         Page<TransactionStatusDTO> transazioni72 = transactionAllBusiness.searchStatusIdAndDate(72L, dataDaGestireStart, dataDaGestireEnd, "CPC", affiliateId, campaignId);
         log.info("PENDING --> 72 >> " + transazioni72.getTotalElements());
-        transazioni72.forEach(ttt -> transactionBusiness.delete(ttt.getId(), "CPC"));
+        transazioni72.forEach(ttt -> transactionCPCBusiness.delete(ttt.getId()));
 
         // RIPASSO TUTTE LE CPC PENDING
         this.gestisci(anno, mese, giorno, affiliateId, campaignId, 72L, false);
@@ -122,7 +122,7 @@ public class RigeneraCPCBusiness {
         // GESTISCO LE TRANSAZIONI --->>> BLACKLSTED
         Page<TransactionStatusDTO> black = transactionAllBusiness.searchStatusIdAndDicIdAndDate(74L, 70L, dataDaGestireStart, dataDaGestireEnd, "CPC", affiliateId, campaignId);
         log.info("BLACKLISTED >> " + black.getTotalElements());
-        black.forEach(transactionStatusDTO -> transactionBusiness.delete(transactionStatusDTO.getId(), "CPC"));
+        black.forEach(transactionStatusDTO -> transactionCPCBusiness.delete(transactionStatusDTO.getId()));
 
         // RIPASSO TUTTE LE CPC BLACKLISTED
         this.gestisci(anno, mese, giorno, affiliateId, campaignId, 74L, true);
@@ -215,7 +215,7 @@ public class RigeneraCPCBusiness {
                         log.info("TRI {}-{}-{} :: {}", campaignId, affiliateId, channelID, totaleClick);
 
                         if (totaleClick > 0) {
-                            TransactionBusiness.BaseCreateRequest transaction = new TransactionBusiness.BaseCreateRequest();
+                            TransactionCPCBusiness.BaseCreateRequest transaction = new TransactionCPCBusiness.BaseCreateRequest();
 
                             Campaign campaign = campaignRepository.findById(campaignId).orElse(null);
                             if (campaign != null) {
@@ -310,21 +310,18 @@ public class RigeneraCPCBusiness {
 
                             // creo la transazione
                             log.trace(">>>>>> " + transaction.toString());
-                            TransactionCPCDTO tcpc = transactionBusiness.createCpc(transaction);
+                            TransactionCPCDTO tcpc = transactionCPCBusiness.createCpc(transaction);
                             log.trace(">>>RI-CLICK :: {} - {}-{} = {}", tcpc.getId(), campaignId, affiliateId, transaction.getClickNumber());
 
                         }// if totale click > 0
                         else {
                             log.trace("Totale click == 0 - verifica problema {}-{} : {} : {} : {}", dataDaGestireStart.getMonthValue(), dataDaGestireStart.getDayOfMonth(), campaignId, affiliateId, channelID);
                         }
-
                     }
-
                 } else {
                     log.warn("Campaign id null {}-{} : {} : {} : {}", data.getMonthValue(), data.getDayOfMonth(), campaignId, affiliateId, channelID);
                 }
             });
-
 
         } catch (Exception e) {
             log.error("CUSTOM Eccezione Scheduler CPC --  {}", e.getMessage(), e);

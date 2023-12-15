@@ -30,7 +30,7 @@ public class ManageCPM {
     @Autowired
     private CpmBusiness CpmBusiness;
     @Autowired
-    private TransactionBusiness transactionBusiness;
+    private TransactionCPMBusiness transactionCPMBusiness;
     @Autowired
     private WalletRepository walletRepository;
     @Autowired
@@ -94,7 +94,7 @@ public class ManageCPM {
                     if (campaignDTO != null) {
 
                         // setta transazione
-                        TransactionBusiness.BaseCreateRequest transaction = new TransactionBusiness.BaseCreateRequest();
+                        TransactionCPMBusiness.BaseCreateRequest transaction = new TransactionCPMBusiness.BaseCreateRequest();
                         transaction.setAffiliateId(refferal.getAffiliateId());
                         transaction.setCampaignId(refferal.getCampaignId());
                         transaction.setChannelId(refferal.getChannelId());
@@ -183,7 +183,7 @@ public class ManageCPM {
                         transaction.setStatusId(73L);
 
                         // creo la transazione
-                        TransactionCPMDTO tcpm = transactionBusiness.createCpm(transaction);
+                        TransactionCPMDTO tcpm = transactionCPMBusiness.createCpm(transaction);
                         log.trace(">>> CREATO TRANSAZIONE :::: CPM :::: {}", tcpm.getId());
                     }
 
@@ -230,7 +230,7 @@ public class ManageCPM {
                     if (campaignDTO != null) {
 
                         // setta transazione
-                        TransactionBusiness.BaseCreateRequest transaction = new TransactionBusiness.BaseCreateRequest();
+                        TransactionCPMBusiness.BaseCreateRequest transaction = new TransactionCPMBusiness.BaseCreateRequest();
                         transaction.setAffiliateId(refferal.getAffiliateId());
                         transaction.setCampaignId(refferal.getCampaignId());
                         transaction.setChannelId(refferal.getChannelId());
@@ -277,7 +277,7 @@ public class ManageCPM {
                         transaction.setDictionaryId(70L);
 
                         // creo la transazione
-                        TransactionCPMDTO tcpm = transactionBusiness.createCpm(transaction);
+                        TransactionCPMDTO tcpm = transactionCPMBusiness.createCpm(transaction);
                         log.trace(">>> CREATO TRANSAZIONE :::: CPM :::: {}", tcpm.getId());
                     }
 

@@ -1,8 +1,7 @@
 package it.cleverad.engine.scheduled;
 
-import it.cleverad.engine.business.TransactionBusiness;
+import it.cleverad.engine.business.TransactionCPCBusiness;
 import it.cleverad.engine.web.dto.TransactionCPCDTO;
-import it.cleverad.engine.web.dto.TransactionCPMDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
@@ -14,10 +13,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,7 +23,7 @@ import java.util.stream.Collectors;
 public class ConsolidaCPC {
 
     @Autowired
-    private TransactionBusiness transactionBusiness;
+    private TransactionCPCBusiness transactionCPCBusiness;
 
     @Async
     @Scheduled(cron = "23 58 * * * ?")
@@ -39,7 +35,7 @@ public class ConsolidaCPC {
 
     public void consolidaCPC(LocalDateTime oraSpaccata, Boolean blacklisted) {
 
-        TransactionBusiness.Filter request = new TransactionBusiness.Filter();
+        TransactionCPCBusiness.Filter request = new TransactionCPCBusiness.Filter();
         request.setDateTimeFrom(oraSpaccata.toLocalDate().atStartOfDay());
         request.setDateTimeTo(oraSpaccata);
         if(blacklisted) {
@@ -52,7 +48,7 @@ public class ConsolidaCPC {
             request.setStatusId(72L);
         }
 
-        Page<TransactionCPCDTO> cpcs = transactionBusiness.searchCpc(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
+        Page<TransactionCPCDTO> cpcs = transactionCPCBusiness.searchCpc(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
 
         List<Triple> triples = new ArrayList<>();
         for (TransactionCPCDTO tcpm : cpcs) {
@@ -62,14 +58,14 @@ public class ConsolidaCPC {
         List<Triple> listWithoutDuplicates = triples.stream().distinct().collect(Collectors.toList());
 
         for (Triple ttt : listWithoutDuplicates) {
-            request = new TransactionBusiness.Filter();
+            request = new TransactionCPCBusiness.Filter();
             oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
             request.setDateTimeFrom(oraSpaccata.toLocalDate().atStartOfDay());
             request.setDateTimeTo(oraSpaccata);
             request.setCampaignId((Long) ttt.getLeft());
             request.setAffiliateId((Long) ttt.getMiddle());
             request.setChannelId((Long) ttt.getRight());
-            cpcs = transactionBusiness.searchCpc(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
+            cpcs = transactionCPCBusiness.searchCpc(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
 
             Long totaleClick = 0L;
             Double value = 0D;
@@ -89,11 +85,11 @@ public class ConsolidaCPC {
                 commissionId = tcpc.getCommissionId();
                 statusId = tcpc.getStatusId();
                 log.trace("TRANSAZIONE CPC ID :: {} : {} :: {}", tcpc.getId(), tcpc.getClickNumber(), tcpc.getDateTime());
-                transactionBusiness.deleteInterno(tcpc.getId(), "CPC");
+                transactionCPCBusiness.deleteInterno(tcpc.getId());
             }
             if (totaleClick > 0) {
                 log.trace("CONSOLIDATO CPC :: {} :: {} ::: {} - {} - {} ::: ", totaleClick, value, ttt.getLeft(), ttt.getMiddle(), ttt.getRight(), totaleClick, value);
-                TransactionBusiness.BaseCreateRequest bReq = new TransactionBusiness.BaseCreateRequest();
+                TransactionCPCBusiness.BaseCreateRequest bReq = new TransactionCPCBusiness.BaseCreateRequest();
                 bReq.setClickNumber(totaleClick);
                 bReq.setValue(value);
                 bReq.setCampaignId((Long) ttt.getLeft());
@@ -109,7 +105,7 @@ public class ConsolidaCPC {
                 bReq.setAgent("");
                // bReq.setData();
                 bReq.setStatusId(statusId);
-                transactionBusiness.createCpc(bReq);
+                transactionCPCBusiness.createCpc(bReq);
             }
 
         }//tripletta

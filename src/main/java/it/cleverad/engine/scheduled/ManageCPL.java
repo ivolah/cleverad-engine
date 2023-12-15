@@ -39,8 +39,6 @@ public class ManageCPL {
     @Autowired
     private CplBusiness cplBusiness;
     @Autowired
-    private TransactionBusiness transactionBusiness;
-    @Autowired
     private WalletRepository walletRepository;
     @Autowired
     private WalletBusiness walletBusiness;
@@ -58,6 +56,8 @@ public class ManageCPL {
     private CpcBusiness cpcBusiness;
     @Autowired
     private CplRepository cplRepository;
+    @Autowired
+    private TransactionCPLBusiness transactionCPLBusiness;
 
     /**
      * ============================================================================================================
@@ -108,7 +108,7 @@ public class ManageCPL {
                     cplRepository.save(cccpl);
 
                     // setta transazione
-                    TransactionBusiness.BaseCreateRequest transaction = new TransactionBusiness.BaseCreateRequest();
+                    TransactionCPLBusiness.BaseCreateRequest transaction = new TransactionCPLBusiness.BaseCreateRequest();
                     transaction.setAffiliateId(refferal.getAffiliateId());
                     transaction.setCampaignId(refferal.getCampaignId());
                     transaction.setChannelId(refferal.getChannelId());
@@ -237,7 +237,7 @@ public class ManageCPL {
                         transaction.setCpcId(idCpc);
 
                         // creo la transazione
-                        TransactionCPLDTO cpl = transactionBusiness.createCpl(transaction);
+                        TransactionCPLDTO cpl = transactionCPLBusiness.createCpl(transaction);
                         log.info(">>> CREATO TRANSAZIONE :::: CPL :::: {} ", cpl.getId());
 
                         // setto a gestito
@@ -284,7 +284,7 @@ public class ManageCPL {
                     cplRepository.save(cccpl);
 
                     // setta transazione
-                    TransactionBusiness.BaseCreateRequest transaction = new TransactionBusiness.BaseCreateRequest();
+                    TransactionCPLBusiness.BaseCreateRequest transaction = new TransactionCPLBusiness.BaseCreateRequest();
                     transaction.setAffiliateId(refferal.getAffiliateId());
                     transaction.setCampaignId(refferal.getCampaignId());
                     transaction.setChannelId(refferal.getChannelId());
@@ -344,7 +344,7 @@ public class ManageCPL {
                         transaction.setDictionaryId(70L);
 
                         // creo la transazione
-                        TransactionCPLDTO cpl = transactionBusiness.createCpl(transaction);
+                        TransactionCPLDTO cpl = transactionCPLBusiness.createCpl(transaction);
                         log.info(">>>BLACKLIST :::: CPL :::: {} ", cpl.getId());
 
                         // setto a gestito

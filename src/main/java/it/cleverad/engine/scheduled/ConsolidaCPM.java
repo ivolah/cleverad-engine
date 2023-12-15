@@ -1,7 +1,6 @@
 package it.cleverad.engine.scheduled;
 
-import it.cleverad.engine.business.TransactionBusiness;
-import it.cleverad.engine.web.dto.TransactionCPCDTO;
+import it.cleverad.engine.business.TransactionCPMBusiness;
 import it.cleverad.engine.web.dto.TransactionCPMDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
@@ -27,7 +26,7 @@ import java.util.stream.Collectors;
 public class ConsolidaCPM {
 
     @Autowired
-    private TransactionBusiness transactionBusiness;
+    private TransactionCPMBusiness transactionCPMBusiness;
 
     @Async
     @Scheduled(cron = "9 59 * * * ?")
@@ -44,10 +43,10 @@ public class ConsolidaCPM {
     public void consolidaCPM(LocalDateTime oraSpaccata) {
         log.trace("\n\n\nCONSOLIDA CPM " + oraSpaccata.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
-        TransactionBusiness.Filter request = new TransactionBusiness.Filter();
+        TransactionCPMBusiness.Filter request = new TransactionCPMBusiness.Filter();
         request.setDateTimeFrom(oraSpaccata.toLocalDate().atStartOfDay());
         request.setDateTimeTo(oraSpaccata);
-        Page<TransactionCPMDTO> cpcM = transactionBusiness.searchCpm(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
+        Page<TransactionCPMDTO> cpcM = transactionCPMBusiness.searchCpm(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
 
         List<Triple> triples = new ArrayList<>();
         for (TransactionCPMDTO tcpm : cpcM) {
@@ -58,14 +57,14 @@ public class ConsolidaCPM {
         List<Triple> listWithoutDuplicates = triples.stream().distinct().collect(Collectors.toList());
         for (Triple ttt : listWithoutDuplicates) {
 
-            request = new TransactionBusiness.Filter();
+            request = new TransactionCPMBusiness.Filter();
             oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
             request.setDateTimeFrom(oraSpaccata.toLocalDate().atStartOfDay());
             request.setDateTimeTo(oraSpaccata);
             request.setCampaignId((Long) ttt.getLeft());
             request.setAffiliateId((Long) ttt.getMiddle());
             request.setChannelId((Long) ttt.getRight());
-            cpcM = transactionBusiness.searchCpm(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
+            cpcM = transactionCPMBusiness.searchCpm(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
 
             Long impressionNumber = 0L;
             Double value = 0D;
@@ -87,12 +86,12 @@ public class ConsolidaCPM {
                 statusId = tcpm.getStatusId();
                 data = tcpm.getNote();
                 log.trace("TRANSAZIONE CPM ID :: {} : {} :: {}", tcpm.getId(), tcpm.getImpressionNumber(), tcpm.getDateTime());
-                transactionBusiness.deleteInterno(tcpm.getId(), "CPM");
+                transactionCPMBusiness.deleteInterno(tcpm.getId());
                 log.trace("DELETE {} ", tcpm.getId());
             }
             if (impressionNumber > 0) {
                 log.trace("CONSOLIDATO CPM :: {} :: {} ::: {} - {} - {} ::: ", impressionNumber, value, ttt.getLeft(), ttt.getMiddle(), ttt.getRight());
-                TransactionBusiness.BaseCreateRequest bReq = new TransactionBusiness.BaseCreateRequest();
+                TransactionCPMBusiness.BaseCreateRequest bReq = new TransactionCPMBusiness.BaseCreateRequest();
                 bReq.setImpressionNumber(impressionNumber);
                 bReq.setValue(value);
                 bReq.setCampaignId((Long) ttt.getLeft());
@@ -108,7 +107,7 @@ public class ConsolidaCPM {
                 bReq.setAgent("");
                 bReq.setData(data);
                 bReq.setStatusId(statusId);
-                transactionBusiness.createCpm(bReq);
+                transactionCPMBusiness.createCpm(bReq);
             }
 
         }//tripletta

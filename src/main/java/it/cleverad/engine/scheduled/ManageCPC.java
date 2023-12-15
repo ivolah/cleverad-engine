@@ -41,7 +41,7 @@ public class ManageCPC {
     @Autowired
     private CpcBusiness cpcBusiness;
     @Autowired
-    private TransactionBusiness transactionBusiness;
+    private TransactionCPCBusiness transactionCPCBusiness;
     @Autowired
     private WalletRepository walletRepository;
     @Autowired
@@ -160,7 +160,7 @@ public class ManageCPC {
                     Campaign campaign = campaignRepository.findById(campaignId).orElse(null);
                     if (campaign != null) {
                         // setta transazione
-                        TransactionBusiness.BaseCreateRequest transaction = new TransactionBusiness.BaseCreateRequest();
+                        TransactionCPCBusiness.BaseCreateRequest transaction = new TransactionCPCBusiness.BaseCreateRequest();
                         transaction.setCampaignId(campaignId);
                         transaction.setPayoutPresent(false);
 
@@ -272,7 +272,7 @@ public class ManageCPC {
                         transaction.setStatusId(72L);
 
                         // creo la transazione
-                        TransactionCPCDTO tcpc = transactionBusiness.createCpc(transaction);
+                        TransactionCPCDTO tcpc = transactionCPCBusiness.createCpc(transaction);
                         log.trace(">>> CREATO TRANSAZIONE :::: CPC :::: {} -- {} -- {}", tcpc.getId(), ref, refferal);
                     } else {
                         log.info(">>> CAMPAGNA NULLO :: {}", campaignId);
@@ -336,7 +336,7 @@ public class ManageCPC {
                     if (campaign != null) {
 
                         // setta transazione
-                        TransactionBusiness.BaseCreateRequest transaction = new TransactionBusiness.BaseCreateRequest();
+                        TransactionCPCBusiness.BaseCreateRequest transaction = new TransactionCPCBusiness.BaseCreateRequest();
                         transaction.setCampaignId(campaignId);
                         transaction.setPayoutPresent(false);
 
@@ -391,7 +391,7 @@ public class ManageCPC {
                         transaction.setDictionaryId(70L);
 
                         // creo la transazione
-                        TransactionCPCDTO tcpc = transactionBusiness.createCpc(transaction);
+                        TransactionCPCDTO tcpc = transactionCPCBusiness.createCpc(transaction);
                         log.trace(">>>BLACKLISTED CPC :::: {} -- {} -- {}", tcpc.getId(), ref, refferal);
                     } else {
                         log.info(">>> BLACKLISTED CAMPAGNA NULLO :: {}", campaignId);
