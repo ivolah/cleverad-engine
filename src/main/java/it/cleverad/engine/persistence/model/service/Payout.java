@@ -25,7 +25,6 @@ public class Payout {
     private Double totale;
     private String valuta;
     private String note;
-    private Boolean stato;
     private LocalDate data;
 
     @Column(name = "creation_date")

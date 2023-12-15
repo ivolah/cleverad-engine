@@ -2,6 +2,7 @@ package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.PayoutBusiness;
 import it.cleverad.engine.config.security.JwtUserDetailsService;
+import it.cleverad.engine.persistence.model.service.Payout;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.PayoutDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @CrossOrigin
 @RestController
@@ -26,21 +29,10 @@ public class PayoutController {
      * ============================================================================================================
      **/
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "/cpc")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<PayoutDTO> createcpc(@ModelAttribute PayoutBusiness.BaseCreateRequest request) {
-        return business.createCpc(request.getTransazioniCpc(), request.getNote());
-    }
-
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "/cpl")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<PayoutDTO> createcpl(@ModelAttribute PayoutBusiness.BaseCreateRequest request) {
-        return business.createCpl(request.getTransazioniCpl(), request.getNote());
-    }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<PayoutDTO> create(@ModelAttribute PayoutBusiness.BaseCreateRequest request) {
+    public List<Payout> create(@ModelAttribute PayoutBusiness.BaseCreateRequest request) {
         return business.create(request);
     }
 

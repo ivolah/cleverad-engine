@@ -18,29 +18,22 @@ import java.util.stream.Collectors;
 public class PayoutDTO {
 
     private Long id;
-
     private Long affiliateId;
     private String affiliateName;
-
     private Double totale;
     private String valuta;
     private String note;
     private LocalDate data;
-    private Boolean stato;
-
-
     private Long dictionaryId;
     private String dictionaryName;
-
     @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
     @Column(name = "last_modification_date")
     private LocalDateTime lastModificationDate = LocalDateTime.now();
-
     private List<TransactionCPCDTO> transactionCPCS;
     private List<TransactionCPLDTO> transactionCPLS;
 
-    public PayoutDTO(Long id, Long affiliateId, String affiliateName, Double totale, String valuta, String note, LocalDate data, Boolean stato, Long dictionaryId, String dictionaryName, LocalDateTime creationDate, LocalDateTime lastModificationDate, List<TransactionCPCDTO> transactionCPCS, List<TransactionCPLDTO> transactionCPLS) {
+    public PayoutDTO(Long id, Long affiliateId, String affiliateName, Double totale, String valuta, String note, LocalDate data, Long dictionaryId, String dictionaryName, LocalDateTime creationDate, LocalDateTime lastModificationDate, List<TransactionCPCDTO> transactionCPCS, List<TransactionCPLDTO> transactionCPLS) {
         this.id = id;
         this.affiliateId = affiliateId;
         this.affiliateName = affiliateName;
@@ -48,7 +41,6 @@ public class PayoutDTO {
         this.valuta = valuta;
         this.note = note;
         this.data = data;
-        this.stato = stato;
         this.dictionaryId = dictionaryId;
         this.dictionaryName = dictionaryName;
         this.creationDate = creationDate;
@@ -84,29 +76,28 @@ public class PayoutDTO {
         }
 
         List<TransactionCPLDTO> transactionCPLS = new ArrayList<>();
-        if (payout.getTransactionCPLS() != null)
-            transactionCPLS = payout.getTransactionCPLS().stream().map(cpl -> {
-                TransactionCPLDTO dto = new TransactionCPLDTO();
-                dto.setId(cpl.getId());
-                dto.setAffiliateId(cpl.getAffiliate() != null ? cpl.getAffiliate().getId() : null);
-                dto.setAffiliateName(cpl.getAffiliate() != null ? cpl.getAffiliate().getName() : null);
-                dto.setCampaignId(cpl.getCampaign() != null ? cpl.getCampaign().getId() : null);
-                dto.setCampaignName(cpl.getCampaign() != null ? cpl.getCampaign().getName() : null);
-                dto.setChannelId(cpl.getChannel() != null ? cpl.getChannel().getId() : null);
-                dto.setChannelName(cpl.getChannel() != null ? cpl.getChannel().getName() : null);
-                dto.setMediaId(cpl.getMedia() != null ? cpl.getMedia().getId() : null);
-                dto.setMediaName(cpl.getMedia() != null ? cpl.getMedia().getName() : null);
-                dto.setCommissionId(cpl.getCommission() != null ? cpl.getCommission().getId() : null);
-                dto.setCommissionName(cpl.getCommission() != null ? cpl.getCommission().getName() : null);
-                dto.setValue(cpl.getValue());
-                dto.setData(cpl.getData());
-                dto.setNote(cpl.getNote());
-                dto.setCreationDate(cpl.getCreationDate());
-                dto.setDateTime(cpl.getDateTime());
-                return dto;
-            }).collect(Collectors.toList());
+        if (payout.getTransactionCPLS() != null) transactionCPLS = payout.getTransactionCPLS().stream().map(cpl -> {
+            TransactionCPLDTO dto = new TransactionCPLDTO();
+            dto.setId(cpl.getId());
+            dto.setAffiliateId(cpl.getAffiliate() != null ? cpl.getAffiliate().getId() : null);
+            dto.setAffiliateName(cpl.getAffiliate() != null ? cpl.getAffiliate().getName() : null);
+            dto.setCampaignId(cpl.getCampaign() != null ? cpl.getCampaign().getId() : null);
+            dto.setCampaignName(cpl.getCampaign() != null ? cpl.getCampaign().getName() : null);
+            dto.setChannelId(cpl.getChannel() != null ? cpl.getChannel().getId() : null);
+            dto.setChannelName(cpl.getChannel() != null ? cpl.getChannel().getName() : null);
+            dto.setMediaId(cpl.getMedia() != null ? cpl.getMedia().getId() : null);
+            dto.setMediaName(cpl.getMedia() != null ? cpl.getMedia().getName() : null);
+            dto.setCommissionId(cpl.getCommission() != null ? cpl.getCommission().getId() : null);
+            dto.setCommissionName(cpl.getCommission() != null ? cpl.getCommission().getName() : null);
+            dto.setValue(cpl.getValue());
+            dto.setData(cpl.getData());
+            dto.setNote(cpl.getNote());
+            dto.setCreationDate(cpl.getCreationDate());
+            dto.setDateTime(cpl.getDateTime());
+            return dto;
+        }).collect(Collectors.toList());
 
-        return new PayoutDTO(payout.getId(), payout.getAffiliate() != null ? payout.getAffiliate().getId() : null, payout.getAffiliate() != null ? payout.getAffiliate().getName() : null, payout.getTotale(), payout.getValuta(), payout.getNote(), payout.getData(), payout.getStato(),  payout.getDictionary() != null ? payout.getDictionary().getId() : null, payout.getDictionary() != null ? payout.getDictionary().getName() : null, payout.getCreationDate(), payout.getLastModificationDate(), transactionCPCS, transactionCPLS);
+        return new PayoutDTO(payout.getId(), payout.getAffiliate() != null ? payout.getAffiliate().getId() : null, payout.getAffiliate() != null ? payout.getAffiliate().getName() : null, payout.getTotale(), payout.getValuta(), payout.getNote(), payout.getData(), payout.getDictionary() != null ? payout.getDictionary().getId() : null, payout.getDictionary() != null ? payout.getDictionary().getName() : null, payout.getCreationDate(), payout.getLastModificationDate(), transactionCPCS, transactionCPLS);
     }
 
 }
