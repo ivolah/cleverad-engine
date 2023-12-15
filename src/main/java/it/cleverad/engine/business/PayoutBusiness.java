@@ -13,7 +13,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.decimal4j.util.DoubleRounder;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +27,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -60,20 +58,18 @@ public class PayoutBusiness {
      * ============================================================================================================
      **/
 
-    public Page<PayoutDTO> create(BaseCreateRequest request) {
-        this.createCpl(request.getTransazioniCpl(), request.getNote());
-        this.createCpc(request.getTransazioniCpc(), request.getNote());
-        return null;
-    }
+    public List<Payout> create(BaseCreateRequest request) {
 
-    public Page<PayoutDTO> createCpc(List<Long> listaTransactions, String note) {
+        String note = request.getNote();
 
-        if (StringUtils.isEmpty(note)) note = "";
-
-        //prndo tutti gli affiliati
+        //Prendo tutti gli affiliati
         List<Long> affiliatesList = new ArrayList<>();
-        listaTransactions.stream().forEach(id -> {
+        request.getTransazioniCpc().stream().forEach(id -> {
             TransactionCPC transaction = cpcRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction CPC", id));
+            affiliatesList.add(transaction.getAffiliate().getId());
+        });
+        request.getTransazioniCpl().stream().forEach(id -> {
+            TransactionCPL transaction = cplRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction CPL", id));
             affiliatesList.add(transaction.getAffiliate().getId());
         });
 
@@ -96,9 +92,10 @@ public class PayoutBusiness {
             affiliatoPayout.put(idAffiliate, map.getId());
         });
 
-        Set<Payout> list = new HashSet<>();
+        Set<Payout> listaPayout = new HashSet<>();
+
         // per ogni singola transazione
-        listaTransactions.forEach(id -> {
+        request.getTransazioniCpc().forEach(id -> {
             TransactionCPC transaction = cpcRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction CPC", id));
             Long payoutId = affiliatoPayout.get(transaction.getAffiliate().getId());
             Payout payout = repository.findById(payoutId).orElseThrow(() -> new ElementCleveradException("PAYOUT CPC", payoutId));
@@ -109,7 +106,7 @@ public class PayoutBusiness {
             //aggiorno payout
             payout.setTotale(totale);
             Payout pp = repository.save(payout);
-            list.add(pp);
+            listaPayout.add(pp);
 
             // decermeto valore wallet
             walletBusiness.decrement(transaction.getWallet().getId(), totale);
@@ -120,43 +117,9 @@ public class PayoutBusiness {
             transaction.setPayoutPresent(true);
             cpcRepository.save(transaction);
         });
-        return null;
-    }
 
-    public Page<PayoutDTO> createCpl(List<Long> listaTransactions, String note) {
-
-        if (StringUtils.isEmpty(note)) note = "";
-
-        //prndo tutti gli affigliati
-        List<Long> affiliatesList = new ArrayList<>();
-        listaTransactions.stream().forEach(id -> {
-            TransactionCPL transaction = cplRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction CPL", id));
-            affiliatesList.add(transaction.getAffiliate().getId());
-        });
-
-        // faccio distinct e creo un pqyout vuoto per ognuno
-        HashMap<Long, Long> affiliatoPayout = new HashMap<>();
-        String finalNote = note;
-        affiliatesList.stream().distinct().forEach(idAffiliate -> {
-            Payout map = new Payout();
-            Affiliate affiliate = affiliateRepository.findById(idAffiliate).orElseThrow(() -> new ElementCleveradException("Affiliate", idAffiliate));
-            map.setAffiliate(affiliate);
-            map.setData(LocalDate.now());
-            map.setValuta("EUR");
-            map.setCreationDate(LocalDateTime.now());
-            map.setLastModificationDate(LocalDateTime.now());
-            map.setTotale(0.0);
-            map.setNote(finalNote);
-            Dictionary dictionary = dictionaryRepository.findById(18L).orElseThrow(() -> new ElementCleveradException("Dictionary", 18L));
-            map.setDictionary(dictionary);
-            map = repository.save(map);
-            affiliatoPayout.put(idAffiliate, map.getId());
-        });
-
-        AtomicReference<Double> totaleTransazioni = new AtomicReference<>(0D);
-        Set<Payout> list = new HashSet<>();
         // per ogni singola transazione
-        listaTransactions.stream().forEach(id -> {
+        request.getTransazioniCpl().stream().forEach(id -> {
             TransactionCPL transaction = cplRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction CPL", id));
             Long payoutId = affiliatoPayout.get(transaction.getAffiliate().getId());
             Payout payout = repository.findById(payoutId).orElseThrow(() -> new ElementCleveradException("PAYOUT CPL", payoutId));
@@ -167,7 +130,7 @@ public class PayoutBusiness {
             //aggiorno payout
             payout.setTotale(totale);
             Payout pp = repository.save(payout);
-            list.add(pp);
+            listaPayout.add(pp);
 
             // decermeto valore wallet
             walletBusiness.decrement(transaction.getWallet().getId(), totale);
@@ -179,7 +142,8 @@ public class PayoutBusiness {
             cplRepository.save(transaction);
         });
 
-        return null;
+        return listaPayout.stream().collect(Collectors.toList());
+
     }
 
     public Page<PayoutDTO> createCps(List<Long> listaTransactions) {
@@ -388,23 +352,18 @@ public class PayoutBusiness {
             if (request.getId() != null) {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
-            if (request.getStato() != null) {
-                predicates.add(cb.equal(root.get("stato"), request.getStato()));
-            }
             if (request.getAffiliateId() != null) {
                 predicates.add(cb.equal(root.get("affiliate").get("id"), request.getAffiliateId()));
             }
             if (request.getDictionaryId() != null) {
                 predicates.add(cb.equal(root.get("dictionary").get("id"), request.getDictionaryId()));
             }
-
             if (request.getDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("data"), request.getDateFrom()));
             }
             if (request.getDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("data"), request.getDateTo().plus(1, ChronoUnit.DAYS)));
             }
-
             if (request.getNote() != null) {
                 predicates.add(cb.like(cb.upper(root.get("note")), "%" + request.getNote().toUpperCase() + "%"));
             }
@@ -427,7 +386,6 @@ public class PayoutBusiness {
         private String note;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate data;
-        private Boolean stato;
         private Long affiliateId;
         private List<Long> transazioniCpl;
         private List<Long> transazioniCpc;

@@ -50,7 +50,11 @@ public class CommissionBusiness {
     @Autowired
     private CampaignRepository campaignRepository;
     @Autowired
-    private TransactionBusiness transactionBusiness;
+    private TransactionCPMBusiness transactionCPMBusiness;
+    @Autowired
+    private TransactionCPLBusiness transactionCPLBusiness;
+    @Autowired
+    private TransactionCPCBusiness transactionCPCBusiness;
     @Autowired
     CampaignAffiliateBusiness campaignAffiliateBusiness;
 
@@ -107,19 +111,19 @@ public class CommissionBusiness {
 
         //aggiorno transazioni
         // cerco tutte le transazioni con quella commissione
-        TransactionBusiness.Filter request = new TransactionBusiness.Filter();
-        request.setCommissionId(id);
+//        TransactionBusiness.Filter request = new TransactionBusiness.Filter();
+//        request.setCommissionId(id);
         //CPC
         for (TransactionCPC tcps : ommission.getTransactionCPCS()) {
-            transactionBusiness.updateCPCValue(tcps.getClickNumber() * ommission.getValue(), tcps.getId());
+            transactionCPCBusiness.updateCPCValue(tcps.getClickNumber() * ommission.getValue(), tcps.getId());
         }
         //CPL
         for (TransactionCPL tcpl : ommission.getTransactionCPLS()) {
-            transactionBusiness.updateCPLValue(1 * ommission.getValue(), tcpl.getId());
+            transactionCPLBusiness.updateCPLValue(1 * ommission.getValue(), tcpl.getId());
         }
         //CPM
         for (TransactionCPM tcpm :  ommission.getTransactionCPMS()){
-            transactionBusiness.updateCPMValue(tcpm.getImpressionNumber() * ommission.getValue(), tcpm.getId());
+            transactionCPMBusiness.updateCPMValue(tcpm.getImpressionNumber() * ommission.getValue(), tcpm.getId());
         }
 
         return CommissionDTO.from(repository.save(ommission));

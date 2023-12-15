@@ -9,6 +9,7 @@ import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,20 +85,12 @@ public class CampaignBudgetBusiness {
         budget.setStatus(true);
         return CampaignBudgetDTO.from(repository.save(budget));
     }
+
     public CampaignBudgetDTO disable(Long id) {
         CampaignBudget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
         budget.setStatus(false);
         return CampaignBudgetDTO.from(repository.save(budget));
     }
-
-    public CampaignBudgetDTO aggiornoCalcoli(Long id) {
-        CampaignBudget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
-
-
-
-        return CampaignBudgetDTO.from(repository.save(budget));
-    }
-
 
     // GET BY ID
     public CampaignBudgetDTO findById(Long id) {
@@ -119,19 +111,37 @@ public class CampaignBudgetBusiness {
 
     // SEARCH PAGINATED
     public Page<CampaignBudgetDTO> search(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize());
         Page<CampaignBudget> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CampaignBudgetDTO::from);
     }
 
     public Page<CampaignBudgetDTO> searchByCampaignID(Long campaignId, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize());
         Filter request = new Filter();
         request.setCampaignId(campaignId);
         Page<CampaignBudget> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CampaignBudgetDTO::from);
     }
 
+    public Page<CampaignBudgetDTO> searchAttivi() {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
+        Filter request = new Filter();
+        request.setStatus(true);
+        Page<CampaignBudget> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(CampaignBudgetDTO::from);
+    }
+
+
+
+
+
+//    public CampaignBudgetDTO aggiornoCalcoli(Long id) {
+//        CampaignBudget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
+//
+//
+//        return CampaignBudgetDTO.from(repository.save(budget));
+//    }
 //    public CampaignBudget findByCampaignIdAndDate(Long campaignId, LocalDateTime data) {
 //        Filter request = new Filter();
 //        request.setCampaignId(campaignId);
@@ -139,7 +149,6 @@ public class CampaignBudgetBusiness {
 //        request.setEndDateTo(data.toLocalDate());
 //        return repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE)).stream().findFirst().orElse(null);
 //    }
-
 //    public CampaignBudgetDTO incrementoCapErogato(Long id, Integer cap) {
 //        CampaignBudget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
 //        Integer capErogato = budget.getCapErogato() + cap;
@@ -178,7 +187,7 @@ public class CampaignBudgetBusiness {
 
     private Specification<CampaignBudget> getSpecification(Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate ;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {
@@ -202,6 +211,15 @@ public class CampaignBudgetBusiness {
             if (request.getEndDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("endDate"), request.getEndDateTo()));
             }
+            if (request.getStartDate() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), request.getStartDate()));
+            }
+            if (request.getEndDate() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("endDate"), request.getEndDate()));
+            }
+            if (request.getStatus() != null) {
+                predicates.add(cb.equal(root.get("status"), request.getStatus()));
+            }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 
@@ -216,6 +234,7 @@ public class CampaignBudgetBusiness {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @ToString
     public static class BaseCreateRequest {
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate startDate;
@@ -248,6 +267,7 @@ public class CampaignBudgetBusiness {
         private Double fatturato;
         private Long fatturaId;
         private Boolean status;
+        private Long id;
     }
 
     @Data
@@ -263,6 +283,10 @@ public class CampaignBudgetBusiness {
         private LocalDate endDateFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate endDateTo;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate startDate;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate endDate;
         private Long campaignId;
         private Long advertiserId;
         private Long plannerId;
