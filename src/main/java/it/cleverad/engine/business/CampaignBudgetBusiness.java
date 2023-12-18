@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
@@ -112,6 +111,7 @@ public class CampaignBudgetBusiness {
     // SEARCH PAGINATED
     public Page<CampaignBudgetDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize());
+        request.setStatus(true);
         Page<CampaignBudget> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CampaignBudgetDTO::from);
     }
@@ -131,9 +131,6 @@ public class CampaignBudgetBusiness {
         Page<CampaignBudget> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CampaignBudgetDTO::from);
     }
-
-
-
 
 
 //    public CampaignBudgetDTO aggiornoCalcoli(Long id) {
@@ -187,7 +184,7 @@ public class CampaignBudgetBusiness {
 
     private Specification<CampaignBudget> getSpecification(Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate ;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {

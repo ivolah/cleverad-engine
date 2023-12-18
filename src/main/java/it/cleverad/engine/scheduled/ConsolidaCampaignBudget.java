@@ -36,7 +36,7 @@ public class ConsolidaCampaignBudget {
     /**
      * Consolido i numeri e le percentuali dei Budget Campagne
      */
-    @Scheduled(cron = "0/30 * * * * ?")
+    @Scheduled(cron = "1 1 0/1 * * ?")
     public void ciclaCampaignBudget() {
         this.gestisciCampaignBudget();
     }//ciclaCampaignBudget
@@ -44,10 +44,9 @@ public class ConsolidaCampaignBudget {
     private void gestisciCampaignBudget() {
         // listo i budget attivi
         List<CampaignBudgetDTO> budgets = campaignBudgetBusiness.searchAttivi().stream().collect(Collectors.toList());
-        log.info(">>>>>>>>> " + budgets.size());
 
         budgets.forEach(dto -> {
-            log.info("GESTISCO {} \n\n", dto);
+            log.trace("GESTISCO {} \n\n", dto);
 
             Integer capErogato = 0;
             double budgetErogato = 0D;
@@ -81,7 +80,7 @@ public class ConsolidaCampaignBudget {
 
             CampaignBudgetBusiness.BaseCreateRequest request = new CampaignBudgetBusiness.BaseCreateRequest();
             request.setCapErogato(capErogato);
-            request.setCapPc((double) ((capErogato * 100) / dto.getCapIniziale()));
+            request.setCapPc(((double) (capErogato * 100) / dto.getCapIniziale()));
             request.setBudgetErogato(budgetErogato);
             request.setCommissioniErogate(commissioniErogate);
             request.setRevenuePC(1 - (commissioniErogate / budgetErogato));
@@ -106,12 +105,12 @@ public class ConsolidaCampaignBudget {
             } else {
                 // cancello
                 campaignBudgetBusiness.delete(dto.getId());
-                log.info(" ELIMINO {}", dto.getId());
+                log.trace("ELIMINO {}", dto.getId());
             }
 
         });
 
-        log.info("END");
+        log.trace("END");
     }
 
 }

@@ -222,7 +222,6 @@ public class AffiliateBusiness {
         wal.setPayed(0.0);
         wal.setResidual(0.0);
         wal.setTotal(0.0);
-        wal.setStatus(true);
         walletBusiness.create(wal);
 
         // creo channel
