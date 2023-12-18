@@ -44,7 +44,7 @@ public class RigeneraController {
     @PostMapping("/wallet")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void wallet(@ModelAttribute RigeneraWalletBusiness.FilterUpdate request) {
-        rigeneraWalletBusiness.rigenera(Integer.parseInt(request.getYear()), Integer.parseInt(request.getMonth()), Integer.parseInt(request.getDay()), request.getAffiliateId());
+        rigeneraWalletBusiness.rigenera(request.getAffiliateId());
     }
 
 }

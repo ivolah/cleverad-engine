@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.Set;
 
 
@@ -20,15 +21,10 @@ public class Wallet {
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String nome;
-    private String description;
-
     private Double total;
     private Double payed;
     private Double residual;
-
-    private Boolean status = true;
 
     @ManyToOne
     @JoinColumn(name = "affiliate_id")

@@ -31,10 +31,6 @@ public class WalletBusiness {
 
     @Autowired
     private WalletRepository repository;
-
-    @Autowired
-    private WalletTransactionBusiness walletTransactionBusiness;
-
     @Autowired
     private Mapper mapper;
 
@@ -72,6 +68,12 @@ public class WalletBusiness {
         return page.map(WalletDTO::from);
     }
 
+    public Page<WalletDTO> getAll() {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
+        Page<Wallet> page = repository.findAll(pageable);
+        return page.map(WalletDTO::from);
+    }
+
     public Page<WalletDTO> findByIdAffilaite(Long id) {
         Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
@@ -82,15 +84,11 @@ public class WalletBusiness {
 
     // UPDATE
     public WalletDTO update(Long id, Filter filter) {
-        Wallet channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Wallet", id));
-        WalletDTO campaignDTOfrom = WalletDTO.from(channel);
-
-        mapper.map(filter, campaignDTOfrom);
-
-        Wallet mappedEntity = mapper.map(channel, Wallet.class);
-        mapper.map(campaignDTOfrom, mappedEntity);
-
-        return WalletDTO.from(repository.save(mappedEntity));
+        Wallet wallet = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Wallet", id));
+        filter.setId(id);
+        filter.setNome(wallet.getNome());
+        mapper.map(filter, wallet);
+        return WalletDTO.from(repository.save(wallet));
     }
 
     public WalletDTO incement(Long id, Double value) {
@@ -102,14 +100,13 @@ public class WalletBusiness {
 
     public WalletDTO decrement(Long id, Double value) {
         Wallet wallet = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Wallet", id));
-        if (wallet.getResidual() != 0D)
-            wallet.setResidual(wallet.getResidual() - value);
-        if (wallet.getTotal() != 0D)
-            wallet.setTotal(wallet.getTotal() - value);
+        if (wallet.getResidual() != 0D) wallet.setResidual(wallet.getResidual() - value);
+        if (wallet.getTotal() != 0D) wallet.setTotal(wallet.getTotal() - value);
         WalletDTO dto = WalletDTO.from(repository.saveAndFlush(wallet));
         log.trace("Decrement by :: {} - {} --> ", id, value, dto.getTotal());
         return dto;
     }
+
 
     /**
      * ============================================================================================================
@@ -121,9 +118,6 @@ public class WalletBusiness {
 
             if (request.getId() != null) {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
-            }
-            if (request.getStatus() != null) {
-                predicates.add(cb.equal(root.get("status"), request.getStatus()));
             }
             if (request.getAffiliateId() != null) {
                 predicates.add(cb.equal(root.get("affiliate").get("id"), request.getAffiliateId()));
@@ -145,13 +139,9 @@ public class WalletBusiness {
     public static class BaseCreateRequest {
         private String nome;
         private String description;
-
         private Double total;
         private Double payed;
         private Double residual;
-
-        private Boolean status;
-
         private Long affiliateId;
     }
 
@@ -160,16 +150,11 @@ public class WalletBusiness {
     @AllArgsConstructor
     public static class Filter {
         private Long id;
-
         private String nome;
         private String description;
-
         private Double total;
         private Double payed;
         private Double residual;
-
-        private Boolean status;
-
         private Long affiliateId;
     }
 
