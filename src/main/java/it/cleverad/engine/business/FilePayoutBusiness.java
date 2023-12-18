@@ -8,6 +8,7 @@ import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
 import it.cleverad.engine.persistence.repository.service.FilePayoutRepository;
 import it.cleverad.engine.persistence.repository.service.PayoutRepository;
 import it.cleverad.engine.service.FileStoreService;
+import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.FilePayoutDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -43,6 +44,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -62,6 +64,8 @@ public class FilePayoutBusiness {
     private Mapper mapper;
     @Autowired
     private FileStoreService fileStoreService;
+    @Autowired
+    private MailService mailService;
 
     /**
      * ============================================================================================================
@@ -71,14 +75,12 @@ public class FilePayoutBusiness {
     public Long store(MultipartFile file, BaseCreateRequest request) {
         Payout payout = payoutRepository.findById(request.payoutId).orElseThrow(() -> new ElementCleveradException("Payout", request.payoutId));
         Dictionary dictionary = (dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
-
         FilePayout fileDB = null;
         try {
-            fileDB = new FilePayout(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), file.getBytes(), payout, dictionary, null);
+            fileDB = new FilePayout(StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename())), file.getContentType(), file.getBytes(), payout, dictionary, null);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
         return repository.save(fileDB).getId();
     }
 
@@ -89,6 +91,13 @@ public class FilePayoutBusiness {
             String filename = StringUtils.cleanPath(file.getOriginalFilename());
             String path = fileStoreService.storeFile(payout.getAffiliate().getId(), "payout", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), file.getBytes());
             FilePayout fileDB = new FilePayout(filename, file.getContentType(), null, payout, dictionary, path);
+
+            MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
+            mailRequest.setAffiliateId(payout.getAffiliate().getId());
+            mailRequest.setPayoutId(payout.getId());
+            mailRequest.setEmail("linda.loturco@cleverad.it");
+            mailService.inviaMailFatturaCaricata(mailRequest);
+
             return repository.save(fileDB).getId();
         } catch (Exception e) {
             throw new PostgresCleveradException("Errore uplaod: " + file.getOriginalFilename() + "!", e);

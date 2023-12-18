@@ -21,39 +21,29 @@ public class Payout {
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private Double totale;
     private String valuta;
     private String note;
     private LocalDate data;
-
     @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
     @Column(name = "last_modification_date")
     private LocalDateTime lastModificationDate = LocalDateTime.now();
-
     @ManyToOne
     @JoinColumn(name = "affiliate_id")
     private Affiliate affiliate;
-
     @ManyToOne()
     @JoinColumn(name = "dictionary_id")
     private Dictionary dictionary;
-
     @OneToMany(mappedBy = "payout")
     private Set<TransactionCPL> transactionCPLS;
-
     @OneToMany(mappedBy = "payout")
     private Set<TransactionCPC> transactionCPCS;
-
     @OneToMany(mappedBy = "payout")
     private Set<TransactionCPM> transactionCPMS;
-
     @OneToMany(mappedBy = "payout")
     private Set<TransactionCPS> transactionCPSS;
-
     @OneToMany(mappedBy = "payout")
     private Set<FilePayout> filePayouts;
-
 
 }

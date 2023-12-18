@@ -190,6 +190,12 @@ public class MailService {
         return null;
     }
 
+    public MailDTO inviaMailFatturaCaricata(BaseCreateRequest request) {
+        request.setTemplateId(15L);
+        this.invio(request);
+        return null;
+    }
+
     public void invioRichiesta(BaseCreateRequest request) {
         AffiliateDTO affiliato = affiliateBusiness.findById(jwtUserDetailsService.getAffiliateID());
         CampaignDTO campaign = campaignBusiness.findById(request.getCampaignId());
