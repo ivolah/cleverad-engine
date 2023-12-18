@@ -79,14 +79,12 @@ public class ReportBusiness {
     private Specification<Report> getSpecification(Filter request) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-
             if (request.getId() != null) {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
             if (request.getName() != null) {
                 predicates.add(cb.equal(root.get("name"), request.getName()));
             }
-
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
@@ -154,9 +152,7 @@ public class ReportBusiness {
      **/
 
     public Page<ReportTopCampaings> searchTopCampaignsChannel(TopFilter request, Pageable pageableRequest) {
-
         request = prepareRequest(request);
-
         List<ReportTopCampaings> listaCampaigns ;
         if (Boolean.FALSE.equals(jwtUserDetailsService.isAdmin())) {
             listaCampaigns = reportRepository.searchTopCampaignsChannel(request.getDateTimeFrom(), request.getDateTimeTo().plusDays(1), jwtUserDetailsService.getAffiliateID(), request.getCampaignId(), request.getDictionaryIds(), request.getStatusIds());
@@ -177,9 +173,7 @@ public class ReportBusiness {
      **/
 
     public Page<ReportTopAffiliates> searchTopAffilaites(TopFilter request, Pageable pageableRequest) {
-
         request = prepareRequest(request);
-
         List<ReportTopAffiliates> listaAffiliates;
         if (Boolean.FALSE.equals(jwtUserDetailsService.isAdmin())) {
             listaAffiliates = reportRepository.searchTopAffilaites(request.getDateTimeFrom(), request.getDateTimeTo(), jwtUserDetailsService.getAffiliateID(), request.getCampaignId(), request.getDictionaryIds(), request.getStatusIds());
@@ -195,9 +189,7 @@ public class ReportBusiness {
      **/
 
     public Page<ReportTopAffiliates> searchTopAffilaitesChannel(TopFilter request, Pageable pageableRequest) {
-
         request = prepareRequest(request);
-
         List<ReportTopAffiliates> listaAffiliates;
         if (Boolean.FALSE.equals(jwtUserDetailsService.isAdmin())) {
             listaAffiliates = reportRepository.searchTopAffilaitesChannel(request.getDateTimeFrom(), request.getDateTimeTo(), jwtUserDetailsService.getAffiliateID(), request.getCampaignId(), request.getDictionaryIds(), request.getStatusIds());
@@ -213,13 +205,10 @@ public class ReportBusiness {
      **/
 
     public Page<ReportDaily> searchDaily(TopFilter request, Pageable pageableRequest) {
-
         request = prepareRequest(request);
-
         if (Boolean.FALSE.equals(jwtUserDetailsService.isAdmin()))
             request.setAffiliateid(jwtUserDetailsService.getAffiliateID());
         List<ReportDaily> lista = reportRepository.searchDaily(request.getDateTimeFrom(), request.getDateTimeTo().plusDays(1), request.getAffiliateid(), request.getCampaignId(), request.getDictionaryIds(), request.getStatusIds());
-
         final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), lista.size());
         return new PageImpl<>(lista.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, lista.size());
     }
@@ -300,6 +289,7 @@ public class ReportBusiness {
         private Long affiliateid;
         private Long campaignId;
         private Long statusId;
+        private Long channelId;
     }
 
 }
