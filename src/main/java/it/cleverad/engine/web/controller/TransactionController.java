@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 public class TransactionController {
 
 
-
     @Autowired
     private TransactionAllBusiness allBusiness;
     @Autowired
@@ -138,13 +137,15 @@ public class TransactionController {
         return transactionCPCBusiness.searchByAffiliateCpc(request, id, pageable);
     }
 
-//    @GetMapping("/{id}/affiliate/cpl")
-//    @ResponseStatus(HttpStatus.ACCEPTED)
-//    public Page<TransactionCPLDTO> getbyAffiliateCpl(@PathVariable Long id, Pageable pageable) {
-//        TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
-//        request.setAffiliateId(id);
-//        return transactionCPLBusiness.searchByAffiliateCpl(request, id, pageable);
-//    }
+    /**
+    @GetMapping("/{id}/affiliate/cpl")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<TransactionCPLDTO> getbyAffiliateCpl(@PathVariable Long id, Pageable pageable) {
+        TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
+        request.setAffiliateId(id);
+        return transactionCPLBusiness.searchByAffiliateCpl(request, id, pageable);
+    }
+    **/
 
     @GetMapping("/{id}/affiliate/cpm")
     @ResponseStatus(HttpStatus.ACCEPTED)
@@ -179,11 +180,25 @@ public class TransactionController {
         return transactionCPSBusiness.searchByAffiliateCps(request, null, pageable);
     }
 
-//    @PatchMapping("/update/status")
-//    @ResponseStatus(HttpStatus.ACCEPTED)
-//    public void updateStatus(@RequestBody TransactionBusiness.FilterUpdate request) {
-//        business.updateStatus(request.getId(), request.getDictionaryId(), request.getTipo(), request.getApproved(), request.getStatusId());
-//    }
+    @PatchMapping("/update/status")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void updateStatus(@RequestBody TransactionCPCBusiness.FilterUpdate request) {
+        switch (request.getTipo()) {
+            case "CPC":
+                transactionCPCBusiness.updateStatus(request.getId(), request.getDictionaryId(), request.getApproved(), request.getStatusId());
+                break;
+            case "CPL":
+                transactionCPLBusiness.updateStatus(request.getId(), request.getDictionaryId(), request.getApproved(), request.getStatusId());
+                break;
+            case "CPM":
+                transactionCPMBusiness.updateStatus(request.getId(), request.getDictionaryId(), request.getApproved(), request.getStatusId());
+                break;
+            case "CPS":
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + request.getTipo());
+        }
+    }
 
     /**
      * ============================================================================================================

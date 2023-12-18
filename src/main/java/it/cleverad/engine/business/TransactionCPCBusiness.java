@@ -2,7 +2,10 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.config.security.JwtUserDetailsService;
-import it.cleverad.engine.persistence.model.service.*;
+import it.cleverad.engine.persistence.model.service.Affiliate;
+import it.cleverad.engine.persistence.model.service.RevenueFactor;
+import it.cleverad.engine.persistence.model.service.TransactionCPC;
+import it.cleverad.engine.persistence.model.service.Wallet;
 import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.web.dto.BudgetDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
@@ -100,9 +103,7 @@ public class TransactionCPCBusiness {
             } else {
                 newCpcTransaction.setRevenueId(2L);
             }
-
         }
-
         newCpcTransaction.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
 
         if (request.commissionId != null) try {
@@ -159,7 +160,6 @@ public class TransactionCPCBusiness {
 
     //  quando campbio stato devo ricalcolare i budget affilitato e campagna
     //  nuovi tre stati  : pending, approvato e rifutato
-
     public void updateStatus(Long id, Long dictionaryId, Boolean approved, Long statusId) {
 
         TransactionCPC cpc = cpcRepository.findById(id).get();
@@ -289,7 +289,6 @@ public class TransactionCPCBusiness {
     }
 
     // SEARCH PAGINATED
-
     public Page<TransactionCPCDTO> searchCpc(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Page<TransactionCPC> page = cpcRepository.findAll(getSpecificationCPC(request), pageable);
@@ -319,6 +318,41 @@ public class TransactionCPCBusiness {
         return dictionaryBusiness.getTransactionTypes();
     }
 
+    //    >>>>>>>>> RICERCE PER RIGENERAZIONE
+
+    public List<TransactionCPC> searchStatusIdAndDateNotManual(Long statusId, LocalDate dataDaGestireStart, LocalDate dataDaGestireEnd, Long affiliateId, Long campaignId) {
+        TransactionCPCBusiness.Filter request = new TransactionCPCBusiness.Filter();
+        request.setDateTimeFrom(dataDaGestireStart.atStartOfDay());
+        request.setDateTimeTo(LocalDateTime.of(dataDaGestireEnd, LocalTime.MAX));
+        request.setStatusId(statusId);
+        List<Long> not = new ArrayList<>();
+        not.add(68L);
+        request.setNotInId(not);
+        request.setAffiliateId(affiliateId);
+        request.setCampaignId(campaignId);
+        return cpcRepository.findAll(getSpecificationCPC(request), Pageable.ofSize(Integer.MAX_VALUE)).stream().collect(Collectors.toList());
+    }
+
+    public List<TransactionCPC> searchStatusIdAndDicIdAndDate(Long statusId, Long dicId, LocalDate dataDaGestireStart, LocalDate dataDaGestireEnd, Long affiliateId, Long campaignId) {
+        TransactionCPCBusiness.Filter request = new TransactionCPCBusiness.Filter();
+        request.setDateTimeFrom(dataDaGestireStart.atStartOfDay());
+        request.setDateTimeTo(LocalDateTime.of(dataDaGestireEnd, LocalTime.MAX));
+        request.setStatusId(statusId);
+        request.setDictionaryId(dicId);
+        request.setAffiliateId(affiliateId);
+        request.setCampaignId(campaignId);
+        return cpcRepository.findAll(getSpecificationCPC(request), Pageable.ofSize(Integer.MAX_VALUE)).stream().collect(Collectors.toList());
+    }
+
+    //    -- ---- ---- ---- ---- RIGENERA WALLET
+    public List<TransactionCPC> searchPayout(Long affiliateId, Boolean payoutPresent) {
+        TransactionCPCBusiness.Filter request = new TransactionCPCBusiness.Filter();
+        request.setAffiliateId(affiliateId);
+        request.setPayoutPresent(payoutPresent);
+        request.setValueNotZero(true);
+        return cpcRepository.findAll(getSpecificationCPC(request), Pageable.ofSize(Integer.MAX_VALUE)).stream().collect(Collectors.toList());
+    }
+
     /**
      * ============================================================================================================
      **/
@@ -334,14 +368,12 @@ public class TransactionCPCBusiness {
             if (request.getApproved() != null) {
                 predicates.add(cb.equal(root.get("approved"), request.getApproved()));
             }
-
             if (request.getIp() != null) {
                 predicates.add(cb.equal(root.get("ip"), request.getIp()));
             }
             if (request.getAgent() != null) {
                 predicates.add(cb.equal(root.get("agent"), request.getAgent()));
             }
-
             if (request.getAffiliateId() != null) {
                 predicates.add(cb.equal(root.get("affiliate").get("id"), request.getAffiliateId()));
             }
@@ -357,18 +389,15 @@ public class TransactionCPCBusiness {
             if (request.getWalletId() != null) {
                 predicates.add(cb.equal(root.get("wallet").get("id"), request.getWalletId()));
             }
-
             if (request.getDateTimeFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("dateTime"), request.getDateTimeFrom()));
             }
             if (request.getDateTimeTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), request.getDateTimeTo()));
             }
-
             if (request.getDictionaryId() != null) {
                 predicates.add(cb.equal(root.get("dictionary").get("id"), request.getDictionaryId()));
             }
-
             if (request.getNotInId() != null) {
                 CriteriaBuilder.In<Long> inClauseNot = cb.in(root.get("dictionary").get("id"));
                 for (Long id : request.getNotInId()) {
@@ -376,15 +405,15 @@ public class TransactionCPCBusiness {
                 }
                 predicates.add(inClauseNot.not());
             }
-
             if (request.getValueNotZero() != null && request.getValueNotZero()) {
                 predicates.add(cb.notEqual(root.get("value"), "0"));
             }
-
             if (request.getBlacklisted() != null) {
                 predicates.add(cb.equal(root.get("blacklisted"), request.getBlacklisted()));
             }
-
+            if (request.getPayoutPresent() != null ) {
+                predicates.add(cb.equal(root.get("payoutPresent"), request.getPayoutPresent()));
+            }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
@@ -399,7 +428,6 @@ public class TransactionCPCBusiness {
     @AllArgsConstructor
     @ToString
     public static class BaseCreateRequest {
-
         private Long affiliateId;
         private Long campaignId;
         private Long commissionId;
@@ -409,12 +437,10 @@ public class TransactionCPCBusiness {
         private LocalDateTime dateTime;
         private Double value;
         private Boolean approved;
-
         private String ip;
         private String agent;
         private String refferal;
         private String data;
-
         private String payoutId;
         private String note;
         private Long dictionaryId;
@@ -424,13 +450,10 @@ public class TransactionCPCBusiness {
         private Long clickNumber;
         private Long revenueId;
         private Boolean payoutPresent;
-
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate manualDate;
-
         private Long statusId;
         private Double initialValue;
-
         private Long cpcId;
     }
 
@@ -460,13 +483,12 @@ public class TransactionCPCBusiness {
         private Long leadNumber;
         private Long clickNumber;
         private Long revenueId;
-
         private Long statusId;
         private Double initialValue;
         private Boolean blacklisted;
         private Boolean valueNotZero;
+        private Boolean payoutPresent;
         private Boolean phoneVerifiedNull;
-
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDateTime dateTimeFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")

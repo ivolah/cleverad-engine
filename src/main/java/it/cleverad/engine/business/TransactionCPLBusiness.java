@@ -146,7 +146,7 @@ public class TransactionCPLBusiness {
 
     //  quando campbio stato devo ricalcolare i budget affilitato e campagna
     //  nuovi tre stati  : pending, approvato e rifutato
-    public void updateStatus(Long id, Long dictionaryId, String tipo, Boolean approved, Long statusId) {
+    public void updateStatus(Long id, Long dictionaryId, Boolean approved, Long statusId) {
 
         TransactionCPL cpl = cplRepository.findById(id).get();
         if (statusId == null && cpl.getDictionaryStatus() != null) statusId = cpl.getDictionaryStatus().getId();
@@ -361,6 +361,15 @@ public class TransactionCPLBusiness {
         return cplRepository.findAll(getSpecificationCPL(request), Pageable.ofSize(Integer.MAX_VALUE)).stream().collect(Collectors.toList());
     }
 
+    //    -- ---- ---- ---- ---- RIGENERA WALLET
+    public List<TransactionCPL> searchPayout(Long affiliateId, Boolean payoutPresent) {
+        TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
+        request.setAffiliateId(affiliateId);
+        request.setPayoutPresent(payoutPresent);
+        request.setValueNotZero(true);
+        return cplRepository.findAll(getSpecificationCPL(request), Pageable.ofSize(Integer.MAX_VALUE)).stream().collect(Collectors.toList());
+    }
+
     /**
      * ============================================================================================================
      **/
@@ -384,14 +393,12 @@ public class TransactionCPLBusiness {
             if (request.getApproved() != null) {
                 predicates.add(cb.equal(root.get("approved"), request.getApproved()));
             }
-
             if (request.getIp() != null) {
                 predicates.add(cb.equal(root.get("ip"), request.getIp()));
             }
             if (request.getAgent() != null) {
                 predicates.add(cb.equal(root.get("agent"), request.getAgent()));
             }
-
             if (request.getAffiliateId() != null) {
                 predicates.add(cb.equal(root.get("affiliate").get("id"), request.getAffiliateId()));
             }
@@ -407,24 +414,24 @@ public class TransactionCPLBusiness {
             if (request.getWalletId() != null) {
                 predicates.add(cb.equal(root.get("wallet").get("id"), request.getWalletId()));
             }
-
             if (request.getDateTimeFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("dateTime"), request.getDateTimeFrom()));
             }
             if (request.getDateTimeTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), request.getDateTimeTo()));
             }
-
             if (request.getDictionaryId() != null) {
                 predicates.add(cb.equal(root.get("dictionary").get("id"), request.getDictionaryId()));
             }
-
             if (request.getNotInId() != null) {
                 CriteriaBuilder.In<Long> inClauseNot = cb.in(root.get("dictionary").get("id"));
                 for (Long id : request.getNotInId()) {
                     inClauseNot.value(id);
                 }
                 predicates.add(inClauseNot.not());
+            }
+            if (request.getPayoutPresent()) {
+                predicates.add(cb.equal(root.get("payoutPresent"), request.getPayoutPresent()));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -440,7 +447,6 @@ public class TransactionCPLBusiness {
     @AllArgsConstructor
     @ToString
     public static class BaseCreateRequest {
-
         private Long affiliateId;
         private Long campaignId;
         private Long commissionId;
@@ -450,12 +456,10 @@ public class TransactionCPLBusiness {
         private LocalDateTime dateTime;
         private Double value;
         private Boolean approved;
-
         private String ip;
         private String agent;
         private String refferal;
         private String data;
-
         private String payoutId;
         private String note;
         private Long dictionaryId;
@@ -465,13 +469,10 @@ public class TransactionCPLBusiness {
         private Long clickNumber;
         private Long revenueId;
         private Boolean payoutPresent;
-
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate manualDate;
-
         private Long statusId;
         private Double initialValue;
-
         private Long cpcId;
     }
 
@@ -501,13 +502,12 @@ public class TransactionCPLBusiness {
         private Long leadNumber;
         private Long clickNumber;
         private Long revenueId;
-
         private Long statusId;
         private Double initialValue;
         private Boolean blacklisted;
         private Boolean valueNotZero;
         private Boolean phoneVerifiedNull;
-
+        private Boolean payoutPresent;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDateTime dateTimeFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
