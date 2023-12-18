@@ -4,6 +4,7 @@ import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.ClickMultipli;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
+import it.cleverad.engine.persistence.model.service.TransactionCPC;
 import it.cleverad.engine.persistence.model.tracking.Cpc;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.tracking.CpcRepository;
@@ -61,8 +62,8 @@ public class RigeneraCPCBusiness {
 
     @Autowired
     private CampaignRepository campaignRepository;
-    @Autowired
-    private TransactionAllBusiness transactionAllBusiness;
+//    @Autowired
+//    private TransactionAllBusiness transactionAllBusiness;
 
     public void rigenera(Integer anno, Integer mese, Integer giorno, Long affiliateId, Long campaignId) {
 
@@ -98,18 +99,18 @@ public class RigeneraCPCBusiness {
         // CANCELLO LE TRANSAZIONI NON BLACKLISTED
 
         // GESTISCO LE TRANSAZIONI --->>> RIGETTATE E NOT MANUALILISTED
-        Page<TransactionStatusDTO> transazioni74 = transactionAllBusiness.searchStatusIdAndDate(74L, dataDaGestireStart, dataDaGestireEnd, "CPC", affiliateId, campaignId);
-        log.info("RIGETTATE --> 74 >> " + transazioni74.getTotalElements());
+         List<TransactionCPC> transazioni74 = transactionCPCBusiness.searchStatusIdAndDateNotManual(74L, dataDaGestireStart, dataDaGestireEnd, affiliateId, campaignId);
+        log.info("RIGETTATE --> 74 >> " + transazioni74.size());
         transazioni74.forEach(ttt -> transactionCPCBusiness.delete(ttt.getId()));
 
         // GESTISCO LE TRANSAZIONI --->>> APPROVATE E NOT MANUALILISTED
-        Page<TransactionStatusDTO> transazioni73 = transactionAllBusiness.searchStatusIdAndDate(73L, dataDaGestireStart, dataDaGestireEnd, "CPC", affiliateId, campaignId);
-        log.info("APPROVATE --> 73 >> " + transazioni73.getTotalElements());
+        List<TransactionCPC> transazioni73 = transactionCPCBusiness.searchStatusIdAndDateNotManual(73L, dataDaGestireStart, dataDaGestireEnd, affiliateId, campaignId);
+        log.info("APPROVATE --> 73 >> " + transazioni73.size());
         transazioni73.forEach(ttt -> transactionCPCBusiness.delete(ttt.getId()));
 
         // GESTISCO LE TRANSAZIONI --->>> PENDING E NOT MANUALILISTED
-        Page<TransactionStatusDTO> transazioni72 = transactionAllBusiness.searchStatusIdAndDate(72L, dataDaGestireStart, dataDaGestireEnd, "CPC", affiliateId, campaignId);
-        log.info("PENDING --> 72 >> " + transazioni72.getTotalElements());
+        List<TransactionCPC> transazioni72 = transactionCPCBusiness.searchStatusIdAndDateNotManual(72L, dataDaGestireStart, dataDaGestireEnd,  affiliateId, campaignId);
+        log.info("PENDING --> 72 >> " + transazioni72.size());
         transazioni72.forEach(ttt -> transactionCPCBusiness.delete(ttt.getId()));
 
         // RIPASSO TUTTE LE CPC PENDING
@@ -120,10 +121,9 @@ public class RigeneraCPCBusiness {
         // GESTISCO BLACKLISTED A PARTE
 
         // GESTISCO LE TRANSAZIONI --->>> BLACKLSTED
-        Page<TransactionStatusDTO> black = transactionAllBusiness.searchStatusIdAndDicIdAndDate(74L, 70L, dataDaGestireStart, dataDaGestireEnd, "CPC", affiliateId, campaignId);
-        log.info("BLACKLISTED >> " + black.getTotalElements());
+        List<TransactionCPC> black = transactionCPCBusiness.searchStatusIdAndDicIdAndDate(74L, 70L, dataDaGestireStart, dataDaGestireEnd,  affiliateId, campaignId);
+        log.info("BLACKLISTED >> " + black.size());
         black.forEach(transactionStatusDTO -> transactionCPCBusiness.delete(transactionStatusDTO.getId()));
-
         // RIPASSO TUTTE LE CPC BLACKLISTED
         this.gestisci(anno, mese, giorno, affiliateId, campaignId, 74L, true);
 
