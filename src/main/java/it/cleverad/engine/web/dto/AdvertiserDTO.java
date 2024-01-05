@@ -29,7 +29,17 @@ public class AdvertiserDTO {
 
     private String country;
 
-    public AdvertiserDTO(long id, String name, String vatNumber, String street, String streetNumber, String city, String zipCode, String primaryMail, String secondaryMail, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, List<BasicCampaignDTO> basicCampaignDTOS, String country) {
+    private Long termId;
+    private String termName;
+    private Long vatId;
+    private String vatName;
+
+    public AdvertiserDTO(long id, String name, String vatNumber, String street, String streetNumber, String city, String zipCode, String primaryMail, String secondaryMail, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, List<BasicCampaignDTO> basicCampaignDTOS, String country,
+                         Long termId,
+                         String termName,
+                         Long vatId,
+                         String vatName
+    ) {
         this.id = id;
         this.name = name;
         this.vatNumber = vatNumber;
@@ -44,6 +54,11 @@ public class AdvertiserDTO {
         this.lastModificationDate = lastModificationDate;
         this.basicCampaignDTOS = basicCampaignDTOS;
         this.country = country;
+        this.termId = termId;
+        this.termName = termName;
+        this.vatId = vatId;
+        this.vatName = vatName;
+
     }
 
     public static AdvertiserDTO from(Advertiser advertiser) {
@@ -61,7 +76,14 @@ public class AdvertiserDTO {
             }).collect(Collectors.toList());
         }
 
-        return new AdvertiserDTO(advertiser.getId(), advertiser.getName(), advertiser.getVatNumber(), advertiser.getStreet(), advertiser.getStreetNumber(), advertiser.getCity(), advertiser.getZipCode(), advertiser.getPrimaryMail(), advertiser.getSecondaryMail(), advertiser.getStatus(), advertiser.getCreationDate(), advertiser.getLastModificationDate(), collect, advertiser.getCountry());
+        return new AdvertiserDTO(advertiser.getId(), advertiser.getName(), advertiser.getVatNumber(), advertiser.getStreet(), advertiser.getStreetNumber(), advertiser.getCity(), advertiser.getZipCode(), advertiser.getPrimaryMail(), advertiser.getSecondaryMail(), advertiser.getStatus(), advertiser.getCreationDate(), advertiser.getLastModificationDate(), collect, advertiser.getCountry(),
+
+                advertiser.getDictionaryTermType() != null ? advertiser.getDictionaryTermType().getId() : null,
+                advertiser.getDictionaryTermType() != null ? advertiser.getDictionaryTermType().getName() : null,
+
+                advertiser.getDictionaryVatType() != null ? advertiser.getDictionaryVatType().getId() : null,
+                advertiser.getDictionaryVatType() != null ? advertiser.getDictionaryVatType().getName() : null
+                );
     }
 
 }

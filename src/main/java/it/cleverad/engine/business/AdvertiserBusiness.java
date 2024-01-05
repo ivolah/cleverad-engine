@@ -3,6 +3,7 @@ package it.cleverad.engine.business;
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Advertiser;
 import it.cleverad.engine.persistence.repository.service.AdvertiserRepository;
+import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
 import it.cleverad.engine.web.dto.AdvertiserDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -39,6 +40,8 @@ public class AdvertiserBusiness {
     private RepresentativeBusiness representativeBusiness;
     @Autowired
     private Mapper mapper;
+    @Autowired
+    private DictionaryRepository dictionaryRepository;
 
     /**
      * ============================================================================================================
@@ -50,6 +53,8 @@ public class AdvertiserBusiness {
         map.setCreationDate(LocalDateTime.now());
         map.setLastModificationDate(LocalDateTime.now());
         map.setStatus(true);
+        map.setDictionaryTermType(dictionaryRepository.findById(request.termId).orElseThrow(() -> new ElementCleveradException("TERM", request.termId)));
+        map.setDictionaryVatType(dictionaryRepository.findById(request.vatId).orElseThrow(() -> new ElementCleveradException("VAT", request.vatId)));
         return AdvertiserDTO.from(repository.save(map));
     }
 
@@ -87,13 +92,13 @@ public class AdvertiserBusiness {
 
     // UPDATE
     public AdvertiserDTO update(Long id, Filter filter) {
-        Advertiser Advertiser = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Advertiser", id));
-        AdvertiserDTO AdvertiserDTOfrom = AdvertiserDTO.from(Advertiser);
-        mapper.map(filter, AdvertiserDTOfrom);
-        Advertiser mappedEntity = mapper.map(Advertiser, Advertiser.class);
-        mappedEntity.setLastModificationDate(LocalDateTime.now());
-        mapper.map(AdvertiserDTOfrom, mappedEntity);
-        return AdvertiserDTO.from(repository.save(mappedEntity));
+        Advertiser advertiser = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Advertiser", id));
+        mapper.map(filter, advertiser);
+        advertiser.setId(id);
+        advertiser.setLastModificationDate(LocalDateTime.now());
+        advertiser.setDictionaryTermType(dictionaryRepository.findById(filter.termId).orElseThrow(() -> new ElementCleveradException("TERM", filter.termId)));
+        advertiser.setDictionaryVatType(dictionaryRepository.findById(filter.vatId).orElseThrow(() -> new ElementCleveradException("VAT", filter.vatId)));
+        return AdvertiserDTO.from(repository.save(advertiser));
     }
 
     public AdvertiserDTO disable(Long id) {
@@ -188,6 +193,8 @@ public class AdvertiserBusiness {
         private String secondaryMail;
         private Boolean status;
         private String country;
+        private Long termId;
+        private Long vatId;
     }
 
     @Data
@@ -209,6 +216,8 @@ public class AdvertiserBusiness {
         private Instant creationDateTo;
         private Instant lastModificationDateFrom;
         private Instant lastModificationDateTo;
+        private Long termId;
+        private Long vatId;
     }
 
 }

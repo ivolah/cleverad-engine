@@ -42,8 +42,6 @@ import java.util.UUID;
 @Component
 @Transactional
 public class AffiliateBusiness {
-    @Autowired
-    private FileAdvertiserRepository fileAdvertiserRepository;
 
     @Autowired
     private AffiliateRepository repository;
@@ -135,19 +133,17 @@ public class AffiliateBusiness {
         Affiliate affiliate = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Affiliate", id));
         filter.setId(id);
         mapper.map(filter, affiliate);
-        log.info("filter  " + id);
-
         affiliate.setLastModificationDate(LocalDateTime.now());
-        log.info("filter 3.... " + id);
         affiliate.setDictionaryStatusType(dictionaryRepository.findById(filter.statusId).orElseThrow(() -> new ElementCleveradException("Status", filter.statusId)));
-        log.info("filter 4 " + id);
         affiliate.setDictionaryCompanyType(dictionaryRepository.findById(filter.companytypeId).orElseThrow(() -> new ElementCleveradException("Company Type", filter.companytypeId)));
-        log.info("filter 5 " + id);
-        AffiliateDTO dto =  AffiliateDTO.from(repository.save(affiliate));
+
+        affiliate.setDictionaryTermType(dictionaryRepository.findById(filter.termId).orElseThrow(() -> new ElementCleveradException("TERM", filter.termId)));
+        affiliate.setDictionaryVatType(dictionaryRepository.findById(filter.vatId).orElseThrow(() -> new ElementCleveradException("VAT", filter.vatId)));
+
+        AffiliateDTO dto = AffiliateDTO.from(repository.save(affiliate));
 
         MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
         Long statusID = filter.statusId;
-        log.info("status  " + statusID);
         if (statusID == 6 && !affiliate.getDictionaryStatusType().getId().equals(statusID)) {
             // invio mail approvato
             if (affiliate.getBrandbuddies()) mailRequest.setTemplateId(21L);
@@ -202,6 +198,9 @@ public class AffiliateBusiness {
         request.statusId = 5L;
 
         map.setDictionaryStatusType(dictionaryRepository.findById(request.statusId).orElseThrow(() -> new ElementCleveradException("Status", request.statusId)));
+        map.setDictionaryTermType(dictionaryRepository.findById(request.termId).orElseThrow(() -> new ElementCleveradException("TERM", request.termId)));
+        map.setDictionaryVatType(dictionaryRepository.findById(request.vatId).orElseThrow(() -> new ElementCleveradException("VAT", request.vatId)));
+
         if (request.companytypeId != null && request.companytypeId != 0)
             map.setDictionaryCompanyType(dictionaryRepository.findById(request.companytypeId).orElseThrow(() -> new ElementCleveradException("Company Type", request.companytypeId)));
 
@@ -405,6 +404,9 @@ public class AffiliateBusiness {
 
         private Long brandbuddiesPlatformId;
         private String brandbuddiesPlatformName;
+
+        private Long termId;
+        private Long vatId;
     }
 
     @Data
@@ -443,6 +445,8 @@ public class AffiliateBusiness {
 
         private Boolean cb;
         private Boolean brandbuddies;
+        private Long termId;
+        private Long vatId;
     }
 
 }

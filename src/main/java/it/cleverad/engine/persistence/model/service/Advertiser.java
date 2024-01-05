@@ -3,7 +3,6 @@ package it.cleverad.engine.persistence.model.service;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -58,4 +57,11 @@ public class Advertiser {
     @OneToMany(mappedBy = "advertiser")
     private Set<FileAdvertiser> fileAdvertisers;
 
+    @ManyToOne
+    @JoinColumn(name = "term_id")
+    private Dictionary dictionaryTermType;
+
+    @ManyToOne
+    @JoinColumn(name = "vat_id")
+    private Dictionary dictionaryVatType;
 }

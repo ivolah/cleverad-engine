@@ -116,4 +116,12 @@ public class Affiliate {
 //    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "affiliates")
 //    private Set<Campaign> campaigns = new HashSet<>();
 
+    @ManyToOne
+    @JoinColumn(name = "term_id")
+    private Dictionary dictionaryTermType;
+
+    @ManyToOne
+    @JoinColumn(name = "vat_id")
+    private Dictionary dictionaryVatType;
+
 } 
