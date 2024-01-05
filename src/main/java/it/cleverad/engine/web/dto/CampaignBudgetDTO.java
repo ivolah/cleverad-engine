@@ -1,6 +1,8 @@
 package it.cleverad.engine.web.dto;
 
 import it.cleverad.engine.persistence.model.service.CampaignBudget;
+import it.cleverad.engine.persistence.model.service.FileCampaignBudgetInvoice;
+import it.cleverad.engine.persistence.model.service.FileCampaignBudgetOrder;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,6 +10,8 @@ import lombok.ToString;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -20,11 +24,16 @@ public class CampaignBudgetDTO {
     private LocalDate startDate;
     private LocalDate endDate;
     private Long campaignId;
+    private String campaignName;
     private Long advertiserId;
+    private String advertiserName;
     private Long plannerId;
+    private String plannerName;
     private Long canaleId;
+    private String canaleName;
     private Boolean prenotato;
     private Long tipologiaId;
+    private String tipologiaNome;
     private Integer capIniziale;
     private Double payout;
     private Double budgetIniziale;
@@ -44,41 +53,42 @@ public class CampaignBudgetDTO {
     private String note;
     private Integer capFatturabile;
     private Double fatturato;
-    private Long fatturaId;
     private Boolean status;
+    private Boolean statoFatturato;
+    private Boolean statoPagato;
+    private LocalDate invoiceDueDate;
+
+    private List<FileCampaignBudgetInvoiceDTO> fileCampaignBudgetInvoices;
+    private List<FileCampaignBudgetOrderDTO> fileCampaignBudgetOrders;
 
     public static CampaignBudgetDTO from(CampaignBudget campaignBudget) {
-        return new CampaignBudgetDTO(
-                campaignBudget.getId(),
-                campaignBudget.getCreationDate(), campaignBudget.getStartDate(), campaignBudget.getEndDate(),
-                campaignBudget.getCampaign().getId(),
-                campaignBudget.getAdvertiser().getId(),
-                campaignBudget.getPlanner().getId(),
-                campaignBudget.getCanali().getId(),
-                campaignBudget.getPrenotato(),
-                campaignBudget.getDictionary().getId(),
-                campaignBudget.getCapIniziale(),
-                campaignBudget.getPayout(),
-                campaignBudget.getBudgetIniziale(),
-                campaignBudget.getCapErogato(),
-                campaignBudget.getCapPc(),
-                campaignBudget.getBudgetErogato(),
-                campaignBudget.getCommissioniErogate(),
-                campaignBudget.getRevenuePC(),
-                campaignBudget.getRevenue(),
-                campaignBudget.getScarto(),
-                campaignBudget.getBudgetErogatoPS(),
-                campaignBudget.getCommissioniErogatePS(),
-                campaignBudget.getRevenuePCPS(),
-                campaignBudget.getRevenuePS(),
-                campaignBudget.getRevenueDay(),
-                campaignBudget.getMateriali(),
-                campaignBudget.getNote(),
-                campaignBudget.getCapFatturabile(),
-                campaignBudget.getFatturato(),
-                campaignBudget.getFatturaId(),
-                campaignBudget.getStatus()
-        );
+
+         List<FileCampaignBudgetInvoiceDTO> invoices = null;
+        if (campaignBudget.getFileCampaignBudgetInvoices() != null) {
+            invoices = campaignBudget.getFileCampaignBudgetInvoices() .stream().map(invoice -> {
+                FileCampaignBudgetInvoiceDTO dto = new FileCampaignBudgetInvoiceDTO();
+                dto.setId(invoice.getId());
+                dto.setName(invoice.getName());
+                dto.setPath(invoice.getPath());
+                dto.setType(invoice.getType());
+                return dto;
+            }).collect(Collectors.toList());
+        }
+
+        List<FileCampaignBudgetOrderDTO> orders = null;
+        if (campaignBudget.getFileCampaignBudgetOrders() != null) {
+            orders = campaignBudget.getFileCampaignBudgetOrders() .stream().map(invoice -> {
+                FileCampaignBudgetOrderDTO dto = new FileCampaignBudgetOrderDTO();
+                dto.setId(invoice.getId());
+                dto.setName(invoice.getName());
+                dto.setPath(invoice.getPath());
+                dto.setType(invoice.getType());
+                return dto;
+            }).collect(Collectors.toList());
+        }
+
+        return new CampaignBudgetDTO(campaignBudget.getId(), campaignBudget.getCreationDate(), campaignBudget.getStartDate(), campaignBudget.getEndDate(), campaignBudget.getCampaign() != null ? campaignBudget.getCampaign().getId() : null, campaignBudget.getCampaign() != null ? campaignBudget.getCampaign().getName() : null, campaignBudget.getAdvertiser() != null ? campaignBudget.getAdvertiser().getId() : null, campaignBudget.getAdvertiser() != null ? campaignBudget.getAdvertiser().getName() : null, campaignBudget.getPlanner() != null ? campaignBudget.getPlanner().getId() : null, campaignBudget.getPlanner() != null ? campaignBudget.getPlanner().getName() : null, campaignBudget.getCanali() != null ? campaignBudget.getCanali().getId() : null, campaignBudget.getCanali() != null ? campaignBudget.getCanali().getName() : null, campaignBudget.getPrenotato(), campaignBudget.getDictionary() != null ? campaignBudget.getDictionary().getId() : null, campaignBudget.getDictionary() != null ? campaignBudget.getDictionary().getName() : null, campaignBudget.getCapIniziale(), campaignBudget.getPayout(), campaignBudget.getBudgetIniziale(), campaignBudget.getCapErogato(), campaignBudget.getCapPc(), campaignBudget.getBudgetErogato(), campaignBudget.getCommissioniErogate(), campaignBudget.getRevenuePC(), campaignBudget.getRevenue(), campaignBudget.getScarto(), campaignBudget.getBudgetErogatoPS(), campaignBudget.getCommissioniErogatePS(), campaignBudget.getRevenuePCPS(), campaignBudget.getRevenuePS(), campaignBudget.getRevenueDay(), campaignBudget.getMateriali(), campaignBudget.getNote(), campaignBudget.getCapFatturabile(), campaignBudget.getFatturato(), campaignBudget.getStatus(), campaignBudget.getStatoFatturato(), campaignBudget.getStatoPagato(), campaignBudget.getInvoiceDueDate(),
+                invoices, orders);
     }
 
 }

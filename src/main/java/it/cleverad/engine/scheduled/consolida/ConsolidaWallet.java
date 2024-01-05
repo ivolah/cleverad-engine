@@ -1,4 +1,4 @@
-package it.cleverad.engine.scheduled;
+package it.cleverad.engine.scheduled.consolida;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

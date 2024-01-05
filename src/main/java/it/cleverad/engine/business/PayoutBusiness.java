@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 @Component
 @Transactional
 public class PayoutBusiness {
+
     @Autowired
     private PayoutRepository repository;
     @Autowired
@@ -85,9 +86,11 @@ public class PayoutBusiness {
             map.setCreationDate(LocalDateTime.now());
             map.setLastModificationDate(LocalDateTime.now());
             map.setTotale(0.0);
+            map.setIva(0.0);
             map.setNote(finalNote);
             Dictionary dictionary = dictionaryRepository.findById(18L).orElseThrow(() -> new ElementCleveradException("Dictionary", 18L));
             map.setDictionary(dictionary);
+            map.setDataScadenza(LocalDate.now().plusDays(60));
             map = repository.save(map);
             affiliatoPayout.put(idAffiliate, map.getId());
         });
@@ -142,8 +145,10 @@ public class PayoutBusiness {
             cplRepository.save(transaction);
         });
 
-        return listaPayout.stream().collect(Collectors.toList());
+        List<Payout> pys = new ArrayList<>(listaPayout);
+        pys.forEach(payout -> payout.setIva(payout.getTotale() * 0.22));
 
+        return pys;
     }
 
     public Page<PayoutDTO> createCps(List<Long> listaTransactions) {
@@ -261,6 +266,9 @@ public class PayoutBusiness {
     // SEARCH PAGINATED
     public Page<PayoutDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+        if (request.getDictionaryId() == null) {
+            request.setDictionaryIdNotConcluso(true);
+        }
         Page<Payout> page = repository.findAll(getSpecification(request), pageable);
         return page.map(PayoutDTO::from);
     }
@@ -367,6 +375,9 @@ public class PayoutBusiness {
             if (request.getNote() != null) {
                 predicates.add(cb.like(cb.upper(root.get("note")), "%" + request.getNote().toUpperCase() + "%"));
             }
+            if (request.getDictionaryIdNotConcluso() != null && request.getDictionaryIdNotConcluso()) {
+                predicates.add(cb.notEqual(root.get("dictionary").get("id"), 22L));
+            }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
@@ -406,6 +417,7 @@ public class PayoutBusiness {
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dateTo;
         private Long dictionaryId;
+        private Boolean dictionaryIdNotConcluso;
     }
 
     @Data

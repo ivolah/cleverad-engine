@@ -1,14 +1,17 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.CampaignBudgetBusiness;
+import it.cleverad.engine.business.FileCampaignBudgetBusiness;
 import it.cleverad.engine.web.dto.CampaignBudgetDTO;
-import it.cleverad.engine.web.dto.DictionaryDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @CrossOrigin
 @RestController
@@ -17,6 +20,9 @@ public class CampaignBudgetController {
 
     @Autowired
     private CampaignBudgetBusiness business;
+
+    @Autowired
+    private FileCampaignBudgetBusiness fileCampaignBudgetBusiness;
 
     /**
      * ============================================================================================================
@@ -40,6 +46,12 @@ public class CampaignBudgetController {
         return business.update(id, request);
     }
 
+    @PatchMapping(path = "/recalculate/{id}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void recalculate(@PathVariable Long id) {
+        business.recalculate(id);
+    }
+
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public CampaignBudgetDTO getByUuid(@PathVariable Long id) {
@@ -58,9 +70,44 @@ public class CampaignBudgetController {
         this.business.delete(id);
     }
 
-
     /**
      * ============================================================================================================
      **/
+
+    @PatchMapping("/upload/invoice")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Long uploadInvoice(@RequestParam("file") MultipartFile file, FileCampaignBudgetBusiness.BaseCreateRequest request) {
+        return fileCampaignBudgetBusiness.storeFile(file, request, "INVOICE");
+    }
+
+    @PatchMapping("/upload/order")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Long uploadOrder(@RequestParam("file") MultipartFile file, FileCampaignBudgetBusiness.BaseCreateRequest request) {
+        return fileCampaignBudgetBusiness.storeFile(file, request, "ORDER");
+    }
+
+    @GetMapping("/{id}/invoice")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<Resource> getInvoice(@PathVariable Long id) {
+        return fileCampaignBudgetBusiness.downloadFile(id, "INVOICE");
+    }
+
+    @GetMapping("/{id}/order")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<Resource> getOrder(@PathVariable Long id) {
+        return fileCampaignBudgetBusiness.downloadFile(id, "ORDER");
+    }
+
+    @DeleteMapping("/{id}/invoice")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void deleteIvoice(@PathVariable Long id) {
+        this.fileCampaignBudgetBusiness.delete(id,"INVOICE");
+    }
+
+    @DeleteMapping("/{id}/order")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void deleteOrder(@PathVariable Long id) {
+        this.fileCampaignBudgetBusiness.delete(id, "ORDER");
+    }
 
 }

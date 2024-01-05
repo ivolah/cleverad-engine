@@ -1,4 +1,4 @@
-package it.cleverad.engine.scheduled;
+package it.cleverad.engine.scheduled.manage;
 
 import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
@@ -50,7 +50,7 @@ public class ManageCPM {
      * ============================================================================================================
      **/
 
-    @Scheduled(cron = "5 */5 * * * ?")
+    @Scheduled(cron = "10 */10 * * * ?")
     @Async
     public void gestisciTransazioni() {
         trasformaTrackingCPM();
@@ -275,7 +275,6 @@ public class ManageCPM {
                         transaction.setStatusId(74L);
                         // setto blacklisted
                         transaction.setDictionaryId(70L);
-
                         // creo la transazione
                         TransactionCPMDTO tcpm = transactionCPMBusiness.createCpm(transaction);
                         log.trace(">>> CREATO TRANSAZIONE :::: CPM :::: {}", tcpm.getId());

@@ -43,8 +43,8 @@ import java.util.stream.Collectors;
 @Transactional
 public class TransactionCPCBusiness {
 
-    @Autowired
-    CampaignBudgetBusiness campaignBudgetBusiness;
+//    @Autowired
+//    CampaignBudgetBusiness campaignBudgetBusiness;
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
     @Autowired

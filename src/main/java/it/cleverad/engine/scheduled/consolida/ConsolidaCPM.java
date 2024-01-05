@@ -1,4 +1,4 @@
-package it.cleverad.engine.scheduled;
+package it.cleverad.engine.scheduled.consolida;
 
 import it.cleverad.engine.business.TransactionCPMBusiness;
 import it.cleverad.engine.web.dto.TransactionCPMDTO;

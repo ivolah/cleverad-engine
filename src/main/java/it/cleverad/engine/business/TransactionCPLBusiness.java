@@ -430,7 +430,7 @@ public class TransactionCPLBusiness {
                 }
                 predicates.add(inClauseNot.not());
             }
-            if (request.getPayoutPresent()) {
+            if (request.getPayoutPresent() != null && request.getPayoutPresent()) {
                 predicates.add(cb.equal(root.get("payoutPresent"), request.getPayoutPresent()));
             }
 

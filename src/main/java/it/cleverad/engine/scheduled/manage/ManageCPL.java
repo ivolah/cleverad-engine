@@ -1,4 +1,4 @@
-package it.cleverad.engine.scheduled;
+package it.cleverad.engine.scheduled.manage;
 
 import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;

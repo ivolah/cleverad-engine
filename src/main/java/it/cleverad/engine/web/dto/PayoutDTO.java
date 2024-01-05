@@ -21,9 +21,11 @@ public class PayoutDTO {
     private Long affiliateId;
     private String affiliateName;
     private Double totale;
+    private Double iva;
     private String valuta;
     private String note;
     private LocalDate data;
+    private LocalDate dataScadenza;
     private Long dictionaryId;
     private String dictionaryName;
     @Column(name = "creation_date")
@@ -33,14 +35,16 @@ public class PayoutDTO {
     private List<TransactionCPCDTO> transactionCPCS;
     private List<TransactionCPLDTO> transactionCPLS;
 
-    public PayoutDTO(Long id, Long affiliateId, String affiliateName, Double totale, String valuta, String note, LocalDate data, Long dictionaryId, String dictionaryName, LocalDateTime creationDate, LocalDateTime lastModificationDate, List<TransactionCPCDTO> transactionCPCS, List<TransactionCPLDTO> transactionCPLS) {
+    public PayoutDTO(Long id, Long affiliateId, String affiliateName, Double totale, Double iva, String valuta, String note, LocalDate data, LocalDate dataScadenza, Long dictionaryId, String dictionaryName, LocalDateTime creationDate, LocalDateTime lastModificationDate, List<TransactionCPCDTO> transactionCPCS, List<TransactionCPLDTO> transactionCPLS) {
         this.id = id;
         this.affiliateId = affiliateId;
         this.affiliateName = affiliateName;
         this.totale = totale;
+        this.iva = iva;
         this.valuta = valuta;
         this.note = note;
         this.data = data;
+        this.dataScadenza = dataScadenza;
         this.dictionaryId = dictionaryId;
         this.dictionaryName = dictionaryName;
         this.creationDate = creationDate;
@@ -97,7 +101,15 @@ public class PayoutDTO {
             return dto;
         }).collect(Collectors.toList());
 
-        return new PayoutDTO(payout.getId(), payout.getAffiliate() != null ? payout.getAffiliate().getId() : null, payout.getAffiliate() != null ? payout.getAffiliate().getName() : null, payout.getTotale(), payout.getValuta(), payout.getNote(), payout.getData(), payout.getDictionary() != null ? payout.getDictionary().getId() : null, payout.getDictionary() != null ? payout.getDictionary().getName() : null, payout.getCreationDate(), payout.getLastModificationDate(), transactionCPCS, transactionCPLS);
+        return new PayoutDTO(payout.getId(),
+                payout.getAffiliate() != null ? payout.getAffiliate().getId() : null,
+                payout.getAffiliate() != null ? payout.getAffiliate().getName() : null,
+                payout.getTotale(), payout.getIva(), payout.getValuta(), payout.getNote(),
+                payout.getData(),
+                payout.getDataScadenza(),
+                payout.getDictionary() != null ? payout.getDictionary().getId() : null,
+                payout.getDictionary() != null ? payout.getDictionary().getName() : null,
+                payout.getCreationDate(), payout.getLastModificationDate(), transactionCPCS, transactionCPLS);
     }
 
 }

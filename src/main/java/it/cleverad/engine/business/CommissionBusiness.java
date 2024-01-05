@@ -102,31 +102,33 @@ public class CommissionBusiness {
 
     // UPDATE
     public CommissionDTO update(Long id, Filter filter) {
-        Commission ommission = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Commission", id));
-        mapper.map(filter, ommission);
+        Commission com = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Commission", id));
+        mapper.map(filter, com);
+        //
+        // log.info("UPDATE COMMISSION {} - {} -> {} - {}", com.getId(), com.getCampaign().getName(), com.getValue(),com.getDueDate());
 
-        ommission.setLastModificationDate(LocalDateTime.now());
-        ommission.setCampaign(campaignRepository.findById(filter.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", filter.campaignId)));
-        ommission.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.dictionaryId)));
+        com.setLastModificationDate(LocalDateTime.now());
+        com.setCampaign(campaignRepository.findById(filter.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", filter.campaignId)));
+        com.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.dictionaryId)));
 
         //aggiorno transazioni
         // cerco tutte le transazioni con quella commissione
 //        TransactionBusiness.Filter request = new TransactionBusiness.Filter();
 //        request.setCommissionId(id);
         //CPC
-        for (TransactionCPC tcps : ommission.getTransactionCPCS()) {
-            transactionCPCBusiness.updateCPCValue(tcps.getClickNumber() * ommission.getValue(), tcps.getId());
+        for (TransactionCPC tcps : com.getTransactionCPCS()) {
+            transactionCPCBusiness.updateCPCValue(tcps.getClickNumber() * com.getValue(), tcps.getId());
         }
         //CPL
-        for (TransactionCPL tcpl : ommission.getTransactionCPLS()) {
-            transactionCPLBusiness.updateCPLValue(1 * ommission.getValue(), tcpl.getId());
+        for (TransactionCPL tcpl : com.getTransactionCPLS()) {
+            transactionCPLBusiness.updateCPLValue(1 * com.getValue(), tcpl.getId());
         }
         //CPM
-        for (TransactionCPM tcpm :  ommission.getTransactionCPMS()){
-            transactionCPMBusiness.updateCPMValue(tcpm.getImpressionNumber() * ommission.getValue(), tcpm.getId());
+        for (TransactionCPM tcpm :  com.getTransactionCPMS()){
+            transactionCPMBusiness.updateCPMValue(tcpm.getImpressionNumber() * com.getValue(), tcpm.getId());
         }
 
-        return CommissionDTO.from(repository.save(ommission));
+        return CommissionDTO.from(repository.save(com));
     }
 
     public CommissionDTO disable(Long id) {

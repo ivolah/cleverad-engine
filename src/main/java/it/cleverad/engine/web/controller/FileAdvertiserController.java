@@ -74,7 +74,6 @@ public class FileAdvertiserController {
         return business.downloadFile(id);
     }
 
-
     /**
      * ============================================================================================================
      **/

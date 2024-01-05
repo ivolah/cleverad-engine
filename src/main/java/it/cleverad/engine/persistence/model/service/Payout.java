@@ -22,9 +22,12 @@ public class Payout {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Double totale;
+    private Double iva;
     private String valuta;
     private String note;
     private LocalDate data;
+    @Column(name = "data_scadenza")
+    private LocalDate dataScadenza;
     @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
     @Column(name = "last_modification_date")

@@ -8,6 +8,7 @@ import lombok.ToString;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "t_campaign_budget")
@@ -102,9 +103,20 @@ public class CampaignBudget {
     @Column(name = "cap_fatturabile")
     private Integer capFatturabile;
     private Double fatturato;
-
-    @Column(name = "fattura_id")
-    private Long fatturaId;
-
     private Boolean status;
+
+    @Column(name = "stato_fatturato")
+    private Boolean statoFatturato;
+    @Column(name = "stato_pagato")
+    private Boolean statoPagato;
+
+    @Column(name = "invoice_due_date")
+    private LocalDate invoiceDueDate;
+
+    @OneToMany(mappedBy = "campaignBudget")
+    private Set<FileCampaignBudgetInvoice> fileCampaignBudgetInvoices;
+
+    @OneToMany(mappedBy = "campaignBudget")
+    private Set<FileCampaignBudgetOrder> fileCampaignBudgetOrders;
+
 }

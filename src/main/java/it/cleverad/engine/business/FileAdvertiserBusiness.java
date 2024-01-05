@@ -67,7 +67,6 @@ public class FileAdvertiserBusiness {
      * ============================================================================================================
      **/
 
-
     public Long storeFile(MultipartFile file, BaseCreateRequest request) {
         try {
             Advertiser advertiser = advertiserRepository.findById(request.advertiserId).orElseThrow(() -> new ElementCleveradException("Advertiser", request.advertiserId));
@@ -80,7 +79,6 @@ public class FileAdvertiserBusiness {
             throw new PostgresCleveradException("Errore uplaod: " + file.getOriginalFilename() + "!");
         }
     }
-
 
     // GET BY ID
     public FileAdvertiserDTO findById(Long id) {

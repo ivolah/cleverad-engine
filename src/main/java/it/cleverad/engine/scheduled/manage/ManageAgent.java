@@ -1,4 +1,4 @@
-package it.cleverad.engine.scheduled;//package it.cleverad.engine.scheduled;
+package it.cleverad.engine.scheduled.manage;//package it.cleverad.engine.scheduled;
 
 import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
@@ -31,7 +31,7 @@ public class ManageAgent {
     private CpsBusiness cpsBusiness;
 
     @Async
-    @Scheduled(cron = "0 15 18 * * ?")
+    @Scheduled(cron = "3 3 3 * * ?")
     public void aggiornaStato() {
         log.info("AGGIORNAMENTO QUOTIDIANO -- AGENT");
         UserAgentAnalyzer uaa = UserAgentAnalyzer.newBuilder().hideMatcherLoadStats().withCache(10000).build();
@@ -66,11 +66,9 @@ public class ManageAgent {
 
     }
 
-
     private void generaAgent(UserAgent a, String refferal, String tipo) {
         AgentBusiness.BaseCreateRequest request = new AgentBusiness.BaseCreateRequest();
         request.setTipo(tipo);
-
         request.setAgentClass(a.get("AgentClass").getValue());
         request.setAgentVersion(a.get("AgentVersion").getValue());
         request.setAgentName(a.get("AgentName").getValue());
