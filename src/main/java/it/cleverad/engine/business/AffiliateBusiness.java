@@ -5,7 +5,6 @@ import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
-import it.cleverad.engine.persistence.repository.service.FileAdvertiserRepository;
 import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.web.dto.AffiliateDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
@@ -198,8 +197,16 @@ public class AffiliateBusiness {
         request.statusId = 5L;
 
         map.setDictionaryStatusType(dictionaryRepository.findById(request.statusId).orElseThrow(() -> new ElementCleveradException("Status", request.statusId)));
-        map.setDictionaryTermType(dictionaryRepository.findById(request.termId).orElseThrow(() -> new ElementCleveradException("TERM", request.termId)));
-        map.setDictionaryVatType(dictionaryRepository.findById(request.vatId).orElseThrow(() -> new ElementCleveradException("VAT", request.vatId)));
+
+        if (request.termId != null)
+            map.setDictionaryTermType(dictionaryRepository.findById(request.termId).orElseThrow(() -> new ElementCleveradException("TERM", request.termId)));
+        else
+            map.setDictionaryTermType(dictionaryRepository.findById(102L).orElseThrow(() -> new ElementCleveradException("TERM", 102L)));
+
+        if (request.vatId != null)
+            map.setDictionaryVatType(dictionaryRepository.findById(request.vatId).orElseThrow(() -> new ElementCleveradException("VAT", request.vatId)));
+        else
+            map.setDictionaryVatType(dictionaryRepository.findById(104L).orElseThrow(() -> new ElementCleveradException("VAT", 104L)));
 
         if (request.companytypeId != null && request.companytypeId != 0)
             map.setDictionaryCompanyType(dictionaryRepository.findById(request.companytypeId).orElseThrow(() -> new ElementCleveradException("Company Type", request.companytypeId)));
