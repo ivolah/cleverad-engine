@@ -25,12 +25,6 @@ public class FileUserController {
      * ============================================================================================================
      **/
 
-    @PostMapping(path = "/old")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public Long uploadFileUser(@RequestParam("file") MultipartFile file, FileUserBusiness.BaseCreateRequest request) {
-        return business.store(file, request);
-    }
-
     @PostMapping()
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Long uploadFileUserFile(@RequestParam("file") MultipartFile file, FileUserBusiness.BaseCreateRequest request) {
@@ -75,35 +69,16 @@ public class FileUserController {
         this.business.deleteFile(id);
     }
 
-    @GetMapping("/{id}/download/old")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public ResponseEntity<Resource> down(@PathVariable Long id) {
-        return business.download(id);
-    }
-
     @GetMapping("/{id}/download")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<Resource> downFile(@PathVariable Long id) throws IOException {
         return business.downloadFile(id);
     }
 
-
-    @PostMapping("/avatar/old")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public Long storeAvatar(@RequestParam("file") MultipartFile file, FileUserBusiness.BaseCreateRequest request) throws IOException {
-        return business.storeAvatar(file, request);
-    }
-
     @PostMapping("/avatar")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Long storeAvatarfile(@RequestParam("file") MultipartFile file, FileUserBusiness.BaseCreateRequest request) throws IOException {
         return business.storeAvatarFile(file, request);
-    }
-
-    @GetMapping("/avatar/old")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public FileUserDTO getAvaTar() {
-        return business.getAvatar();
     }
 
     @GetMapping("/avatar")

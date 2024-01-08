@@ -15,17 +15,14 @@ public class FileUserDTO {
     private Long id;
     private String name;
     private String type;
-    private byte[] data;
     private LocalDateTime creationDate;
-    private String note;
-
     private Long userId;
     private Boolean avatar;
-
     private String path;
+    private byte[] data;
 
     public static FileUserDTO from(FileUser file) {
-        return new FileUserDTO(file.getId(), file.getName(), file.getType(), null, file.getCreationDate(), file.getNote(), file.getUser().getId(), file.getAvatar(), file.getPath());
+        return new FileUserDTO(file.getId(), file.getName(), file.getType(), file.getCreationDate(), file.getUser().getId(), file.getAvatar(), file.getPath(), null);
     }
 
 }

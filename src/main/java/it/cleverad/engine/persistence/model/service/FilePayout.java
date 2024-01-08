@@ -27,9 +27,6 @@ public class FilePayout {
     @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
 
-    @Lob
-    private byte[] data;
-
     @ManyToOne
     @JoinColumn(name = "payout_id")
     private Payout payout;
@@ -40,10 +37,9 @@ public class FilePayout {
 
     private String path;
 
-    public FilePayout(String name, String docType, byte[] data, Payout payout, Dictionary dictionary, String path) {
+    public FilePayout(String name, String docType, Payout payout, Dictionary dictionary, String path) {
         this.name = name;
         this.type = docType;
-        this.data = data;
         this.payout = payout;
         this.dictionary = dictionary;
         this.path = path;

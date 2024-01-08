@@ -82,7 +82,6 @@ public class AffiliateDTO {
                 fileAffiliateDTO.setDictionaryId(fileAffiliate.getDictionary().getId());
                 fileAffiliateDTO.setDictionaryValue(fileAffiliate.getDictionary().getName());
                 fileAffiliateDTO.setCreationDate(fileAffiliate.getCreationDate());
-                fileAffiliateDTO.setNote(fileAffiliate.getNote());
                 fileAffiliateDTO.setId(fileAffiliate.getId());
                 fileAffiliateDTO.setName(fileAffiliate.getName());
                 fileAffiliateDTO.setType(fileAffiliate.getType());

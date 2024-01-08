@@ -23,12 +23,10 @@ public class FileAffiliate {
     private Long id;
     private String name;
     private String type;
+    private String path;
 
     @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
-
-    @Lob
-    private byte[] data;
 
     @ManyToOne
     @JoinColumn(name = "affiliate_id")
@@ -38,16 +36,11 @@ public class FileAffiliate {
     @JoinColumn(name = "dictionary_id")
     private Dictionary dictionary;
 
-    private String note;
-    private String path;
-
-    public FileAffiliate(String name, String docType, byte[] data, Affiliate affiliate, Dictionary dictionary, String note, String path) {
+    public FileAffiliate(String name, String docType, Affiliate affiliate, Dictionary dictionary, String path) {
         this.name = name;
         this.type = docType;
-        this.data = data;
         this.affiliate = affiliate;
         this.dictionary = dictionary;
-        this.note = note;
         this.path = path;
     }
 

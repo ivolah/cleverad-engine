@@ -15,18 +15,14 @@ public class FilePayoutDTO {
     private Long id;
     private String name;
     private String type;
-    private byte[] data;
     private LocalDateTime creationDate;
-
     private Long dictionaryId;
     private String dictionaryValue;
     private Long payoutId;
-
     private String path;
 
     public static FilePayoutDTO from(FilePayout file) {
-        return new FilePayoutDTO(file.getId(), file.getName(), file.getType(), null, file.getCreationDate(),
-                file.getDictionary().getId(), file.getDictionary().getName(), file.getPayout().getId(), file.getPath());
+        return new FilePayoutDTO(file.getId(), file.getName(), file.getType(), file.getCreationDate(), file.getDictionary().getId(), file.getDictionary().getName(), file.getPayout().getId(), file.getPath());
     }
 
 }

@@ -1,6 +1,5 @@
 package it.cleverad.engine.business;
 
-import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.Dictionary;
 import it.cleverad.engine.persistence.model.service.FileAffiliate;
@@ -37,7 +36,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.criteria.Predicate;
-import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -60,21 +58,11 @@ public class FileAffiliateBusiness {
     @Autowired
     private DictionaryBusiness dictionaryBusiness;
     @Autowired
-    private Mapper mapper;
-    @Autowired
     private FileStoreService fileStoreService;
 
     /**
      * ============================================================================================================
      **/
-
-    // CREATE
-    public Long store(MultipartFile file, BaseCreateRequest request) throws IOException {
-        Affiliate aff = affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId));
-        Dictionary dictionary = (dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
-        FileAffiliate fileDB = new FileAffiliate(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), file.getBytes(), aff, dictionary, request.note, null);
-        return repository.save(fileDB).getId();
-    }
 
     public Long storeFile(MultipartFile file, BaseCreateRequest request) {
         try {
@@ -82,29 +70,17 @@ public class FileAffiliateBusiness {
             Dictionary dictionary = (dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
             String filename = StringUtils.cleanPath(file.getOriginalFilename());
             String path = fileStoreService.storeFile(aff.getId(), "affiliate", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), file.getBytes());
-            FileAffiliate fileDB = new FileAffiliate(filename, file.getContentType(), null, aff, dictionary, request.note, path);
+            FileAffiliate fileDB = new FileAffiliate(filename, file.getContentType(), aff, dictionary, path);
             return repository.save(fileDB).getId();
         } catch (Exception e) {
             throw new PostgresCleveradException("Errore uplaod: " + file.getOriginalFilename() + "!");
         }
     }
 
-
     // GET BY ID
     public FileAffiliateDTO findById(Long id) {
         FileAffiliate file = repository.findById(id).orElseThrow(() -> new ElementCleveradException("FileAffiliate", id));
         return FileAffiliateDTO.from(file);
-    }
-
-    // DELETE BY ID
-    public void delete(Long id) {
-        try {
-            repository.deleteById(id);
-        } catch (ConstraintViolationException ex) {
-            throw ex;
-        } catch (Exception ee) {
-            throw new PostgresDeleteCleveradException(ee);
-        }
     }
 
     public void deleteFile(Long id) {
@@ -126,29 +102,22 @@ public class FileAffiliateBusiness {
     }
 
     // UPDATE
-    public FileAffiliateDTO update(Long id, FileAffiliateBusiness.Filter filter) {
-        FileAffiliate fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File", id));
-        FileAffiliateDTO from = FileAffiliateDTO.from(fil);
-        mapper.map(filter, from);
-        FileAffiliate mappedEntity = mapper.map(fil, FileAffiliate.class);
-        mapper.map(from, mappedEntity);
-        mappedEntity.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.dictionaryId)));
-        mappedEntity.setAffiliate(affiliateRepository.findById(filter.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", filter.affiliateId)));
-        return FileAffiliateDTO.from(repository.save(mappedEntity));
-    }
+//    public FileAffiliateDTO update(Long id, FileAffiliateBusiness.Filter filter) {
+//        FileAffiliate fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File", id));
+//        FileAffiliateDTO from = FileAffiliateDTO.from(fil);
+//        mapper.map(filter, from);
+//        FileAffiliate mappedEntity = mapper.map(fil, FileAffiliate.class);
+//        mapper.map(from, mappedEntity);
+//        mappedEntity.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.dictionaryId)));
+//        mappedEntity.setAffiliate(affiliateRepository.findById(filter.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", filter.affiliateId)));
+//        return FileAffiliateDTO.from(repository.save(mappedEntity));
+//    }
 
     //  GET TIPI
     public Page<DictionaryDTO> getTypes() {
         return dictionaryBusiness.getTypeDocument();
     }
 
-    public ResponseEntity<Resource> download(Long id) {
-        FileAffiliate fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("FileAffiliate", id));
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(fil.getType()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fil.getName() + "\"")
-                .body(new ByteArrayResource(fil.getData()));
-    }
 
     public ResponseEntity<Resource> downloadFile(Long id) {
         try {
@@ -180,11 +149,9 @@ public class FileAffiliateBusiness {
             if (request.getType() != null) {
                 predicates.add(cb.equal(root.get("type"), request.getType()));
             }
-
             if (request.getAffiliateId() != null) {
                 predicates.add(cb.equal(root.get("affiliate").get("id"), request.getAffiliateId()));
             }
-
             if (request.getCreationDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("creationDate"), LocalDateTime.ofInstant(request.getCreationDateFrom(), ZoneOffset.UTC)));
             }
@@ -209,11 +176,8 @@ public class FileAffiliateBusiness {
     public static class BaseCreateRequest {
         private String name;
         private String type;
-        private byte[] data;
         private Long affiliateId;
         private Long dictionaryId;
-        private String docType;
-        private String note;
     }
 
     @Data
@@ -223,13 +187,10 @@ public class FileAffiliateBusiness {
         private Long id;
         private String name;
         private String type;
-        private byte[] data;
         private Long affiliateId;
         private Long dictionaryId;
-        private String docType;
         private Instant creationDateFrom;
         private Instant creationDateTo;
-        private String note;
     }
 
 }

@@ -23,25 +23,18 @@ public class FileUser {
     private Long id;
     private String name;
     private String type;
-    private String note;
     private Boolean avatar;
     @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
-
-    @Lob
-    private byte[] data;
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
     private String path;
 
-    public FileUser(String name, String docType, byte[] data, User userFiles,  String note, Boolean avatar, String path) {
+    public FileUser(String name, String docType, User userFiles, Boolean avatar, String path) {
         this.name = name;
         this.type = docType;
-        this.data = data;
         this.user = userFiles;
-        this.note = note;
         this.avatar = avatar;
         this.path = path;
     }

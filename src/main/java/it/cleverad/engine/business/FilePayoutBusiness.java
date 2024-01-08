@@ -44,7 +44,6 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -72,25 +71,13 @@ public class FilePayoutBusiness {
      **/
 
     // CREATE
-    public Long store(MultipartFile file, BaseCreateRequest request) {
-        Payout payout = payoutRepository.findById(request.payoutId).orElseThrow(() -> new ElementCleveradException("Payout", request.payoutId));
-        Dictionary dictionary = (dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
-        FilePayout fileDB = null;
-        try {
-            fileDB = new FilePayout(StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename())), file.getContentType(), file.getBytes(), payout, dictionary, null);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return repository.save(fileDB).getId();
-    }
-
     public Long storeFile(MultipartFile file, BaseCreateRequest request) {
         try {
             Payout payout = payoutRepository.findById(request.payoutId).orElseThrow(() -> new ElementCleveradException("Payout", request.payoutId));
             Dictionary dictionary = (dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
             String filename = StringUtils.cleanPath(file.getOriginalFilename());
             String path = fileStoreService.storeFile(payout.getAffiliate().getId(), "payout", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), file.getBytes());
-            FilePayout fileDB = new FilePayout(filename, file.getContentType(), null, payout, dictionary, path);
+            FilePayout fileDB = new FilePayout(filename, file.getContentType(), payout, dictionary, path);
 
             MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
             mailRequest.setAffiliateId(payout.getAffiliate().getId());
@@ -155,14 +142,6 @@ public class FilePayoutBusiness {
     //  GET TIPI
     public Page<DictionaryDTO> getTypes() {
         return dictionaryBusiness.getFilePayoutTypes();
-    }
-
-    public ResponseEntity<Resource> download(Long id) {
-        FilePayout fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("FilePayout", id));
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(fil.getType()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fil.getName() + "\"")
-                .body(new ByteArrayResource(fil.getData()));
     }
 
     public ResponseEntity<Resource> downloadFile(Long id) {

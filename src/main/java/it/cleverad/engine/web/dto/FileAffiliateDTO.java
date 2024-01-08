@@ -15,9 +15,7 @@ public class FileAffiliateDTO {
     private Long id;
     private String name;
     private String type;
-    private byte[] data;
     private LocalDateTime creationDate;
-    private String note;
     private Long dictionaryId;
     private String dictionaryValue;
     private Long affiliateId;
@@ -25,8 +23,7 @@ public class FileAffiliateDTO {
     private String path;
 
     public static FileAffiliateDTO from(FileAffiliate file) {
-        return new FileAffiliateDTO(file.getId(), file.getName(), file.getType(), null, file.getCreationDate(), file.getNote(),
-                file.getDictionary().getId(), file.getDictionary().getName(), file.getAffiliate().getId(), file.getAffiliate().getName(), file.getPath());
+        return new FileAffiliateDTO(file.getId(), file.getName(), file.getType(), file.getCreationDate(), file.getDictionary().getId(), file.getDictionary().getName(), file.getAffiliate().getId(), file.getAffiliate().getName(), file.getPath());
     }
 
 }

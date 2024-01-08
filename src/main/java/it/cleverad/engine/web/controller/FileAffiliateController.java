@@ -44,11 +44,11 @@ public class FileAffiliateController {
         return business.search(request, pageable);
     }
 
-    @PatchMapping(path = "/{id}")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public FileAffiliateDTO update(@PathVariable Long id, @RequestBody FileAffiliateBusiness.Filter request) {
-        return business.update(id, request);
-    }
+//    @PatchMapping(path = "/{id}")
+//    @ResponseStatus(HttpStatus.ACCEPTED)
+//    public FileAffiliateDTO update(@PathVariable Long id, @RequestBody FileAffiliateBusiness.Filter request) {
+//        return business.update(id, request);
+//    }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)

@@ -1,12 +1,12 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.FileUser;
 import it.cleverad.engine.persistence.model.service.User;
 import it.cleverad.engine.persistence.repository.service.FileUserRepository;
 import it.cleverad.engine.persistence.repository.service.UserRepository;
 import it.cleverad.engine.service.FileStoreService;
-import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.FileUserDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresCleveradException;
@@ -65,16 +65,6 @@ public class FileUserBusiness {
      **/
 
     // CREATE
-    public Long store(MultipartFile file, BaseCreateRequest request) {
-        try {
-            User user = userRepository.findById(request.userId).orElseThrow(() -> new ElementCleveradException("User", request.userId));
-            FileUser fileDB = new FileUser(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), file.getBytes(), user, request.note, request.avatar, null);
-            return repository.save(fileDB).getId();
-        } catch (Exception e) {
-            throw new PostgresCleveradException("Errore uplaod: " + file.getOriginalFilename() + "!", e);
-        }
-    }
-
     public Long storeFile(MultipartFile file, BaseCreateRequest request) {
         try {
             log.info("Req {}", request);
@@ -83,7 +73,7 @@ public class FileUserBusiness {
             byte[] bytes = file.getBytes();
             Long affiliateID = user.getAffiliate().getId();
             String path = fileStoreService.storeFile(affiliateID, "user", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), bytes);
-            FileUser fileDB = new FileUser(filename, file.getContentType(), null, user, request.note, request.avatar, path);
+            FileUser fileDB = new FileUser(filename, file.getContentType(), user, request.avatar, path);
             return repository.save(fileDB).getId();
         } catch (Exception e) {
             throw new PostgresCleveradException("Errore uplaod: " + file.getOriginalFilename() + "!", e);
@@ -142,32 +132,10 @@ public class FileUserBusiness {
         return FileUserDTO.from(repository.save(mappedEntity));
     }
 
-    public ResponseEntity<Resource> download(Long id) {
-        FileUser fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("FileUser", id));
-        return ResponseEntity.ok().contentType(MediaType.parseMediaType(fil.getType())).header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fil.getName() + "\"").body(new ByteArrayResource(fil.getData()));
-    }
-
     public ResponseEntity<Resource> downloadFile(Long id) throws IOException {
         FileUser fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("FileUser", id));
         byte[] data = fileStoreService.retrieveFile(fil.getPath());
         return ResponseEntity.ok().contentType(MediaType.parseMediaType(fil.getType())).header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fil.getName() + "\"").body(new ByteArrayResource(data));
-    }
-
-
-    public Long storeAvatar(MultipartFile file, BaseCreateRequest request) throws IOException {
-        // cancello tutti gli avatar
-        Filter rr = new Filter();
-        rr.setAvatar(true);
-        rr.setUserId(jwtUserDetailsService.getUserID());
-        Page<FileUser> page = repository.findAll(getSpecification(rr), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
-        page.stream().forEach(fileUser -> repository.delete(fileUser));
-
-        // salvo avatar
-        request.setAvatar(true);
-        request.setUserId(jwtUserDetailsService.getUserID());
-        User user = userRepository.findById(jwtUserDetailsService.getUserID()).orElseThrow(() -> new ElementCleveradException("User", jwtUserDetailsService.getUserID()));
-        FileUser fileDB = new FileUser(StringUtils.cleanPath(file.getOriginalFilename()), file.getContentType(), file.getBytes(), user, request.note, request.avatar, null);
-        return repository.save(fileDB).getId();
     }
 
     public Long storeAvatarFile(MultipartFile file, BaseCreateRequest request) throws IOException {
@@ -185,23 +153,8 @@ public class FileUserBusiness {
         request.setUserId(jwtUserDetailsService.getUserID());
         User user = userRepository.findById(jwtUserDetailsService.getUserID()).orElseThrow(() -> new ElementCleveradException("User", jwtUserDetailsService.getUserID()));
         String path = fileStoreService.storeFile(user.getAffiliate().getId(), "user", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), file.getBytes());
-        FileUser fileDB = new FileUser(filename, file.getContentType(), null, user, request.note, request.avatar, path);
+        FileUser fileDB = new FileUser(filename, file.getContentType(), user, request.avatar, path);
         return repository.save(fileDB).getId();
-    }
-
-
-    public FileUserDTO getAvatar() {
-        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
-        Filter request = new Filter();
-        request.setAvatar(true);
-        request.setUserId(jwtUserDetailsService.getUserID());
-        FileUser fu = repository.findAll(getSpecification(request), pageable).stream().findFirst().orElse(null);
-
-        if (fu != null) {
-            FileUserDTO f = FileUserDTO.from(fu);
-            f.setData(fu.getData());
-            return f;
-        } else return null;
     }
 
     public FileUserDTO getAvatarFile() throws IOException {
@@ -217,7 +170,6 @@ public class FileUserBusiness {
             return f;
         } else return null;
     }
-
 
     /**
      * ============================================================================================================
@@ -253,7 +205,6 @@ public class FileUserBusiness {
         };
     }
 
-
     /**
      * ============================================================================================================
      **/
@@ -264,10 +215,8 @@ public class FileUserBusiness {
     @ToString
     public static class BaseCreateRequest {
         private String name;
-        private byte[] data;
         private Long userId;
         private Long dictionaryId;
-        private String note;
         private Boolean avatar;
     }
 
@@ -277,12 +226,10 @@ public class FileUserBusiness {
     public static class Filter {
         private Long id;
         private String name;
-        private byte[] data;
         private Long userId;
         private Long dictionaryId;
         private Instant creationDateFrom;
         private Instant creationDateTo;
-        private String note;
         private Boolean avatar;
         private String path;
     }

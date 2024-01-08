@@ -50,7 +50,6 @@ public class UserDTO {
         if (user.getFileUsers() != null && !user.getFileUsers().isEmpty()) {
             listaFile = user.getFileUsers().stream().map(fileUser -> {
                 FileUserDTO file = new FileUserDTO();
-                file.setNote(fileUser.getNote());
                 file.setId(fileUser.getId());
                 file.setName(fileUser.getName());
                 file.setType(fileUser.getType());

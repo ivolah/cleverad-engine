@@ -63,12 +63,6 @@ public class FileBusiness {
      **/
 
     // CREATE
-    public Long store(MultipartFile file) throws IOException {
-        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-        File fileDB = new File(fileName, file.getContentType(), file.getBytes(), null);
-        return repository.save(fileDB).getId();
-    }
-
     public Long storeFile(MultipartFile file) throws IOException {
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
         String path = fileStoreService.storeFile(1L, "misc", UUID.randomUUID() + "." + FilenameUtils.getExtension(fileName), file.getBytes());
@@ -88,16 +82,6 @@ public class FileBusiness {
     }
 
     // DELETE BY ID
-    public void delete(Long id) {
-        try {
-            repository.deleteById(id);
-        } catch (ConstraintViolationException ex) {
-            throw ex;
-        } catch (Exception ee) {
-            throw new PostgresDeleteCleveradException(ee);
-        }
-    }
-
     public void deleteFile(Long id) {
         try {
             fileStoreService.deleteFile(this.findById(id).getPath());
@@ -117,17 +101,17 @@ public class FileBusiness {
     }
 
     // UPDATE
-    public FileDTO update(Long id, FileBusiness.Filter filter) {
-        File fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File", id));
-        FileDTO from = FileDTO.from(fil);
-
-        mapper.map(filter, from);
-
-        File mappedEntity = mapper.map(fil, File.class);
-        mapper.map(from, mappedEntity);
-
-        return FileDTO.from(repository.save(mappedEntity));
-    }
+//    public FileDTO update(Long id, FileBusiness.Filter filter) {
+//        File fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File", id));
+//        FileDTO from = FileDTO.from(fil);
+//
+//        mapper.map(filter, from);
+//
+//        File mappedEntity = mapper.map(fil, File.class);
+//        mapper.map(from, mappedEntity);
+//
+//        return FileDTO.from(repository.save(mappedEntity));
+//    }
 
     public List<FileDTO> listaFileCodificati() {
         Filter request = new Filter();
@@ -158,14 +142,6 @@ public class FileBusiness {
         return fileDTOList.stream().distinct().collect(Collectors.toList());
     }
 
-    public ResponseEntity<Resource> download(Long id) {
-        File fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File", id));
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(fil.getType()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fil.getName() + "\"")
-                .body(new ByteArrayResource(fil.getData()));
-    }
-
     public ResponseEntity<Resource> downloadFile(Long id) throws IOException {
         File fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File", id));
         byte[] data = fileStoreService.retrieveFile(fil.getPath());
@@ -174,7 +150,6 @@ public class FileBusiness {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fil.getName() + "\"")
                 .body(new ByteArrayResource(data));
     }
-
 
     /**
      * ============================================================================================================
@@ -217,7 +192,6 @@ public class FileBusiness {
     public static class BaseCreateRequest {
         private String name;
         private String type;
-        private byte[] data;
     }
 
     @Data
@@ -227,7 +201,6 @@ public class FileBusiness {
         private Long id;
         private String name;
         private String type;
-        private byte[] data;
         private Instant creationDateFrom;
         private Instant creationDateTo;
     }
