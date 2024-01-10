@@ -1,6 +1,6 @@
 package it.cleverad.engine.scheduled.rigenera;
 
-import it.cleverad.engine.business.RigeneraCPCBusiness;
+import it.cleverad.engine.business.RigeneraCPLBusiness;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -10,16 +10,16 @@ import java.time.LocalDate;
 
 @Slf4j
 @Component
-public class RigeneraCPC {
+public class RigeneraCPL {
 
     @Autowired
-    private RigeneraCPCBusiness rigeneraCPC;
+    private RigeneraCPLBusiness rigenera;
 
-    @Scheduled(cron = "14 14 2 * * ?")
-    public void rigeneraCPCdiIeri() {
+    @Scheduled(cron = "24 24 2 * * ?")
+    public void rigeneraCPLdiIeri() {
         LocalDate localDate = LocalDate.now();
         LocalDate yesterday = localDate.minusDays(1);
-        rigeneraCPC.rigenera(yesterday.getYear(), yesterday.getMonthValue(), yesterday.getDayOfMonth(), null, null);
-    }//rigeneraCPCdiIeri
+        rigenera.rigenera(yesterday.getYear(), yesterday.getMonthValue(), yesterday.getDayOfMonth(), null);
+    }//rigeneraCPLdiIeri
 
 }
