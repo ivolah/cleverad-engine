@@ -103,7 +103,6 @@ public class ConsolidaCPC {
                 bReq.setRevenueId(revenueId);
                 bReq.setWalletId(walletId);
                 bReq.setAgent("");
-               // bReq.setData();
                 bReq.setStatusId(statusId);
                 transactionCPCBusiness.createCpc(bReq);
             }

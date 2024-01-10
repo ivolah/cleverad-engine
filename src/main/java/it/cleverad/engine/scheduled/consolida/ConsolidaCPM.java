@@ -35,9 +35,10 @@ public class ConsolidaCPM {
         consolidaCPM(oraSpaccata);
         consolidaCPM(LocalDate.now().minusDays(1).atTime(LocalTime.MAX));
 
-        for (int i = 45; i < 60; i++) {
-            //   consolidaCPM(LocalDate.now().minusDays(i).atTime(LocalTime.MAX));
-        }
+        // CONSOLIDA DATE PASSATE
+        //        for (int i = 45; i < 60; i++) {
+        //               consolidaCPM(LocalDate.now().minusDays(i).atTime(LocalTime.MAX));
+        //        }
     }//trasformaTrackingCPC
 
     public void consolidaCPM(LocalDateTime oraSpaccata) {
@@ -48,13 +49,13 @@ public class ConsolidaCPM {
         request.setDateTimeTo(oraSpaccata);
         Page<TransactionCPMDTO> cpcM = transactionCPMBusiness.searchCpm(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
 
-        List<Triple> triples = new ArrayList<>();
+        ArrayList<Triple<Long, Long, Long>> triples = new ArrayList<>();
         for (TransactionCPMDTO tcpm : cpcM) {
             Triple<Long, Long, Long> triple = new ImmutableTriple<>(tcpm.getCampaignId(), tcpm.getAffiliateId(), tcpm.getChannelId());
             triples.add(triple);
         }
 
-        List<Triple> listWithoutDuplicates = triples.stream().distinct().collect(Collectors.toList());
+        List<Triple<Long, Long, Long>> listWithoutDuplicates = triples.stream().distinct().collect(Collectors.toList());
         for (Triple ttt : listWithoutDuplicates) {
 
             request = new TransactionCPMBusiness.Filter();

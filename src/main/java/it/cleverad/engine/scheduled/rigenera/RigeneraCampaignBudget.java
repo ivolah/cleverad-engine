@@ -1,4 +1,4 @@
-package it.cleverad.engine.scheduled.consolida;
+package it.cleverad.engine.scheduled.rigenera;
 
 import it.cleverad.engine.service.CampaignBudgetService;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class ConsolidaCampaignBudget {
+public class RigeneraCampaignBudget {
 
     @Autowired
     private CampaignBudgetService campaignBudgetService;
@@ -16,8 +16,7 @@ public class ConsolidaCampaignBudget {
     /**
      * Consolido i numeri e le percentuali dei Budget Campagne
      */
-    @Scheduled(cron = "1 1 0/1 * * ?")
-    //   @Scheduled(cron = "0 0/1 * * * ?")
+    @Scheduled(cron = "7 7 0/1 * * ?")
     public void ciclaCampaignBudget() {
         campaignBudgetService.gestisciCampaignBudget(null);
     }//ciclaCampaignBudget

@@ -16,7 +16,7 @@ import java.util.List;
 @Slf4j
 @Component
 @Async
-public class ScheduledStatusActivities {
+public class DisableStausDailyScheduledActivities {
 
     @Autowired
     private CampaignBusiness campaignBusiness;
