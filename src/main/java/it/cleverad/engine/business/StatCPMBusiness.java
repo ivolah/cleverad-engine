@@ -2,10 +2,8 @@ package it.cleverad.engine.business;
 
 import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.TopCampagneCPM;
-import it.cleverad.engine.persistence.model.service.WidgetCampaignDayCpl;
 import it.cleverad.engine.persistence.model.service.WidgetCampaignDayCpm;
 import it.cleverad.engine.persistence.model.service.WidgetCampaignDayCps;
-import it.cleverad.engine.persistence.repository.service.WidgetCampaignDayCplRepository;
 import it.cleverad.engine.persistence.repository.service.WidgetCampaignDayCpmRepository;
 import it.cleverad.engine.persistence.repository.service.WidgetCampaignDayCpsRepository;
 import it.cleverad.engine.persistence.repository.service.WidgetTopCPMRepository;
@@ -37,29 +35,31 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @Transactional
-public class StatCPLBusiness {
+public class StatCPMBusiness {
 
     @Autowired
-    private WidgetCampaignDayCplRepository widgetCampaignDayCplRepository;
-
+    private WidgetCampaignDayCpmRepository widgetCampaignDayCpmRepository;
+    @Autowired
+    private CampaignBusiness campaignBusiness;
+    @Autowired
+    private WidgetTopCPMRepository widgetTopCPMRepository;
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
 
     /**
      * ===========================================================================================================
-     * >>> CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL CPL <<<
+     * >>> CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM CPM <<<
      * ===========================================================================================================
      **/
 
-    public String getStatTotaleDayCpl(Filter request) {
+    public String getStatTotaleDayCpm(Filter request) {
 
         request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 6);
         request.setYear((long) LocalDate.now().getYear());
         if (!jwtUserDetailsService.isAdmin()) request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-        List<WidgetCampaignDayCpl> tutto = widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")))
-        ).stream().collect(Collectors.toList());
+        List<WidgetCampaignDayCpm> tutto = widgetCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(request), PageRequest.of(0, Integer.MAX_VALUE)).stream().collect(Collectors.toList());
 
-        Set<Long> doys = tutto.stream().map(WidgetCampaignDayCpl::getDoy).collect(Collectors.toSet());
+        Set<Long> doys = tutto.stream().map(WidgetCampaignDayCpm::getDoy).collect(Collectors.toSet());
         Set<Long> doysDaVerificare = new HashSet<>();
         if (!doys.isEmpty() && doys.size() > 0)
             for (Long i = doys.stream().min(Long::compareTo).get(); i <= doys.stream().max(Long::compareTo).get(); i++)
@@ -71,21 +71,22 @@ public class StatCPLBusiness {
         JSONArray xSeries = new JSONArray();
         doysDaVerificare.stream().sorted().forEach(gg -> {
             Double dd = 0D;
+
             Filter filter = new Filter();
             filter.setDoy(gg);
             if (!jwtUserDetailsService.isAdmin()) filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-            List<WidgetCampaignDayCpl> giornato = widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(filter), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
-            for (WidgetCampaignDayCpl w : giornato) {
-                dd = dd + 1;
-            }
+            List<WidgetCampaignDayCpm> giornato = widgetCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(filter), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
+            for (WidgetCampaignDayCpm w : giornato)
+                dd = dd + w.getTotale();
+
             xSeries.put(today.withDayOfYear(Math.toIntExact(gg)).toString());
             harej.put(dd);
         });
 
         Double totale = 0D;
-        for (Object o : harej) {
+        for (Object o : harej)
             totale += (Double) o;
-        }
+
         mainObj.put("totale", totale);
         mainObj.put("data", harej);
         mainObj.put("xSeries", xSeries);
@@ -93,31 +94,55 @@ public class StatCPLBusiness {
         return mainObj.toString();
     }
 
-    public Page<WidgetCampaignDayCpl> getStatCampaignDayCpl(Filter request, Pageable pageableRequest) {
+    public Page<WidgetCampaignDayCpm> getStatCampaignDayCpm(Filter request, Pageable pageableRequest) {
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("totale")));
         if (!jwtUserDetailsService.isAdmin()) request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-        return widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id"))));
+        return widgetCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(request), pageable);
     }
 
-    public Page<WidgetCampaignDayCpl> getTopCampaignsDayCpl() {
-        Filter request = new Filter();
+    public Page<WidgetCampaignDayCpm> getTopCampaignsDayCpm() {
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.desc("totale")));
+
         LocalDate oggi = LocalDate.now();
         Integer week = YearWeek.from(LocalDate.of(oggi.getYear(), oggi.getMonth(), oggi.getDayOfMonth())).getWeek();
-        request.setWeek(week);
-        request.setWeekMeno(week - 1);
-        if (!jwtUserDetailsService.isAdmin()) request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-        return widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(request), PageRequest.of(0, 10, Sort.by(Sort.Order.desc("valore"))));
-    }
-
-    public String getWidgetCampaignsDayCpl() {
 
         Filter request = new Filter();
-        request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 11);
-        request.setYear((long) LocalDate.now().getYear());
+        request.setWeek(week + 1);
+        request.setWeekMeno(week - 1);
         if (!jwtUserDetailsService.isAdmin()) request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-        Page<WidgetCampaignDayCpl> tutto = widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("doy"))));
+        return widgetCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(request), pageable);
+    }
 
-        Set<Long> doys = tutto.stream().map(WidgetCampaignDayCpl::getDoy).collect(Collectors.toSet());
-        Set<String> camps = tutto.stream().map(WidgetCampaignDayCpl::getCampaign).collect(Collectors.toSet());
+    public String getWidgetCampaignsDayCpm() {
+
+        Filter request = new Filter();
+        request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 6);
+        request.setYear((long) LocalDate.now().getYear());
+
+        if (!jwtUserDetailsService.isAdmin()) request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+        Page<WidgetCampaignDayCpm> tutto = widgetCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("totale"))));
+
+        Set<Long> doys = tutto.stream().map(WidgetCampaignDayCpm::getDoy).collect(Collectors.toSet());
+
+        List<Long> listaTop0 = widgetTopCPMRepository.listaTopCampagne(request.getAffiliateId(), 0).stream().filter(topCampagneCPM -> topCampagneCPM.getimpression() > 100L).map(TopCampagneCPM::getcampaignid).collect(Collectors.toList());
+        // Set<Long> listaTop3 = widgetTopCPMRepository.listaTopCampagne(request.getAffiliateId(), 3).stream().filter(topCampagneCPM -> topCampagneCPM.getimpression() > 100L).map(TopCampagneCPM::getcampaignid).collect(Collectors.toSet());
+        List<Long> listaTop5 = widgetTopCPMRepository.listaTopCampagne(request.getAffiliateId(), 5).stream().filter(topCampagneCPM -> topCampagneCPM.getimpression() > 100L).map(TopCampagneCPM::getcampaignid).collect(Collectors.toList());
+        // Set<Long> listaTop10 = widgetTopCPMRepository.listaTopCampagne(request.getAffiliateId(), 10).stream().filter(topCampagneCPM -> topCampagneCPM.getimpression() > 100L).map(TopCampagneCPM::getcampaignid).collect(Collectors.toSet());
+
+        // tolgo dalla lista gli elementi già presenti in lista 0
+        listaTop5.removeAll(listaTop0);
+        log.trace(listaTop5.size() + " - di 5");
+        listaTop5.forEach(aLong -> log.trace(">>>> 5 :: {}", aLong));
+        log.trace(listaTop0.size() + " - di 0");
+        listaTop0.forEach(aLong -> log.trace(">>>> 0 :: {}", aLong));
+
+        if (listaTop0.size() < 6 && listaTop5.size() > 0) {
+            listaTop0.addAll(listaTop5);
+            listaTop0.forEach(aLong -> log.trace("NEW 0 :: {}", aLong));
+        }
+        listaTop0.subList(0, listaTop0.size());
+
+        log.trace("CAMAPGNE {}", listaTop0.size());
 
         Set<Long> doysDaVerificare = new HashSet<>();
         if (!doys.isEmpty() && doys.size() > 0)
@@ -125,11 +150,13 @@ public class StatCPLBusiness {
                 doysDaVerificare.add(i);
 
         JSONObject mainObj = new JSONObject();
-        JSONArray arr = new JSONArray();
-        camps.stream().distinct().forEach(campagna -> {
+        JSONArray tutti = new JSONArray();
+        listaTop0.stream().distinct().forEach(campagnaId -> {
+
             JSONObject ele = new JSONObject();
+            String campagna = campaignBusiness.findById(campagnaId).getName();
             ele.put("name", campagna);
-            JSONArray ja = new JSONArray();
+            JSONArray arrray = new JSONArray();
 
             doysDaVerificare.stream().sorted().forEach(gg -> {
                 Double dd = 0D;
@@ -137,15 +164,16 @@ public class StatCPLBusiness {
                 filter.setDoy(gg);
                 filter.setCampaign(campagna);
                 if (!jwtUserDetailsService.isAdmin()) filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-                List<WidgetCampaignDayCpl> giornato = widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(filter), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
-                for (WidgetCampaignDayCpl w : giornato)
-                    dd = dd + w.getValore();
-                ja.put(dd);
+                List<WidgetCampaignDayCpm> giornato = widgetCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(filter), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
+                for (WidgetCampaignDayCpm w : giornato)
+                    dd = dd + w.getTotale();
+
+                log.trace("campagna :: {}  ({}) :: {} :: {}", campagna, campagnaId, gg, dd);
+                arrray.put(dd);
             });
 
-            ele.put("data", ja);
-            arr.put(ele);
-            //log.info(aLong + " :: " + dd);
+            ele.put("data", arrray);
+            tutti.put(ele);
         });
 
         JSONArray xSeries = new JSONArray();
@@ -154,13 +182,12 @@ public class StatCPLBusiness {
             xSeries.put(today.withDayOfYear(Math.toIntExact(gg)).toString());
         });
 
-        mainObj.put("series", arr);
+        mainObj.put("series", tutti);
         mainObj.put("xSeries", xSeries);
-
         return mainObj.toString();
     }
 
-    public Specification<WidgetCampaignDayCpl> getSpecificationCampaignDayCpl(Filter request) {
+    private Specification<WidgetCampaignDayCpm> getSpecificationCampaignDayCpm(Filter request) {
         return (root, query, cb) -> {
             Predicate completePredicate = null;
             List<Predicate> predicates = new ArrayList<>();

@@ -21,6 +21,8 @@ public class StatisticsController {
     private StatCPCBusiness statCPCBusiness;
     @Autowired
     private StatCPLBusiness statCPLBusiness;
+    @Autowired
+    private StatCPMBusiness statCPMBusiness;
 
     @Autowired
     private StatBusiness statBusiness;
@@ -77,33 +79,34 @@ public class StatisticsController {
     @GetMapping(path = "/cpm/top")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<WidgetCampaignDayCpm> getStatTopCpm() {
-        return business.getTopCampaignsDayCpm();
+        return statCPMBusiness.getTopCampaignsDayCpm();
     }
 
     @GetMapping(path = "/cpm/campaign/day/total")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public String getStatTotaleDayCpm(ViewBusiness.Filter request) {
-        return business.getStatTotaleDayCpm(request);
+    public String getStatTotaleDayCpm(StatCPMBusiness.Filter request) {
+        return statCPMBusiness.getStatTotaleDayCpm(request);
     }
 
     @GetMapping(path = "/cpm/campaign/day")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<WidgetCampaignDayCpm> getStatDayCpm(ViewBusiness.Filter request, Pageable pageable) {
-        return business.getStatCampaignDayCpm(request, pageable);
+    public Page<WidgetCampaignDayCpm> getStatDayCpm(StatCPMBusiness.Filter request, Pageable pageable) {
+        return statCPMBusiness.getStatCampaignDayCpm(request, pageable);
     }
 
     @GetMapping(path = "/cpm/campaign/{id}/day")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<WidgetCampaignDayCpm> getStatCampaignDayCpm(@PathVariable Long id, Pageable pageable) {
-        ViewBusiness.Filter request = new ViewBusiness.Filter();
+        StatCPMBusiness.Filter request = new StatCPMBusiness.Filter();
         request.setCampaignId(id);
-        return business.getStatCampaignDayCpm(request, pageable);
+        return statCPMBusiness.getStatCampaignDayCpm(request, pageable);
     }
 
     @GetMapping(path = "/cpm/campaign/day/widget")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public String getStatCpmDayWidget() {
-        return business.getWidgetCampaignsDayCpm();
+          return statCPMBusiness.getWidgetCampaignsDayCpm();
+//        return null;
     }
 
     /**

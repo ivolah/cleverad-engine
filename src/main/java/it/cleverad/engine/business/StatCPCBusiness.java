@@ -46,7 +46,7 @@ public class StatCPCBusiness {
     public String getStatTotaleDayCpc(Filter request) {
 
         request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 6);
-
+        request.setYear((long) LocalDate.now().getYear());
         if (Boolean.FALSE.equals(jwtUserDetailsService.isAdmin()))
             request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         List<WidgetCampaignDayCpc> tutto = widgetCampaignDayCpcRepository.findAll(getSpecificationCampaignDayCpc(request), pageableDoy).stream().collect(Collectors.toList());
@@ -98,24 +98,23 @@ public class StatCPCBusiness {
     public Page<WidgetCampaignDayCpc> getTopCampaignsDayCpc(Integer giorni) {
         Filter request = new Filter();
         request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - giorni);
+        request.setYear((long) LocalDate.now().getYear());
         if (Boolean.FALSE.equals(jwtUserDetailsService.isAdmin()))
             request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         return widgetCampaignDayCpcRepository.findAll(getSpecificationCampaignDayCpc(request), PageRequest.of(0, 100, Sort.by(Sort.Order.asc("doy"))));
     }
 
     public String getWidgetCampaignsDayCpc() {
+
         Filter request = new Filter();
-        log.info(LocalDate.now().getDayOfYear() - 11 + "");
         request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 11);
+        request.setYear((long) LocalDate.now().getYear());
         if (Boolean.FALSE.equals(jwtUserDetailsService.isAdmin()))
             request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         Page<WidgetCampaignDayCpc> tutto = widgetCampaignDayCpcRepository.findAll(getSpecificationCampaignDayCpc(request), pageableDoy);
 
         Set<Long> doys = tutto.stream().map(WidgetCampaignDayCpc::getDoy).collect(Collectors.toSet());
         Set<String> camps = tutto.stream().map(WidgetCampaignDayCpc::getCampaign).collect(Collectors.toSet());
-
-        log.info(doys.stream().min(Long::compareTo).get() + "");
-        log.info(doys.stream().max(Long::compareTo).get() + "");
         Set<Long> doysDaVerificare = new HashSet<>();
         if (!doys.isEmpty())
             for (Long i = doys.stream().min(Long::compareTo).get(); i <= doys.stream().max(Long::compareTo).get(); i++)
@@ -161,14 +160,15 @@ public class StatCPCBusiness {
 
         Filter request = new Filter();
         request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 11);
+        request.setYear((long) LocalDate.now().getYear());
         if (jwtUserDetailsService.isAdmin().equals(Boolean.FALSE))
             request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
 
         Map<Integer, Integer> dayOfYearMap = new HashMap<>();
         for (int i = 0; i <= 9; i++) {
             LocalDate previousDay = today.minusDays(i);
-            dayOfYearMap.put( previousDay.getDayOfYear(),previousDay.getYear());
-            log.info(" -- {} - {}", previousDay.getYear(),  previousDay.getDayOfYear());
+            dayOfYearMap.put(previousDay.getDayOfYear(), previousDay.getYear());
+            log.info(" -- {} - {}", previousDay.getYear(), previousDay.getDayOfYear());
         }
         log.info("----- " + dayOfYearMap.size());
 
@@ -224,6 +224,9 @@ public class StatCPCBusiness {
             }
             if (request.getDoy() != null) {
                 predicates.add(cb.equal(root.get("doy"), request.getDoy()));
+            }
+            if (request.getYear() != null) {
+                predicates.add(cb.equal(root.get("year"), request.getYear()));
             }
             if (request.getDoyMenoDieci() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("doy"), request.getDoyMenoDieci()));
