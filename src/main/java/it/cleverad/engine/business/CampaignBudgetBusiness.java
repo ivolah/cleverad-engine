@@ -18,18 +18,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.decimal4j.util.DoubleRounder;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -48,6 +47,49 @@ public class CampaignBudgetBusiness {
     @Autowired
     private Mapper mapper;
 
+    public static double calculateMedian(Page<CampaignBudget> page, String fieldName) {
+
+        double[] pp = page.getContent().stream().mapToDouble(entity -> {
+            try {
+                Field field = CampaignBudget.class.getDeclaredField(fieldName);
+                field.setAccessible(true);
+                Object value = field.get(entity);
+                if (value instanceof Double) {
+                    return (Double) value;
+                }
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+            return 0.0;
+        }).toArray();
+
+        List<Double> percentages = new ArrayList<>();
+        for (double value : pp)
+            percentages.add(value);
+
+        Collections.sort(percentages);
+
+        int size = percentages.size();
+        double median = 0.0;
+        if (size > 0) {
+            if (size % 2 == 0) {
+                // For an even number of elements, average the middle two values
+                int mid = size / 2;
+                try {
+                    median = (percentages.get(mid - 1) + percentages.get(mid)) / 2.0;
+                } catch (IndexOutOfBoundsException e) {
+                    log.error("ERRORE CALCOLO MEDIANO == nullo ");
+                    return 0.0;
+                }
+            } else {
+                // For an odd number of elements, take the middle value
+                median = percentages.get(size / 2);
+            }
+        }
+
+        return DoubleRounder.round(median, 2);
+    }
+
     /**
      * ============================================================================================================
      **/
@@ -62,7 +104,7 @@ public class CampaignBudgetBusiness {
         map.setDictionary(dictionaryRepository.findById(request.tipologiaId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.tipologiaId)));
         map.setCanali(dictionaryRepository.findById(request.canaleId).orElseThrow(() -> new ElementCleveradException("Dictionary-canale", request.canaleId)));
         map.setStatus(true);
-        map.setPayout(DoubleRounder.round(request.getBudgetIniziale() / request.capIniziale, 2));
+        map.setBudgetIniziale(DoubleRounder.round(request.getPayout() * request.capIniziale, 2));
         if (request.getScarto() == null)
             map.setScarto(0D);
         return CampaignBudgetDTO.from(repository.save(map));
@@ -125,14 +167,83 @@ public class CampaignBudgetBusiness {
 
     // SEARCH PAGINATED
     public Page<CampaignBudgetDTO> search(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize());
+
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by("advertiserName", "plannerName", "campaignId", "status").ascending());
         request.setStatus(true);
         Page<CampaignBudget> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(CampaignBudgetDTO::from);
+
+        CampaignBudget calcolato = calculateTotalsForDoubleFields(page);
+        List<CampaignBudget> newListWithAdditionalElement = new ArrayList<>(page.getContent());
+        newListWithAdditionalElement.add(calcolato);
+        Page<CampaignBudget> newPage = new PageImpl<>(newListWithAdditionalElement, pageable, page.getTotalElements() + 1);
+
+        return newPage.map(CampaignBudgetDTO::from);
+    }
+
+    public CampaignBudget calculateTotalsForDoubleFields(Page<CampaignBudget> page) {
+        CampaignBudget campaignBudget = new CampaignBudget();
+        campaignBudget.setCapIniziale(getIntegerFieldValue(page, "capIniziale"));
+        campaignBudget.setCapPc(calculateMedian(page, "capPc"));
+        campaignBudget.setCapErogato(getIntegerFieldValue(page, "capErogato"));
+        campaignBudget.setPayout(calculateMedian(page, "payout"));
+        campaignBudget.setBudgetIniziale(getFieldValue(page, "budgetIniziale"));
+        campaignBudget.setBudgetErogato(getFieldValue(page, "budgetErogato"));
+        campaignBudget.setCommissioniErogate(getFieldValue(page, "commissioniErogate"));
+        campaignBudget.setRevenue(getFieldValue(page, "revenue"));
+        campaignBudget.setRevenuePC(calculateMedian(page, "revenuePC"));
+        campaignBudget.setScarto(getFieldValue(page, "scarto"));
+        campaignBudget.setBudgetErogatoPS(getFieldValue(page, "budgetErogatoPS"));
+        campaignBudget.setCommissioniErogatePS(getFieldValue(page, "commissioniErogatePS"));
+        campaignBudget.setRevenuePCPS(calculateMedian(page, "revenuePCPS"));
+        campaignBudget.setRevenuePS(getFieldValue(page, "revenuePS"));
+        campaignBudget.setRevenueDay(calculateMedian(page, "revenueDay"));
+        campaignBudget.setFatturato(getFieldValue(page, "fatturato"));
+        campaignBudget.setStatus(null);
+        campaignBudget.setPrenotato(null);
+        return campaignBudget;
+    }
+
+    // Helper method to get field value by field name using Reflection
+    private double getFieldValue(Page<CampaignBudget> page, String fieldName) {
+        return page.getContent().stream()
+                .mapToDouble(entity -> {
+                    Field field = null;
+                    try {
+                        field = CampaignBudget.class.getDeclaredField(fieldName);
+                        field.setAccessible(true);
+                        Object value = field.get(entity);
+                        if (value instanceof Double) {
+                            return (Double) value;
+                        }
+                    } catch (NoSuchFieldException | IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return 0.0;
+                })
+                .sum();
+    }
+
+    private Integer getIntegerFieldValue(Page<CampaignBudget> page, String fieldName) {
+        return page.getContent().stream()
+                .mapToInt(entity -> {
+                    Field field = null;
+                    try {
+                        field = CampaignBudget.class.getDeclaredField(fieldName);
+                        field.setAccessible(true);
+                        Object value = field.get(entity);
+                        if (value instanceof Integer) {
+                            return (Integer) value;
+                        }
+                    } catch (NoSuchFieldException | IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return 0;
+                })
+                .sum();
     }
 
     public Page<CampaignBudgetDTO> searchByCampaignID(Long campaignId, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize());
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by("advertiserName", "plannerName", "campaignId", "status").ascending());
         Filter request = new Filter();
         request.setCampaignId(campaignId);
         Page<CampaignBudget> page = repository.findAll(getSpecification(request), pageable);
@@ -140,7 +251,7 @@ public class CampaignBudgetBusiness {
     }
 
     public Page<CampaignBudgetDTO> searchAttivi() {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("id", "status").ascending());
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("advertiserName", "plannerName", "campaignId", "status").ascending());
         Filter request = new Filter();
         request.setStatus(true);
         Page<CampaignBudget> page = repository.findAll(getSpecification(request), pageable);

@@ -74,13 +74,13 @@ public class CampaignBudgetController {
      * ============================================================================================================
      **/
 
-    @PatchMapping("/upload/invoice")
+    @PostMapping("/upload/invoice")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Long uploadInvoice(@RequestParam("file") MultipartFile file, FileCampaignBudgetBusiness.BaseCreateRequest request) {
         return fileCampaignBudgetBusiness.storeFile(file, request, "INVOICE");
     }
 
-    @PatchMapping("/upload/order")
+    @PostMapping("/upload/order")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Long uploadOrder(@RequestParam("file") MultipartFile file, FileCampaignBudgetBusiness.BaseCreateRequest request) {
         return fileCampaignBudgetBusiness.storeFile(file, request, "ORDER");
