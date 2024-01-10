@@ -103,7 +103,7 @@ public class WalletBusiness {
         if (wallet.getResidual() != 0D) wallet.setResidual(wallet.getResidual() - value);
         if (wallet.getTotal() != 0D) wallet.setTotal(wallet.getTotal() - value);
         WalletDTO dto = WalletDTO.from(repository.saveAndFlush(wallet));
-        log.trace("Decrement by :: {} - {} --> ", id, value, dto.getTotal());
+        log.trace("Decrement by :: {} - {} --> {}", id, value, dto.getTotal());
         return dto;
     }
 
@@ -113,7 +113,7 @@ public class WalletBusiness {
      **/
     private Specification<Wallet> getSpecification(Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {

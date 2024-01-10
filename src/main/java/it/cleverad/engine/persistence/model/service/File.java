@@ -19,20 +19,15 @@ public class File {
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
     private String type;
-    @Lob
-    private byte[] data;
-
+    private String path;
     @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
-    private String path;
 
-    public File(String name, String type, byte[] data, String path) {
+    public File(String name, String type, String path) {
         this.name = name;
         this.type = type;
-        this.data = data;
         this.creationDate = LocalDateTime.now();
         this.path = path;
     }

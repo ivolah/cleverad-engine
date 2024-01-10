@@ -1,5 +1,9 @@
-package it.cleverad.engine.business;
+package it.cleverad.engine.service;
 
+import it.cleverad.engine.business.PayoutBusiness;
+import it.cleverad.engine.business.TransactionCPCBusiness;
+import it.cleverad.engine.business.TransactionCPLBusiness;
+import it.cleverad.engine.business.WalletBusiness;
 import it.cleverad.engine.persistence.model.service.TransactionCPC;
 import it.cleverad.engine.persistence.model.service.TransactionCPL;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
@@ -15,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -22,7 +27,8 @@ import java.util.List;
 @Slf4j
 @Component
 @Transactional
-public class RigeneraWalletBusiness {
+@Service
+public class WalletService {
 
     @Autowired
     private TransactionCPLBusiness transactionCPLBusiness;
@@ -38,10 +44,8 @@ public class RigeneraWalletBusiness {
     public void rigenera(Long affiliateId) {
         try {
             if (affiliateId == null) {
-                //log.warn("RIGENERA WALLET - Affiliate ID nullo, non faccio nulla");
-                walletBusiness.getAll().get().mapToLong(WalletDTO::getAffiliateId).forEach(affiliateID -> {
-                    calcola(affiliateID);
-                });
+                // se affiliate non valorizzato prendo tutti gli wallet
+                walletBusiness.getAll().get().mapToLong(WalletDTO::getAffiliateId).forEach(this::calcola);
             } else {
                 calcola(affiliateId);
             }
@@ -54,7 +58,7 @@ public class RigeneraWalletBusiness {
         // 1. --- PAYED - faccio la somma dei payout
         Page<PayoutDTO> payouts = payoutBusiness.findByIdAffilaite(affiliateId, Pageable.ofSize(Integer.MAX_VALUE));
         Double totalePayouts = payouts.stream().mapToDouble(PayoutDTO::getTotale).sum();
-        log.info("TOTALE PAYOUTS {}", totalePayouts);
+        log.trace("TOTALE PAYOUTS {}", totalePayouts);
 
         // 2. --- TRANSAZIONI CON PAYOUT
         // CPC
@@ -76,14 +80,14 @@ public class RigeneraWalletBusiness {
         double totaleConPayout = 0D;
         totaleConPayout += cpcs.stream().mapToDouble(TransactionCPC::getValue).sum();
         totaleConPayout += cpls.stream().mapToDouble(TransactionCPL::getValue).sum();
-        log.info("TOTALE CON PAYOUT per {} = {}", affiliateId, totaleConPayout);
+        log.trace("TOTALE CON PAYOUT per {} = {}", affiliateId, totaleConPayout);
         double totaleSenzaPayout = 0D;
         totaleSenzaPayout += cpcsSenza.stream().mapToDouble(TransactionCPC::getValue).sum();
         totaleSenzaPayout += cplsSenza.stream().mapToDouble(TransactionCPL::getValue).sum();
-        log.info("TOTALE SENZA PAYOUT per {} = {}", affiliateId, totaleSenzaPayout);
+        log.trace("TOTALE SENZA PAYOUT per {} = {}", affiliateId, totaleSenzaPayout);
 
         double totale = DoubleRounder.round(totaleSenzaPayout + totaleConPayout, 2);
-        log.info("TOTALE per {} = {}", affiliateId, totaleSenzaPayout);
+        log.trace("TOTALE per {} = {}", affiliateId, totaleSenzaPayout);
 
         // 5 - Cerco il Wallet e aggiorno
         Long walletID = walletRepository.findByAffiliateId(affiliateId).getId();

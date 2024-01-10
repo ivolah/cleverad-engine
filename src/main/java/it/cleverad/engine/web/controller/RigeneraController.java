@@ -2,7 +2,7 @@ package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.RigeneraCPCBusiness;
 import it.cleverad.engine.business.RigeneraCPLBusiness;
-import it.cleverad.engine.business.RigeneraWalletBusiness;
+import it.cleverad.engine.service.WalletService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,7 +19,7 @@ public class RigeneraController {
     @Autowired
     private RigeneraCPLBusiness rigeneraCPLBusiness;
     @Autowired
-    private RigeneraWalletBusiness rigeneraWalletBusiness;
+    private WalletService rigeneraWalletService;
 
     /**
      * ============================================================================================================
@@ -43,8 +43,8 @@ public class RigeneraController {
 
     @PostMapping("/wallet")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void wallet(@ModelAttribute RigeneraWalletBusiness.FilterUpdate request) {
-        rigeneraWalletBusiness.rigenera(request.getAffiliateId());
+    public void wallet(@ModelAttribute WalletService.FilterUpdate request) {
+        rigeneraWalletService.rigenera(request.getAffiliateId());
     }
 
 }

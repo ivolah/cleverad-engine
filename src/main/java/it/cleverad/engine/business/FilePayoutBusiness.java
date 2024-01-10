@@ -19,6 +19,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
+import org.checkerframework.checker.units.qual.A;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -60,11 +61,13 @@ public class FilePayoutBusiness {
     @Autowired
     private DictionaryBusiness dictionaryBusiness;
     @Autowired
-    private Mapper mapper;
-    @Autowired
     private FileStoreService fileStoreService;
     @Autowired
     private MailService mailService;
+    @Autowired
+    private PayoutBusiness payoutBusiness;
+    @Autowired
+    private Mapper mapper;
 
     /**
      * ============================================================================================================
@@ -74,10 +77,14 @@ public class FilePayoutBusiness {
     public Long storeFile(MultipartFile file, BaseCreateRequest request) {
         try {
             Payout payout = payoutRepository.findById(request.payoutId).orElseThrow(() -> new ElementCleveradException("Payout", request.payoutId));
-            Dictionary dictionary = (dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
             String filename = StringUtils.cleanPath(file.getOriginalFilename());
             String path = fileStoreService.storeFile(payout.getAffiliate().getId(), "payout", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), file.getBytes());
+
+            Dictionary dictionary = (dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
             FilePayout fileDB = new FilePayout(filename, file.getContentType(), payout, dictionary, path);
+
+            // Aggiorano stato in verifica
+            payoutBusiness.updateStatus(request.payoutId, 20L);
 
             MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
             mailRequest.setAffiliateId(payout.getAffiliate().getId());

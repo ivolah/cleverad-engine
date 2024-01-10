@@ -50,8 +50,6 @@ public class FileBusiness {
     @Autowired
     private FileRepository repository;
     @Autowired
-    private Mapper mapper;
-    @Autowired
     private ReferralService referralService;
     @Autowired
     private MediaBusiness mediaBusiness;
@@ -66,19 +64,16 @@ public class FileBusiness {
     public Long storeFile(MultipartFile file) throws IOException {
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
         String path = fileStoreService.storeFile(1L, "misc", UUID.randomUUID() + "." + FilenameUtils.getExtension(fileName), file.getBytes());
-        File fileDB = new File(fileName, file.getContentType(), null, path);
+        File fileDB = new File(fileName, file.getContentType(), path);
         return repository.save(fileDB).getId();
     }
 
     // GET BY ID
-    public FileDTO findById(Long id) {
+    public FileDTO findById(Long id) throws IOException {
         File file = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File", id));
-        try {
-            file.setData(fileStoreService.retrieveFile(file.getPath()));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return FileDTO.from(file);
+        FileDTO dto = FileDTO.from(file);
+        dto.setData(fileStoreService.retrieveFile(file.getPath()));
+        return dto;
     }
 
     // DELETE BY ID
@@ -121,7 +116,7 @@ public class FileBusiness {
             try {
                 data = fileStoreService.retrieveFile(ele.getPath());
             } catch (IOException e) {
-               log.trace("Eccezione in cariamento file {}", ele.getPath());
+                log.trace("Eccezione in cariamento file {}", ele.getPath());
             }
             // trovo media id collegato e campaign id a cui e colelgato il media
             Media mm = mediaBusiness.getByFileId(ele.getId());

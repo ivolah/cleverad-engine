@@ -59,7 +59,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/target",
                         "/file/encoded",
                         "/file/*/download",
-                        "/register", "/register/brandbuddies",
+                        "/register",
+                        "/register/brandbuddies",
                         "/register/types/*",
                         "/register/types/brandbuddies/platform",
                         "/register/user/",
@@ -68,7 +69,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/register/user/request",
                         "/user/reset/request",
                         "/user/reset/user",
-                        "/reset/request", "/reset/user", "/short/*"
+                        "/reset/request",
+                        "/reset/user",
+                        "/short/*"
                 ).permitAll().
                 // TUTTE LE ALTRE RICHIESTO SONO AUTENTICATE
                         anyRequest().authenticated().and().

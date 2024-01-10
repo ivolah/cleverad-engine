@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @CrossOrigin
@@ -50,7 +51,7 @@ public class FileController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public FileDTO getByUuid(@PathVariable Long id) {
+    public FileDTO getByUuid(@PathVariable Long id) throws IOException {
         return business.findById(id);
     }
 
