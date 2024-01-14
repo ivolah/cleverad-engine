@@ -36,7 +36,7 @@ public class ManageCPM {
     @Autowired
     private WalletBusiness walletBusiness;
     @Autowired
-    private BudgetBusiness budgetBusiness;
+    private AffiliateBudgetBusiness affiliateBudgetBusiness;
     @Autowired
     private CampaignBusiness campaignBusiness;
     @Autowired
@@ -155,10 +155,10 @@ public class ManageCPM {
                         if (walletID != null && totale > 0D) walletBusiness.incement(walletID, totale);
 
                         // decremento budget Affiliato
-                        BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
+                        AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
                         if (bb != null && bb.getBudget() != null) {
                             Double totBudgetDecrementato = bb.getBudget() - totale;
-                            budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
+                            affiliateBudgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
 
                             // setto stato transazione a ovebudget editore se totale < 0
                             if (totBudgetDecrementato < 0) {

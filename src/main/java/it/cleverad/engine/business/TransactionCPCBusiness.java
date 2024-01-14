@@ -7,7 +7,7 @@ import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.model.service.TransactionCPC;
 import it.cleverad.engine.persistence.model.service.Wallet;
 import it.cleverad.engine.persistence.repository.service.*;
-import it.cleverad.engine.web.dto.BudgetDTO;
+import it.cleverad.engine.web.dto.AffiliateBudgetDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.TransactionCPCDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -72,7 +72,7 @@ public class TransactionCPCBusiness {
     @Autowired
     private DictionaryRepository dictionaryRepository;
     @Autowired
-    private BudgetBusiness budgetBusiness;
+    private AffiliateBudgetBusiness affiliateBudgetBusiness;
     @Autowired
     private CampaignBusiness campaignBusiness;
 
@@ -170,10 +170,10 @@ public class TransactionCPCBusiness {
         if (statusId == 74L || dictionaryId == 40L) {
 
             // aggiorno budge e CAP affiliato
-            BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(cpc.getCampaign().getId(), cpc.getAffiliate().getId()).stream().findFirst().orElse(null);
+            AffiliateBudgetDTO budgetAff = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(cpc.getCampaign().getId(), cpc.getAffiliate().getId()).stream().findFirst().orElse(null);
             if (budgetAff != null) {
-                budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + cpc.getValue());
-                budgetBusiness.updateCap(budgetAff.getId(), Math.toIntExact(budgetAff.getCap() + cpc.getClickNumber()));
+                affiliateBudgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + cpc.getValue());
+                affiliateBudgetBusiness.updateCap(budgetAff.getId(), Math.toIntExact(budgetAff.getCap() + cpc.getClickNumber()));
             }
 
             // aggiorno budget campagna
@@ -235,10 +235,10 @@ public class TransactionCPCBusiness {
             TransactionCPCDTO dto = this.findByIdCPCInterno(id);
 
             // aggiorno budge e CAP affiliato
-            BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
+            AffiliateBudgetDTO budgetAff = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
             if (budgetAff != null && budgetAff.getId() != null && budgetAff.getBudget() != null) {
-                budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
-                budgetBusiness.updateCap(budgetAff.getId(), Math.toIntExact(budgetAff.getCap() + dto.getClickNumber()));
+                affiliateBudgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
+                affiliateBudgetBusiness.updateCap(budgetAff.getId(), Math.toIntExact(budgetAff.getCap() + dto.getClickNumber()));
             }
 
             // aggiorno budget campagna

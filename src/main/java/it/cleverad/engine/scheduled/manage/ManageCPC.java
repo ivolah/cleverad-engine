@@ -11,7 +11,7 @@ import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.persistence.repository.tracking.CpcRepository;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
-import it.cleverad.engine.web.dto.BudgetDTO;
+import it.cleverad.engine.web.dto.AffiliateBudgetDTO;
 import it.cleverad.engine.web.dto.TransactionCPCDTO;
 import it.cleverad.engine.web.dto.tracking.CpcDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -47,7 +47,7 @@ public class ManageCPC {
     @Autowired
     private WalletBusiness walletBusiness;
     @Autowired
-    private BudgetBusiness budgetBusiness;
+    private AffiliateBudgetBusiness affiliateBudgetBusiness;
     @Autowired
     private CampaignBusiness campaignBusiness;
     @Autowired
@@ -225,14 +225,14 @@ public class ManageCPC {
                         if (walletID != null && totale > 0D) walletBusiness.incement(walletID, totale);
 
                         // decremento budget Affiliato
-                        BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(campaignId, affiliateId).stream().findFirst().orElse(null);
+                        AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(campaignId, affiliateId).stream().findFirst().orElse(null);
                         if (bb != null && bb.getBudget() != null) {
                             Double totBudgetDecrementato = bb.getBudget() - totale;
-                            budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
+                            affiliateBudgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
 
                             // decremento cap affiliato
                             Integer cap = bb.getCap() - numer;
-                            budgetBusiness.updateCap(bb.getId(), cap);
+                            affiliateBudgetBusiness.updateCap(bb.getId(), cap);
 
                             // setto stato transazione a ovebudget editore se totale < 0
                             if (totBudgetDecrementato < 0) {

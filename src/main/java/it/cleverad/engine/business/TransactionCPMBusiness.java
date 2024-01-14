@@ -4,10 +4,9 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.*;
 import it.cleverad.engine.persistence.repository.service.*;
-import it.cleverad.engine.web.dto.BudgetDTO;
+import it.cleverad.engine.web.dto.AffiliateBudgetDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.TransactionCPMDTO;
-import it.cleverad.engine.web.dto.TransactionCPSDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -26,7 +25,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -67,7 +65,7 @@ public class TransactionCPMBusiness {
     @Autowired
     private DictionaryRepository dictionaryRepository;
     @Autowired
-    private BudgetBusiness budgetBusiness;
+    private AffiliateBudgetBusiness affiliateBudgetBusiness;
     @Autowired
     private CampaignBusiness campaignBusiness;
     @Autowired
@@ -186,10 +184,10 @@ public class TransactionCPMBusiness {
             TransactionCPMDTO dto = this.findByIdCPM(id);
 
             // aggiorno budget affiliato
-            BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
+            AffiliateBudgetDTO budgetAff = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
             if (budgetAff != null) {
-                budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
-                budgetBusiness.updateCap(budgetAff.getId(), Math.toIntExact(budgetAff.getCap() + dto.getImpressionNumber()));
+                affiliateBudgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
+                affiliateBudgetBusiness.updateCap(budgetAff.getId(), Math.toIntExact(budgetAff.getCap() + dto.getImpressionNumber()));
             }
 
             // aggiorno budget campagna

@@ -6,9 +6,8 @@ import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
-import it.cleverad.engine.web.dto.BudgetDTO;
+import it.cleverad.engine.web.dto.AffiliateBudgetDTO;
 import it.cleverad.engine.web.dto.CampaignDTO;
-import it.cleverad.engine.web.dto.CommissionDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +29,7 @@ public class ManageCPS {
     @Autowired
     private WalletBusiness walletBusiness;
     @Autowired
-    private BudgetBusiness budgetBusiness;
+    private AffiliateBudgetBusiness affiliateBudgetBusiness;
     @Autowired
     private CampaignBusiness campaignBusiness;
     @Autowired
@@ -122,10 +121,10 @@ public class ManageCPS {
                     walletBusiness.incement(walletID, totale);
 
                 // decremento budget Affiliato
-                BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
+                AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
                 if (bb != null && bb.getBudget() != null) {
                     Double totBudgetDecrementato = bb.getBudget() - totale;
-                    budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
+                    affiliateBudgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
 
                     // setto stato transazione a ovebudget editore se totale < 0
                     if (totBudgetDecrementato < 0) {

@@ -20,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.decimal4j.util.DoubleRounder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +42,7 @@ public class RigeneraCPLBusiness {
     @Autowired
     private WalletBusiness walletBusiness;
     @Autowired
-    private BudgetBusiness budgetBusiness;
+    private AffiliateBudgetBusiness affiliateBudgetBusiness;
     @Autowired
     private CampaignBusiness campaignBusiness;
     @Autowired
@@ -94,10 +93,10 @@ public class RigeneraCPLBusiness {
                 TransactionCPL trans = transactionCPLRepository.findById(tcpl.getId()).orElseThrow(() -> new ElementCleveradException("Transaction", 0L));
                 // aggiorno budget affiliato
                 // da gestire in esterna con un azione scheduata
-                BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(trans.getCampaign().getId(), trans.getAffiliate().getId()).stream().findFirst().orElse(null);
+                AffiliateBudgetDTO budgetAff = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(trans.getCampaign().getId(), trans.getAffiliate().getId()).stream().findFirst().orElse(null);
                 if (budgetAff != null) {
-                    budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + trans.getValue());
-                    budgetBusiness.updateCap(budgetAff.getId(), budgetAff.getCap() + 1);
+                    affiliateBudgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + trans.getValue());
+                    affiliateBudgetBusiness.updateCap(budgetAff.getId(), budgetAff.getCap() + 1);
                 }
 
                 // aggiorno budget campagna
@@ -219,10 +218,10 @@ public class RigeneraCPLBusiness {
                             if (walletID != null && totale > 0D) walletBusiness.incement(walletID, totale);
 
                             // decremento budget Affiliato
-                            BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
+                            AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
                             if (bb != null && bb.getBudget() != null) {
                                 double totBudgetDecrementato = bb.getBudget() - totale;
-                                budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
+                                affiliateBudgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
 
                                 // setto stato transazione a ovebudget editore se totale < 0
                                 if (totBudgetDecrementato < 0) {

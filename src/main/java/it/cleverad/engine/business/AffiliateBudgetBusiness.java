@@ -1,11 +1,11 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.service.Budget;
+import it.cleverad.engine.persistence.model.service.AffiliateBudget;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
-import it.cleverad.engine.persistence.repository.service.BudgetRepository;
+import it.cleverad.engine.persistence.repository.service.AffiliateBudgetRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
-import it.cleverad.engine.web.dto.BudgetDTO;
+import it.cleverad.engine.web.dto.AffiliateBudgetDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -37,14 +37,14 @@ import java.util.List;
 @Slf4j
 @Component
 @Transactional
-public class BudgetBusiness {
+public class AffiliateBudgetBusiness {
 
     @Autowired
     private AffiliateRepository affiliateRepository;
     @Autowired
     private CampaignRepository campaignRepository;
     @Autowired
-    private BudgetRepository repository;
+    private AffiliateBudgetRepository repository;
     @Autowired
     private Mapper mapper;
 
@@ -53,20 +53,20 @@ public class BudgetBusiness {
      **/
 
     // CREATE
-    public BudgetDTO create(BaseCreateRequest request) {
-        Budget map = mapper.map(request, Budget.class);
+    public AffiliateBudgetDTO create(BaseCreateRequest request) {
+        AffiliateBudget map = mapper.map(request, AffiliateBudget.class);
         map.setStatus(true);
         map.setInitialBudget(request.getBudget());
         map.setInitialCap(request.getCap());
         map.setAffiliate(affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId)));
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
-        return BudgetDTO.from(repository.save(map));
+        return AffiliateBudgetDTO.from(repository.save(map));
     }
 
     // GET BY ID
-    public BudgetDTO findById(Long id) {
-        Budget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Budget", id));
-        return BudgetDTO.from(budget);
+    public AffiliateBudgetDTO findById(Long id) {
+        AffiliateBudget affiliateBudget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Budget", id));
+        return AffiliateBudgetDTO.from(affiliateBudget);
     }
 
     // DELETE BY ID
@@ -81,84 +81,84 @@ public class BudgetBusiness {
     }
 
     // SEARCH PAGINATED
-    public Page<BudgetDTO> search(Filter request, Pageable pageableRequest) {
+    public Page<AffiliateBudgetDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
-        Page<Budget> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(BudgetDTO::from);
+        Page<AffiliateBudget> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(AffiliateBudgetDTO::from);
     }
 
     // UPDATE
-    public BudgetDTO update(Long id, Filter filter) {
+    public AffiliateBudgetDTO update(Long id, Filter filter) {
 
         log.info(">>>> " + filter);
-        Budget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Budget", id));
+        AffiliateBudget affiliateBudget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Budget", id));
 
         Double newBudget = null;
-        if (!budget.getInitialBudget().equals(filter.getInitialBudget())) {
-            newBudget = budget.getBudget() + filter.getInitialBudget() - budget.getInitialBudget();
+        if (!affiliateBudget.getInitialBudget().equals(filter.getInitialBudget())) {
+            newBudget = affiliateBudget.getBudget() + filter.getInitialBudget() - affiliateBudget.getInitialBudget();
             log.info(newBudget + "");
         }
 
-        mapper.map(filter, budget);
+        mapper.map(filter, affiliateBudget);
 
-        budget.setBudget(newBudget);
-        budget.setLastModificationDate(LocalDateTime.now());
-        budget.setAffiliate(affiliateRepository.findById(filter.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", filter.affiliateId)));
-        budget.setCampaign(campaignRepository.findById(filter.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", filter.campaignId)));
+        affiliateBudget.setBudget(newBudget);
+        affiliateBudget.setLastModificationDate(LocalDateTime.now());
+        affiliateBudget.setAffiliate(affiliateRepository.findById(filter.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", filter.affiliateId)));
+        affiliateBudget.setCampaign(campaignRepository.findById(filter.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", filter.campaignId)));
 
-        return BudgetDTO.from(repository.save(budget));
+        return AffiliateBudgetDTO.from(repository.save(affiliateBudget));
     }
 
-    public BudgetDTO disable(Long id) {
-        Budget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Budget", id));
-        budget.setLastModificationDate(LocalDateTime.now());
-        budget.setStatus(false);
-        return BudgetDTO.from(repository.save(budget));
+    public AffiliateBudgetDTO disable(Long id) {
+        AffiliateBudget affiliateBudget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Budget", id));
+        affiliateBudget.setLastModificationDate(LocalDateTime.now());
+        affiliateBudget.setStatus(false);
+        return AffiliateBudgetDTO.from(repository.save(affiliateBudget));
     }
 
-    public BudgetDTO updateBudget(Long id, Double budgetValue) {
-        Budget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Budget", id));
-        budget.setLastModificationDate(LocalDateTime.now());
-        budget.setBudget(budgetValue);
-        return BudgetDTO.from(repository.save(budget));
+    public AffiliateBudgetDTO updateBudget(Long id, Double budgetValue) {
+        AffiliateBudget affiliateBudget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Budget", id));
+        affiliateBudget.setLastModificationDate(LocalDateTime.now());
+        affiliateBudget.setBudget(budgetValue);
+        return AffiliateBudgetDTO.from(repository.save(affiliateBudget));
     }
 
-    public BudgetDTO updateCap(Long id, Integer cap) {
-        Budget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Budget", id));
-        budget.setLastModificationDate(LocalDateTime.now());
-        budget.setCap(cap);
-        return BudgetDTO.from(repository.save(budget));
+    public AffiliateBudgetDTO updateCap(Long id, Integer cap) {
+        AffiliateBudget affiliateBudget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Budget", id));
+        affiliateBudget.setLastModificationDate(LocalDateTime.now());
+        affiliateBudget.setCap(cap);
+        return AffiliateBudgetDTO.from(repository.save(affiliateBudget));
     }
 
-    public Page<BudgetDTO> getByIdCampaign(Long id) {
+    public Page<AffiliateBudgetDTO> getByIdCampaign(Long id) {
         Filter request = new Filter();
         request.setCampaignId(id);
-        Page<Budget> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
-        return page.map(BudgetDTO::from);
+        Page<AffiliateBudget> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
+        return page.map(AffiliateBudgetDTO::from);
     }
 
-    public Page<BudgetDTO> getByIdCampaignAndIdAffiliate(Long idCampaign, Long idAffilaite) {
+    public Page<AffiliateBudgetDTO> getByIdCampaignAndIdAffiliate(Long idCampaign, Long idAffilaite) {
         Filter request = new Filter();
         request.setCampaignId(idCampaign);
         request.setAffiliateId(idAffilaite);
         request.setStatus(true);
-        Page<Budget> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
-        return page.map(BudgetDTO::from);
+        Page<AffiliateBudget> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
+        return page.map(AffiliateBudgetDTO::from);
     }
 
-    public List<BudgetDTO> getBudgetToDisable() {
+    public List<AffiliateBudgetDTO> getBudgetToDisable() {
         Filter request = new Filter();
         request.setDisableDueDateTo(LocalDate.now().plusDays(1));
         request.setStatus(true);
-        Page<Budget> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
-        return page.map(BudgetDTO::from).toList();
+        Page<AffiliateBudget> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
+        return page.map(AffiliateBudgetDTO::from).toList();
     }
 
     /**
      * ============================================================================================================
      **/
 
-    private Specification<Budget> getSpecification(Filter request) {
+    private Specification<AffiliateBudget> getSpecification(Filter request) {
         return (root, query, cb) -> {
             Predicate completePredicate = null;
             List<Predicate> predicates = new ArrayList<>();

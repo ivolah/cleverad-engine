@@ -72,7 +72,7 @@ public class Campaign {
     private Set<RevenueFactor> revenueFactors;
 
     @OneToMany(mappedBy = "campaign")
-    private Set<Budget> budgets;
+    private Set<AffiliateBudget> affiliateBudgets;
 
     @OneToMany(mappedBy = "campaign")
     private Set<TransactionCPC> transactionCPCS;

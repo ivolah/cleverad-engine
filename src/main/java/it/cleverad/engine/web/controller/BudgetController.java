@@ -1,7 +1,7 @@
 package it.cleverad.engine.web.controller;
 
-import it.cleverad.engine.business.BudgetBusiness;
-import it.cleverad.engine.web.dto.BudgetDTO;
+import it.cleverad.engine.business.AffiliateBudgetBusiness;
+import it.cleverad.engine.web.dto.AffiliateBudgetDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class BudgetController {
 
     @Autowired
-    private BudgetBusiness business;
+    private AffiliateBudgetBusiness business;
 
     /**
      * ============================================================================================================
@@ -23,25 +23,25 @@ public class BudgetController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public BudgetDTO create(@ModelAttribute BudgetBusiness.BaseCreateRequest request) {
+    public AffiliateBudgetDTO create(@ModelAttribute AffiliateBudgetBusiness.BaseCreateRequest request) {
         return business.create(request);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<BudgetDTO> search(BudgetBusiness.Filter request, Pageable pageable) {
+    public Page<AffiliateBudgetDTO> search(AffiliateBudgetBusiness.Filter request, Pageable pageable) {
         return business.search(request, pageable);
     }
 
     @PatchMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public BudgetDTO update(@PathVariable Long id, @RequestBody BudgetBusiness.Filter request) {
+    public AffiliateBudgetDTO update(@PathVariable Long id, @RequestBody AffiliateBudgetBusiness.Filter request) {
         return business.update(id, request);
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public BudgetDTO getByUuid(@PathVariable Long id) {
+    public AffiliateBudgetDTO getByUuid(@PathVariable Long id) {
         return business.findById(id);
     }
 
@@ -54,7 +54,7 @@ public class BudgetController {
 
     @GetMapping("/{id}/campaign")
     @ResponseStatus(HttpStatus.OK)
-    public Page<BudgetDTO> getByIdCampaign(@PathVariable Long id) {
+    public Page<AffiliateBudgetDTO> getByIdCampaign(@PathVariable Long id) {
         return business.getByIdCampaign(id);
     }
     /**

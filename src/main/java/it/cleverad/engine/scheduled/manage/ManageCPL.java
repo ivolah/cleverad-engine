@@ -2,7 +2,6 @@ package it.cleverad.engine.scheduled.manage;
 
 import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
-import it.cleverad.engine.persistence.model.service.CampaignBudget;
 import it.cleverad.engine.persistence.model.service.Commission;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.model.tracking.Cpl;
@@ -11,7 +10,7 @@ import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.persistence.repository.tracking.CplRepository;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
-import it.cleverad.engine.web.dto.BudgetDTO;
+import it.cleverad.engine.web.dto.AffiliateBudgetDTO;
 import it.cleverad.engine.web.dto.CampaignDTO;
 import it.cleverad.engine.web.dto.TransactionCPLDTO;
 import it.cleverad.engine.web.dto.tracking.CpcDTO;
@@ -25,7 +24,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,7 +41,7 @@ public class ManageCPL {
     @Autowired
     private WalletBusiness walletBusiness;
     @Autowired
-    private BudgetBusiness budgetBusiness;
+    private AffiliateBudgetBusiness affiliateBudgetBusiness;
     @Autowired
     private CampaignBusiness campaignBusiness;
     @Autowired
@@ -192,14 +190,14 @@ public class ManageCPL {
                         if (walletID != null && totale > 0D) walletBusiness.incement(walletID, totale);
 
                         // decremento budget Affiliato
-                        BudgetDTO bb = budgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
+                        AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
                         if (bb != null && bb.getBudget() != null) {
                             Double totBudgetDecrementato = bb.getBudget() - totale;
-                            budgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
+                            affiliateBudgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
 
                             // decremento cap affiliato
                             Integer cap = bb.getCap() - 1;
-                            budgetBusiness.updateCap(bb.getId(), cap);
+                            affiliateBudgetBusiness.updateCap(bb.getId(), cap);
 
                             // setto stato transazione a ovebudget editore se totale < 0
                             if (totBudgetDecrementato < 0) {

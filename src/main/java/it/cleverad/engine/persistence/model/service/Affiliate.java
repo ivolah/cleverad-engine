@@ -91,7 +91,7 @@ public class Affiliate {
     private Set<Channel> channels;
 
     @OneToMany(mappedBy = "affiliate")
-    private Set<Budget> budgets;
+    private Set<AffiliateBudget> affiliateBudgets;
 
     @OneToMany(mappedBy = "affiliate")
     private Set<TransactionCPC> transactionCPCS;

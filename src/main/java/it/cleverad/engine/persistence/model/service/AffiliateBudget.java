@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Budget {
+public class AffiliateBudget {
     // AFFILAITE BUDGET
     @Id
     @Column(name = "id", nullable = false)

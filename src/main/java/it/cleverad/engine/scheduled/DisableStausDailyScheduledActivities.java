@@ -1,6 +1,6 @@
 package it.cleverad.engine.scheduled;//package it.cleverad.engine.scheduled;
 
-import it.cleverad.engine.business.BudgetBusiness;
+import it.cleverad.engine.business.AffiliateBudgetBusiness;
 import it.cleverad.engine.business.CampaignBusiness;
 import it.cleverad.engine.business.CommissionBusiness;
 import it.cleverad.engine.business.RevenueFactorBusiness;
@@ -21,7 +21,7 @@ public class DisableStausDailyScheduledActivities {
     @Autowired
     private CampaignBusiness campaignBusiness;
     @Autowired
-    private BudgetBusiness budgetBusiness;
+    private AffiliateBudgetBusiness affiliateBudgetBusiness;
     @Autowired
     private CommissionBusiness commissionBusiness;
     @Autowired
@@ -32,9 +32,9 @@ public class DisableStausDailyScheduledActivities {
         log.info("AGGIORNAMENTO QUOTIDIANO STATO");
 
         // aggiorno Stato Budget
-        List<BudgetDTO> listaBudget = budgetBusiness.getBudgetToDisable();
+        List<AffiliateBudgetDTO> listaBudget = affiliateBudgetBusiness.getBudgetToDisable();
         listaBudget.stream().forEach(budgetDTO -> {
-            budgetBusiness.disable(budgetDTO.getId());
+            affiliateBudgetBusiness.disable(budgetDTO.getId());
             log.info("Disable Budget : {}", budgetDTO.getId());
         });
 

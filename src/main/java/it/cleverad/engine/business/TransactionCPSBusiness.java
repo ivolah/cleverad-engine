@@ -6,7 +6,7 @@ import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.TransactionCPS;
 import it.cleverad.engine.persistence.model.service.Wallet;
 import it.cleverad.engine.persistence.repository.service.*;
-import it.cleverad.engine.web.dto.BudgetDTO;
+import it.cleverad.engine.web.dto.AffiliateBudgetDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.TransactionCPSDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -66,7 +66,7 @@ public class TransactionCPSBusiness {
     @Autowired
     private DictionaryRepository dictionaryRepository;
     @Autowired
-    private BudgetBusiness budgetBusiness;
+    private AffiliateBudgetBusiness affiliateBudgetBusiness;
     @Autowired
     private CampaignBusiness campaignBusiness;
 
@@ -170,9 +170,9 @@ public class TransactionCPSBusiness {
                 TransactionCPSDTO dto = this.findByIdCPS(id);
 
                 // aggiorno budget affiliato
-                BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
+                AffiliateBudgetDTO budgetAff = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
                 if (budgetAff != null) {
-                    budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
+                    affiliateBudgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
                 }
 
                 // aggiorno budget campagna
