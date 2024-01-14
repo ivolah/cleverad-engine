@@ -3,8 +3,10 @@ package it.cleverad.engine.business;
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.Commission;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
+import it.cleverad.engine.persistence.model.service.TransactionCPL;
 import it.cleverad.engine.persistence.model.tracking.Cpl;
 import it.cleverad.engine.persistence.repository.service.CommissionRepository;
+import it.cleverad.engine.persistence.repository.service.TransactionCPLRepository;
 import it.cleverad.engine.persistence.repository.tracking.CplRepository;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.*;
@@ -31,6 +33,8 @@ import java.util.Objects;
 @Component
 @Transactional
 public class RigeneraCPLBusiness {
+    @Autowired
+    private TransactionCPLRepository transactionCPLRepository;
 
     @Autowired
     private CplBusiness cplBusiness;
@@ -81,11 +85,26 @@ public class RigeneraCPLBusiness {
             not.add(74L); // RIGETTATO
             request.setNotInStatusId(not);
 
-            Page<TransactionStatusDTO> ls = transactionAllBusiness.searchPrefiltrato(request, PageRequest.of(0, Integer.MAX_VALUE));
+            Page<TransactionStatusDTO> ls = transactionAllBusiness.searchPrefiltratoInterno(request);
             log.info(">>> TOT :: " + ls.getTotalElements());
 
             for (TransactionStatusDTO tcpl : ls) {
                 log.trace("CANCELLO PER RIGENERA CP :: {} : {} :: {}", tcpl.getId(), tcpl.getValue(), tcpl.getDateTime());
+
+                TransactionCPL trans = transactionCPLRepository.findById(tcpl.getId()).orElseThrow(() -> new ElementCleveradException("Transaction", 0L));
+                // aggiorno budget affiliato
+                // da gestire in esterna con un azione scheduata
+                BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(trans.getCampaign().getId(), trans.getAffiliate().getId()).stream().findFirst().orElse(null);
+                if (budgetAff != null) {
+                    budgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + trans.getValue());
+                    budgetBusiness.updateCap(budgetAff.getId(), budgetAff.getCap() + 1);
+                }
+
+                // aggiorno budget campagna
+                // - non serve più  abbiamo campagin budget :
+                // aggiorno wallet in modo schedulato
+                // aggiorno campaign buget in modo schedualto
+
                 transactionCPLBusiness.delete(tcpl.getId());
                 Thread.sleep(50L);
             }

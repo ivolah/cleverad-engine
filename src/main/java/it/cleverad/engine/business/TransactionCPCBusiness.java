@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class TransactionCPCBusiness {
 
-//    @Autowired
+    //    @Autowired
 //    CampaignBudgetBusiness campaignBudgetBusiness;
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
@@ -232,7 +232,7 @@ public class TransactionCPCBusiness {
 
     public void delete(Long id) {
         try {
-            TransactionCPCDTO dto = this.findByIdCPC(id);
+            TransactionCPCDTO dto = this.findByIdCPCInterno(id);
 
             // aggiorno budge e CAP affiliato
             BudgetDTO budgetAff = budgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
@@ -242,31 +242,16 @@ public class TransactionCPCBusiness {
             }
 
             // aggiorno budget campagna
-            campaignBusiness.updateBudget(dto.getCampaignId(), campaignBusiness.findById(dto.getCampaignId()).getBudget() + dto.getValue());
+            // - non serve più  abbiamo campagin budget :
+            //campaignBusiness.updateBudget(dto.getCampaignId(), campaignBusiness.findById(dto.getCampaignId()).getBudget() + dto.getValue());
 
-            // aggiorno wallet
-            Long walletID = null;
-            if (dto.getAffiliateId() != null) {
-                walletID = walletRepository.findByAffiliateId(dto.getAffiliateId()).getId();
-                walletBusiness.decrement(walletID, dto.getValue());
-            } else {
-                log.warn("WALLET NON TROVATO :: {}", dto.getAffiliateId());
-            }
-
-            //aggiorno Camapign Budget
-//                if (dto.getValue() > 0D) {
-//                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(dto.getCampaignId(), dto.getDateTime());
-//                    if (cb != null) {
-//                        campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - dto.getClickNumber()));
-//                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - dto.getValue());
-//                    }
-//                }
+            // aggiorno wallet in modo schedulato
+            // aggiorno campaign buget in modo schedualto
 
             //cancello
             cpcRepository.delete(cpcRepository.findById(id).get());
-        } catch (ConstraintViolationException ex) {
-            throw ex;
         } catch (Exception ee) {
+            log.error("Errore in cancell transazione CPC :: " + ee.getMessage());
             throw new PostgresDeleteCleveradException(ee);
         }
     }
@@ -281,11 +266,13 @@ public class TransactionCPCBusiness {
         if (jwtUserDetailsService.getRole().equals("Admin")) {
             transaction = cpcRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
         } else {
-            CampaignBusiness.Filter request = new CampaignBusiness.Filter();
-            request.setId(id);
             transaction = cpcRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
         }
         return TransactionCPCDTO.from(transaction);
+    }
+
+    public TransactionCPCDTO findByIdCPCInterno(Long id) {
+        return TransactionCPCDTO.from( cpcRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id)));
     }
 
     // SEARCH PAGINATED
@@ -411,7 +398,7 @@ public class TransactionCPCBusiness {
             if (request.getBlacklisted() != null) {
                 predicates.add(cb.equal(root.get("blacklisted"), request.getBlacklisted()));
             }
-            if (request.getPayoutPresent() != null ) {
+            if (request.getPayoutPresent() != null) {
                 predicates.add(cb.equal(root.get("payoutPresent"), request.getPayoutPresent()));
             }
 

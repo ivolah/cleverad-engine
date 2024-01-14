@@ -87,6 +87,7 @@ public class ConsolidaCPC {
                 log.trace("TRANSAZIONE CPC ID :: {} : {} :: {}", tcpc.getId(), tcpc.getClickNumber(), tcpc.getDateTime());
                 transactionCPCBusiness.deleteInterno(tcpc.getId());
             }
+
             if (totaleClick > 0) {
                 log.trace("CONSOLIDATO CPC :: {} :: {} ::: {} - {} - {} ::: ", totaleClick, value, ttt.getLeft(), ttt.getMiddle(), ttt.getRight(), totaleClick, value);
                 TransactionCPCBusiness.BaseCreateRequest bReq = new TransactionCPCBusiness.BaseCreateRequest();

@@ -265,6 +265,10 @@ public class TransactionCPLBusiness {
         return TransactionCPLDTO.from(transaction);
     }
 
+    public TransactionCPLDTO findByIdCPLInterno(Long id) {
+        return TransactionCPLDTO.from(cplRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id)));
+    }
+
     /**
      * == DELETE =========================================================================================================
      **/
@@ -292,25 +296,11 @@ public class TransactionCPLBusiness {
             }
 
             // aggiorno budget campagna
-            campaignBusiness.updateBudget(dto.getCampaignId(), campaignBusiness.findById(dto.getCampaignId()).getBudget() + dto.getValue());
+            // - non serve più  abbiamo campagin budget :
+            //campaignBusiness.updateBudget(dto.getCampaignId(), campaignBusiness.findById(dto.getCampaignId()).getBudget() + dto.getValue());
 
-            // aggiorno wallet
-            Long walletID = null;
-            if (dto.getAffiliateId() != null) {
-                walletID = walletRepository.findByAffiliateId(dto.getAffiliateId()).getId();
-                walletBusiness.decrement(walletID, dto.getValue());
-            } else {
-                log.warn("WALLET NON TROVATO :: {}", dto.getAffiliateId());
-            }
-
-            //aggiorno Camapign Budget
-//                if (dto.getValue() > 0D) {
-//                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(dto.getCampaignId(), dto.getDateTime());
-//                    if (cb != null) {
-//                        campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - 1));
-//                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - dto.getValue());
-//                    }
-//                }
+            // aggiorno wallet in modo schedulato
+            // aggiorno campaign buget in modo schedualto
 
             cplRepository.delete(cplRepository.findById(id).get());
 

@@ -13,13 +13,13 @@ import java.time.LocalDate;
 public class RigeneraCPC {
 
     @Autowired
-    private RigeneraCPCBusiness rigeneraCPC;
+    private RigeneraCPCBusiness rigeneraCPCBusiness;
 
     @Scheduled(cron = "14 14 2 * * ?")
     public void rigeneraCPCdiIeri() {
         LocalDate localDate = LocalDate.now();
         LocalDate yesterday = localDate.minusDays(1);
-        rigeneraCPC.rigenera(yesterday.getYear(), yesterday.getMonthValue(), yesterday.getDayOfMonth(), null, null);
+        rigeneraCPCBusiness.rigenera(yesterday.getYear(), yesterday.getMonthValue(), yesterday.getDayOfMonth(), null, null);
     }//rigeneraCPCdiIeri
 
 }

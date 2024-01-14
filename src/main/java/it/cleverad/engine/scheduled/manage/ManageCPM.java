@@ -68,7 +68,7 @@ public class ManageCPM {
             Map<String, Integer> mappa = new HashMap<>();
             Page<CpmDTO> last = CpmBusiness.getUnreadHourBefore();
 
-            last.stream().filter(CpmDTO -> CpmDTO.getRefferal() != null).forEach(cpm -> {
+            last.stream().filter(cpmDTO -> cpmDTO.getRefferal() != null).forEach(cpm -> {
                 // gestisco calcolatore
                 Integer num = mappa.get(cpm.getRefferal());
                 if (num == null) num = 0;
@@ -205,7 +205,7 @@ public class ManageCPM {
 
             // trovo tutti i tracking con read == false
             Map<String, Integer> mappa = new HashMap<>();
-            CpmBusiness.getUnreadBlacklisted().stream().filter(CpmDTO -> CpmDTO.getRefferal() != null).forEach(cpm -> {
+            CpmBusiness.getUnreadBlacklisted().stream().filter(cmpDTO -> cmpDTO.getRefferal() != null).forEach(cpm -> {
                 // gestisco calcolatore
                 Integer num = mappa.get(cpm.getRefferal());
                 if (num == null) num = 0;

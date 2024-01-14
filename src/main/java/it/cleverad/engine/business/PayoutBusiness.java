@@ -266,9 +266,9 @@ public class PayoutBusiness {
     // SEARCH PAGINATED
     public Page<PayoutDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
-        if (request.getDictionaryId() == null) {
-            request.setDictionaryIdNotConcluso(true);
-        }
+//        if (request.getDictionaryId() == null) {
+//            request.setDictionaryIdNotConcluso(true);
+//        }
         Page<Payout> page = repository.findAll(getSpecification(request), pageable);
         return page.map(PayoutDTO::from);
     }

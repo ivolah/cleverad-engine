@@ -46,7 +46,7 @@ public class CampaignBudgetService {
         }
 
         for (CampaignBudgetDTO dto : budgets) {
-            log.warn("GESTISCO {}:{} ", dto.getCampaignId(), dto.getCampaignName());
+            log.trace("GESTISCO {}:{} ", dto.getCampaignId(), dto.getCampaignName());
 
             Integer capErogato = 0;
             double budgetErogato = 0D;
@@ -85,27 +85,43 @@ public class CampaignBudgetService {
             mapper.map(dto, request);
 
             request.setCapErogato(capErogato);
-            request.setCapPc(br.round((double) (capErogato * 100) / dto.getCapIniziale()));
-            // request.setBudgetErogato(budgetErogato);
+
+            if (capErogato != 0D) {
+                request.setCapPc(br.round((double) (capErogato * 100) / dto.getCapIniziale()));
+            } else request.setCapPc(0D);
+
             budgetErogato = br.round(capErogato * dto.getPayout());
             request.setBudgetErogato(budgetErogato);
             request.setCommissioniErogate(br.round(commissioniErogate));
             double revenue = budgetErogato - commissioniErogate;
             request.setRevenue(br.round(revenue));
-            request.setRevenuePC(br.round((revenue / budgetErogato) * 100));
+
+            if (budgetErogato != 0D) {
+                request.setRevenuePC(br.round((revenue / budgetErogato) * 100));
+            } else request.setRevenuePC(0D);
+
             if (budgetErogato != 0D) {
                 request.setBudgetErogatoPS(br.round(budgetErogato - (budgetErogato / 100 * scarto)));
             } else request.setBudgetErogatoPS(0D);
+
             if (commissioniErogate != 0D) {
                 request.setCommissioniErogatePS(br.round(commissioniErogate - (commissioniErogate / 100 * scarto)));
             } else request.setCommissioniErogatePS(0D);
-            request.setRevenuePS(br.round(revenue - (revenue / 100 * scarto)));
-            request.setRevenuePCPS(br.round((request.getRevenuePS() / request.getBudgetErogatoPS()) * 100));
+
+            if (scarto != 0D) {
+                request.setRevenuePS(br.round(revenue - (revenue / 100 * scarto)));
+            } else request.setRevenuePS(0D);
+
+            if (request.getBudgetErogatoPS() != 0D) {
+                request.setRevenuePCPS(br.round((request.getRevenuePS() / request.getBudgetErogatoPS()) * 100));
+            } else request.setRevenuePCPS(0D);
+
             request.setRevenueDay(br.round(revenue / LocalDate.now().getDayOfMonth()));
+
             request.setId(null);
             request.setStatus(true);
             CampaignBudgetDTO cb = campaignBudgetBusiness.create(request);
-            log.info("CREATO :: {}\n", cb.getId());
+            log.trace("CREATO :: {}\n", cb.getId());
 
             //  ASSEGNO INVOICE A NUOVO BUDGET
             dto.getFileCampaignBudgetInvoices().stream().forEach(invoice ->

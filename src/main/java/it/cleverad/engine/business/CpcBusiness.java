@@ -113,15 +113,14 @@ public class CpcBusiness {
                     cpcDTO.setChannelName(channel.getName());
             }
 
-            if (jwtUserDetailsService.isAdmin()) {
+            if (Boolean.TRUE.equals(jwtUserDetailsService.isAdmin())) {
                 exp.add(cpcDTO);
             } else if (!cpcDTO.getRefferal().equals("") && cpcDTO.getAffiliateId().equals(jwtUserDetailsService.getAffiliateID())) {
                 exp.add(cpcDTO);
             }
 
         });
-        Page<CpcDTO> pages = new PageImpl<CpcDTO>(exp, pageable, page.getTotalElements());
-        return pages;
+        return new PageImpl<CpcDTO>(exp, pageable, page.getTotalElements());
     }
 
     // UPDATE
@@ -216,8 +215,7 @@ public class CpcBusiness {
     }
 
     public List<ClickMultipli> getListaClickMultipliDaDisabilitare(LocalDate dateFrom, LocalDate dateTo) {
-        List<ClickMultipli> lista = repository.getListaClickMultipliDaDisabilitare(dateFrom, dateTo.plusDays(1));
-        return lista;
+        return repository.getListaClickMultipliDaDisabilitare(dateFrom, dateTo.plusDays(1));
     }
 
     public void setRead(long id) {

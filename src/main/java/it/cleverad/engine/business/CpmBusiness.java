@@ -245,6 +245,12 @@ public class CpmBusiness {
             if (request.getBlacklisted() != null) {
                 predicates.add(cb.equal(root.get("blacklisted"), request.getBlacklisted()));
             }
+            if (request.getAffiliateid() != null) {
+                predicates.add(cb.equal(root.get("affiliateId"), request.getAffiliateid()));
+            }
+            if (request.getCampaignid() != null) {
+                predicates.add(cb.equal(root.get("campaignId"), request.getCampaignid()));
+            }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
@@ -269,7 +275,7 @@ public class CpmBusiness {
     @AllArgsConstructor
     public static class Filter {
         private Long id;
-        private Long campaignId;
+        private Long campaignid;
         private Long imageId;
         private Long mediaId;
         private String refferal;
@@ -283,6 +289,7 @@ public class CpmBusiness {
         private LocalDateTime datetimeFrom;
         private LocalDateTime datetimeTo;
         private Boolean blacklisted;
+        private Long affiliateid;
     }
 
 }

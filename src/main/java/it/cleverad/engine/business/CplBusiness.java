@@ -155,7 +155,7 @@ public class CplBusiness {
         request.setDatetimeTo(LocalDateTime.now());
         Page<Cpl> page = repository.findAll(getSpecification(request), pageable);
         if (page.getTotalElements() > 0)
-            log.trace("\n\n\n >>>>>>>>>>>>>>>>>>>>>> UNREAD CPL HOUR BEFORE :: {}", page.getTotalElements());
+            log.trace("\n\n\n >>>>>>>>>>>>>>>>>>>>>> UNREAD CPL  BEFORE :: {}:{} = {}", request.getDatetimeFrom(), request.getDatetimeTo(), page.getTotalElements());
         return page.map(CplDTO::from);
     }
 

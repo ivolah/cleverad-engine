@@ -65,6 +65,11 @@ public class TransactionAllBusiness {
         return page.map(TransactionStatusDTO::from);
     }
 
+    public Page<TransactionStatusDTO> searchPrefiltratoInterno(Filter filter) {
+        Page<ViewTransactionStatus> page = repository.findAll(getSpecification(filter), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("dateTime"))));
+        return page.map(TransactionStatusDTO::from);
+    }
+
     public Page<TransactionStatusDTO> searchStatusIdAndDate(Long statusId, LocalDate dataDaGestireStart, LocalDate dataDaGestireEnd, String tipo, Long affiliateId, Long campaignId) {
         Filter request = new Filter();
         request.setCreationDateFrom(dataDaGestireStart);
