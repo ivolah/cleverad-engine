@@ -150,6 +150,7 @@ public class TransactionCPMBusiness {
             cpm.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
             cpm.setValue(0D);
         }
+        cpm.setLastModificationDate(LocalDateTime.now());
         cpmRepository.save(cpm);
     }
 

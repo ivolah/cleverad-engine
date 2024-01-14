@@ -138,6 +138,7 @@ public class TransactionCPSBusiness {
             cps.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
             cps.setValue(0D);
         }
+        cps.setLastModificationDate(LocalDateTime.now());
         cpsRepository.save(cps);
     }
 

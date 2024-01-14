@@ -197,6 +197,7 @@ public class TransactionCPLBusiness {
         } else statusId = 0L;
         if (approved != null) cpl.setApproved(approved);
 
+        cpl.setLastModificationDate(LocalDateTime.now());
         cplRepository.save(cpl);
     }
 
@@ -338,9 +339,9 @@ public class TransactionCPLBusiness {
         return page.map(TransactionCPLDTO::from);
     }
 
-    public List<TransactionCPL> searchByCampaignMese(Long id) {
+    public List<TransactionCPL> searchByCampaignMese(Long campaignId) {
         TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
-        request.setCampaignId(id);
+        request.setCampaignId(campaignId);
         LocalDate now = LocalDate.now();
         request.setDateTimeFrom(now.withDayOfMonth(1).atStartOfDay());
         request.setDateTimeTo(LocalDateTime.of(now.withDayOfMonth(now.lengthOfMonth()), LocalTime.MAX));

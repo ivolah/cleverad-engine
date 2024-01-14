@@ -211,6 +211,7 @@ public class TransactionCPCBusiness {
         } else statusId = 0L;
         if (approved != null) cpc.setApproved(approved);
 
+        cpc.setLastModificationDate(LocalDateTime.now());
         cpcRepository.save(cpc);
     }
 
