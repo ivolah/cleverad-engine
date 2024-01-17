@@ -1,14 +1,11 @@
 package it.cleverad.engine.service;
 
-import it.cleverad.engine.business.PayoutBusiness;
+import it.cleverad.engine.business.AffiliateBudgetBusiness;
 import it.cleverad.engine.business.TransactionCPCBusiness;
 import it.cleverad.engine.business.TransactionCPLBusiness;
-import it.cleverad.engine.business.WalletBusiness;
 import it.cleverad.engine.persistence.model.service.TransactionCPC;
 import it.cleverad.engine.persistence.model.service.TransactionCPL;
-import it.cleverad.engine.persistence.repository.service.WalletRepository;
-import it.cleverad.engine.web.dto.PayoutDTO;
-import it.cleverad.engine.web.dto.WalletDTO;
+import it.cleverad.engine.persistence.repository.service.AffiliateBudgetRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,7 +13,6 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.decimal4j.util.DoubleRounder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -35,32 +31,29 @@ public class AffiliaiteBudgetService {
     @Autowired
     private TransactionCPCBusiness transactionCPCBusiness;
     @Autowired
-    private WalletRepository walletRepository;
+    private AffiliateBudgetRepository affiliateBudgetRepository;
     @Autowired
-    private WalletBusiness walletBusiness;
-    @Autowired
-    private PayoutBusiness payoutBusiness;
+    private AffiliateBudgetBusiness affiliateBudgetBusiness;
 
-    public void rigenera(Long affiliateId) {
-        try {
-            if (affiliateId == null) {
-                // se affiliate non valorizzato prendo tutti gli wallet
-                walletBusiness.getAll().get().mapToLong(WalletDTO::getAffiliateId).forEach(this::calcola);
-            } else {
-                calcola(affiliateId);
-            }
-        } catch (Exception e) {
-            log.error("RIGENERA WALLET --  {}", e.getMessage(), e);
-        }
-    }
 
-    private void calcola(Long affiliateId) {
-        // 1. --- PAYED - faccio la somma dei payout
-        Page<PayoutDTO> payouts = payoutBusiness.findByIdAffilaite(affiliateId, Pageable.ofSize(Integer.MAX_VALUE));
-        Double totalePayouts = payouts.stream().mapToDouble(PayoutDTO::getTotale).sum();
-        log.trace("TOTALE PAYOUTS {}", totalePayouts);
+    private void rigeneraAffiliateBudget(Long affiliateId, Long campaignId) {
 
-        // 2. --- TRANSAZIONI CON PAYOUT
+        // 1. --- TRANSAZIONI CON VALORE > 0 non blacklisted e non rifiutate
+        List<Long> campaignIdsCPL = (List<Long>) transactionCPLBusiness.searchLastModified().stream().mapToLong(value -> value.getCampaign().getId());
+        List<Long> campaignIdsCPC = (List<Long>) transactionCPCBusiness.searchLastModified().stream().mapToLong(value -> value.getCampaign().getId());
+        campaignIdsCPL.addAll(campaignIdsCPC);
+campaignIdsCPL.stream().distinct();
+
+        List<Long> affiliateIds = (List<Long>) transactionCPLBusiness.searchLastModified().stream().mapToLong(value -> value.getAffiliate().getId());
+
+        // trovo le campagne
+//        for (Long id : campaignIds) {
+//            transactionCPLBusiness.searchByCampaign(id, Pageable.ofSize(Integer.MAX_VALUE));
+//        }
+
+
+        //searchByCampaignMese
+
         // CPC
         List<TransactionCPC> cpcs = transactionCPCBusiness.searchPayout(affiliateId, true);
         // CPL
@@ -69,6 +62,12 @@ public class AffiliaiteBudgetService {
         //List<TransactionCPMDTO> dtoCpms = transactionBusiness.searchWithPayout(filter, PageRequest.of(0, Integer.MAX_VALUE)).stream().collect(Collectors.toList());
         // CPS
         //List<TransactionCPSDTO> dtoCpss = transactionBusiness.searchWithPayout(filter, PageRequest.of(0, Integer.MAX_VALUE)).stream().collect(Collectors.toList());
+
+
+        // 1. --- PAYED - faccio la somma dei payout
+//        Page<PayoutDTO> payouts = payoutBusiness.findByIdAffilaite(affiliateId, Pageable.ofSize(Integer.MAX_VALUE));
+//        Double totalePayouts = payouts.stream().mapToDouble(PayoutDTO::getTotale).sum();
+//        log.trace("TOTALE PAYOUTS {}", totalePayouts);
 
         // 3. --- TOTALE SENZA PAYOUT
         // CPC
@@ -90,13 +89,13 @@ public class AffiliaiteBudgetService {
         log.trace("TOTALE per {} = {}", affiliateId, totaleSenzaPayout);
 
         // 5 - Cerco il Wallet e aggiorno
-        Long walletID = walletRepository.findByAffiliateId(affiliateId).getId();
-        WalletBusiness.Filter filter = new WalletBusiness.Filter();
-        filter.setId(walletID);
-        filter.setPayed(totalePayouts);
-        filter.setTotal(totale);
-        filter.setResidual(totale - totalePayouts);
-        walletBusiness.update(walletID, filter);
+//        Long walletID = walletRepository.findByAffiliateId(affiliateId).getId();
+//        WalletBusiness.Filter filter = new WalletBusiness.Filter();
+//        filter.setId(walletID);
+//        filter.setPayed(totalePayouts);
+//        filter.setTotal(totale);
+//        filter.setResidual(totale - totalePayouts);
+//        walletBusiness.update(walletID, filter);
 
     }
 
@@ -121,5 +120,7 @@ public class AffiliaiteBudgetService {
         private String month;
         private String day;
         private Long affiliateId;
+        private Long campaignId;
     }
+
 }

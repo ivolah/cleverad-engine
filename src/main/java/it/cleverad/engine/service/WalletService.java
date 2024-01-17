@@ -97,7 +97,6 @@ public class WalletService {
         filter.setTotal(totale);
         filter.setResidual(totale - totalePayouts);
         walletBusiness.update(walletID, filter);
-
     }
 
     /**

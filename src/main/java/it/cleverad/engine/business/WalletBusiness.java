@@ -69,8 +69,7 @@ public class WalletBusiness {
     }
 
     public Page<WalletDTO> getAll() {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
-        Page<Wallet> page = repository.findAll(pageable);
+        Page<Wallet> page = repository.findAll(PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(WalletDTO::from);
     }
 
