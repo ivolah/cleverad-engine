@@ -22,6 +22,7 @@ public class PayoutDTO {
     private String affiliateName;
     private Double totale;
     private Double iva;
+    private Double imponibile;
     private String valuta;
     private String note;
     private LocalDate data;
@@ -35,7 +36,7 @@ public class PayoutDTO {
     private List<TransactionCPCDTO> transactionCPCS;
     private List<TransactionCPLDTO> transactionCPLS;
 
-    public PayoutDTO(Long id, Long affiliateId, String affiliateName, Double totale, Double iva, String valuta, String note, LocalDate data, LocalDate dataScadenza, Long dictionaryId, String dictionaryName, LocalDateTime creationDate, LocalDateTime lastModificationDate, List<TransactionCPCDTO> transactionCPCS, List<TransactionCPLDTO> transactionCPLS) {
+    public PayoutDTO(Long id, Long affiliateId, String affiliateName, Double totale, Double iva, String valuta, String note, LocalDate data, LocalDate dataScadenza, Long dictionaryId, String dictionaryName, LocalDateTime creationDate, LocalDateTime lastModificationDate, List<TransactionCPCDTO> transactionCPCS, List<TransactionCPLDTO> transactionCPLS, Double imponibile) {
         this.id = id;
         this.affiliateId = affiliateId;
         this.affiliateName = affiliateName;
@@ -51,6 +52,7 @@ public class PayoutDTO {
         this.lastModificationDate = lastModificationDate;
         this.transactionCPCS = transactionCPCS;
         this.transactionCPLS = transactionCPLS;
+        this.imponibile = imponibile;
     }
 
     public static PayoutDTO from(Payout payout) {
@@ -109,7 +111,7 @@ public class PayoutDTO {
                 payout.getDataScadenza(),
                 payout.getDictionary() != null ? payout.getDictionary().getId() : null,
                 payout.getDictionary() != null ? payout.getDictionary().getName() : null,
-                payout.getCreationDate(), payout.getLastModificationDate(), transactionCPCS, transactionCPLS);
+                payout.getCreationDate(), payout.getLastModificationDate(), transactionCPCS, transactionCPLS, payout.getImponibile());
     }
 
 }

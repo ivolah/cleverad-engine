@@ -23,6 +23,7 @@ public class Payout {
     private Long id;
     private Double totale;
     private Double iva;
+    private Double imponibile;
     private String valuta;
     private String note;
     private LocalDate data;

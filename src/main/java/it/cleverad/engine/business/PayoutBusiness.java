@@ -1,10 +1,10 @@
 package it.cleverad.engine.business;
 
-import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Dictionary;
 import it.cleverad.engine.persistence.model.service.*;
 import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.service.MailService;
+import it.cleverad.engine.service.WalletService;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.PayoutDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -49,9 +49,7 @@ public class PayoutBusiness {
     @Autowired
     private DictionaryRepository dictionaryRepository;
     @Autowired
-    private WalletBusiness walletBusiness;
-    @Autowired
-    private Mapper mapper;
+    private WalletService walletService;
     @Autowired
     private MailService mailService;
 
@@ -85,12 +83,14 @@ public class PayoutBusiness {
             map.setValuta("EUR");
             map.setCreationDate(LocalDateTime.now());
             map.setLastModificationDate(LocalDateTime.now());
+            map.setImponibile(0.0);
             map.setTotale(0.0);
             map.setIva(0.0);
             map.setNote(finalNote);
             Dictionary dictionary = dictionaryRepository.findById(18L).orElseThrow(() -> new ElementCleveradException("Dictionary", 18L));
             map.setDictionary(dictionary);
-            map.setDataScadenza(LocalDate.now().plusDays(60));
+            Long dataDaSommare = Long.valueOf(affiliate.getDictionaryTermType().getDescription());
+            map.setDataScadenza(LocalDate.now().plusDays(dataDaSommare));
             map = repository.save(map);
             affiliatoPayout.put(idAffiliate, map.getId());
         });
@@ -104,15 +104,12 @@ public class PayoutBusiness {
             Payout payout = repository.findById(payoutId).orElseThrow(() -> new ElementCleveradException("PAYOUT CPC", payoutId));
 
             //aumento il valore
-            Double totale = DoubleRounder.round(payout.getTotale() + transaction.getValue(), 2);
+            Double imponibile = DoubleRounder.round(payout.getImponibile() + transaction.getValue(), 2);
 
             //aggiorno payout
-            payout.setTotale(totale);
+            payout.setImponibile(imponibile);
             Payout pp = repository.save(payout);
             listaPayout.add(pp);
-
-            // decermeto valore wallet
-            walletBusiness.decrement(transaction.getWallet().getId(), totale);
 
             //aggiorno transazione e setto riferimento a payout
             transaction.setPayout(payout);
@@ -128,15 +125,12 @@ public class PayoutBusiness {
             Payout payout = repository.findById(payoutId).orElseThrow(() -> new ElementCleveradException("PAYOUT CPL", payoutId));
 
             //aumento il valore
-            Double totale = DoubleRounder.round(payout.getTotale() + transaction.getValue(), 2);
+            Double imponibile = DoubleRounder.round(payout.getImponibile() + transaction.getValue(), 2);
 
             //aggiorno payout
-            payout.setTotale(totale);
+            payout.setImponibile(imponibile);
             Payout pp = repository.save(payout);
             listaPayout.add(pp);
-
-            // decermeto valore wallet
-            walletBusiness.decrement(transaction.getWallet().getId(), totale);
 
             //aggiorno transazione e setto riferimento a payout
             transaction.setPayout(payout);
@@ -145,8 +139,16 @@ public class PayoutBusiness {
             cplRepository.save(transaction);
         });
 
+        // rigenero tutti i wallet
+        affiliatoPayout.forEach((idAffiliate, longTwo) -> walletService.rigenera(idAffiliate));
+
+        // setto iva e imponibile
         List<Payout> pys = new ArrayList<>(listaPayout);
-        pys.forEach(payout -> payout.setIva(payout.getTotale() * 0.22));
+        pys.forEach(payout -> {
+            Double ivaDaMoltiplicare = Double.valueOf(payout.getAffiliate().getDictionaryVatType().getDescription());
+            payout.setIva(payout.getImponibile() * ivaDaMoltiplicare);
+            payout.setTotale(payout.getImponibile() + payout.getIva());
+        });
 
         return pys;
     }
@@ -192,9 +194,6 @@ public class PayoutBusiness {
             Payout pp = repository.save(payout);
             list.add(pp);
 
-            // decermeto valore wallet
-            walletBusiness.decrement(transaction.getWallet().getId(), totale);
-
             //aggiorno transazione e setto riferimento a payout
             transaction.setPayout(payout);
             transaction.setPayoutReference("Payout " + payoutId);
@@ -206,6 +205,9 @@ public class PayoutBusiness {
         list.forEach(payout -> {
             list2.add(repository.findById(payout.getId()).orElseThrow(() -> new ElementCleveradException("PAYOUT CPL", payout.getId())));
         });
+
+        // rigenero tutti i wallet
+        affiliatoPayout.forEach((idAffiliate, longTwo) -> walletService.rigenera(idAffiliate));
 
         Page<Payout> page = new PageImpl<>(list2.stream().distinct().collect(Collectors.toList()));
         return page.map(PayoutDTO::from);
@@ -227,10 +229,6 @@ public class PayoutBusiness {
                 cpc.setPayout(null);
                 cpc.setPayoutReference(null);
                 cpcRepository.save(cpc);
-
-                // incemento valore wallet
-                if (cpc.getValue() > 0D) walletBusiness.incement(cpc.getWallet().getId(), cpc.getValue());
-
             });
             payout.getTransactionCPLS().forEach(transactionCPL -> {
                 // rimuovo relazione
@@ -238,10 +236,6 @@ public class PayoutBusiness {
                 cpl.setPayout(null);
                 cpl.setPayoutReference(null);
                 cplRepository.save(cpl);
-
-                // incemento valore wallet
-                if (cpl.getValue() > 0D) walletBusiness.incement(cpl.getWallet().getId(), cpl.getValue());
-
             });
             payout.getTransactionCPSS().forEach(transactionCPS -> {
                 // rimuovo relazione
@@ -249,11 +243,10 @@ public class PayoutBusiness {
                 cps.setPayout(null);
                 cps.setPayoutReference(null);
                 cpsRepository.save(cps);
-
-                // incemento valore wallet
-                if (cps.getValue() > 0D) walletBusiness.incement(cps.getWallet().getId(), cps.getValue());
             });
 
+            // rigenero wallet affiliato
+            walletService.rigenera(payout.getAffiliate().getId());
 
             repository.deleteById(id);
         } catch (ConstraintViolationException ex) {
@@ -283,13 +276,13 @@ public class PayoutBusiness {
 
     // UPDATE
     public PayoutDTO update(Long id, Filter filter) {
-
         Payout payout = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Payout", id));
-        mapper.map(filter, payout);
-
-        payout.setAffiliate(affiliateRepository.findById(filter.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", filter.affiliateId)));
-        payout.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.dictionaryId)));
-
+        payout.setDataScadenza(filter.getDataScadenza());
+        //        Long dataDaSommare = Long.valueOf(payout.getAffiliate().getDictionaryTermType().getDescription());
+        //        payout.setDataScadenza(payout.getData().plusDays(dataDaSommare));
+        //        Double ivaDaMoltiplicare = Double.valueOf(payout.getAffiliate().getDictionaryVatType().getDescription());
+        //        payout.setIva(payout.getImponibile() * ivaDaMoltiplicare);
+        //        payout.setTotale(payout.getImponibile() + payout.getIva());
         return PayoutDTO.from(repository.save(payout));
     }
 
@@ -418,6 +411,10 @@ public class PayoutBusiness {
         private LocalDate dateTo;
         private Long dictionaryId;
         private Boolean dictionaryIdNotConcluso;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate data;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate dataScadenza;
     }
 
     @Data
