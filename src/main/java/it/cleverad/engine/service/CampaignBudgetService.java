@@ -53,91 +53,111 @@ public class CampaignBudgetService {
             double commissioniErogate = 0D;
 
             // TODO in futuro aggiungere proprietà per gestire solo quelle non precedentemente lette per consolida budget
-            // TODO , usare come date da a quelle del budget
-            // CPL
-            if (dto.getTipologiaId().equals(97L)) {
-                List<TransactionCPL> cpls = transactionCPLBusiness.searchByCampaignMese(dto.getCampaignId());
-                for (TransactionCPL cpl : cpls) {
-                    capErogato += 1;
-                    budgetErogato += cpl.getValue();
-                    commissioniErogate += cpl.getCommission().getValue();
-                    //revenue += revenueFactorBusiness.findById(cpl.getRevenueId()).getRevenue();
-                }
-            }
-            // CPC
-            else if (dto.getTipologiaId().equals(96L)) {
-                List<TransactionCPC> cpcs = transactionCPCBusiness.searchByCampaignMese(dto.getCampaignId());
-                for (TransactionCPC cpc : cpcs) {
-                    log.trace("{}-{}-{}", cpc.getValue(), cpc.getCommission().getValue(), revenueFactorBusiness.findById(cpc.getRevenueId()).getRevenue());
-                    capErogato += 1;
-                    budgetErogato += cpc.getValue();
-                    commissioniErogate += cpc.getCommission().getValue();
-//                    revenue += revenueFactorBusiness.findById(cpc.getRevenueId()).getRevenue();
-                }
-            }
-            log.trace(" :: {} - {} - {}", capErogato, budgetErogato, commissioniErogate);
 
-            double scarto;
-            if (dto.getScarto() == null) scarto = 0D;
-            else scarto = dto.getScarto();
+            // TODO , usare come date da a quelle del budget
+
+            // >>>>>>>>>>>>>>>>>>> CPL
+            List<TransactionCPL> cpls = transactionCPLBusiness.searchForCampaignBudget(dto.getCampaignId(), dto.getStartDate(), dto.getEndDate());
+            log.info("NUMERO TRANS CPL {} :: {} ({})", dto.getCampaignId(), cpls.size(), dto.getCapIniziale());
+            for (TransactionCPL cpl : cpls) {
+                if (capErogato < dto.getCapIniziale()) {
+                    capErogato += 1;
+                    budgetErogato += revenueFactorBusiness.findById(cpl.getRevenueId()).getRevenue();
+                    commissioniErogate += cpl.getCommission().getValue();
+                }
+            }
+            log.trace("CPL budgetErogato :: {}", budgetErogato);
+            log.trace("CPL capErogato :: {} ", capErogato);
+            log.trace("CPL commissioniErogate :: {}", commissioniErogate);
+
+            // >>>>>>>>>>>>>>>>>>> CPC
+            List<TransactionCPC> cpcs = transactionCPCBusiness.searchForCampaignBudget(dto.getCampaignId(), dto.getStartDate(), dto.getEndDate());
+            log.info("NUMERO TRANS CPC {} :: {} ({})", dto.getCampaignId(), cpcs.size(), dto.getCapIniziale());
+            for (TransactionCPC cpc : cpcs) {
+                if (capErogato < dto.getCapIniziale()) {
+                    capErogato += cpc.getClickNumber().intValue();
+                    budgetErogato += revenueFactorBusiness.findById(cpc.getRevenueId()).getRevenue() * cpc.getClickNumber().intValue();
+                    commissioniErogate += (cpc.getCommission().getValue() * cpc.getClickNumber().intValue());
+                    log.trace("{} :: comm value  {} :: {} * {} == {}", capErogato, cpc.getValue(), cpc.getCommission().getValue(), cpc.getClickNumber().intValue(), (cpc.getCommission().getValue() * cpc.getClickNumber().intValue()));
+                }
+            }
+            log.trace("CPC budgetErogato :: {}", budgetErogato);
+            log.trace("CPC capErogato :: {} ", capErogato);
+            log.trace("CPC commissioniErogate :: {}", commissioniErogate);
+
+            budgetErogato = br.round(budgetErogato);
+            commissioniErogate = br.round(commissioniErogate);
+
+            log.trace("POST budgetErogato :: {}", budgetErogato);
+            log.trace("POST capErogato :: {} ", capErogato);
+            log.trace("POST commissioniErogate :: {}", commissioniErogate);
+
+            double revenue = budgetErogato - commissioniErogate;
+            double scarto = 0D;
+            if (dto.getScarto() != null) scarto = dto.getScarto();
 
             CampaignBudgetBusiness.BaseCreateRequest request = new CampaignBudgetBusiness.BaseCreateRequest();
             mapper.map(dto, request);
 
-            request.setCapErogato(capErogato);
-
-            if (capErogato != 0D) {
-                request.setCapPc(br.round((double) (capErogato * 100) / dto.getCapIniziale()));
-            } else request.setCapPc(0D);
-
-            budgetErogato = br.round(capErogato * dto.getPayout());
             request.setBudgetErogato(budgetErogato);
             request.setCommissioniErogate(br.round(commissioniErogate));
-            double revenue = budgetErogato - commissioniErogate;
-            request.setRevenue(br.round(revenue));
+            request.setCapErogato(capErogato);
 
-            if (budgetErogato != 0D) {
-                request.setRevenuePC(br.round((revenue / budgetErogato) * 100));
-            } else request.setRevenuePC(0D);
+            // Cap Percentuale
+            Double ce = 0D;
+            if (capErogato != 0D)
+                ce = br.round((double) (capErogato * 100) / dto.getCapIniziale());
+            request.setCapPc(ce);
 
-            if (budgetErogato != 0D) {
-                request.setBudgetErogatoPS(br.round(budgetErogato - (budgetErogato / 100 * scarto)));
-            } else request.setBudgetErogatoPS(0D);
+            // Revenue Percentuale
+            Double rpc = 0D;
+            if (budgetErogato != 0D)
+                rpc = br.round((revenue / budgetErogato) * 100);
+            request.setRevenuePC(rpc);
 
-            if (commissioniErogate != 0D) {
-                request.setCommissioniErogatePS(br.round(commissioniErogate - (commissioniErogate / 100 * scarto)));
-            } else request.setCommissioniErogatePS(0D);
+            // Budget Erogato Post Scarto
+            Double beps = 0D;
+            if (budgetErogato != 0D)
+                beps = br.round(budgetErogato - (budgetErogato / 100 * scarto));
+            request.setBudgetErogatops(beps);
 
-            if (scarto != 0D) {
-                request.setRevenuePS(br.round(revenue - (revenue / 100 * scarto)));
-            } else request.setRevenuePS(0D);
+            // Commisioni Erogate Post Scarto
+            Double ceps = 0D;
+            if (commissioniErogate != 0D)
+                ceps = br.round(commissioniErogate - (commissioniErogate / 100 * scarto));
+            request.setCommissioniErogateps(ceps);
 
-            if (request.getBudgetErogatoPS() != 0D) {
-                request.setRevenuePCPS(br.round((request.getRevenuePS() / request.getBudgetErogatoPS()) * 100));
-            } else request.setRevenuePCPS(0D);
+            // Revenu Post Scarto
+            Double rps = 0D;
+            if (scarto != 0D)
+                rps = br.round(revenue - (revenue / 100 * scarto));
+            request.setRevenuePS(rps);
+
+            // Revenue Percentuale Post Scarto
+            Double rpcps = 0D;
+            if (request.getBudgetErogatops() != 0D)
+                rpcps = br.round((request.getRevenuePS() / request.getBudgetErogatops()) * 100);
+            request.setRevenuePCPS(rpcps);
 
             request.setRevenueDay(br.round(revenue / LocalDate.now().getDayOfMonth()));
-
             request.setId(null);
             request.setStatus(true);
+            request.setRevenue(br.round(revenue));
+
             CampaignBudgetDTO cb = campaignBudgetBusiness.create(request);
-            log.trace("CREATO :: {}\n", cb.getId());
+            log.trace("CREATO :: {}", cb.getId());
 
             //  ASSEGNO INVOICE A NUOVO BUDGET
-            dto.getFileCampaignBudgetInvoices().stream().forEach(invoice ->
-                    fileCampaignBudgetBusiness.updateInterno(invoice.getId(), "INVOICE", cb.getId())
-            );
+            dto.getFileCampaignBudgetInvoices().stream().forEach(invoice -> fileCampaignBudgetBusiness.updateInterno(invoice.getId(), "INVOICE", cb.getId()));
             //  ASSEGNO ORDER A NUOVO BUDGET
-            dto.getFileCampaignBudgetOrders().stream().forEach(order ->
-                    fileCampaignBudgetBusiness.updateInterno(order.getId(), "ORDER", cb.getId())
-            );
+            dto.getFileCampaignBudgetOrders().stream().forEach(order -> fileCampaignBudgetBusiness.updateInterno(order.getId(), "ORDER", cb.getId()));
 
             // cancello se la data di creazione e oggi
             // in questo modo mantendo solo l'utimo budget del giorno precedente
             if (dto.getCreationDate().getDayOfYear() < LocalDateTime.now().getDayOfYear()) {
                 // lo setto a non attivo
                 campaignBudgetBusiness.disable(dto.getId());
-                log.info("Disabilito :: {}", dto.getId());
+                log.trace("Disabilito :: {}", dto.getId());
             } else {
                 // cancello
                 campaignBudgetBusiness.delete(dto.getId());

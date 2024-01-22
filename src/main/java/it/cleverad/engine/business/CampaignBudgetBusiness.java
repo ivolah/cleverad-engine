@@ -66,7 +66,7 @@ public class CampaignBudgetBusiness {
         for (double value : pp) {
             sum += value;
         }
-       // log.info("SS {} + {} - {}", sum, pp.length, overallPercentage);
+        // log.info("SS {} + {} - {}", sum, pp.length, overallPercentage);
 
         return DoubleRounder.round(sum / pp.length, 2);
     }
@@ -95,21 +95,8 @@ public class CampaignBudgetBusiness {
     public CampaignBudgetDTO update(Long id, Update filter) {
         CampaignBudget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
         mapper.map(filter, budget);
-
-        if (filter.getCampaignId() != null) {
-            Campaign campaign = campaignRepository.findById(filter.getCampaignId()).orElseThrow(() -> new ElementCleveradException("Campaign", filter.getCampaignId()));
-            budget.setCampaign(campaign);
-            budget.setAdvertiser(campaign.getAdvertiser());
-            budget.setPlanner(campaign.getPlanner());
-        }
-        if (filter.getTipologiaId() != null)
-            budget.setDictionary(dictionaryRepository.findById(filter.getTipologiaId()).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.getTipologiaId())));
-        if (filter.getCanaleId() != null)
-            budget.setCanali(dictionaryRepository.findById(filter.getCanaleId()).orElseThrow(() -> new ElementCleveradException("Dictionary-canale", filter.getCanaleId())));
-
         budget.setStatus(true);
         budget.setBudgetIniziale(DoubleRounder.round(filter.getPayout() * filter.capIniziale, 2));
-
         return CampaignBudgetDTO.from(repository.save(budget));
     }
 
@@ -127,6 +114,8 @@ public class CampaignBudgetBusiness {
     public CampaignBudgetDTO disable(Long id) {
         CampaignBudget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
         budget.setStatus(false);
+        budget.setFileCampaignBudgetOrders(null);
+        budget.setFileCampaignBudgetInvoices(null);
         return CampaignBudgetDTO.from(repository.save(budget));
     }
 
@@ -173,25 +162,33 @@ public class CampaignBudgetBusiness {
         CampaignBudget campaignBudget = new CampaignBudget();
         campaignBudget.setCapIniziale(getIntegerFieldValue(page, "capIniziale"));
         campaignBudget.setCapErogato(getIntegerFieldValue(page, "capErogato"));
-        if (campaignBudget.getCapErogato() != 0D) {
-            campaignBudget.setCapPc(DoubleRounder.round((campaignBudget.getCapErogato() * 100) / campaignBudget.getCapIniziale(), 2));
-        } else campaignBudget.setCapPc(0D);
+
+        // versione originale
+//        if (campaignBudget.getCapErogato() != 0D) {
+//            campaignBudget.setCapPc(DoubleRounder.round((campaignBudget.getCapErogato() * 100) / campaignBudget.getCapIniziale(), 2));
+//        } else campaignBudget.setCapPc(0D);
 
         campaignBudget.setPayout(calculateMedian(page, "payout"));
-
         campaignBudget.setBudgetIniziale(getFieldValue(page, "budgetIniziale"));
         campaignBudget.setBudgetErogato(getFieldValue(page, "budgetErogato"));
+
+        // hack per manenere stesso campo ma calcolare % budget
+        if (campaignBudget.getBudgetErogato() != 0D) {
+            campaignBudget.setCapPc(DoubleRounder.round((campaignBudget.getBudgetErogato() * 100) / campaignBudget.getBudgetIniziale(), 2));
+        } else campaignBudget.setCapPc(0D);
+
         campaignBudget.setCommissioniErogate(getFieldValue(page, "commissioniErogate"));
         campaignBudget.setRevenue(getFieldValue(page, "revenue"));
         if (campaignBudget.getBudgetErogato() != 0D) {
             campaignBudget.setRevenuePC(DoubleRounder.round((campaignBudget.getRevenue() / campaignBudget.getBudgetErogato()) * 100, 2));
         } else campaignBudget.setRevenuePC(0D);
+
         campaignBudget.setScarto(getFieldValue(page, "scarto"));
-        campaignBudget.setBudgetErogatoPS(getFieldValue(page, "budgetErogatoPS"));
-        campaignBudget.setCommissioniErogatePS(getFieldValue(page, "commissioniErogatePS"));
+        campaignBudget.setBudgetErogatops(getFieldValue(page, "budgetErogatops"));
+        campaignBudget.setCommissioniErogateps(getFieldValue(page, "commissioniErogateps"));
         campaignBudget.setRevenuePS(getFieldValue(page, "revenuePS"));
-        if (campaignBudget.getBudgetErogatoPS() != 0D) {
-            campaignBudget.setRevenuePCPS(DoubleRounder.round((campaignBudget.getRevenuePS() / campaignBudget.getBudgetErogatoPS()) * 100, 2));
+        if (campaignBudget.getBudgetErogatops() != 0D) {
+            campaignBudget.setRevenuePCPS(DoubleRounder.round((campaignBudget.getRevenuePS() / campaignBudget.getBudgetErogatops()) * 100, 2));
         } else campaignBudget.setRevenuePCPS(0D);
         campaignBudget.setRevenueDay(DoubleRounder.round(campaignBudget.getRevenue() / LocalDate.now().getDayOfMonth(), 2));
         campaignBudget.setFatturato(getFieldValue(page, "fatturato"));
@@ -340,8 +337,8 @@ public class CampaignBudgetBusiness {
         private Double revenuePC;
         private Double revenue;
         private Double scarto;
-        private Double budgetErogatoPS;
-        private Double commissioniErogatePS;
+        private Double budgetErogatops;
+        private Double commissioniErogateps;
         private Double revenuePCPS;
         private Double revenuePS;
         private Double revenueDay;
@@ -386,8 +383,8 @@ public class CampaignBudgetBusiness {
         private Double revenuePC;
         private Double revenue;
         private Double scarto;
-        private Double budgetErogatoPS;
-        private Double commissioniErogatePS;
+        private Double budgetErogatops;
+        private Double commissioniErogateps;
         private Double revenuePCPS;
         private Double revenuePS;
         private Double revenueDay;
@@ -403,30 +400,10 @@ public class CampaignBudgetBusiness {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Update {
-        private Long tipologiaId;
-        private Long campaignId;
-        private Long canaleId;
         private Boolean prenotato;
         private Integer capIniziale;
         private Double payout;
-        private Double budgetIniziale;
-        private Integer capErogato;
-        private Double capPc;
-        private Double budgetErogato;
-        private Double commissioniErogate;
-        private Double revenuePC;
-        private Double revenue;
         private Double scarto;
-        private Double budgetErogatoPS;
-        private Double commissioniErogatePS;
-        private Double revenuePCPS;
-        private Double revenuePS;
-        private Double revenueDay;
-        private String materiali;
-        private String note;
-        private Integer capFatturabile;
-        private Double fatturato;
-        private Boolean status;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate startDate;
         @DateTimeFormat(pattern = "yyyy-MM-dd")

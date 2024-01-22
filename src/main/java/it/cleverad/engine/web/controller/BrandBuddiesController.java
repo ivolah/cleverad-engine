@@ -35,7 +35,12 @@ public class BrandBuddiesController {
         request.setBusinessTypeId(53L);
         request.setChannelDimension("1");
         request.setChannelUrl("");
-        request.setChannelName("Canale BrandBuddies " + request.getFirstName().toUpperCase() + " " + request.getLastName().toUpperCase());
+        String nomeCanale = "Canale BrandBuddies " ;
+        if(request.getFirstName() != null)
+            nomeCanale += request.getFirstName().toUpperCase() + " ";
+        if(request.getLastName() != null)
+            nomeCanale += request.getLastName().toUpperCase();
+        request.setChannelName(nomeCanale);
         return business.create(request);
     }
 

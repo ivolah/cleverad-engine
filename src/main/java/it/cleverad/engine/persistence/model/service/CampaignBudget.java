@@ -85,11 +85,11 @@ public class CampaignBudget {
     private Double scarto;
 
     // post scarto
-    @Column(name = "budget_erogato_ps")
-    private Double budgetErogatoPS;
-    @Column(name = "commissioni_erogate_ps")
-    private Double commissioniErogatePS;
-    @Column(name = "revenue_pc_ps")
+    @Column(name = "budget_erogatops")
+    private Double budgetErogatops;
+    @Column(name = "commissioni_erogateps")
+    private Double commissioniErogateps;
+    @Column(name = "revenue_pcps")
     private Double revenuePCPS;
     @Column(name = "revenue_ps")
     private Double revenuePS;

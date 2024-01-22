@@ -45,8 +45,8 @@ public class CampaignBudgetDTO {
     private Double revenuePC;
     private Double revenue;
     private Double scarto;
-    private Double budgetErogatoPS;
-    private Double commissioniErogatePS;
+    private Double budgetErogatops;
+    private Double commissioniErogateps;
     private Double revenuePCPS;
     private Double revenuePS;
     private Double revenueDay;
@@ -88,10 +88,32 @@ public class CampaignBudgetDTO {
             }).collect(Collectors.toList());
         }
 
-        return new CampaignBudgetDTO(campaignBudget.getId(), campaignBudget.getCreationDate(), campaignBudget.getStartDate(), campaignBudget.getEndDate(), campaignBudget.getCampaign() != null ? campaignBudget.getCampaign().getId() : null,
+        return new CampaignBudgetDTO(campaignBudget.getId(), campaignBudget.getCreationDate(), campaignBudget.getStartDate(), campaignBudget.getEndDate(),
+                campaignBudget.getCampaign() != null ? campaignBudget.getCampaign().getId() : null,
                 campaignBudget.getCampaign() != null ? campaignBudget.getCampaign().getName() : null,
                 campaignBudget.getCampaign() != null ? campaignBudget.getCampaign().getStatus() : null,
-                campaignBudget.getAdvertiser() != null ? campaignBudget.getAdvertiser().getId() : null, campaignBudget.getAdvertiser() != null ? campaignBudget.getAdvertiser().getName() : null, campaignBudget.getPlanner() != null ? campaignBudget.getPlanner().getId() : null, campaignBudget.getPlanner() != null ? campaignBudget.getPlanner().getName() : null, campaignBudget.getCanali() != null ? campaignBudget.getCanali().getId() : null, campaignBudget.getCanali() != null ? campaignBudget.getCanali().getName() : null, campaignBudget.getPrenotato(), campaignBudget.getDictionary() != null ? campaignBudget.getDictionary().getId() : null, campaignBudget.getDictionary() != null ? campaignBudget.getDictionary().getName() : null, campaignBudget.getCapIniziale(), campaignBudget.getPayout(), campaignBudget.getBudgetIniziale(), campaignBudget.getCapErogato(), campaignBudget.getCapPc(), campaignBudget.getBudgetErogato(), campaignBudget.getCommissioniErogate(), campaignBudget.getRevenuePC(), campaignBudget.getRevenue(), campaignBudget.getScarto(), campaignBudget.getBudgetErogatoPS(), campaignBudget.getCommissioniErogatePS(), campaignBudget.getRevenuePCPS(), campaignBudget.getRevenuePS(), campaignBudget.getRevenueDay(), campaignBudget.getMateriali(), campaignBudget.getNote(), campaignBudget.getCapFatturabile(), campaignBudget.getFatturato(), campaignBudget.getStatus(), campaignBudget.getStatoFatturato(), campaignBudget.getStatoPagato(), campaignBudget.getInvoiceDueDate(),
+                campaignBudget.getAdvertiser() != null ? campaignBudget.getAdvertiser().getId() : null,
+                campaignBudget.getAdvertiser() != null ? campaignBudget.getAdvertiser().getName() : null,
+                campaignBudget.getPlanner() != null ? campaignBudget.getPlanner().getId() : null,
+                campaignBudget.getPlanner() != null ? campaignBudget.getPlanner().getName() : null,
+                campaignBudget.getCanali() != null ? campaignBudget.getCanali().getId() : null,
+                campaignBudget.getCanali() != null ? campaignBudget.getCanali().getName() : null,
+                campaignBudget.getPrenotato(),
+                campaignBudget.getDictionary() != null ? campaignBudget.getDictionary().getId() : null,
+                campaignBudget.getDictionary() != null ? campaignBudget.getDictionary().getName() : null,
+                campaignBudget.getCapIniziale(),
+                campaignBudget.getPayout(),
+                campaignBudget.getBudgetIniziale(),
+                campaignBudget.getCapErogato(),
+                campaignBudget.getCapPc(),
+                campaignBudget.getBudgetErogato(),
+                campaignBudget.getCommissioniErogate(),
+                campaignBudget.getRevenuePC(),
+                campaignBudget.getRevenue(),
+                campaignBudget.getScarto(), campaignBudget.getBudgetErogatops(), campaignBudget.getCommissioniErogateps(),
+                campaignBudget.getRevenuePCPS(), campaignBudget.getRevenuePS(), campaignBudget.getRevenueDay(), campaignBudget.getMateriali(),
+                campaignBudget.getNote(), campaignBudget.getCapFatturabile(), campaignBudget.getFatturato(), campaignBudget.getStatus(),
+                campaignBudget.getStatoFatturato(), campaignBudget.getStatoPagato(), campaignBudget.getInvoiceDueDate(),
                 invoices, orders);
     }
 

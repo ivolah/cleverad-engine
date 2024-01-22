@@ -106,7 +106,6 @@ public class StatisticsController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public String getStatCpmDayWidget() {
           return statCPMBusiness.getWidgetCampaignsDayCpm();
-//        return null;
     }
 
     /**
