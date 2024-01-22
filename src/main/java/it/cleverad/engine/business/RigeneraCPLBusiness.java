@@ -60,7 +60,7 @@ public class RigeneraCPLBusiness {
     @Autowired
     private TransactionCPLBusiness transactionCPLBusiness;
 
-    public void rigenera(Integer anno, Integer mese, Integer giorno, Long affiliateId) {
+    public void rigenera(Integer anno, Integer mese, Integer giorno, Long affiliateId, Long camapignId) {
         try {
 
             int start = (giorno == null) ? 1 : giorno;
@@ -69,7 +69,7 @@ public class RigeneraCPLBusiness {
             LocalDate dataDaGestireStart = LocalDate.of(anno, mese, start);
             LocalDate dataDaGestireEnd = LocalDate.of(anno, mese, end);
 
-            log.info(anno + "-" + mese + "-" + giorno + " >> " + dataDaGestireStart + " || " + dataDaGestireEnd + " per " + affiliateId);
+            log.info(anno + "-" + mese + "-" + giorno + " >> " + dataDaGestireStart + " || " + dataDaGestireEnd + " per " + affiliateId + " e " + camapignId);
 
             // cancello le transazioni
             TransactionAllBusiness.Filter request = new TransactionAllBusiness.Filter();
@@ -77,6 +77,7 @@ public class RigeneraCPLBusiness {
             request.setCreationDateTo(dataDaGestireEnd);
             request.setTipo("CPL");
             request.setAffiliateId(affiliateId);
+            request.setCampaignId(camapignId);
             List<Long> not = new ArrayList<>();
             not.add(68L); // MANUALE
             request.setNotInDictionaryId(not);
@@ -144,7 +145,7 @@ public class RigeneraCPLBusiness {
                         transaction.setApproved(true);
                         transaction.setPayoutPresent(false);
                         transaction.setIp(cplDTO.getIp());
-                        transaction.setData(cplDTO.getData());
+                        transaction.setData(cplDTO.getData().trim().replace("[REPLACE]", ""));
                         transaction.setMediaId(refferal.getMediaId());
                         transaction.setCpcId(cplDTO.getCpcId());
 
@@ -265,9 +266,10 @@ public class RigeneraCPLBusiness {
     @AllArgsConstructor
     @ToString
     public static class FilterUpdate {
-        private String year;
-        private String month;
-        private String day;
+        private Integer year;
+        private Integer month;
+        private Integer day;
         private Long affiliateId;
+        private Long campaignId;
     }
 }

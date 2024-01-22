@@ -2,10 +2,7 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.config.security.JwtUserDetailsService;
-import it.cleverad.engine.persistence.model.service.Affiliate;
-import it.cleverad.engine.persistence.model.service.RevenueFactor;
-import it.cleverad.engine.persistence.model.service.TransactionCPC;
-import it.cleverad.engine.persistence.model.service.Wallet;
+import it.cleverad.engine.persistence.model.service.*;
 import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.web.dto.AffiliateBudgetDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
@@ -215,7 +212,6 @@ public class TransactionCPCBusiness {
         cpcRepository.save(cpc);
     }
 
-
     /**
      * == DELETE =========================================================================================================
      **/
@@ -299,7 +295,23 @@ public class TransactionCPCBusiness {
         LocalDate now = LocalDate.now();
         request.setDateTimeFrom(now.withDayOfMonth(1).atStartOfDay());
         request.setDateTimeTo(LocalDateTime.of(now.withDayOfMonth(now.lengthOfMonth()), LocalTime.MAX));
-        return cpcRepository.findAll(getSpecificationCPC(request), Pageable.ofSize(Integer.MAX_VALUE)).stream().collect(Collectors.toList());
+        request.setValueNotZero(true);
+        ArrayList  not = new ArrayList<>();
+        not.add(74L); // RIGETTATO
+        request.setNotInStatusId(not);
+        return cpcRepository.findAll(getSpecificationCPC(request), PageRequest.of(0,Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")))).stream().collect(Collectors.toList());
+    }
+
+    public List<TransactionCPC> searchForCampaignBudget(Long id, LocalDate from, LocalDate to)  {
+        TransactionCPCBusiness.Filter request = new TransactionCPCBusiness.Filter();
+        request.setCampaignId(id);
+        request.setDateTimeFrom(from.atStartOfDay());
+        request.setDateTimeTo(LocalDateTime.of((to), LocalTime.MAX));
+        request.setValueNotZero(true);
+        ArrayList  not = new ArrayList<>();
+        not.add(74L); // RIGETTATO
+        request.setNotInStatusId(not);
+        return cpcRepository.findAll(getSpecificationCPC(request), PageRequest.of(0,Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")))).stream().collect(Collectors.toList());
     }
 
     public Page<DictionaryDTO> getTypes() {
@@ -307,7 +319,6 @@ public class TransactionCPCBusiness {
     }
 
     //    >>>>>>>>> RICERCE PER RIGENERAZIONE
-
     public List<TransactionCPC> searchStatusIdAndDateNotManual(Long statusId, LocalDate dataDaGestireStart, LocalDate dataDaGestireEnd, Long affiliateId, Long campaignId) {
         TransactionCPCBusiness.Filter request = new TransactionCPCBusiness.Filter();
         request.setDateTimeFrom(dataDaGestireStart.atStartOfDay());
@@ -338,6 +349,17 @@ public class TransactionCPCBusiness {
         request.setAffiliateId(affiliateId);
         request.setPayoutPresent(payoutPresent);
         request.setValueNotZero(true);
+        return cpcRepository.findAll(getSpecificationCPC(request), Pageable.ofSize(Integer.MAX_VALUE)).stream().collect(Collectors.toList());
+    }
+
+    //    -- ---- ---- ---- ---- RIGENERA AFFILIATE BUDGET
+    public List<TransactionCPC> searchLastModified() {
+        TransactionCPCBusiness.Filter request = new TransactionCPCBusiness.Filter();
+        request.setValueNotZero(true);
+        ArrayList  not = new ArrayList<>();
+        not.add(74L); // RIGETTATO
+        request.setNotInStatusId(not);
+        request.setLastModificationDateTimeFrom(LocalDateTime.now().minusHours(24));
         return cpcRepository.findAll(getSpecificationCPC(request), Pageable.ofSize(Integer.MAX_VALUE)).stream().collect(Collectors.toList());
     }
 
@@ -401,6 +423,20 @@ public class TransactionCPCBusiness {
             }
             if (request.getPayoutPresent() != null) {
                 predicates.add(cb.equal(root.get("payoutPresent"), request.getPayoutPresent()));
+            }
+            if (request.getLastModificationDateTimeFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("lastModificationDate"), request.getLastModificationDateTimeFrom()));
+            }
+            if (request.getLastModificationDateTimeTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("lastModificationDate"), request.getLastModificationDateTimeTo()));
+            }
+
+            if (request.getNotInStatusId() != null) {
+                CriteriaBuilder.In<Long> inClauseNot = cb.in(root.get("dictionaryStatus").get("id"));
+                for (Long id : request.getNotInStatusId()) {
+                    inClauseNot.value(id);
+                }
+                predicates.add(inClauseNot.not());
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -481,6 +517,12 @@ public class TransactionCPCBusiness {
         private LocalDateTime dateTimeFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDateTime dateTimeTo;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDateTime lastModificationDateTimeFrom;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDateTime lastModificationDateTimeTo;
+
+        public List<Long> notInStatusId;
     }
 
     @Data

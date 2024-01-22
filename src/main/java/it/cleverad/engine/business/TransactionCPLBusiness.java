@@ -2,10 +2,7 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.config.security.JwtUserDetailsService;
-import it.cleverad.engine.persistence.model.service.Affiliate;
-import it.cleverad.engine.persistence.model.service.RevenueFactor;
-import it.cleverad.engine.persistence.model.service.TransactionCPL;
-import it.cleverad.engine.persistence.model.service.Wallet;
+import it.cleverad.engine.persistence.model.service.*;
 import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.web.dto.AffiliateBudgetDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
@@ -93,7 +90,7 @@ public class TransactionCPLBusiness {
             newCplTransaction.setLeadNumber(1L);
             request.setDictionaryId(68L);
             request.setStatusId(73L);
-            newCplTransaction.setData(request.getData().trim());
+            newCplTransaction.setData(request.getData().trim().replace("[REPLACE]", ""));
 
             // trovo revenue
             RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(request.getCampaignId(), 11L);
@@ -348,6 +345,18 @@ public class TransactionCPLBusiness {
         return cplRepository.findAll(getSpecificationCPL(request), Pageable.ofSize(Integer.MAX_VALUE)).stream().collect(Collectors.toList());
     }
 
+    public List<TransactionCPL> searchForCampaignBudget(Long campaignId, LocalDate from, LocalDate to) {
+        TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
+        request.setCampaignId(campaignId);
+        request.setDateTimeFrom(from.atStartOfDay());
+        request.setDateTimeTo(LocalDateTime.of((to), LocalTime.MAX));
+        request.setValueNotZero(true);
+        ArrayList  not = new ArrayList<>();
+        not.add(74L); // RIGETTATO
+        request.setNotInStatusId(not);
+        return cplRepository.findAll(getSpecificationCPL(request), Pageable.ofSize(Integer.MAX_VALUE)).stream().collect(Collectors.toList());
+    }
+
     //    -- ---- ---- ---- ---- RIGENERA WALLET
     public List<TransactionCPL> searchPayout(Long affiliateId, Boolean payoutPresent) {
         TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
@@ -355,6 +364,28 @@ public class TransactionCPLBusiness {
         request.setPayoutPresent(payoutPresent);
         request.setValueNotZero(true);
         return cplRepository.findAll(getSpecificationCPL(request), Pageable.ofSize(Integer.MAX_VALUE)).stream().collect(Collectors.toList());
+    }
+
+    //    -- ---- ---- ---- ---- RIGENERA AFFILIATE BUDGET
+    public List<TransactionCPL> searchLastModified() {
+        TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
+        request.setValueNotZero(true);
+        ArrayList  not = new ArrayList<>();
+        not.add(74L); // RIGETTATO
+        request.setNotInStatusId(not);
+        request.setLastModificationDateTimeFrom(LocalDateTime.now().minusHours(24));
+        return cplRepository.findAll(getSpecificationCPL(request), PageRequest.of(0,Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")))).stream().collect(Collectors.toList());
+    }
+
+    public List<TransactionCPL> searchForAffiliateBudget(Long affiliateId, Long campaignId) {
+        TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
+        request.setValueNotZero(true);
+        ArrayList  not = new ArrayList<>();
+        not.add(74L); // RIGETTATO
+        request.setNotInStatusId(not);
+        request.setAffiliateId(affiliateId);
+        request.setCampaignId(campaignId);
+        return cplRepository.findAll(getSpecificationCPL(request), PageRequest.of(0,Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")))).stream().collect(Collectors.toList());
     }
 
     /**
@@ -420,6 +451,19 @@ public class TransactionCPLBusiness {
             if (request.getPayoutPresent() != null && request.getPayoutPresent()) {
                 predicates.add(cb.equal(root.get("payoutPresent"), request.getPayoutPresent()));
             }
+            if (request.getLastModificationDateTimeFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("lastModificationDate"), request.getLastModificationDateTimeFrom()));
+            }
+            if (request.getLastModificationDateTimeTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("lastModificationDate"), request.getLastModificationDateTimeTo()));
+            }
+            if (request.getNotInStatusId() != null) {
+                CriteriaBuilder.In<Long> inClauseNot = cb.in(root.get("dictionaryStatus").get("id"));
+                for (Long id : request.getNotInStatusId()) {
+                    inClauseNot.value(id);
+                }
+                predicates.add(inClauseNot.not());
+            }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
@@ -469,7 +513,7 @@ public class TransactionCPLBusiness {
     @ToString
     public static class Filter {
         public List<Long> notInId;
-        public List<Long> statusIdIn;
+        public List<Long> notInStatusId;
         public List<Long> dictionaryIdIn;
         private Long id;
         private Long affiliateId;
@@ -499,6 +543,10 @@ public class TransactionCPLBusiness {
         private LocalDateTime dateTimeFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDateTime dateTimeTo;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDateTime lastModificationDateTimeFrom;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDateTime lastModificationDateTimeTo;
     }
 
     @Data

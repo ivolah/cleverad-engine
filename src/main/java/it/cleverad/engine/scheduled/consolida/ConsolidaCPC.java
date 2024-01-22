@@ -5,6 +5,7 @@ import it.cleverad.engine.web.dto.TransactionCPCDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
+import org.decimal4j.util.DoubleRounder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -92,7 +93,7 @@ public class ConsolidaCPC {
                 log.trace("CONSOLIDATO CPC :: {} :: {} ::: {} - {} - {} ::: ", totaleClick, value, ttt.getLeft(), ttt.getMiddle(), ttt.getRight(), totaleClick, value);
                 TransactionCPCBusiness.BaseCreateRequest bReq = new TransactionCPCBusiness.BaseCreateRequest();
                 bReq.setClickNumber(totaleClick);
-                bReq.setValue(value);
+                bReq.setValue(DoubleRounder.round(value, 2));
                 bReq.setCampaignId((Long) ttt.getLeft());
                 bReq.setAffiliateId((Long) ttt.getMiddle());
                 bReq.setChannelId((Long) ttt.getRight());

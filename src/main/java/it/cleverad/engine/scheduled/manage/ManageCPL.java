@@ -119,7 +119,7 @@ public class ManageCPL {
                     else transaction.setAgent("");
 
                     transaction.setIp(cplDTO.getIp());
-                    transaction.setData(cplDTO.getData());
+                    transaction.setData(cplDTO.getData().trim().replace("[REPLACE]", ""));
                     transaction.setMediaId(refferal.getMediaId());
 
                     // controlla data scadneza camapgna
@@ -295,7 +295,7 @@ public class ManageCPL {
                     else transaction.setAgent("");
 
                     transaction.setIp(cplDTO.getIp());
-                    transaction.setData(cplDTO.getData());
+                    transaction.setData(cplDTO.getData().trim().replace("[REPLACE]", ""));
                     transaction.setMediaId(refferal.getMediaId());
 
                     // controlla data scadneza camapgna
