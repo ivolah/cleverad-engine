@@ -8,6 +8,7 @@ import lombok.ToString;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "t_campaign_cost")
@@ -30,8 +31,6 @@ public class CampaignCost {
     private String nome;
     private Integer numero;
     private Double costo;
-
-
     private String note;
 
     @Column(name = "start_date")
@@ -43,4 +42,11 @@ public class CampaignCost {
 
     @Column(name = "creation_date")
     private LocalDateTime creationDate = LocalDateTime.now();
+
+    @ManyToOne
+    @JoinColumn(name = "type_id")
+    private Dictionary dictionary;
+
+    @OneToMany(mappedBy = "campaignCost")
+    private Set<FileCost> fileCosts;
 }

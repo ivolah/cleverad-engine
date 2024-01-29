@@ -2,7 +2,6 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.CampaignCost;
-import it.cleverad.engine.persistence.repository.service.AdvertiserRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignCostRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
@@ -52,6 +51,7 @@ public class CampaignCostBusiness {
     public CampaignCostDTO create(BaseCreateRequest request) {
         CampaignCost map = mapper.map(request, CampaignCost.class);
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
+        map.setDictionary(dictionaryRepository.findById(request.typeId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.typeId)));
         map.setCreationDate(LocalDateTime.now());
         map.setStatus(true);
         return CampaignCostDTO.from(repository.save(map));
@@ -63,6 +63,8 @@ public class CampaignCostBusiness {
         mapper.map(request, budget);
         if (request.getCampaignId() != null)
             budget.setCampaign(campaignRepository.findById(request.getCampaignId()).orElseThrow(() -> new ElementCleveradException("Campaign", request.getCampaignId())));
+        if (request.getTypeId() != null)
+            budget.setDictionary(dictionaryRepository.findById(request.typeId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.typeId)));
         return CampaignCostDTO.from(repository.save(budget));
     }
 
@@ -110,7 +112,6 @@ public class CampaignCostBusiness {
         Page<CampaignCost> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CampaignCostDTO::from);
     }
-
 
     /**
      * ============================================================================================================
@@ -162,6 +163,7 @@ public class CampaignCostBusiness {
         private Integer numero;
         private Double costo;
         private String note;
+        private Long typeId;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate startDate;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -182,9 +184,8 @@ public class CampaignCostBusiness {
         private LocalDate endDateFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate endDateTo;
+        private Long typeId;
     }
-
-
 
 
 }
