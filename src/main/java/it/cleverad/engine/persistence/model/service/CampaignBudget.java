@@ -113,6 +113,12 @@ public class CampaignBudget {
     @Column(name = "invoice_due_date")
     private LocalDate invoiceDueDate;
 
+    private Double volume;
+    @Column(name = "volume_date")
+    private LocalDate volumeDate;
+    @Column(name = "volume_delta")
+    private Double volumeDelta;
+
     @OneToMany(mappedBy = "campaignBudget")
     private Set<FileCampaignBudgetInvoice> fileCampaignBudgetInvoices;
 

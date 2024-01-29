@@ -1,13 +1,12 @@
 package it.cleverad.engine.web.dto;
 
 import it.cleverad.engine.persistence.model.service.CampaignBudget;
-import it.cleverad.engine.persistence.model.service.FileCampaignBudgetInvoice;
-import it.cleverad.engine.persistence.model.service.FileCampaignBudgetOrder;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import javax.persistence.Column;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -59,14 +58,20 @@ public class CampaignBudgetDTO {
     private Boolean statoPagato;
     private LocalDate invoiceDueDate;
 
+    private Double volume;
+    private LocalDate volumeDate;
+    private Double volumeDelta;
+
     private List<FileCampaignBudgetInvoiceDTO> fileCampaignBudgetInvoices;
     private List<FileCampaignBudgetOrderDTO> fileCampaignBudgetOrders;
 
+
+
     public static CampaignBudgetDTO from(CampaignBudget campaignBudget) {
 
-         List<FileCampaignBudgetInvoiceDTO> invoices = null;
+        List<FileCampaignBudgetInvoiceDTO> invoices = null;
         if (campaignBudget.getFileCampaignBudgetInvoices() != null) {
-            invoices = campaignBudget.getFileCampaignBudgetInvoices() .stream().map(invoice -> {
+            invoices = campaignBudget.getFileCampaignBudgetInvoices().stream().map(invoice -> {
                 FileCampaignBudgetInvoiceDTO dto = new FileCampaignBudgetInvoiceDTO();
                 dto.setId(invoice.getId());
                 dto.setName(invoice.getName());
@@ -78,7 +83,7 @@ public class CampaignBudgetDTO {
 
         List<FileCampaignBudgetOrderDTO> orders = null;
         if (campaignBudget.getFileCampaignBudgetOrders() != null) {
-            orders = campaignBudget.getFileCampaignBudgetOrders() .stream().map(invoice -> {
+            orders = campaignBudget.getFileCampaignBudgetOrders().stream().map(invoice -> {
                 FileCampaignBudgetOrderDTO dto = new FileCampaignBudgetOrderDTO();
                 dto.setId(invoice.getId());
                 dto.setName(invoice.getName());
@@ -114,6 +119,7 @@ public class CampaignBudgetDTO {
                 campaignBudget.getRevenuePCPS(), campaignBudget.getRevenuePS(), campaignBudget.getRevenueDay(), campaignBudget.getMateriali(),
                 campaignBudget.getNote(), campaignBudget.getCapFatturabile(), campaignBudget.getFatturato(), campaignBudget.getStatus(),
                 campaignBudget.getStatoFatturato(), campaignBudget.getStatoPagato(), campaignBudget.getInvoiceDueDate(),
+                campaignBudget.getVolume(), campaignBudget.getVolumeDate(), campaignBudget.getVolumeDelta(),
                 invoices, orders);
     }
 

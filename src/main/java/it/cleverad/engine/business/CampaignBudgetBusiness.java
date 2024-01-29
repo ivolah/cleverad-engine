@@ -348,6 +348,9 @@ public class CampaignBudgetBusiness {
         private Double fatturato;
         private Boolean status;
         private Long id;
+        private Double volume;
+        private LocalDate volumeDate;
+        private Double volumeDelta;
     }
 
     @Data
@@ -412,6 +415,8 @@ public class CampaignBudgetBusiness {
         private Boolean statoPagato;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate invoiceDueDate;
+        private Double volume;
+        private LocalDate volumeDate;
     }
 
 }
