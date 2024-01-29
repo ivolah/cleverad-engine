@@ -60,11 +60,11 @@ public class CampaignBudgetService {
             List<TransactionCPL> cpls = transactionCPLBusiness.searchForCampaignBudget(dto.getCampaignId(), dto.getStartDate(), dto.getEndDate());
             log.info("NUMERO TRANS CPL {} :: {} ({})", dto.getCampaignId(), cpls.size(), dto.getCapIniziale());
             for (TransactionCPL cpl : cpls) {
-                if (capErogato < dto.getCapIniziale()) {
-                    capErogato += 1;
-                    budgetErogato += revenueFactorBusiness.findById(cpl.getRevenueId()).getRevenue();
-                    commissioniErogate += cpl.getCommission().getValue();
-                }
+                // tolgo limite cap if (capErogato < dto.getCapIniziale()) {
+                capErogato += 1;
+                budgetErogato += revenueFactorBusiness.findById(cpl.getRevenueId()).getRevenue();
+                commissioniErogate += cpl.getCommission().getValue();
+                //}
             }
             log.trace("CPL budgetErogato :: {}", budgetErogato);
             log.trace("CPL capErogato :: {} ", capErogato);
@@ -74,12 +74,12 @@ public class CampaignBudgetService {
             List<TransactionCPC> cpcs = transactionCPCBusiness.searchForCampaignBudget(dto.getCampaignId(), dto.getStartDate(), dto.getEndDate());
             log.info("NUMERO TRANS CPC {} :: {} ({})", dto.getCampaignId(), cpcs.size(), dto.getCapIniziale());
             for (TransactionCPC cpc : cpcs) {
-                if (capErogato < dto.getCapIniziale()) {
-                    capErogato += cpc.getClickNumber().intValue();
-                    budgetErogato += revenueFactorBusiness.findById(cpc.getRevenueId()).getRevenue() * cpc.getClickNumber().intValue();
-                    commissioniErogate += (cpc.getCommission().getValue() * cpc.getClickNumber().intValue());
-                    log.trace("{} :: comm value  {} :: {} * {} == {}", capErogato, cpc.getValue(), cpc.getCommission().getValue(), cpc.getClickNumber().intValue(), (cpc.getCommission().getValue() * cpc.getClickNumber().intValue()));
-                }
+                // tolgo limite cap if (capErogato < dto.getCapIniziale()) {
+                capErogato += cpc.getClickNumber().intValue();
+                budgetErogato += revenueFactorBusiness.findById(cpc.getRevenueId()).getRevenue() * cpc.getClickNumber().intValue();
+                commissioniErogate += (cpc.getCommission().getValue() * cpc.getClickNumber().intValue());
+                log.trace("{} :: comm value  {} :: {} * {} == {}", capErogato, cpc.getValue(), cpc.getCommission().getValue(), cpc.getClickNumber().intValue(), (cpc.getCommission().getValue() * cpc.getClickNumber().intValue()));
+                //  }
             }
             log.trace("CPC budgetErogato :: {}", budgetErogato);
             log.trace("CPC capErogato :: {} ", capErogato);
