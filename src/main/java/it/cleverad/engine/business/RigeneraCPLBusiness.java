@@ -137,6 +137,7 @@ public class RigeneraCPLBusiness {
 
                         // setta transazione
                         TransactionCPLBusiness.BaseCreateRequest transaction = new TransactionCPLBusiness.BaseCreateRequest();
+                        transaction.setRefferal(cplDTO.getRefferal());
                         transaction.setAffiliateId(refferal.getAffiliateId());
                         transaction.setCampaignId(refferal.getCampaignId());
                         transaction.setChannelId(refferal.getChannelId());

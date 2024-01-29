@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -27,7 +28,7 @@ public class DisableStausDailyScheduledActivities {
     @Autowired
     private RevenueFactorBusiness revenueFactorBusiness;
 
-    @Scheduled(cron = "30 0 0 * * ?")
+    @Scheduled(cron = "10 59 23 * * ?")
     public void aggiornaStato() {
         log.info("AGGIORNAMENTO QUOTIDIANO STATO");
 
@@ -35,28 +36,28 @@ public class DisableStausDailyScheduledActivities {
         List<AffiliateBudgetDTO> listaBudget = affiliateBudgetBusiness.getBudgetToDisable();
         listaBudget.stream().forEach(budgetDTO -> {
             affiliateBudgetBusiness.disable(budgetDTO.getId());
-            log.info("Disable Budget : {}", budgetDTO.getId());
+            log.info("Disable Budget ({}) : {} ", LocalDate.now().plusDays(1), budgetDTO.getId());
         });
 
         // aggiorao sato commission
         List<CommissionDTO> listaCommission = commissionBusiness.getCommissionToDisable();
         listaCommission.stream().forEach(comm -> {
             commissionBusiness.disable(comm.getId());
-            log.info("Disable Commission : {}", comm.getId());
+            log.info("Disable Commission ({}) : {} ", LocalDate.now().plusDays(1), comm.getId());
         });
 
         // aggiorno stato revenue
         List<RevenueFactorDTO> listaRevenu = revenueFactorBusiness.getRevenueToDisable();
         listaRevenu.stream().forEach(rr -> {
             revenueFactorBusiness.disable(rr.getId());
-            log.info("Disable Revenue : {}", rr.getId());
+            log.info("Disable Revenue ({}) : {} ", LocalDate.now().plusDays(1), rr.getId());
         });
 
         // aggiorno Stato Campagne
         List<CampaignDTO> listaCampagne = campaignBusiness.getCampaignsToDisable();
         listaCampagne.stream().forEach(campaignDTO -> {
             campaignBusiness.disable(campaignDTO.getId());
-            log.info("Disable Campaign : {}", campaignDTO.getId());
+            log.info("Disable Campaign ({}) : {} ", LocalDate.now().plusDays(1), campaignDTO.getId());
         });
 
     }

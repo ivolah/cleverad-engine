@@ -89,23 +89,17 @@ public class AffiliateBudgetBusiness {
 
     // UPDATE
     public AffiliateBudgetDTO update(Long id, Filter filter) {
-
-        log.info(">>>> " + filter);
         AffiliateBudget affiliateBudget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Budget", id));
-
         Double newBudget = null;
         if (!affiliateBudget.getInitialBudget().equals(filter.getInitialBudget())) {
             newBudget = affiliateBudget.getBudget() + filter.getInitialBudget() - affiliateBudget.getInitialBudget();
             log.info(newBudget + "");
         }
-
         mapper.map(filter, affiliateBudget);
-
         affiliateBudget.setBudget(newBudget);
         affiliateBudget.setLastModificationDate(LocalDateTime.now());
         affiliateBudget.setAffiliate(affiliateRepository.findById(filter.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", filter.affiliateId)));
         affiliateBudget.setCampaign(campaignRepository.findById(filter.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", filter.campaignId)));
-
         return AffiliateBudgetDTO.from(repository.save(affiliateBudget));
     }
 

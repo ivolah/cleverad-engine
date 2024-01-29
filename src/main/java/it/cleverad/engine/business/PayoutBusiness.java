@@ -146,8 +146,8 @@ public class PayoutBusiness {
         List<Payout> pys = new ArrayList<>(listaPayout);
         pys.forEach(payout -> {
             Double ivaDaMoltiplicare = Double.valueOf(payout.getAffiliate().getDictionaryVatType().getDescription());
-            payout.setIva(payout.getImponibile() * ivaDaMoltiplicare);
-            payout.setTotale(payout.getImponibile() + payout.getIva());
+            payout.setIva(DoubleRounder.round(payout.getImponibile() * ivaDaMoltiplicare, 2));
+            payout.setTotale(DoubleRounder.round(payout.getImponibile() + payout.getIva(), 2));
         });
 
         return pys;
