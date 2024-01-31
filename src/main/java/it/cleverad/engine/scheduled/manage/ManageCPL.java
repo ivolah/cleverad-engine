@@ -75,14 +75,11 @@ public class ManageCPL {
             cplBusiness.getUnreadOneHourBefore().stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
 
                 // leggo sempre i cpc precedenti per trovare il click riferito alla lead
-                cpcBusiness.findByIp24HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal())
-                        .stream()
-                        .filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal()))
-                        .forEach(cpcDTO -> {
-                            log.trace("R ORIG {} --> R CPC {}", cplDTO.getRefferal(), cpcDTO.getRefferal());
-                            cplDTO.setRefferal(cpcDTO.getRefferal());
-                            cplDTO.setCpcId(cpcDTO.getId());
-                        });
+                cpcBusiness.findByIp24HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal()).stream().filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal())).forEach(cpcDTO -> {
+                    log.trace("R ORIG {} --> R CPC {}", cplDTO.getRefferal(), cpcDTO.getRefferal());
+                    cplDTO.setRefferal(cpcDTO.getRefferal());
+                    cplDTO.setCpcId(cpcDTO.getId());
+                });
                 Long idCpc = cplDTO.getCpcId();
                 log.trace("Refferal :: {} con ID CPC {}", cplDTO.getRefferal(), idCpc);
                 cplBusiness.setCpcId(cplDTO.getId(), idCpc);
@@ -208,12 +205,13 @@ public class ManageCPL {
 
                         // Stato Budget Campagna
                         CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(refferal.getCampaignId(), transaction.getDateTime().toLocalDate()).stream().findFirst().orElse(null);
-                        Double budgetCampagna = campBudget.getBudgetErogato() - totale;
-                        // setto stato transazione a ovebudget editore se totale < 0
-                        if (budgetCampagna < 0) {
-                            transaction.setDictionaryId(48L);
+                        if (campBudget != null && campBudget.getBudgetErogato() != null) {
+                            Double budgetCampagna = campBudget.getBudgetErogato() - totale;
+                            // setto stato transazione a ovebudget editore se totale < 0
+                            if (budgetCampagna < 0) {
+                                transaction.setDictionaryId(48L);
+                            }
                         }
-
                         //setto pending
                         transaction.setStatusId(72L);
 
