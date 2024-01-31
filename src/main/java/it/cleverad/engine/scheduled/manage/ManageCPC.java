@@ -50,8 +50,6 @@ public class ManageCPC {
     @Autowired
     private AffiliateBudgetBusiness affiliateBudgetBusiness;
     @Autowired
-    private CampaignBusiness campaignBusiness;
-    @Autowired
     private RevenueFactorBusiness revenueFactorBusiness;
     @Autowired
     private AffiliateChannelCommissionCampaignBusiness affiliateChannelCommissionCampaignBusiness;
