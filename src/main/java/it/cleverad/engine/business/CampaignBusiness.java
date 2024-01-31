@@ -92,7 +92,6 @@ public class CampaignBusiness {
         map.setDealer(dealerRepository.findById(request.getDealerId()).orElseThrow(() -> new ElementCleveradException("Dealer", request.dealerId)));
         map.setPlanner(plannerRepository.findById(request.getPlannerId()).orElseThrow(() -> new ElementCleveradException("Planner", request.plannerId)));
 
-        map.setBudget(request.initialBudget);
         map.setValuta("EUR");
 
         CampaignDTO dto = CampaignDTO.from(repository.save(map));
@@ -234,16 +233,7 @@ public class CampaignBusiness {
     public CampaignDTO update(Long id, Filter filter) {
 
         Campaign campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
-
-        Double newBB = null;
-        if (campaign.getBudget() != null && campaign.getInitialBudget() != null && filter.getInitialBudget() != null && !campaign.getInitialBudget().equals(filter.getInitialBudget())) {
-            newBB = campaign.getBudget() + (filter.getInitialBudget()) - campaign.getInitialBudget();
-            campaign.setInitialBudget(filter.getInitialBudget());
-        }
-
         mapper.map(filter, campaign);
-
-        if (newBB != null) campaign.setBudget(newBB);
 
         // SET
         if (filter.getCookieId() != null)
@@ -272,12 +262,6 @@ public class CampaignBusiness {
         Campaign campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
         campaign.setStatus(false);
         campaign.setLastModificationDate(LocalDateTime.now());
-        return CampaignDTO.from(repository.save(campaign));
-    }
-
-    public CampaignDTO updateBudget(Long campaignId, Double budget) {
-        Campaign campaign = repository.findById(campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", campaignId));
-        campaign.setBudget(budget);
         return CampaignDTO.from(repository.save(campaign));
     }
 
@@ -557,15 +541,12 @@ public class CampaignBusiness {
         private Long plannerId;
         private Long dealerId;
         private String valuta;
-        private Double budget;
-        private Double initialBudget;
+        private Boolean checkPhoneNumber = false;
         private String note;
         @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSz")
         private LocalDateTime startDate;
         @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSz")
         private LocalDateTime endDate;
-        private String cap;
-        private Boolean checkPhoneNumber = false;
     }
 
     @Data
@@ -604,16 +585,13 @@ public class CampaignBusiness {
         private Long companyId;
         private Long plannerId;
         private Long dealerId;
-        private String cap;
         private List<Long> idListIn;
         private List<Long> idListNotIn;
         private Boolean checkPhoneNumber;
         private String bbtipo;
         private Long categoryId;
-
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate disableDueDateTo;
-
         private Long advertiserId;
     }
 

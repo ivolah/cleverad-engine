@@ -39,11 +39,6 @@ public class Campaign {
     private String valuta;
     @Column(name = "encoded_id")
     private String encodedId;
-    private Double budget;
-    @Column(name = "initial_budget")
-    private Double initialBudget;
-    @Column
-    private String cap;
     @Column(nullable = false)
     private Boolean status = true;
     @Column(name = "creation_date")

@@ -9,7 +9,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Data
@@ -29,34 +28,24 @@ public class CampaignDTO {
     private LocalDate endDate;
     private String idFile;
     private String valuta;
-    private Double budget;
-    private Double initialBudget;
-    private String cap;
     private String encodedId;
-
     private Long cookieId;
     private String cookieName;
     private String cookieValue;
-
     private Long companyId;
     private String companyName;
-
     private Long dealerId;
     private String dealerName;
-
     private Long plannerId;
     private String plannerName;
     private String plannerMail;
-
     private List<BasicMediaDTO> medias;
     private List<BasicAffiliateDTO> affiliates;
     private List<CommissionDTO> commissions;
     private List<BasicCategoryDTO> categories;
-    //    private List<BasicCookieDTO> cookies;
     private List<RevenueFactorDTO> revenues;
     private List<AffiliateChannelCommissionCampaignDTO> affiliateChannelCommissionCampaigns;
     private List<Long> categoryList;
-
     private Boolean checkPhoneNumber;
 
     public static CampaignDTO from(Campaign campaign) {
@@ -117,24 +106,9 @@ public class CampaignDTO {
             }).collect(Collectors.toList());
         }
 
-        List<Long> categoryList = new ArrayList<>();
-        //        String catergoryList = "";
-        if (categoryDTOS.size() > 0)
-            for (BasicCategoryDTO basicCategoryDTO : Objects.requireNonNull(categoryDTOS)) {
-                categoryList.add(basicCategoryDTO.getId());
-            }
-
-        //        List<BasicCookieDTO> cookie = null;
-        //        if (campaign.getCampaignCookies() != null) {
-        //            cookie = campaign.getCampaignCookies().stream().map(campaignCookie -> {
-        //                BasicCookieDTO dto = new BasicCookieDTO();
-        //                dto.setId(campaignCookie.getCookie().getId());
-        //                dto.setName(campaignCookie.getCookie().getName());
-        //                dto.setStatus(campaignCookie.getCookie().getStatus());
-        //                dto.setValue(campaignCookie.getCookie().getValue());
-        //                return dto;
-        //            }).collect(Collectors.toList());
-        //        }
+        List<Long> categoryList = categoryDTOS.stream()
+                .map(BasicCategoryDTO::getId)
+                .collect(Collectors.toList());
 
         List<RevenueFactorDTO> revenues = null;
         if (campaign.getRevenueFactors() != null) {
@@ -164,7 +138,7 @@ public class CampaignDTO {
                 dto.setCommissionId(acccc.getCommission().getId());
                 dto.setCommissionName(acccc.getCommission().getName());
                 dto.setCreationDate(acccc.getCreationDate());
-                 return dto;
+                return dto;
             }).collect(Collectors.toList());
         }
 
@@ -172,7 +146,7 @@ public class CampaignDTO {
                 campaign.getLongDescription(), campaign.getNote(), campaign.getStatus(),
                 campaign.getCreationDate(), campaign.getLastModificationDate(),
                 campaign.getStartDate(), campaign.getEndDate(), campaign.getIdFile(),
-                campaign.getValuta(), campaign.getBudget(), campaign.getInitialBudget(), campaign.getCap(),
+                campaign.getValuta(),
                 campaign.getEncodedId(),
                 campaign.getCookie().getId(),
                 campaign.getCookie().getName(),
@@ -180,11 +154,9 @@ public class CampaignDTO {
                 campaign.getAdvertiser().getId(), campaign.getAdvertiser().getName(),
                 campaign.getDealer() != null ? campaign.getDealer().getId() : null,
                 campaign.getDealer() != null ? campaign.getDealer().getName() : null,
-
                 campaign.getPlanner() != null ? campaign.getPlanner().getId() : null,
                 campaign.getPlanner() != null ? campaign.getPlanner().getName() : null,
                 campaign.getPlanner() != null ? campaign.getPlanner().getEmail() : null,
-
                 medias, affiliateDTOList, commissions, categoryDTOS, revenues, accc, categoryList,
                 campaign.getCheckPhoneNumber());
     }
