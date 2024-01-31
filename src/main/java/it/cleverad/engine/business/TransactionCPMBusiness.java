@@ -2,7 +2,10 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.config.security.JwtUserDetailsService;
-import it.cleverad.engine.persistence.model.service.*;
+import it.cleverad.engine.persistence.model.service.Affiliate;
+import it.cleverad.engine.persistence.model.service.RevenueFactor;
+import it.cleverad.engine.persistence.model.service.TransactionCPM;
+import it.cleverad.engine.persistence.model.service.Wallet;
 import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.web.dto.AffiliateBudgetDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
@@ -66,10 +69,6 @@ public class TransactionCPMBusiness {
     private DictionaryRepository dictionaryRepository;
     @Autowired
     private AffiliateBudgetBusiness affiliateBudgetBusiness;
-    @Autowired
-    private CampaignBusiness campaignBusiness;
-    @Autowired
-    private TransactionCPLBusiness transactionCPLBusiness;
 
     /**
      * ============================================================================================================
@@ -181,7 +180,6 @@ public class TransactionCPMBusiness {
 
     public void delete(Long id, String type) {
         try {
-
             TransactionCPMDTO dto = this.findByIdCPM(id);
 
             // aggiorno budget affiliato
@@ -191,20 +189,9 @@ public class TransactionCPMBusiness {
                 affiliateBudgetBusiness.updateCap(budgetAff.getId(), Math.toIntExact(budgetAff.getCap() + dto.getImpressionNumber()));
             }
 
-            // aggiorno budget campagna
-            campaignBusiness.updateBudget(dto.getCampaignId(), campaignBusiness.findById(dto.getCampaignId()).getBudget() + dto.getValue());
-
-            // aggiorno wallet
-            Long wallerID = walletBusiness.findByIdAffilaite(dto.getAffiliateId()).stream().findFirst().get().getId();
-            walletBusiness.decrement(wallerID, dto.getValue());
-
-//                if (dto.getValue() > 0D) {
-//                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(dto.getCampaignId(), dto.getDateTime());
-//                    if (cb != null) {
-//                        campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - dto.getImpressionNumber()));
-//                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - dto.getValue());
-//                    }
-//                }
+            // aggiorno budget campagna in modo schedualto
+            // aggiorno wallet in modo schedulato
+            // aggiorno campaign buget in modo schedualto
 
             //cancello
             cpmRepository.deleteById(id);

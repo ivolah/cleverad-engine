@@ -40,8 +40,6 @@ import java.util.stream.Collectors;
 @Transactional
 public class TransactionCPCBusiness {
 
-    //    @Autowired
-//    CampaignBudgetBusiness campaignBudgetBusiness;
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
     @Autowired
@@ -70,8 +68,6 @@ public class TransactionCPCBusiness {
     private DictionaryRepository dictionaryRepository;
     @Autowired
     private AffiliateBudgetBusiness affiliateBudgetBusiness;
-    @Autowired
-    private CampaignBusiness campaignBusiness;
 
     /**
      * == CREATE =========================================================================================================
@@ -173,24 +169,12 @@ public class TransactionCPCBusiness {
                 affiliateBudgetBusiness.updateCap(budgetAff.getId(), Math.toIntExact(budgetAff.getCap() + cpc.getClickNumber()));
             }
 
-            // aggiorno budget campagna
-            campaignBusiness.updateBudget(cpc.getCampaign().getId(), campaignBusiness.findById(cpc.getCampaign().getId()).getBudget() + cpc.getValue());
-
             // aggiorno wallet
             Long walletID = null;
             if (cpc.getAffiliate().getId() != null) {
                 walletID = walletRepository.findByAffiliateId(cpc.getAffiliate().getId()).getId();
                 walletBusiness.decrement(walletID, cpc.getValue());
             }
-
-            //aggiorno Camapign Budget
-//                if (cpc.getValue() > 0D) {
-//                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(cpc.getCampaign().getId(), cpc.getDateTime());
-//                    if (cb != null) {
-//                        campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - cpc.getClickNumber()));
-//                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - cpc.getValue());
-//                    }
-//                }
 
         } else if (dictionaryId == 40L || statusId == 74L) {
             // setto revenue e commission a 0
@@ -238,10 +222,7 @@ public class TransactionCPCBusiness {
                 affiliateBudgetBusiness.updateCap(budgetAff.getId(), Math.toIntExact(budgetAff.getCap() + dto.getClickNumber()));
             }
 
-            // aggiorno budget campagna
-            // - non serve più  abbiamo campagin budget :
-            //campaignBusiness.updateBudget(dto.getCampaignId(), campaignBusiness.findById(dto.getCampaignId()).getBudget() + dto.getValue());
-
+            // aggiorno budget campagna in modo schedualto
             // aggiorno wallet in modo schedulato
             // aggiorno campaign buget in modo schedualto
 

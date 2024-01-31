@@ -10,8 +10,9 @@ import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.persistence.repository.tracking.CpcRepository;
 import it.cleverad.engine.service.ReferralService;
-import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.dto.AffiliateBudgetDTO;
+import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
+import it.cleverad.engine.web.dto.CampaignBudgetDTO;
 import it.cleverad.engine.web.dto.TransactionCPCDTO;
 import it.cleverad.engine.web.dto.tracking.CpcDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -240,13 +241,14 @@ public class ManageCPC {
                             }
                         }
 
-                        // decremento budget Campagna
-                        Double budgetCampagna = campaign.getBudget() - totale;
-                        campaignBusiness.updateBudget(campaign.getId(), budgetCampagna);
-
-                        // setto stato transazione a ovebudget editore se totale < 0
-                        if (budgetCampagna < 0) {
-                            transaction.setDictionaryId(48L);
+                        // Stato Budget Campagna
+                        CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(refferal.getCampaignId(), transaction.getDateTime().toLocalDate()).stream().findFirst().orElse(null);
+                        if (campBudget != null && campBudget.getBudgetErogato() != null) {
+                            Double budgetCampagna = campBudget.getBudgetErogato() - totale;
+                            // setto stato transazione a ovebudget editore se totale < 0
+                            if (budgetCampagna < 0) {
+                                transaction.setDictionaryId(48L);
+                            }
                         }
 
                         if (accc != null && accc.getCommissionDueDate() != null) {

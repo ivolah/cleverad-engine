@@ -5,8 +5,9 @@ import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.service.ReferralService;
-import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.dto.AffiliateBudgetDTO;
+import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
+import it.cleverad.engine.web.dto.CampaignBudgetDTO;
 import it.cleverad.engine.web.dto.CampaignDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -20,6 +21,8 @@ import java.time.LocalDate;
 @Component
 public class ManageCPS {
 
+    @Autowired
+    CampaignBudgetBusiness campaignBudgetBusiness;
     @Autowired
     private CpsBusiness cpsBusiness;
     @Autowired
@@ -38,8 +41,6 @@ public class ManageCPS {
     private AffiliateChannelCommissionCampaignBusiness affiliateChannelCommissionCampaignBusiness;
     @Autowired
     private ReferralService referralService;
-    @Autowired
-    private CommissionBusiness commissionBusiness;
 
     @Scheduled(cron = "0 0 4 * * ?")
     public void trasformaTrackingCPS() {
@@ -52,26 +53,26 @@ public class ManageCPS {
                 log.info("CPS :: {} - {}", cpsDTO, refferal);
 
                 // setta transazione
-                TransactionCPSBusiness.BaseCreateRequest rr = new TransactionCPSBusiness.BaseCreateRequest();
-                rr.setAffiliateId(refferal.getAffiliateId());
-                rr.setCampaignId(refferal.getCampaignId());
-                rr.setChannelId(refferal.getChannelId());
-                rr.setMediaId(refferal.getMediaId());
-                rr.setDateTime(cpsDTO.getDate());
-                rr.setApproved(true);
-                rr.setAgent(cpsDTO.getAgent());
-                rr.setIp(cpsDTO.getIp());
-                rr.setData(cpsDTO.getData());
-                rr.setMediaId(refferal.getMediaId());
+                TransactionCPSBusiness.BaseCreateRequest transaction = new TransactionCPSBusiness.BaseCreateRequest();
+                transaction.setAffiliateId(refferal.getAffiliateId());
+                transaction.setCampaignId(refferal.getCampaignId());
+                transaction.setChannelId(refferal.getChannelId());
+                transaction.setMediaId(refferal.getMediaId());
+                transaction.setDateTime(cpsDTO.getDate());
+                transaction.setApproved(true);
+                transaction.setAgent(cpsDTO.getAgent());
+                transaction.setIp(cpsDTO.getIp());
+                transaction.setData(cpsDTO.getData());
+                transaction.setMediaId(refferal.getMediaId());
 
                 // controlla data scadneza camapgna
                 CampaignDTO campaignDTO = campaignBusiness.findById(refferal.getCampaignId());
                 LocalDate endDate = campaignDTO.getEndDate();
                 if (endDate.isBefore(LocalDate.now())) {
                     // setto a campagna scaduta
-                    rr.setDictionaryId(42L);
+                    transaction.setDictionaryId(42L);
                 } else {
-                    rr.setDictionaryId(42L);
+                    transaction.setDictionaryId(49L);
                 }
 
                 // associo a wallet
@@ -80,7 +81,7 @@ public class ManageCPS {
                 Long walletID;
                 if (affiliateID != null) {
                     walletID = walletRepository.findByAffiliateId(affiliateID).getId();
-                    rr.setWalletId(walletID);
+                    transaction.setWalletId(walletID);
                 } else {
                     walletID = null;
                 }
@@ -88,10 +89,10 @@ public class ManageCPS {
                 // trovo revenue
                 RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 51L);
                 if (rf != null) {
-                    rr.setRevenueId(rf.getId());
+                    transaction.setRevenueId(rf.getId());
                 } else {
                     log.warn("Non trovato revenue factor di tipo 11 per campagna {} , setto default", refferal.getCampaignId());
-                    rr.setRevenueId(4L);
+                    transaction.setRevenueId(4L);
                 }
 
                 // gesione commisione
@@ -111,14 +112,13 @@ public class ManageCPS {
                 }
 
                 Double totale = commVal * 1;
-                rr.setValue(totale);
+                transaction.setValue(totale);
 
-                rr.setCommissionId(commId);
-                rr.setClickNumber(Long.valueOf(1));
+                transaction.setCommissionId(commId);
+                transaction.setClickNumber(Long.valueOf(1));
 
                 // incemento valore
-                if (walletID != null && totale > 0D)
-                    walletBusiness.incement(walletID, totale);
+                if (walletID != null && totale > 0D) walletBusiness.incement(walletID, totale);
 
                 // decremento budget Affiliato
                 AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
@@ -128,29 +128,23 @@ public class ManageCPS {
 
                     // setto stato transazione a ovebudget editore se totale < 0
                     if (totBudgetDecrementato < 0) {
-                        rr.setDictionaryId(47L);
+                        transaction.setDictionaryId(47L);
                     }
                 }
 
-                // decremento budget Campagna
-                if (campaignDTO != null) {
-                    Double budgetCampagna = campaignDTO.getBudget() - totale;
-
-                    CampaignBusiness.Filter filter = new CampaignBusiness.Filter();
-                    filter.setBudget(budgetCampagna);
-                    campaignBusiness.update(bb.getId(), filter);
-
-                    // setto stato transazione a ovebudget editore se totale < 0
-                    if (budgetCampagna < 0) {
-                        rr.setDictionaryId(48L);
-                    }
+                // Stato Budget Campagna
+                CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(refferal.getCampaignId(), transaction.getDateTime().toLocalDate()).stream().findFirst().orElse(null);
+                Double budgetCampagna = campBudget.getBudgetErogato() - totale;
+                // setto stato transazione a ovebudget editore se totale < 0
+                if (budgetCampagna < 0) {
+                    transaction.setDictionaryId(48L);
                 }
 
                 //setto pending
-                rr.setStatusId(72L);
+                transaction.setStatusId(72L);
 
                 // creo la transazione
-                transactionCPSBusiness.createCps(rr);
+                transactionCPSBusiness.createCps(transaction);
 
                 // setto a gestito
                 cpsBusiness.setRead(cpsDTO.getId());

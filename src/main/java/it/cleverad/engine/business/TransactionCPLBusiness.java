@@ -70,8 +70,6 @@ public class TransactionCPLBusiness {
     private DictionaryRepository dictionaryRepository;
     @Autowired
     private AffiliateBudgetBusiness affiliateBudgetBusiness;
-    @Autowired
-    private CampaignBusiness campaignBusiness;
 
     /**
      * == CREATE =========================================================================================================
@@ -158,24 +156,7 @@ public class TransactionCPLBusiness {
                 affiliateBudgetBusiness.updateCap(budgetAff.getId(), budgetAff.getCap() + 1);
             }
 
-            // aggiorno budget campagna
-            campaignBusiness.updateBudget(cpl.getCampaign().getId(), campaignBusiness.findById(cpl.getCampaign().getId()).getBudget() + cpl.getValue());
-
-            // aggiorno wallet
-            Long walletID = null;
-            if (cpl.getAffiliate().getId() != null) {
-                walletID = walletRepository.findByAffiliateId(cpl.getAffiliate().getId()).getId();
-                walletBusiness.decrement(walletID, cpl.getValue());
-            }
-
-            //aggiorno Camapign Budget
-//                if (cpl.getValue() > 0D) {
-//                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(cpl.getCampaign().getId(), cpl.getDateTime());
-//                    if (cb != null) {
-//                        campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - 1));
-//                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - cpl.getValue());
-//                    }
-//                }
+            // aggiorno wallet in modo schedulato
 
         } else if (dictionaryId == 40L || statusId == 74L) {
             // setto revenue e commission a 0
@@ -215,24 +196,8 @@ public class TransactionCPLBusiness {
                 affiliateBudgetBusiness.updateCap(budgetAff.getId(), budgetAff.getCap() + 1);
             }
 
-            // aggiorno budget campagna
-            campaignBusiness.updateBudget(cpl.getCampaign().getId(), campaignBusiness.findById(cpl.getCampaign().getId()).getBudget() + cpl.getValue());
+            // aggiorno wallet in modo schedulato
 
-            // aggiorno wallet
-            Long walletID = null;
-            if (cpl.getAffiliate().getId() != null) {
-                walletID = walletRepository.findByAffiliateId(cpl.getAffiliate().getId()).getId();
-                walletBusiness.decrement(walletID, cpl.getValue());
-            }
-
-            //aggiorno Camapign Budget
-//            if (cpl.getValue() > 0D) {
-//                CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(cpl.getCampaign().getId(), cpl.getDateTime());
-//                if (cb != null) {
-//                    campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - 1));
-//                    campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - cpl.getValue());
-//                }
-//            }
         }
 
         cplRepository.save(cpl);
@@ -289,10 +254,7 @@ public class TransactionCPLBusiness {
                 affiliateBudgetBusiness.updateCap(budgetAff.getId(), budgetAff.getCap() + 1);
             }
 
-            // aggiorno budget campagna
-            // - non serve più  abbiamo campagin budget :
-            //campaignBusiness.updateBudget(dto.getCampaignId(), campaignBusiness.findById(dto.getCampaignId()).getBudget() + dto.getValue());
-
+            // aggiorno budget campagna in modo schedualto
             // aggiorno wallet in modo schedulato
             // aggiorno campaign buget in modo schedualto
 

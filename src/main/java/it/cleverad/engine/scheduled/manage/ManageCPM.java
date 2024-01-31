@@ -3,10 +3,13 @@ package it.cleverad.engine.scheduled.manage;
 import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
+import it.cleverad.engine.persistence.model.tracking.Cpm;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
+import it.cleverad.engine.persistence.repository.tracking.CpmRepository;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.*;
 import it.cleverad.engine.web.dto.tracking.CpmDTO;
+import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +33,8 @@ public class ManageCPM {
     @Autowired
     private CpmBusiness CpmBusiness;
     @Autowired
+    private CpmRepository repository;
+    @Autowired
     private TransactionCPMBusiness transactionCPMBusiness;
     @Autowired
     private WalletRepository walletRepository;
@@ -45,6 +50,8 @@ public class ManageCPM {
     private RevenueFactorBusiness revenueFactorBusiness;
     @Autowired
     private ReferralService referralService;
+    @Autowired
+    CampaignBudgetBusiness campaignBudgetBusiness;
 
     /**
      * ============================================================================================================
@@ -69,6 +76,7 @@ public class ManageCPM {
             Page<CpmDTO> last = CpmBusiness.getUnreadHourBefore();
 
             last.stream().filter(cpmDTO -> cpmDTO.getRefferal() != null).forEach(cpm -> {
+
                 // gestisco calcolatore
                 Integer num = mappa.get(cpm.getRefferal());
                 if (num == null) num = 0;
@@ -80,8 +88,36 @@ public class ManageCPM {
                         if (StringUtils.isNotBlank(dto.getRefferal())) dto.setRefferal(dto.getRefferal());
                 }
                 mappa.put(cpm.getRefferal(), num + 1);
+
                 // setto a gestito
                 CpmBusiness.setRead(cpm.getId());
+
+                // TODO SE PESANTE EVENTUALEMNTE TOLGO
+                // aggiorno dati CPM
+                Cpm cpmm = repository.findById(cpm.getId()).orElseThrow(() -> new ElementCleveradException("CPM", cpm.getId()));
+                if (cpm.getRefferal().equals("{{refferalId}}")) {
+                    cpmm.setRefferal("");
+                } else {
+                    Refferal refferal = referralService.decodificaReferral(cpm.getRefferal());
+                    if (refferal != null) {
+                        if (refferal.getMediaId() != null) {
+                            cpmm.setMediaId(refferal.getMediaId());
+                        }
+                        if (refferal.getCampaignId() != null) {
+                            cpmm.setCampaignId(refferal.getCampaignId());
+                        }
+                        if (refferal.getAffiliateId() != null) {
+                            cpmm.setAffiliateId(refferal.getAffiliateId());
+                        }
+                        if (refferal.getChannelId() != null) {
+                            cpmm.setChannelId(refferal.getChannelId());
+                        }
+                        if (refferal.getTargetId() != null) {
+                            cpmm.setTargetId(refferal.getTargetId());
+                        }
+                    }
+                }
+                repository.save(cpmm);
             });
 
             mappa.forEach((x, aLong) -> {
@@ -166,20 +202,15 @@ public class ManageCPM {
                             }
                         }
 
-                        // decremento budget Campagna
-                        RevenueFactor rff = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 50L);
-                        if (rff != null && rff.getRevenue() != null) {
-                            Double totaleDaDecurtare = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 50L).getRevenue() * aLong;
-                            Double budgetCampagna = campaignDTO.getBudget() - totaleDaDecurtare;
-                            campaignBusiness.updateBudget(campaignDTO.getId(), budgetCampagna);
-
-                            // setto stato transazione a ovebudget editore se totale < 0
-                            if (budgetCampagna < 0) {
-                                transaction.setDictionaryId(48L);
-                            }
+                        // Stato Budget Campagna
+                        CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(refferal.getCampaignId(), transaction.getDateTime().toLocalDate()).stream().findFirst().orElse(null);
+                        Double budgetCampagna = campBudget.getBudgetErogato() - totale;
+                        // setto stato transazione a ovebudget editore se totale < 0
+                        if (budgetCampagna < 0) {
+                            transaction.setDictionaryId(48L);
                         }
 
-                        //setto APPROVATO
+                        //setto APPROVATO - sempre per i CPM
                         transaction.setStatusId(73L);
 
                         // creo la transazione

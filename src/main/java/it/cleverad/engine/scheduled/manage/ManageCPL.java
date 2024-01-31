@@ -9,10 +9,7 @@ import it.cleverad.engine.persistence.repository.service.CommissionRepository;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.persistence.repository.tracking.CplRepository;
 import it.cleverad.engine.service.ReferralService;
-import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
-import it.cleverad.engine.web.dto.AffiliateBudgetDTO;
-import it.cleverad.engine.web.dto.CampaignDTO;
-import it.cleverad.engine.web.dto.TransactionCPLDTO;
+import it.cleverad.engine.web.dto.*;
 import it.cleverad.engine.web.dto.tracking.CpcDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.extern.slf4j.Slf4j;
@@ -87,9 +84,8 @@ public class ManageCPL {
                             cplDTO.setCpcId(cpcDTO.getId());
                         });
                 Long idCpc = cplDTO.getCpcId();
-                log.trace("Refferal :: {} con ID CPC {}", cplDTO.getRefferal(),idCpc);
+                log.trace("Refferal :: {} con ID CPC {}", cplDTO.getRefferal(), idCpc);
                 cplBusiness.setCpcId(cplDTO.getId(), idCpc);
-
                 // prendo reffereal e lo leggo
                 Refferal refferal = referralService.decodificaReferral(cplDTO.getRefferal());
 
@@ -103,6 +99,10 @@ public class ManageCPL {
                     cccpl.setAffiliateId(refferal.getAffiliateId());
                     cccpl.setChannelId(refferal.getChannelId());
                     cccpl.setTargetId(refferal.getTargetId());
+                    if (cccpl.getData().equals("[REPLACE]")) {
+                        cccpl.setData("");
+                        cplDTO.setData("");
+                    }
                     cplRepository.save(cccpl);
 
                     // setta transazione
@@ -206,28 +206,13 @@ public class ManageCPL {
                             }
                         }
 
-                        // decremento budget Campagna
-                        if (campaignDTO != null) {
-
-                            Double budgetCampagna = campaignDTO.getBudget() - totale;
-                            campaignBusiness.updateBudget(campaignDTO.getId(), budgetCampagna);
-
-                            // setto stato transazione a ovebudget editore se totale < 0
-                            if (budgetCampagna < 0) {
-                                transaction.setDictionaryId(48L);
-                            }
+                        // Stato Budget Campagna
+                        CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(refferal.getCampaignId(), transaction.getDateTime().toLocalDate()).stream().findFirst().orElse(null);
+                        Double budgetCampagna = campBudget.getBudgetErogato() - totale;
+                        // setto stato transazione a ovebudget editore se totale < 0
+                        if (budgetCampagna < 0) {
+                            transaction.setDictionaryId(48L);
                         }
-
-//                        if (totale > 0) {
-//                            // trovo CampaignBudget
-//                            CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(campaignDTO.getId(), LocalDateTime.now());
-//                            if (cb != null) {
-//                                //incremento budget erogato
-//                                campaignBudgetBusiness.incrementoBudgetErogato(cb.getId(), totale);
-//                                // incremento cap
-//                                campaignBudgetBusiness.incrementoCapErogato(cb.getId(), 1);
-//                            }
-//                        }
 
                         //setto pending
                         transaction.setStatusId(72L);

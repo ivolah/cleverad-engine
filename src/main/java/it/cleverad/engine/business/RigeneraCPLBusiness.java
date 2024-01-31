@@ -59,6 +59,8 @@ public class RigeneraCPLBusiness {
     private CommissionRepository commissionRepository;
     @Autowired
     private TransactionCPLBusiness transactionCPLBusiness;
+    @Autowired
+    private CampaignBudgetBusiness campaignBudgetBusiness;
 
     public void rigenera(Integer anno, Integer mese, Integer giorno, Long affiliateId, Long camapignId) {
         try {
@@ -231,14 +233,9 @@ public class RigeneraCPLBusiness {
                                 }
                             }
 
-                            // decremento budget Campagna
-                            double budgetCampagna = campaignDTO.getBudget() - totale;
-                            campaignBusiness.updateBudget(campaignDTO.getId(), budgetCampagna);
-
                             // setto stato transazione a ovebudget editore se totale < 0
-                            if (budgetCampagna < 0) {
-                                transaction.setDictionaryId(48L);
-                            }
+                            CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(camapignId, cplDTO.getDate().toLocalDate()).stream().findFirst().orElse(null);
+                            if (campBudget.getBudgetErogato() - totale < 0) transaction.setDictionaryId(48L);
 
                             if (cccpl.getBlacklisted() != null && cccpl.getBlacklisted()) transaction.setStatusId(74L);
                             else transaction.setStatusId(72L);

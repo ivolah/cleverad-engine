@@ -46,7 +46,7 @@ public class CampaignBudgetBusiness {
     @Autowired
     private Mapper mapper;
 
-    public static double calculateMedian(Page<CampaignBudget> page, String fieldName) {
+    private static double calculateMedian(Page<CampaignBudget> page, String fieldName) {
 
         double[] pp = page.getContent().stream().mapToDouble(entity -> {
             try {
@@ -86,8 +86,7 @@ public class CampaignBudgetBusiness {
         map.setCanali(dictionaryRepository.findById(request.canaleId).orElseThrow(() -> new ElementCleveradException("Dictionary-canale", request.canaleId)));
         map.setStatus(true);
         map.setBudgetIniziale(DoubleRounder.round(request.getPayout() * request.capIniziale, 2));
-        if (request.getScarto() == null)
-            map.setScarto(0D);
+        if (request.getScarto() == null) map.setScarto(0D);
         return CampaignBudgetDTO.from(repository.save(map));
     }
 
@@ -139,12 +138,7 @@ public class CampaignBudgetBusiness {
     // SEARCH PAGINATED
     public Page<CampaignBudgetDTO> search(Filter request, Pageable pageableRequest) {
 
-        Sort sort = Sort.by(
-                Sort.Order.desc("campaignStatus"),
-                Sort.Order.asc("advertiserName"),
-                Sort.Order.asc("plannerName"),
-                Sort.Order.asc("campaignName")
-        );
+        Sort sort = Sort.by(Sort.Order.desc("campaignStatus"), Sort.Order.asc("advertiserName"), Sort.Order.asc("plannerName"), Sort.Order.asc("campaignName"));
 
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), sort);
         request.setStatus(true);
@@ -158,7 +152,7 @@ public class CampaignBudgetBusiness {
         return newPage.map(CampaignBudgetDTO::from);
     }
 
-    public CampaignBudget calculateTotalsForDoubleFields(Page<CampaignBudget> page) {
+    private CampaignBudget calculateTotalsForDoubleFields(Page<CampaignBudget> page) {
         CampaignBudget campaignBudget = new CampaignBudget();
         campaignBudget.setCapIniziale(getIntegerFieldValue(page, "capIniziale"));
         campaignBudget.setCapErogato(getIntegerFieldValue(page, "capErogato"));
@@ -194,55 +188,47 @@ public class CampaignBudgetBusiness {
         campaignBudget.setFatturato(getFieldValue(page, "fatturato"));
         campaignBudget.setStatus(null);
         campaignBudget.setPrenotato(null);
+
         return campaignBudget;
     }
 
     // Helper method to get field value by field name using Reflection
     private double getFieldValue(Page<CampaignBudget> page, String fieldName) {
-        return page.getContent().stream()
-                .mapToDouble(entity -> {
-                    Field field = null;
-                    try {
-                        field = CampaignBudget.class.getDeclaredField(fieldName);
-                        field.setAccessible(true);
-                        Object value = field.get(entity);
-                        if (value instanceof Double) {
-                            return (Double) value;
-                        }
-                    } catch (NoSuchFieldException | IllegalAccessException e) {
-                        throw new RuntimeException(e);
-                    }
-                    return 0.0;
-                })
-                .sum();
+        return page.getContent().stream().mapToDouble(entity -> {
+            Field field = null;
+            try {
+                field = CampaignBudget.class.getDeclaredField(fieldName);
+                field.setAccessible(true);
+                Object value = field.get(entity);
+                if (value instanceof Double) {
+                    return (Double) value;
+                }
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+            return 0.0;
+        }).sum();
     }
 
     private Integer getIntegerFieldValue(Page<CampaignBudget> page, String fieldName) {
-        return page.getContent().stream()
-                .mapToInt(entity -> {
-                    Field field = null;
-                    try {
-                        field = CampaignBudget.class.getDeclaredField(fieldName);
-                        field.setAccessible(true);
-                        Object value = field.get(entity);
-                        if (value instanceof Integer) {
-                            return (Integer) value;
-                        }
-                    } catch (NoSuchFieldException | IllegalAccessException e) {
-                        throw new RuntimeException(e);
-                    }
-                    return 0;
-                })
-                .sum();
+        return page.getContent().stream().mapToInt(entity -> {
+            Field field = null;
+            try {
+                field = CampaignBudget.class.getDeclaredField(fieldName);
+                field.setAccessible(true);
+                Object value = field.get(entity);
+                if (value instanceof Integer) {
+                    return (Integer) value;
+                }
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+            return 0;
+        }).sum();
     }
 
     public Page<CampaignBudgetDTO> searchByCampaignID(Long campaignId, Pageable pageableRequest) {
-        Sort sort = Sort.by(
-                Sort.Order.desc("campaignStatus"),
-                Sort.Order.asc("advertiserName"),
-                Sort.Order.asc("plannerName"),
-                Sort.Order.asc("campaignName")
-        );
+        Sort sort = Sort.by(Sort.Order.desc("campaignStatus"), Sort.Order.asc("advertiserName"), Sort.Order.asc("plannerName"), Sort.Order.asc("campaignName"));
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), sort);
         Filter request = new Filter();
         request.setCampaignId(campaignId);
@@ -251,18 +237,23 @@ public class CampaignBudgetBusiness {
     }
 
     public Page<CampaignBudgetDTO> searchAttivi() {
-        Sort sort = Sort.by(
-                Sort.Order.desc("campaignStatus"),
-                Sort.Order.asc("advertiserName"),
-                Sort.Order.asc("plannerName"),
-                Sort.Order.asc("campaignName")
-        );
+        Sort sort = Sort.by(Sort.Order.desc("campaignStatus"), Sort.Order.asc("advertiserName"), Sort.Order.asc("plannerName"), Sort.Order.asc("campaignName"));
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, sort);
         Filter request = new Filter();
         request.setStatus(true);
         Page<CampaignBudget> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CampaignBudgetDTO::from);
     }
+
+    public Page<CampaignBudgetDTO> searchByCampaignAndDate(Long campaignId, LocalDate date) {
+        Filter request = new Filter();
+        request.setCampaignId(campaignId);
+        request.setStartDateFrom(date);
+        request.setEndDateTo(date);
+        Page<CampaignBudget> page = repository.findAll(getSpecification(request), PageRequest.ofSize(Integer.MAX_VALUE));
+        return page.map(CampaignBudgetDTO::from);
+    }
+
 
     /**
      * ============================================================================================================
@@ -331,6 +322,7 @@ public class CampaignBudgetBusiness {
         private Double payout;
         private Double budgetIniziale;
         private Integer capErogato;
+        private Integer capVolume;
         private Double capPc;
         private Double budgetErogato;
         private Double commissioniErogate;
@@ -348,9 +340,9 @@ public class CampaignBudgetBusiness {
         private Double fatturato;
         private Boolean status;
         private Long id;
-        private Double volume;
+        private Integer volume;
         private LocalDate volumeDate;
-        private Double volumeDelta;
+        private Integer volumeDelta;
     }
 
     @Data
@@ -380,6 +372,7 @@ public class CampaignBudgetBusiness {
         private Double payout;
         private Double budgetIniziale;
         private Integer capErogato;
+        private Integer capVolume;
         private Double capPc;
         private Double budgetErogato;
         private Double commissioniErogate;
@@ -415,7 +408,7 @@ public class CampaignBudgetBusiness {
         private Boolean statoPagato;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate invoiceDueDate;
-        private Double volume;
+        private Integer volume;
         private LocalDate volumeDate;
     }
 

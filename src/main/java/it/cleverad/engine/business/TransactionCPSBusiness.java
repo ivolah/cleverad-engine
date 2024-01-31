@@ -67,8 +67,6 @@ public class TransactionCPSBusiness {
     private DictionaryRepository dictionaryRepository;
     @Autowired
     private AffiliateBudgetBusiness affiliateBudgetBusiness;
-    @Autowired
-    private CampaignBusiness campaignBusiness;
 
     /**
      * ============================================================================================================
@@ -168,31 +166,20 @@ public class TransactionCPSBusiness {
 
     public void deletel(Long id) {
         try {
-                TransactionCPSDTO dto = this.findByIdCPS(id);
+            TransactionCPSDTO dto = this.findByIdCPS(id);
 
-                // aggiorno budget affiliato
-                AffiliateBudgetDTO budgetAff = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
-                if (budgetAff != null) {
-                    affiliateBudgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
-                }
+            // aggiorno budget affiliato
+            AffiliateBudgetDTO budgetAff = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
+            if (budgetAff != null) {
+                affiliateBudgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
+            }
 
-                // aggiorno budget campagna
-                campaignBusiness.updateBudget(dto.getCampaignId(), campaignBusiness.findById(dto.getCampaignId()).getBudget() + dto.getValue());
+            // aggiorno budget campagna in modo schedualto
+            // aggiorno wallet in modo schedulato
+            // aggiorno campaign buget in modo schedualto
 
-                // aggiorno wallet
-                Long wallerID = walletBusiness.findByIdAffilaite(dto.getAffiliateId()).stream().findFirst().get().getId();
-                walletBusiness.decrement(wallerID, dto.getValue());
-
-//                if (dto.getValue() > 0D) {
-//                    CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(dto.getCampaignId(), dto.getDateTime());
-//                    if (cb != null) {
-                // campaignBudgetBusiness.decreaseCapErogatoOnDeleteTransaction(cb.getId(), Math.toIntExact(cb.getCapErogato() - dto.get));
-//                        campaignBudgetBusiness.decreaseBudgetErogatoOnDeleteTransaction(cb.getId(), cb.getBudgetErogato() - dto.getValue());
-//                    }
-//                }
-
-                //cancello
-                cpsRepository.deleteById(id);
+            //cancello
+            cpsRepository.deleteById(id);
         } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {

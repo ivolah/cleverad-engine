@@ -9,8 +9,9 @@ import it.cleverad.engine.persistence.model.tracking.Cpc;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.tracking.CpcRepository;
 import it.cleverad.engine.service.ReferralService;
-import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.dto.AffiliateBudgetDTO;
+import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
+import it.cleverad.engine.web.dto.CampaignBudgetDTO;
 import it.cleverad.engine.web.dto.TransactionCPCDTO;
 import it.cleverad.engine.web.dto.tracking.CpcDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -43,7 +44,6 @@ public class RigeneraCPCBusiness {
     private CpcBusiness cpcBusiness;
     @Autowired
     private CpcRepository repository;
-
     @Autowired
     private TransactionCPCBusiness transactionCPCBusiness;
     @Autowired
@@ -51,18 +51,15 @@ public class RigeneraCPCBusiness {
     @Autowired
     private AffiliateBudgetBusiness affiliateBudgetBusiness;
     @Autowired
-    private CampaignBusiness campaignBusiness;
+    private CampaignBudgetBusiness campaignBudgetBusiness;
     @Autowired
     private RevenueFactorBusiness revenueFactorBusiness;
     @Autowired
     private AffiliateChannelCommissionCampaignBusiness affiliateChannelCommissionCampaignBusiness;
     @Autowired
     private ReferralService referralService;
-
     @Autowired
     private CampaignRepository campaignRepository;
-//    @Autowired
-//    private TransactionAllBusiness transactionAllBusiness;
 
     public void rigenera(Integer anno, Integer mese, Integer giorno, Long affiliateId, Long campaignId) {
 
@@ -283,12 +280,9 @@ public class RigeneraCPCBusiness {
                                         }
                                     }
 
-                                    // decremento budget Campagna
-                                    Double budgetCampagna = campaign.getBudget() - totale;
-                                    campaignBusiness.updateBudget(campaign.getId(), budgetCampagna);
-
                                     // setto stato transazione a ovebudget editore se totale < 0
-                                    if (budgetCampagna < 0) transaction.setDictionaryId(48L);
+                                    CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(campaignId, data).stream().findFirst().orElse(null);
+                                    if (campBudget.getBudgetErogato() - totale < 0) transaction.setDictionaryId(48L);
 
                                     // commissione scaduta
                                     if (accc != null && accc.getCommissionDueDate() != null && accc.getCommissionDueDate().isBefore(data))

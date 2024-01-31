@@ -38,6 +38,7 @@ public class CampaignBudgetDTO {
     private Double payout;
     private Double budgetIniziale;
     private Integer capErogato;
+    private Integer capVolume;
     private Double capPc;
     private Double budgetErogato;
     private Double commissioniErogate;
@@ -58,14 +59,12 @@ public class CampaignBudgetDTO {
     private Boolean statoPagato;
     private LocalDate invoiceDueDate;
 
-    private Double volume;
+    private Integer volume;
     private LocalDate volumeDate;
-    private Double volumeDelta;
+    private Integer volumeDelta;
 
     private List<FileCampaignBudgetInvoiceDTO> fileCampaignBudgetInvoices;
     private List<FileCampaignBudgetOrderDTO> fileCampaignBudgetOrders;
-
-
 
     public static CampaignBudgetDTO from(CampaignBudget campaignBudget) {
 
@@ -110,6 +109,7 @@ public class CampaignBudgetDTO {
                 campaignBudget.getPayout(),
                 campaignBudget.getBudgetIniziale(),
                 campaignBudget.getCapErogato(),
+                campaignBudget.getCapVolume(),
                 campaignBudget.getCapPc(),
                 campaignBudget.getBudgetErogato(),
                 campaignBudget.getCommissioniErogate(),

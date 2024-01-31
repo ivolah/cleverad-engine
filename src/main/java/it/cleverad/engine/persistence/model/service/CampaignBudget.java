@@ -63,6 +63,8 @@ public class CampaignBudget {
 
     @Column(name = "cap_erogato")
     private Integer capErogato;
+    @Column(name = "cap_volume")
+    private Integer capVolume;
 
     @Column(name = "cap_pc")
     private Double capPc;
@@ -113,11 +115,11 @@ public class CampaignBudget {
     @Column(name = "invoice_due_date")
     private LocalDate invoiceDueDate;
 
-    private Double volume;
+    private Integer volume;
     @Column(name = "volume_date")
     private LocalDate volumeDate;
     @Column(name = "volume_delta")
-    private Double volumeDelta;
+    private Integer volumeDelta;
 
     @OneToMany(mappedBy = "campaignBudget")
     private Set<FileCampaignBudgetInvoice> fileCampaignBudgetInvoices;
