@@ -282,7 +282,9 @@ public class RigeneraCPCBusiness {
 
                                     // setto stato transazione a ovebudget editore se totale < 0
                                     CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(campaignId, data).stream().findFirst().orElse(null);
-                                    if (campBudget.getBudgetErogato() - totale < 0) transaction.setDictionaryId(48L);
+                                    if (campBudget != null && campBudget.getBudgetErogato() != null)
+                                        if (campBudget.getBudgetErogato() - totale < 0)
+                                            transaction.setDictionaryId(48L);
 
                                     // commissione scaduta
                                     if (accc != null && accc.getCommissionDueDate() != null && accc.getCommissionDueDate().isBefore(data))

@@ -235,7 +235,8 @@ public class RigeneraCPLBusiness {
 
                             // setto stato transazione a ovebudget editore se totale < 0
                             CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(camapignId, cplDTO.getDate().toLocalDate()).stream().findFirst().orElse(null);
-                            if (campBudget.getBudgetErogato() - totale < 0) transaction.setDictionaryId(48L);
+                            if (campBudget != null && campBudget.getBudgetErogato() != null)
+                                if (campBudget.getBudgetErogato() - totale < 0) transaction.setDictionaryId(48L);
 
                             if (cccpl.getBlacklisted() != null && cccpl.getBlacklisted()) transaction.setStatusId(74L);
                             else transaction.setStatusId(72L);
