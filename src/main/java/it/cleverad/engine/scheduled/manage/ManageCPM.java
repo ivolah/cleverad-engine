@@ -31,6 +31,8 @@ import java.util.stream.Collectors;
 public class ManageCPM {
 
     @Autowired
+    CampaignBudgetBusiness campaignBudgetBusiness;
+    @Autowired
     private CpmBusiness CpmBusiness;
     @Autowired
     private CpmRepository repository;
@@ -50,8 +52,6 @@ public class ManageCPM {
     private RevenueFactorBusiness revenueFactorBusiness;
     @Autowired
     private ReferralService referralService;
-    @Autowired
-    CampaignBudgetBusiness campaignBudgetBusiness;
 
     /**
      * ============================================================================================================
@@ -204,10 +204,12 @@ public class ManageCPM {
 
                         // Stato Budget Campagna
                         CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(refferal.getCampaignId(), transaction.getDateTime().toLocalDate()).stream().findFirst().orElse(null);
-                        Double budgetCampagna = campBudget.getBudgetErogato() - totale;
-                        // setto stato transazione a ovebudget editore se totale < 0
-                        if (budgetCampagna < 0) {
-                            transaction.setDictionaryId(48L);
+                        if (campBudget != null && campBudget.getBudgetErogato() != null) {
+                            Double budgetCampagna = campBudget.getBudgetErogato() - totale;
+                            // setto stato transazione a ovebudget editore se totale < 0
+                            if (budgetCampagna < 0) {
+                                transaction.setDictionaryId(48L);
+                            }
                         }
 
                         //setto APPROVATO - sempre per i CPM
