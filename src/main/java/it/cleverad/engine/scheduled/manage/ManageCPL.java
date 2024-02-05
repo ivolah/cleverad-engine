@@ -154,7 +154,7 @@ public class ManageCPL {
                         Double commVal = 0D;
                         Long commissionId = 0L;
                         AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
-                        if (StringUtils.isNotBlank(cplDTO.getActionId())) {
+                        if (StringUtils.isNotBlank(cplDTO.getActionId()) && !cplDTO.getActionId().equals(0)) {
                             // con action Id settanto in cpl vado a cercare la commissione associata
                             req.setAffiliateId(refferal.getAffiliateId());
                             req.setChannelId(refferal.getChannelId());
@@ -170,7 +170,7 @@ public class ManageCPL {
                             req.setAffiliateId(refferal.getAffiliateId());
                             req.setChannelId(refferal.getChannelId());
                             req.setCampaignId(refferal.getCampaignId());
-                            req.setCommissionDicId(11L);
+                            req.setCommissionDicId(11L); // CPL
                             AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
                             if (acccFirst != null) {
                                 commVal = acccFirst.getCommissionValue();

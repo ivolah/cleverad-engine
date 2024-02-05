@@ -17,6 +17,32 @@
     <properties>
         <java.version>11</java.version>
     </properties>
+
+
+    <profiles>
+
+        <profile>
+            <id>service</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <env>service</env>
+                <profile>service</profile>
+                <spring.datasource.tracking.url>jdbc:postgresql://57.128.74.119:5432/tracking</spring.datasource.tracking.url>
+            </properties>
+        </profile>
+        <profile>
+            <id>test</id>
+            <properties>
+                <env>test</env>
+                <profile>test</profile>
+                <spring.datasource.tracking.url>jdbc:postgresql://localhost:5432/tracking</spring.datasource.tracking.url>
+            </properties>
+        </profile>
+
+    </profiles>
+
     <dependencies>
 
         <!--SPRING WEB -->
@@ -34,7 +60,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
-<!--            <optional>true</optional>-->
+            <!--            <optional>true</optional>-->
         </dependency>
 
         <!-- PERSISTENCE -->
@@ -90,7 +116,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20230227</version>
+            <version>20231013</version>
         </dependency>
 
         <!-- SPRING SECURITY-->
@@ -131,7 +157,7 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>3.14.9</version>
+            <version>4.10.0-RC1</version>
         </dependency>
 
         <!-- GSON -->
@@ -148,29 +174,26 @@
             <version>1.0.3</version>
         </dependency>
 
-        <!-- MARIA DB -->
-<!--        <dependency>-->
-<!--            <groupId>org.mariadb.jdbc</groupId>-->
-<!--            <artifactId>mariadb-java-client</artifactId>-->
-<!--            <version>3.2.0</version>-->
-<!--        </dependency>-->
-
     </dependencies>
 
     <build>
+
+        <filters>
+            <filter>src/main/resources/application-${env}.properties</filter>
+        </filters>
+
+        <!-- Map ${} into resources -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>*.properties</include>
+                </includes>
+            </resource>
+        </resources>
+
         <plugins>
-<!--            <plugin>-->
-<!--                <groupId>org.springframework.boot</groupId>-->
-<!--                <artifactId>spring-boot-maven-plugin</artifactId>-->
-<!--                <configuration>-->
-<!--                    <excludes>-->
-<!--                        <exclude>-->
-<!--                            <groupId>org.projectlombok</groupId>-->
-<!--                            <artifactId>lombok</artifactId>-->
-<!--                        </exclude>-->
-<!--                    </excludes>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

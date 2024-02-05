@@ -62,13 +62,19 @@ public class TrackingBusiness {
         Refferal refferal = referralService.decodificaReferral(request.getRefferalId());
 
         if (refferal != null && refferal.getMediaId() != null) {
-            MediaDTO mediaDTO = mediaBusiness.findById(refferal.getMediaId());
-            targetDTO.setTarget(mediaDTO.getTarget());
+            MediaDTO mediaDTO = null;
+            if (mediaBusiness.findById(refferal.getMediaId()) != null) {
+                mediaDTO = mediaBusiness.findById(refferal.getMediaId());
+                targetDTO.setTarget(mediaDTO.getTarget());
+            }
+
             targetDTO.setMediaId(refferal.getMediaId());
 
-            Long cID = mediaDTO.getCampaignId();
-            if (cID != null) {
-                targetDTO.setCookieTime(campaignBusiness.findById(cID).getCookieValue());
+            if (mediaDTO != null) {
+                Long cID = mediaDTO.getCampaignId();
+                if (cID != null) {
+                    targetDTO.setCookieTime(campaignBusiness.findById(cID).getCookieValue());
+                }
             } else {
                 targetDTO.setCookieTime("60");
             }

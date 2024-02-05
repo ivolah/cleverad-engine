@@ -2,10 +2,7 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.config.security.JwtUserDetailsService;
-import it.cleverad.engine.persistence.model.service.Affiliate;
-import it.cleverad.engine.persistence.model.service.RevenueFactor;
-import it.cleverad.engine.persistence.model.service.TransactionCPM;
-import it.cleverad.engine.persistence.model.service.Wallet;
+import it.cleverad.engine.persistence.model.service.*;
 import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.web.dto.AffiliateBudgetDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
@@ -31,16 +28,16 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 @Transactional
 public class TransactionCPMBusiness {
 
-    @Autowired
-    CampaignBudgetBusiness campaignBudgetBusiness;
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
     @Autowired
@@ -57,8 +54,6 @@ public class TransactionCPMBusiness {
     private CampaignRepository campaignRepository;
     @Autowired
     private WalletRepository walletRepository;
-    @Autowired
-    private WalletBusiness walletBusiness;
     @Autowired
     private ChannelRepository channelRepository;
     @Autowired
@@ -178,7 +173,7 @@ public class TransactionCPMBusiness {
         }
     }
 
-    public void delete(Long id, String type) {
+    public void delete(Long id) {
         try {
             TransactionCPMDTO dto = this.findByIdCPM(id);
 
@@ -223,7 +218,32 @@ public class TransactionCPMBusiness {
     public Page<DictionaryDTO> getTypes() {
         return dictionaryBusiness.getTransactionTypes();
     }
+    
+    
+    //    >>>>>>>>> RICERCE PER RIGENERAZIONE
+    public List<TransactionCPM> searchStatusIdAndDateNotManual(Long statusId, LocalDate dataDaGestireStart, LocalDate dataDaGestireEnd, Long affiliateId, Long campaignId) {
+        TransactionCPMBusiness.Filter request = new TransactionCPMBusiness.Filter();
+        request.setDateTimeFrom(dataDaGestireStart.atStartOfDay());
+        request.setDateTimeTo(LocalDateTime.of(dataDaGestireEnd, LocalTime.MAX));
+        request.setStatusId(statusId);
+        List<Long> not = new ArrayList<>();
+        not.add(68L);
+        request.setNotInId(not);
+        request.setAffiliateId(affiliateId);
+        request.setCampaignId(campaignId);
+        return cpmRepository.findAll(getSpecificationCPM(request), Pageable.ofSize(Integer.MAX_VALUE)).stream().collect(Collectors.toList());
+    }
 
+    public List<TransactionCPM> searchStatusIdAndDicIdAndDate(Long statusId, Long dicId, LocalDate dataDaGestireStart, LocalDate dataDaGestireEnd, Long affiliateId, Long campaignId) {
+        TransactionCPMBusiness.Filter request = new TransactionCPMBusiness.Filter();
+        request.setDateTimeFrom(dataDaGestireStart.atStartOfDay());
+        request.setDateTimeTo(LocalDateTime.of(dataDaGestireEnd, LocalTime.MAX));
+        request.setStatusId(statusId);
+        request.setDictionaryId(dicId);
+        request.setAffiliateId(affiliateId);
+        request.setCampaignId(campaignId);
+        return cpmRepository.findAll(getSpecificationCPM(request), Pageable.ofSize(Integer.MAX_VALUE)).stream().collect(Collectors.toList());
+    }
     /**
      * ============================================================================================================
      **/

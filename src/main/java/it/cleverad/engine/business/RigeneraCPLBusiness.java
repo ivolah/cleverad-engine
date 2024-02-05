@@ -78,15 +78,17 @@ public class RigeneraCPLBusiness {
             request.setCreationDateFrom(dataDaGestireStart);
             request.setCreationDateTo(dataDaGestireEnd);
             request.setTipo("CPL");
-            request.setAffiliateId(affiliateId);
-            request.setCampaignId(camapignId);
+            if (affiliateId != null)
+                request.setAffiliateId(affiliateId);
+            if (camapignId != null)
+                request.setCampaignId(camapignId);
             List<Long> not = new ArrayList<>();
             not.add(68L); // MANUALE
             request.setNotInDictionaryId(not);
             not = new ArrayList<>();
             not.add(74L); // RIGETTATO
             request.setNotInStatusId(not);
-
+            log.info(request.toString());
             Page<TransactionStatusDTO> ls = transactionAllBusiness.searchPrefiltratoInterno(request);
             log.info(">>> TOT :: " + ls.getTotalElements());
 
@@ -188,7 +190,7 @@ public class RigeneraCPLBusiness {
                             Double commVal = 0D;
                             Long commissionId = 0L;
                             AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
-                            if (StringUtils.isNotBlank(cplDTO.getActionId())) {
+                            if (StringUtils.isNotBlank(cplDTO.getActionId()) && !cplDTO.getActionId().equals(0)) {
                                 // con action Id settanto in cpl vado a cercare la commissione associata
                                 req.setAffiliateId(refferal.getAffiliateId());
                                 req.setChannelId(refferal.getChannelId());
@@ -210,7 +212,7 @@ public class RigeneraCPLBusiness {
                                     commVal = acccFirst.getCommissionValue();
                                     commissionId = acccFirst.getCommissionId();
                                 } else
-                                    log.warn("Non trovato Commission di tipo 10 per campagna {}, setto default", refferal.getCampaignId());
+                                    log.warn("No Commission CPL C: {} e A: {}, setto default ({})", refferal.getCampaignId(), refferal.getAffiliateId(), cplDTO.getRefferal());
                             }
                             transaction.setCommissionId(commissionId);
 

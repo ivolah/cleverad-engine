@@ -103,12 +103,16 @@ public class MediaBusiness {
 
     // GET BY ID
     public MediaDTO findById(Long id) {
-        Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Media", id));
-        MediaDTO dto = MediaDTO.from(media);
-        if (dto.getTypeId() != null) {
-            MediaTypeDTO mtDto = mediaTypeBusiness.findById(dto.getTypeId());
-            dto.setTypeName(mtDto.getName());
-            dto.setBannerCode(generaBannerCode(dto, media.getId(), id, 0L, 0L));
+//        Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Media", id));
+        Media media = repository.findById(id).orElse(null);
+        MediaDTO dto = null;
+        if (media != null) {
+            dto = MediaDTO.from(media);
+            if (dto.getTypeId() != null) {
+                MediaTypeDTO mtDto = mediaTypeBusiness.findById(dto.getTypeId());
+                dto.setTypeName(mtDto.getName());
+                dto.setBannerCode(generaBannerCode(dto, media.getId(), id, 0L, 0L));
+            }
         }
         return dto;
     }

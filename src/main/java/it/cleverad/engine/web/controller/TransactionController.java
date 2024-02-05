@@ -95,7 +95,7 @@ public class TransactionController {
     @DeleteMapping("/{id}/cpm")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void deleteCpm(@PathVariable Long id) {
-        this.transactionCPMBusiness.delete(id, "cpm");
+        this.transactionCPMBusiness.delete(id);
     }
 
     //SEARCH BY CAPAOIGN ID

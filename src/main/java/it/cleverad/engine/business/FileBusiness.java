@@ -1,6 +1,5 @@
 package it.cleverad.engine.business;
 
-import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.File;
 import it.cleverad.engine.persistence.model.service.Media;
 import it.cleverad.engine.persistence.repository.service.FileRepository;
@@ -123,7 +122,9 @@ public class FileBusiness {
             if (mm != null) {
                 Long mediaId = mm.getId();
                 // trovo campaignID
-                Long campaignId = mediaBusiness.findById(mediaId).getCampaignId();
+                Long campaignId = 0L;
+                if (mediaBusiness.findById(mediaId) != null)
+                    campaignId = mediaBusiness.findById(mediaId).getCampaignId();
                 String stringa = referralService.encode(String.valueOf(campaignId)) + "-" + referralService.encode(String.valueOf(mediaId));
                 FileDTO dto = FileDTO.from(ele);
                 dto.setNomeCodificato(stringa);

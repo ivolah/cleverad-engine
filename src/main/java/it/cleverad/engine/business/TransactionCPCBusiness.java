@@ -120,7 +120,11 @@ public class TransactionCPCBusiness {
             log.error("ECCEZIONE statusId  - " + ex.getMessage(), ex);
         }
         if (request.mediaId != null) try {
-            newCpcTransaction.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
+            Media media = mediaRepository.findById(request.mediaId).orElse(null);
+            if (media != null)
+                newCpcTransaction.setMedia(media);
+            else
+                log.warn("ATTENZIONE !!! Media con id {} non trovato!!", request.mediaId);
         } catch (Exception ex) {
             log.error("ECCEZIONE MEDIA  - " + ex.getMessage(), ex);
         }
@@ -250,7 +254,7 @@ public class TransactionCPCBusiness {
     }
 
     public TransactionCPCDTO findByIdCPCInterno(Long id) {
-        return TransactionCPCDTO.from( cpcRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id)));
+        return TransactionCPCDTO.from(cpcRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id)));
     }
 
     // SEARCH PAGINATED
@@ -277,22 +281,22 @@ public class TransactionCPCBusiness {
         request.setDateTimeFrom(now.withDayOfMonth(1).atStartOfDay());
         request.setDateTimeTo(LocalDateTime.of(now.withDayOfMonth(now.lengthOfMonth()), LocalTime.MAX));
         request.setValueNotZero(true);
-        ArrayList  not = new ArrayList<>();
+        ArrayList not = new ArrayList<>();
         not.add(74L); // RIGETTATO
         request.setNotInStatusId(not);
-        return cpcRepository.findAll(getSpecificationCPC(request), PageRequest.of(0,Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")))).stream().collect(Collectors.toList());
+        return cpcRepository.findAll(getSpecificationCPC(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")))).stream().collect(Collectors.toList());
     }
 
-    public List<TransactionCPC> searchForCampaignBudget(Long id, LocalDate from, LocalDate to)  {
+    public List<TransactionCPC> searchForCampaignBudget(Long id, LocalDate from, LocalDate to) {
         TransactionCPCBusiness.Filter request = new TransactionCPCBusiness.Filter();
         request.setCampaignId(id);
         request.setDateTimeFrom(from.atStartOfDay());
         request.setDateTimeTo(LocalDateTime.of((to), LocalTime.MAX));
         request.setValueNotZero(true);
-        ArrayList  not = new ArrayList<>();
+        ArrayList not = new ArrayList<>();
         not.add(74L); // RIGETTATO
         request.setNotInStatusId(not);
-        return cpcRepository.findAll(getSpecificationCPC(request), PageRequest.of(0,Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")))).stream().collect(Collectors.toList());
+        return cpcRepository.findAll(getSpecificationCPC(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")))).stream().collect(Collectors.toList());
     }
 
     public Page<DictionaryDTO> getTypes() {
@@ -337,7 +341,7 @@ public class TransactionCPCBusiness {
     public List<TransactionCPC> searchLastModified() {
         TransactionCPCBusiness.Filter request = new TransactionCPCBusiness.Filter();
         request.setValueNotZero(true);
-        ArrayList  not = new ArrayList<>();
+        ArrayList not = new ArrayList<>();
         not.add(74L); // RIGETTATO
         request.setNotInStatusId(not);
         request.setLastModificationDateTimeFrom(LocalDateTime.now().minusHours(24));
@@ -470,6 +474,7 @@ public class TransactionCPCBusiness {
         public List<Long> notInId;
         public List<Long> statusIdIn;
         public List<Long> dictionaryIdIn;
+        public List<Long> notInStatusId;
         private Long id;
         private Long affiliateId;
         private Long campaignId;
@@ -502,8 +507,6 @@ public class TransactionCPCBusiness {
         private LocalDateTime lastModificationDateTimeFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDateTime lastModificationDateTimeTo;
-
-        public List<Long> notInStatusId;
     }
 
     @Data

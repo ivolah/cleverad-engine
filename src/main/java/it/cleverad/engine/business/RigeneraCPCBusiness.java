@@ -30,9 +30,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -61,6 +64,19 @@ public class RigeneraCPCBusiness {
     @Autowired
     private CampaignRepository campaignRepository;
 
+    private long TIME_THRESHOLD = 60000;
+    private Map<String, Instant> ipTimestampMap = new HashMap<>();
+
+    private boolean isSuspiciousRequest(String ipAddress) {
+        Instant currentTime = Instant.now();
+        return ipTimestampMap.compute(ipAddress, (key, lastTimestamp) -> {
+            if (lastTimestamp != null && currentTime.toEpochMilli() - lastTimestamp.toEpochMilli() < TIME_THRESHOLD) {
+                return lastTimestamp; // Suspicious request
+            }
+            return currentTime;
+        }) != currentTime;
+    }
+
     public void rigenera(Integer anno, Integer mese, Integer giorno, Long affiliateId, Long campaignId) {
 
         int start = (giorno == null) ? 1 : giorno;
@@ -87,8 +103,25 @@ public class RigeneraCPCBusiness {
             Cpc cccp = repository.findById(clickMultipli.getId()).orElseThrow(() -> new ElementCleveradException("Cpc", clickMultipli.getId()));
             cccp.setRead(true);
             cccp.setBlacklisted(true);
+            cccp.setMultiple(true);
             repository.save(cccp);
         });
+
+        // cerco IP vicini tra quelli non già blacklisted
+        //       Page<CpcDTO> listaIpDaVerificare = cpcBusiness.getListaNotBlacklisted(dataDaGestireStart, dataDaGestireEnd);
+//        List<String> ips = listaIpDaVerificare.stream().map(cpcDTO -> cpcDTO.getIp()).distinct().collect(Collectors.toList();
+//        ips.stream().filter(this::isSuspiciousRequest).forEach(ipAddress -> {
+//            // Additional logic for handling suspicious requests
+//            log.info("Suspicious request from near IP address: " + ipAddress);
+//            // You can add more actions here, such as blocking the IP or logging the request.
+//        });
+//
+//        listaIpDaVerificare.stream().forEach(cpcDTO -> {
+//            String ip = cpcDTO.getIp();
+//
+//
+//        });
+
 
         // ==========================================================================================================================================
         // ==========================================================================================================================================
@@ -141,7 +174,6 @@ public class RigeneraCPCBusiness {
             // trovo tutti i refferal
             List<Triple> triples = new ArrayList<>();
             day.stream().filter(dto -> dto.getRefferal() != null).forEach(cpcDTO -> {
-                log.trace("|>>>>>>| " + cpcDTO.getRefferal());
                 // gestisco i refferal troppo corti
                 if (cpcDTO.getRefferal().length() < 5) {
                     // cerco da cpc
@@ -152,31 +184,25 @@ public class RigeneraCPCBusiness {
                 }
 
                 //gestisco i casi dove i dati non sono tutti valorizzati
-                //if (StringUtils.isNotBlank(cpcDTO.getRefferal()) && cpcDTO.getCampaignId() == null) {
                 Cpc cccp = repository.findById(cpcDTO.getId()).get();
                 if (cpcDTO.getRefferal().equals("{{refferalId}}")) {
-                    log.trace(" <<<< REFERRAL VUOTO >>>>>> " + cpcDTO.getRefferal());
                     cccp.setRefferal("");
                 } else {
                     Refferal refferal = referralService.decodificaReferral(cpcDTO.getRefferal());
-                    if (refferal != null && refferal.getMediaId() != null) {
-                        cccp.setMediaId(refferal.getMediaId());
+                    if (refferal != null) {
+                        if (refferal.getMediaId() != null)
+                            cccp.setMediaId(refferal.getMediaId());
+                        if (refferal.getCampaignId() != null)
+                            cccp.setCampaignId(refferal.getCampaignId());
+                        if (refferal.getAffiliateId() != null)
+                            cccp.setAffiliateId(refferal.getAffiliateId());
+                        if (refferal.getChannelId() != null)
+                            cccp.setChannelId(refferal.getChannelId());
+                        if (refferal.getTargetId() != null)
+                            cccp.setTargetId(refferal.getTargetId());
                     }
-                    if (refferal != null && refferal.getCampaignId() != null) {
-                        cccp.setCampaignId(refferal.getCampaignId());
-                    }
-                    if (refferal != null && refferal.getAffiliateId() != null) {
-                        cccp.setAffiliateId(refferal.getAffiliateId());
-                    }
-                    if (refferal != null && refferal.getChannelId() != null) {
-                        cccp.setChannelId(refferal.getChannelId());
-                    }
-                    if (refferal != null && refferal.getTargetId() != null) {
-                        cccp.setTargetId(refferal.getTargetId());
-                    }
+                    repository.save(cccp);
                 }
-                repository.save(cccp);
-                //}
 
                 Triple<Long, Long, Long> triple = new ImmutableTriple<>(cpcDTO.getCampaignId(), cpcDTO.getAffiliateId(), cpcDTO.getChannelId());
                 triples.add(triple);
@@ -247,17 +273,15 @@ public class RigeneraCPCBusiness {
                                     req.setChannelId(channelID);
                                     req.setCampaignId(campaignId);
                                     req.setCommissionDicId(10L);
-                                    log.trace("------------------ " + req.toString());
 
                                     AffiliateChannelCommissionCampaignDTO accc = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
                                     if (accc != null) {
                                         log.trace(accc.getCommissionId() + " " + accc.getCommissionValue());
                                         commVal = accc.getCommissionValue();
                                         transaction.setCommissionId(accc.getCommissionId());
-
                                     } else {
-                                        log.info("COMMISSION = 0");
                                         transaction.setCommissionId(0L);
+                                        log.trace("Transazione a commissione 0 : {} ", req.toString());
                                     }
 
                                     // calcolo valore
@@ -306,7 +330,6 @@ public class RigeneraCPCBusiness {
                                 transaction.setStatusId(statusID);
 
                                 // creo la transazione
-                                log.trace(">>>>>> " + transaction.toString());
                                 TransactionCPCDTO tcpc = transactionCPCBusiness.createCpc(transaction);
                                 log.trace(">>>RI-CLICK :: {} - {}-{} = {}", tcpc.getId(), campaignId, affiliateId, transaction.getClickNumber());
 

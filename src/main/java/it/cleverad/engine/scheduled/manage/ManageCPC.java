@@ -25,6 +25,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -39,6 +40,10 @@ public class ManageCPC {
 
     @Autowired
     CampaignBudgetBusiness campaignBudgetBusiness;
+    /**
+     * ============================================================================================================
+     **/
+
     @Autowired
     private CpcBusiness cpcBusiness;
     @Autowired
@@ -60,6 +65,9 @@ public class ManageCPC {
     @Autowired
     private CampaignRepository campaignRepository;
 
+    long TIME_THRESHOLD = 60000 * 60; // Time threshold in milliseconds (e.g., 1 minute)
+    Map<String, Instant> ipTimestampMap = new HashMap<>();
+
     /**
      * ============================================================================================================
      **/
@@ -68,7 +76,7 @@ public class ManageCPC {
     @Async
     public void gestiusciTransazioni() {
 
-        // Setto a  Blacklisted i click mulipli
+        // Setto a  Blacklisted + Multiple i click mulipli
         List<ClickMultipli> listaDaDisabilitare = cpcBusiness.getListaClickMultipliDaDisabilitare(LocalDate.now(), LocalDate.now());
         // giro settaggio click multipli
         listaDaDisabilitare.stream().forEach(clickMultipli -> {
@@ -76,8 +84,12 @@ public class ManageCPC {
             Cpc cccp = repository.findById(clickMultipli.getId()).orElseThrow(() -> new ElementCleveradException("Cpc", clickMultipli.getId()));
             cccp.setRead(false);
             cccp.setBlacklisted(true);
+            cccp.setMultiple(true);
             repository.save(cccp);
         });
+
+        // cerco gli ip vicini
+
 
         // GESTICO I CLICK E CREO TRANSAZIONE
         trasformaTrackingCPC();
@@ -86,10 +98,6 @@ public class ManageCPC {
         gestisciBlacklisted();
 
     }
-
-    /**
-     * ============================================================================================================
-     **/
 
     public void trasformaTrackingCPC() {
 

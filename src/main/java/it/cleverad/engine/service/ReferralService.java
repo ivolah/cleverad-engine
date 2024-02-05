@@ -15,9 +15,7 @@ public class ReferralService {
     public Refferal decodificaReferral(String refferalString) {
         if (StringUtils.isNotBlank(refferalString) && !refferalString.contains("{{refferalId}}")) {
             Refferal refferal = new Refferal();
-
             refferal.setRefferal(refferalString);
-
             Boolean continua = true;
 
             String[] tokens = refferalString.split("-");
@@ -66,7 +64,6 @@ public class ReferralService {
             } catch (Exception cc) {
                 log.warn("Eccezione token 4 :: {}", cc);
             }
-
             return refferal;
         }
         return null;
