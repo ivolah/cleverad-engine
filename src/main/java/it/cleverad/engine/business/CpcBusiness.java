@@ -174,6 +174,15 @@ public class CpcBusiness {
         return page.map(CpcDTO::from);
     }
 
+    public Page<CpcDTO> getListaNotBlacklisted(LocalDate dateFrom, LocalDate dateTo) {
+        Filter request = new Filter();
+        request.setBlacklisted(false);
+        request.setDatetimeFrom(dateFrom.atStartOfDay());
+        request.setDatetimeTo(dateTo.atTime(LocalTime.MAX));
+        Page<Cpc> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
+        return page.map(CpcDTO::from);
+    }
+
     public Page<CpcDTO> findByIp24HoursBefore(String ip, LocalDateTime dateTime, String referral) {
         Filter request = new Filter();
         request.setIp(ip);

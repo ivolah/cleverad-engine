@@ -2,16 +2,18 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.config.model.Refferal;
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.Channel;
+import it.cleverad.engine.persistence.model.tracking.Cpc;
 import it.cleverad.engine.persistence.model.tracking.Cpm;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.ChannelRepository;
 import it.cleverad.engine.persistence.repository.tracking.CpmRepository;
-import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.service.ReferralService;
+import it.cleverad.engine.web.dto.tracking.CpcDTO;
 import it.cleverad.engine.web.dto.tracking.CpmDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -173,18 +175,18 @@ public class CpmBusiness {
         Filter request = new Filter();
         request.setRead(false);
         request.setBlacklisted(false);
-        LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
-        request.setDatetimeFrom(oraSpaccata.toLocalDate().atStartOfDay());
+        request.setDatetimeFrom(LocalDate.now().atStartOfDay());
         request.setDatetimeTo(LocalDateTime.now());
         Page<Cpm> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id"))));
         return page.map(CpmDTO::from);
     }
 
-    public Page<CpmDTO> getAllDayBefore() {
+    public Page<CpmDTO> getAllDaysBefore() {
         Filter request = new Filter();
-        request.setDatetimeFrom(LocalDate.now().minusDays(1).atStartOfDay());
-        // request.setDatetimeTo(LocalDate.now().minusDays(1).atStartOfDay().plusHours(1));
-        request.setDatetimeTo(LocalDate.now().minusDays(1).atStartOfDay().plusHours(24));
+        request.setRead(false);
+        request.setBlacklisted(false);
+        request.setDatetimeFrom(LocalDate.now().atStartOfDay().minusHours(6));
+        request.setDatetimeTo(LocalDate.now().atStartOfDay());
         Page<Cpm> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id"))));
         return page.map(CpmDTO::from);
     }
@@ -199,6 +201,17 @@ public class CpmBusiness {
         return page.map(CpmDTO::from);
     }
 
+    public Page<CpmDTO> findByIp24HoursBefore(String ip, LocalDateTime dateTime, String referral) {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal")));
+        Filter request = new Filter();
+        request.setIp(ip);
+        request.setDatetimeFrom(dateTime.minusHours(24));
+        request.setDatetimeTo(dateTime);
+        request.setRefferal(referral);
+        Page<Cpm> page = repository.findAll(getSpecification(request), pageable);
+        return page.map(CpmDTO::from);
+    }
+
     public Page<CpmDTO> getUnreadBlacklisted() {
         CpmBusiness.Filter request = new CpmBusiness.Filter();
         request.setRead(false);
@@ -206,6 +219,16 @@ public class CpmBusiness {
         LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
         request.setDatetimeFrom(oraSpaccata.toLocalDate().atStartOfDay().minusHours(3));
         request.setDatetimeTo(LocalDateTime.now());
+        Page<Cpm> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
+        return page.map(CpmDTO::from);
+    }
+
+    public Page<CpmDTO> getAllByDay(LocalDate dataFrom, LocalDate datato, Boolean blacklisted) {
+        CpmBusiness.Filter request = new CpmBusiness.Filter();
+        request.setDateFrom(dataFrom);
+        request.setDateTo(datato);
+        request.setBlacklisted(blacklisted);
+        request.setRead(false);
         Page<Cpm> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(CpmDTO::from);
     }
@@ -277,6 +300,7 @@ public class CpmBusiness {
         private Long id;
         private Long campaignid;
         private Long imageId;
+        private Long channelId;
         private Long mediaId;
         private String refferal;
         private String ip;

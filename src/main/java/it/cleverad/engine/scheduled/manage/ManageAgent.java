@@ -31,7 +31,7 @@ public class ManageAgent {
     private CpsBusiness cpsBusiness;
 
     @Async
-    @Scheduled(cron = "3 3 3 * * ?")
+//    @Scheduled(cron = "3 3 3 * * ?")
     public void aggiornaStato() {
         log.info("AGGIORNAMENTO QUOTIDIANO -- AGENT");
         UserAgentAnalyzer uaa = UserAgentAnalyzer.newBuilder().hideMatcherLoadStats().withCache(10000).build();
@@ -44,11 +44,11 @@ public class ManageAgent {
         });
 
         // inserisco info Agent CPM
-        cpmBusiness.getAllDayBefore().stream().filter(dto -> dto.getRefferal() != null).forEach(dto -> {
-            // valorizzo agent
-            if (StringUtils.isNotBlank(dto.getAgent()))
-                this.generaAgent(uaa.parse(dto.getAgent()), dto.getRefferal(), "CPM");
-        });
+//        cpmBusiness.darivederegetAllDaysBefore().stream().filter(dto -> dto.getRefferal() != null).forEach(dto -> {
+//            // valorizzo agent
+//            if (StringUtils.isNotBlank(dto.getAgent()))
+//                this.generaAgent(uaa.parse(dto.getAgent()), dto.getRefferal(), "CPM");
+//        });
 
         // inserisco info Agent CPL
         cplBusiness.getAllDayBefore().stream().filter(dto -> dto.getRefferal() != null).forEach(dto -> {

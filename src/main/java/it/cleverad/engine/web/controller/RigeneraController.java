@@ -2,6 +2,7 @@ package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.RigeneraCPCBusiness;
 import it.cleverad.engine.business.RigeneraCPLBusiness;
+import it.cleverad.engine.business.RigeneraCPMBusiness;
 import it.cleverad.engine.service.WalletService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,8 @@ public class RigeneraController {
     @Autowired
     private RigeneraCPLBusiness rigeneraCPLBusiness;
     @Autowired
+    private RigeneraCPMBusiness rigeneraCPMBusiness;
+    @Autowired
     private WalletService rigeneraWalletService;
 
     /**
@@ -28,13 +31,19 @@ public class RigeneraController {
     @PostMapping("/cpl")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void manageCPL(@ModelAttribute RigeneraCPLBusiness.FilterUpdate request) {
-        rigeneraCPLBusiness.rigenera(request.getYear(), request.getMonth(),request.getDay(), request.getAffiliateId(), request.getCampaignId());
+        rigeneraCPLBusiness.rigenera(request.getYear(), request.getMonth(), request.getDay(), request.getAffiliateId(), request.getCampaignId());
     }
 
     @PostMapping("/cpc")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void manageCPC(@ModelAttribute RigeneraCPCBusiness.FilterUpdate request) {
         rigeneraCPCBusiness.rigenera(request.getYear(), request.getMonth(), request.getDay(), request.getAffiliateId(), request.getCampaignId());
+    }
+
+    @PostMapping("/cpm")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void manageCPM(@ModelAttribute RigeneraCPMBusiness.FilterUpdate request) {
+        rigeneraCPMBusiness.rigenera(request.getYear(), request.getMonth(), request.getDay());
     }
 
     /**

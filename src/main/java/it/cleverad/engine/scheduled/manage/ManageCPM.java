@@ -7,23 +7,24 @@ import it.cleverad.engine.persistence.model.tracking.Cpm;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.persistence.repository.tracking.CpmRepository;
 import it.cleverad.engine.service.ReferralService;
-import it.cleverad.engine.web.dto.*;
+import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
+import it.cleverad.engine.web.dto.CampaignBudgetDTO;
+import it.cleverad.engine.web.dto.CampaignDTO;
+import it.cleverad.engine.web.dto.TransactionCPMDTO;
 import it.cleverad.engine.web.dto.tracking.CpmDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -41,10 +42,6 @@ public class ManageCPM {
     @Autowired
     private WalletRepository walletRepository;
     @Autowired
-    private WalletBusiness walletBusiness;
-    @Autowired
-    private AffiliateBudgetBusiness affiliateBudgetBusiness;
-    @Autowired
     private CampaignBusiness campaignBusiness;
     @Autowired
     private AffiliateChannelCommissionCampaignBusiness affiliateChannelCommissionCampaignBusiness;
@@ -57,10 +54,11 @@ public class ManageCPM {
      * ============================================================================================================
      **/
 
-    @Scheduled(cron = "10 */10 * * * ?")
+    @Scheduled(cron = "12 0/8 * * * ?")
     @Async
     public void gestisciTransazioni() {
-        trasformaTrackingCPM();
+        trasformaTrackingCPM(true);
+        //  trasformaTrackingCPM(false);
         gestisciBlacklisted();
     }
 
@@ -68,13 +66,22 @@ public class ManageCPM {
      * ============================================================================================================
      **/
 
-    public void trasformaTrackingCPM() {
+    public void trasformaTrackingCPM(boolean today) {
         try {
 
             // trovo tutti i tracking con read == false
             Map<String, Integer> mappa = new HashMap<>();
-            Page<CpmDTO> last = CpmBusiness.getUnreadHourBefore();
+            List<Long> lstaID = new ArrayList<>();
+            List<CpmDTO> last;
+            if (today)
+                last = CpmBusiness.getUnreadHourBefore().getContent();
+            else
+                last = CpmBusiness.getAllDaysBefore().getContent();
 
+            log.trace("MANAGE CPM TOT {}", last.size());
+            last = last.stream().limit(20000).collect(Collectors.toList());
+
+            List<Triple> triples = new ArrayList<>();
             last.stream().filter(cpmDTO -> cpmDTO.getRefferal() != null).forEach(cpm -> {
 
                 // gestisco calcolatore
@@ -89,8 +96,8 @@ public class ManageCPM {
                 }
                 mappa.put(cpm.getRefferal(), num + 1);
 
-                // setto a gestito
-                CpmBusiness.setRead(cpm.getId());
+                Triple<LocalDate, String, Integer> triple = new ImmutableTriple<>(cpm.getDate().toLocalDate(), cpm.getRefferal(), num + 1);
+                triples.add(triple);
 
                 // TODO SE PESANTE EVENTUALEMNTE TOLGO
                 // aggiorno dati CPM
@@ -117,6 +124,8 @@ public class ManageCPM {
                         }
                     }
                 }
+                lstaID.add(cpm.getId());
+
                 repository.save(cpmm);
             });
 
@@ -187,28 +196,15 @@ public class ManageCPM {
                         transaction.setValue(totale);
                         transaction.setImpressionNumber(Long.valueOf(aLong));
 
-                        // incemento valore
-                        if (walletID != null && totale > 0D) walletBusiness.incement(walletID, totale);
-
-                        // decremento budget Affiliato
-                        AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
-                        if (bb != null && bb.getBudget() != null) {
-                            Double totBudgetDecrementato = bb.getBudget() - totale;
-                            affiliateBudgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
-
-                            // setto stato transazione a ovebudget editore se totale < 0
-                            if (totBudgetDecrementato < 0) {
-                                transaction.setDictionaryId(47L);
-                            }
-                        }
-
                         // Stato Budget Campagna
-                        CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(refferal.getCampaignId(), transaction.getDateTime().toLocalDate()).stream().findFirst().orElse(null);
-                        if (campBudget != null && campBudget.getBudgetErogato() != null) {
-                            Double budgetCampagna = campBudget.getBudgetErogato() - totale;
-                            // setto stato transazione a ovebudget editore se totale < 0
-                            if (budgetCampagna < 0) {
-                                transaction.setDictionaryId(48L);
+                        if (totale > 0) {
+                            CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(refferal.getCampaignId(), transaction.getDateTime().toLocalDate()).stream().findFirst().orElse(null);
+                            if (campBudget != null && campBudget.getBudgetErogato() != null) {
+                                Double budgetCampagna = campBudget.getBudgetErogato() - totale;
+                                // setto stato transazione a ovebudget editore se totale < 0
+                                if (budgetCampagna < 0) {
+                                    transaction.setDictionaryId(48L);
+                                }
                             }
                         }
 
@@ -217,11 +213,14 @@ public class ManageCPM {
 
                         // creo la transazione
                         TransactionCPMDTO tcpm = transactionCPMBusiness.createCpm(transaction);
-                        log.trace(">>> CREATO TRANSAZIONE :::: CPM :::: {}", tcpm.getId());
+                        //  log.info(">>> CREATO TRANSAZIONE :::: CPM :::: {}", tcpm.getId());
                     }
 
                 }// refferal not null
             });
+
+            // setto a gestito
+            lstaID.forEach(aLong -> CpmBusiness.setRead(aLong));
 
         } catch (Exception e) {
             log.error("Eccezione Scheduler Cpm --  {}", e.getMessage(), e);
