@@ -54,7 +54,7 @@ public class CampaignBudgetService {
 
             // >>>>>>>>>>>>>>>>>>> CPL
             List<TransactionCPL> cpls = transactionCPLBusiness.searchForCampaignBudget(dto.getCampaignId(), dto.getStartDate(), dto.getEndDate());
-            log.info("NUMERO TRANS CPL {} :: {} ({})", dto.getCampaignId(), cpls.size(), dto.getCapIniziale());
+            log.trace("NUMERO TRANS CPL {} :: {} ({})", dto.getCampaignId(), cpls.size(), dto.getCapIniziale());
             for (TransactionCPL cpl : cpls) {
                 // tolgo limite cap if (capErogato < dto.getCapIniziale()) {
                 capErogato += 1;
@@ -68,7 +68,7 @@ public class CampaignBudgetService {
 
             // >>>>>>>>>>>>>>>>>>> CPC
             List<TransactionCPC> cpcs = transactionCPCBusiness.searchForCampaignBudget(dto.getCampaignId(), dto.getStartDate(), dto.getEndDate());
-            log.info("NUMERO TRANS CPC {} :: {} ({})", dto.getCampaignId(), cpcs.size(), dto.getCapIniziale());
+            log.trace("NUMERO TRANS CPC {} :: {} ({})", dto.getCampaignId(), cpcs.size(), dto.getCapIniziale());
             for (TransactionCPC cpc : cpcs) {
                 // tolgo limite cap if (capErogato < dto.getCapIniziale()) {
                 capErogato += cpc.getClickNumber().intValue();
