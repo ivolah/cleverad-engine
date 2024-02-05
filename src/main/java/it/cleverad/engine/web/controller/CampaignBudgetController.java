@@ -3,6 +3,7 @@ package it.cleverad.engine.web.controller;
 import it.cleverad.engine.business.CampaignBudgetBusiness;
 import it.cleverad.engine.business.FileCampaignBudgetBusiness;
 import it.cleverad.engine.web.dto.CampaignBudgetDTO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @CrossOrigin
 @RestController
 @RequestMapping(value = "/campaignbudget")
@@ -43,6 +45,7 @@ public class CampaignBudgetController {
     @PatchMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public CampaignBudgetDTO update(@PathVariable Long id, @RequestBody CampaignBudgetBusiness.Update request) {
+        log.info(">>> " + request);
         return business.update(id, request);
     }
 
@@ -101,7 +104,7 @@ public class CampaignBudgetController {
     @DeleteMapping("/{id}/invoice")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void deleteIvoice(@PathVariable Long id) {
-        this.fileCampaignBudgetBusiness.delete(id,"INVOICE");
+        this.fileCampaignBudgetBusiness.delete(id, "INVOICE");
     }
 
     @DeleteMapping("/{id}/order")

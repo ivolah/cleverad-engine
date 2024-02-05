@@ -92,10 +92,13 @@ public class CampaignBudgetBusiness {
 
     // UPDATE
     public CampaignBudgetDTO update(Long id, Update filter) {
+        log.info("-- {}",filter);
         CampaignBudget budget = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id));
         mapper.map(filter, budget);
         budget.setStatus(true);
         budget.setBudgetIniziale(DoubleRounder.round(filter.getPayout() * filter.capIniziale, 2));
+
+        log.info("---{}",budget);
         return CampaignBudgetDTO.from(repository.save(budget));
     }
 
@@ -395,6 +398,7 @@ public class CampaignBudgetBusiness {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @ToString
     public static class Update {
         private Boolean prenotato;
         private Integer capIniziale;
