@@ -1,14 +1,9 @@
 package it.cleverad.engine.business;
 
 import it.cleverad.engine.config.security.JwtUserDetailsService;
-import it.cleverad.engine.persistence.model.service.TopCampagneCPM;
 import it.cleverad.engine.persistence.model.service.WidgetCampaignDayCpl;
-import it.cleverad.engine.persistence.model.service.WidgetCampaignDayCpm;
-import it.cleverad.engine.persistence.model.service.WidgetCampaignDayCps;
+import it.cleverad.engine.persistence.repository.service.TransactionCPLRepository;
 import it.cleverad.engine.persistence.repository.service.WidgetCampaignDayCplRepository;
-import it.cleverad.engine.persistence.repository.service.WidgetCampaignDayCpmRepository;
-import it.cleverad.engine.persistence.repository.service.WidgetCampaignDayCpsRepository;
-import it.cleverad.engine.persistence.repository.service.WidgetTopCPMRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -41,7 +36,8 @@ public class StatCPLBusiness {
 
     @Autowired
     private WidgetCampaignDayCplRepository widgetCampaignDayCplRepository;
-
+    @Autowired
+    private TransactionCPLRepository repository;
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
 
@@ -52,42 +48,22 @@ public class StatCPLBusiness {
      **/
 
     public String getStatTotaleDayCpl(Filter request) {
-
-        request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 6);
-        request.setYear((long) LocalDate.now().getYear());
-        if (!jwtUserDetailsService.isAdmin()) request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-        List<WidgetCampaignDayCpl> tutto = widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")))
-        ).stream().collect(Collectors.toList());
-
-        Set<Long> doys = tutto.stream().map(WidgetCampaignDayCpl::getDoy).collect(Collectors.toSet());
-        Set<Long> doysDaVerificare = new HashSet<>();
-        if (!doys.isEmpty() && doys.size() > 0)
-            for (Long i = doys.stream().min(Long::compareTo).get(); i <= doys.stream().max(Long::compareTo).get(); i++)
-                doysDaVerificare.add(i);
-
-        LocalDate today = LocalDate.now();
         JSONObject mainObj = new JSONObject();
-        JSONArray harej = new JSONArray();
+        JSONArray data = new JSONArray();
         JSONArray xSeries = new JSONArray();
-        doysDaVerificare.stream().sorted().forEach(gg -> {
-            Double dd = 0D;
-            Filter filter = new Filter();
-            filter.setDoy(gg);
-            if (!jwtUserDetailsService.isAdmin()) filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-            List<WidgetCampaignDayCpl> giornato = widgetCampaignDayCplRepository.findAll(getSpecificationCampaignDayCpl(filter), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
-            for (WidgetCampaignDayCpl w : giornato) {
-                dd = dd + 1;
-            }
-            xSeries.put(today.withDayOfYear(Math.toIntExact(gg)).toString());
-            harej.put(dd);
-        });
 
-        Double totale = 0D;
-        for (Object o : harej) {
-            totale += (Double) o;
+        for (int i = 6; i >= 0; i--) {
+            Long nu = repository.totaleGiorno(i).get(0).gettotale();
+            data.put(nu);
+            xSeries.put(LocalDate.now().minusDays(i).toString());
         }
+
+        Long totale = 0L;
+        for (Object tot : data)
+            totale += (Long) tot;
+
         mainObj.put("totale", totale);
-        mainObj.put("data", harej);
+        mainObj.put("data", data);
         mainObj.put("xSeries", xSeries);
 
         return mainObj.toString();

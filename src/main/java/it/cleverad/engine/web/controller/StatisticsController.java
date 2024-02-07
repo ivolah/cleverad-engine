@@ -42,8 +42,8 @@ public class StatisticsController {
 
     @GetMapping(path = "/cpc/campaign/day/total")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public String getStatTotaleDayCpc(StatCPCBusiness.Filter request) {
-        return statCPCBusiness.getStatTotaleDayCpc(request);
+    public String getStatTotaleDayCpc() {
+        return statCPCBusiness.getStatTotaleDayCpc();
     }
 
     @GetMapping(path = "/cpc/campaign/day")
@@ -76,17 +76,25 @@ public class StatisticsController {
      * ============================================================================================================
      **/
 
+    @GetMapping(path = "/cpm/campaign/day/widget")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public String getStatCpmDayWidget() {
+        return statCPMBusiness.getWidgetCampaignsDayCpm();
+    }
+
+    @GetMapping(path = "/cpm/campaign/day/total")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public String getStatTotaleDayCpm(StatCPMBusiness.Filter request) {
+        return statCPMBusiness.getStatTotaleDayCpm();
+    }
+
     @GetMapping(path = "/cpm/top")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<WidgetCampaignDayCpm> getStatTopCpm() {
         return statCPMBusiness.getTopCampaignsDayCpm();
     }
 
-    @GetMapping(path = "/cpm/campaign/day/total")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public String getStatTotaleDayCpm(StatCPMBusiness.Filter request) {
-        return statCPMBusiness.getStatTotaleDayCpm(request);
-    }
+
 
     @GetMapping(path = "/cpm/campaign/day")
     @ResponseStatus(HttpStatus.ACCEPTED)
@@ -102,11 +110,6 @@ public class StatisticsController {
         return statCPMBusiness.getStatCampaignDayCpm(request, pageable);
     }
 
-    @GetMapping(path = "/cpm/campaign/day/widget")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public String getStatCpmDayWidget() {
-          return statCPMBusiness.getWidgetCampaignsDayCpm();
-    }
 
     /**
      * ============================================================================================================

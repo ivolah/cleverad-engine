@@ -1,6 +1,6 @@
 package it.cleverad.engine.persistence.model.service;
 
-public interface TopCampagneCPM {
+public interface TopCampagne {
     Long getcampaignid();
-    Long getimpression();
+    Long gettotale();
 }
