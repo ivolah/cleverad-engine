@@ -3,6 +3,7 @@ package it.cleverad.engine.web.controller;
 import it.cleverad.engine.business.RigeneraCPCBusiness;
 import it.cleverad.engine.business.RigeneraCPLBusiness;
 import it.cleverad.engine.business.RigeneraCPMBusiness;
+import it.cleverad.engine.service.AffiliaiteBudgetService;
 import it.cleverad.engine.service.WalletService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,8 @@ public class RigeneraController {
     private RigeneraCPMBusiness rigeneraCPMBusiness;
     @Autowired
     private WalletService rigeneraWalletService;
+    @Autowired
+    private AffiliaiteBudgetService affiliaiteBudgetService;
 
     /**
      * ============================================================================================================
@@ -54,6 +57,16 @@ public class RigeneraController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void wallet(@ModelAttribute WalletService.FilterUpdate request) {
         rigeneraWalletService.rigenera(request.getAffiliateId());
+    }
+
+    /**
+     * ============================================================================================================
+     **/
+
+    @PostMapping("/affiliatebudget")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void affiliateBudget(@ModelAttribute AffiliaiteBudgetService.FilterUpdate request) {
+        affiliaiteBudgetService.rigeneraAffiliateBudget(request.getYear(), request.getMonth(), request.getDay(), request.getAffiliateId(), request.getCampaignId());
     }
 
 }

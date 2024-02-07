@@ -36,8 +36,6 @@ public class ManageCPL {
     @Autowired
     private WalletRepository walletRepository;
     @Autowired
-    private WalletBusiness walletBusiness;
-    @Autowired
     private AffiliateBudgetBusiness affiliateBudgetBusiness;
     @Autowired
     private CampaignBusiness campaignBusiness;
@@ -184,23 +182,12 @@ public class ManageCPL {
                         transaction.setValue(DoubleRounder.round(totale, 2));
                         transaction.setLeadNumber(Long.valueOf(1));
 
-                        // incemento valore
-                        if (walletID != null && totale > 0D) walletBusiness.incement(walletID, totale);
+                        // incemento valore schedled
 
                         // decremento budget Affiliato
                         AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
                         if (bb != null && bb.getBudget() != null) {
-                            Double totBudgetDecrementato = bb.getBudget() - totale;
-                            affiliateBudgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
-
-                            // decremento cap affiliato
-                            Integer cap = bb.getCap() - 1;
-                            affiliateBudgetBusiness.updateCap(bb.getId(), cap);
-
-                            // setto stato transazione a ovebudget editore se totale < 0
-                            if (totBudgetDecrementato < 0) {
-                                transaction.setDictionaryId(47L);
-                            }
+                            if ((bb.getBudget() - totale) < 0) transaction.setDictionaryId(47L);
                         }
 
                         // Stato Budget Campagna

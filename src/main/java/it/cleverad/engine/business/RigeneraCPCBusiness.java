@@ -289,19 +289,13 @@ public class RigeneraCPCBusiness {
                                     transaction.setValue(totale);
                                     transaction.setClickNumber(totaleClick);
 
-                                    // incemento valore
-                                    if (walletID != null && totale > 0D) walletBusiness.incement(walletID, totale);
+                                    // incemento valore schedualto
 
                                     // decremento budget Affiliato
                                     AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(campaignId, affiliateId).stream().findFirst().orElse(null);
                                     if (bb != null && bb.getBudget() != null) {
-                                        Double totBudgetDecrementato = bb.getBudget() - totale;
-                                        affiliateBudgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
-
                                         // setto stato transazione a ovebudget editore se totale < 0
-                                        if (totBudgetDecrementato < 0) {
-                                            transaction.setDictionaryId(47L);
-                                        }
+                                        if ((bb.getBudget() - totale) < 0) transaction.setDictionaryId(47L);
                                     }
 
                                     // setto stato transazione a ovebudget editore se totale < 0

@@ -90,37 +90,32 @@ public class CpcBusiness {
 
     // SEARCH PAGINATED
     public Page<CpcDTO> searchWithReferral(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
-        Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
-        Page<CpcDTO> res = page.map(CpcDTO::from);
-        List<CpcDTO> exp = new ArrayList<>();
-        res.stream().forEach(cpcDTO -> {
-
-            if (cpcDTO.getCampaignId() != null) {
-                Campaign campaign = campaignRepository.findById(cpcDTO.getCampaignId()).orElse(null);
-                if (cpcDTO.getCampaignId() != null && campaign != null && campaign.getName() != null)
-                    cpcDTO.setCampaignName(campaign.getName());
-            }
-
-            if (cpcDTO.getAffiliateId() != null) {
-                Affiliate affiliate = affiliateRepository.findById(cpcDTO.getAffiliateId()).orElse(null);
-                if (cpcDTO.getAffiliateId() != null && affiliate != null && affiliate.getName() != null)
-                    cpcDTO.setAffiliateName(affiliate.getName());
-            }
-            if (cpcDTO.getChannelId() != null) {
-                Channel channel = channelRepository.findById(cpcDTO.getChannelId()).orElse(null);
-                if (cpcDTO.getChannelId() != null && channel != null && channel.getName() != null)
-                    cpcDTO.setChannelName(channel.getName());
-            }
-
-            if (Boolean.TRUE.equals(jwtUserDetailsService.isAdmin())) {
+        if (jwtUserDetailsService.isAdmin()) {
+            Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+            Page<CpcDTO> page = repository.findAll(getSpecification(request), pageable).map(CpcDTO::from);
+            List<CpcDTO> exp = new ArrayList<>();
+            page.stream().forEach(cpcDTO -> {
+                if (cpcDTO.getCampaignId() != null) {
+                    Campaign campaign = campaignRepository.findById(cpcDTO.getCampaignId()).orElse(null);
+                    if (cpcDTO.getCampaignId() != null && campaign != null && campaign.getName() != null)
+                        cpcDTO.setCampaignName(campaign.getName());
+                }
+                if (cpcDTO.getAffiliateId() != null) {
+                    Affiliate affiliate = affiliateRepository.findById(cpcDTO.getAffiliateId()).orElse(null);
+                    if (cpcDTO.getAffiliateId() != null && affiliate != null && affiliate.getName() != null)
+                        cpcDTO.setAffiliateName(affiliate.getName());
+                }
+                if (cpcDTO.getChannelId() != null) {
+                    Channel channel = channelRepository.findById(cpcDTO.getChannelId()).orElse(null);
+                    if (cpcDTO.getChannelId() != null && channel != null && channel.getName() != null)
+                        cpcDTO.setChannelName(channel.getName());
+                }
                 exp.add(cpcDTO);
-            } else if (!cpcDTO.getRefferal().equals("") && cpcDTO.getAffiliateId().equals(jwtUserDetailsService.getAffiliateID())) {
-                exp.add(cpcDTO);
-            }
-
-        });
-        return new PageImpl<CpcDTO>(exp, pageable, page.getTotalElements());
+            });
+            return new PageImpl<>(exp, pageable, page.getTotalElements());
+        } else {
+            return null;
+        }
     }
 
     // UPDATE
@@ -245,7 +240,7 @@ public class CpcBusiness {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
             if (request.getRefferal() != null) {
-                predicates.add(cb.like(cb.upper(root.get("refferal")), "%" + request.getRefferal().toUpperCase() + "%"));
+                predicates.add(cb.like(root.get("refferal"), "%" + request.getRefferal() + "%"));
             }
             if (request.getRead() != null) {
                 predicates.add(cb.equal(root.get("read"), request.getRead()));

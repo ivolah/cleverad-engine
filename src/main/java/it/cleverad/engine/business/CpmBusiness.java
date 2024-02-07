@@ -6,14 +6,12 @@ import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.Channel;
-import it.cleverad.engine.persistence.model.tracking.Cpc;
 import it.cleverad.engine.persistence.model.tracking.Cpm;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.ChannelRepository;
 import it.cleverad.engine.persistence.repository.tracking.CpmRepository;
 import it.cleverad.engine.service.ReferralService;
-import it.cleverad.engine.web.dto.tracking.CpcDTO;
 import it.cleverad.engine.web.dto.tracking.CpmDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -98,43 +96,34 @@ public class CpmBusiness {
     }
 
     public Page<CpmDTO> searchWithReferral(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
-        Page<Cpm> page = repository.findAll(getSpecification(request), pageable);
-        Page<CpmDTO> res = page.map(CpmDTO::from);
-        List<CpmDTO> exp = new ArrayList<>();
-        res.stream().forEach(cpm -> {
-            if (!cpm.getRefferal().contains("{{refferalId}}")) {
-                Refferal refferal = referralService.decodificaReferral(cpm.getRefferal());
+        if (jwtUserDetailsService.isAdmin()) {
+            Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+            Page<CpmDTO> page = repository.findAll(getSpecification(request), pageable).map(CpmDTO::from);
+            List<CpmDTO> exp = new ArrayList<>();
+            page.stream().forEach(cpm -> {
 
+                Refferal refferal = referralService.decodificaReferral(cpm.getRefferal());
                 Affiliate affiliate = affiliateRepository.findById(refferal.getAffiliateId()).orElse(null);
                 if (refferal.getAffiliateId() != null && affiliate != null && affiliate.getName() != null) {
                     cpm.setAffiliateName(affiliate.getName());
                     cpm.setAffiliateId(refferal.getAffiliateId());
                 }
-
                 Campaign campaign = campaignRepository.findById(refferal.getCampaignId()).orElse(null);
                 if (refferal.getCampaignId() != null && campaign != null && campaign.getName() != null) {
                     cpm.setCampaignName(campaign.getName());
                     cpm.setCampaignId(refferal.getCampaignId());
                 }
-
                 Channel channel = channelRepository.findById(refferal.getChannelId()).orElse(null);
                 if (refferal.getChannelId() != null && channel != null && channel.getName() != null) {
                     cpm.setChannelName(channel.getName());
                     cpm.setChannelId(refferal.getChannelId());
                 }
-            } else {
-                cpm.setRefferal("");
-            }
-
-            if (jwtUserDetailsService.isAdmin()) {
                 exp.add(cpm);
-            } else if (!cpm.getRefferal().equals("") && cpm.getAffiliateId().equals(jwtUserDetailsService.getAffiliateID())) {
-                exp.add(cpm);
-            }
-        });
-        Page<CpmDTO> pages = new PageImpl<CpmDTO>(exp, pageable, page.getTotalElements());
-        return pages;
+            });
+            return new PageImpl<>(exp, pageable, page.getTotalElements());
+        } else {
+            return null;
+        }
     }
 
     // UPDATE
@@ -245,7 +234,7 @@ public class CpmBusiness {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
             if (request.getRefferal() != null) {
-                predicates.add(cb.like(cb.upper(root.get("refferal")), "%" + request.getRefferal().toUpperCase() + "%"));
+                predicates.add(cb.like(root.get("refferal"), "%" + request.getRefferal() + "%"));
             }
             if (request.getRead() != null) {
                 predicates.add(cb.equal(root.get("read"), request.getRead()));

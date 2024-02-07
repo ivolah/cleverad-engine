@@ -10,7 +10,6 @@ import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.ChannelRepository;
 import it.cleverad.engine.persistence.repository.tracking.CplRepository;
-import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.tracking.CplDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -30,7 +29,6 @@ import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,8 +39,6 @@ public class CplBusiness {
 
     @Autowired
     private CplRepository repository;
-    @Autowired
-    private ReferralService referralService;
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
     @Autowired
@@ -91,39 +87,30 @@ public class CplBusiness {
     }
 
     public Page<CplDTO> searchWithReferral(CplBusiness.Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
-        Page<Cpl> page = repository.findAll(getSpecification(request), pageable);
-        Page<CplDTO> res = page.map(CplDTO::from);
-        List<CplDTO> exp = new ArrayList<>();
-        res.stream().forEach(cplDTO -> {
-
-            if (cplDTO.getCampaignId() != null) {
-                Campaign campaign = campaignRepository.findById(cplDTO.getCampaignId()).orElse(null);
-                if (campaign != null && campaign.getName() != null)
-                    cplDTO.setCampaignName(campaign.getName());
-            }
-
-            if (cplDTO.getAffiliateId() != null) {
-                Affiliate affiliate = affiliateRepository.findById(cplDTO.getAffiliateId()).orElse(null);
-                if (affiliate != null && affiliate.getName() != null)
-                    cplDTO.setAffiliateName(affiliate.getName());
-            }
-
-            if (cplDTO.getChannelId() != null) {
-                Channel channel = channelRepository.findById(cplDTO.getChannelId()).orElse(null);
-                if (cplDTO.getChannelId() != null && channel != null && channel.getName() != null)
-                    cplDTO.setChannelName(channel.getName());
-            }
-
-            if (jwtUserDetailsService.isAdmin()) {
+        if (jwtUserDetailsService.isAdmin()) {
+            Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
+            Page<CplDTO> page = repository.findAll(getSpecification(request), pageable).map(CplDTO::from);
+            List<CplDTO> exp = new ArrayList<>();
+            page.stream().parallel().forEach(cplDTO -> {
+                if (cplDTO.getCampaignId() != null) {
+                    Campaign campaign = campaignRepository.findById(cplDTO.getCampaignId()).orElse(null);
+                    if (campaign != null && campaign.getName() != null) cplDTO.setCampaignName(campaign.getName());
+                }
+                if (cplDTO.getAffiliateId() != null) {
+                    Affiliate affiliate = affiliateRepository.findById(cplDTO.getAffiliateId()).orElse(null);
+                    if (affiliate != null && affiliate.getName() != null) cplDTO.setAffiliateName(affiliate.getName());
+                }
+                if (cplDTO.getChannelId() != null) {
+                    Channel channel = channelRepository.findById(cplDTO.getChannelId()).orElse(null);
+                    if (cplDTO.getChannelId() != null && channel != null && channel.getName() != null)
+                        cplDTO.setChannelName(channel.getName());
+                }
                 exp.add(cplDTO);
-            } else if (!cplDTO.getRefferal().equals("") && cplDTO.getAffiliateId().equals(jwtUserDetailsService.getAffiliateID())) {
-                exp.add(cplDTO);
-            }
-
-        });
-        Page<CplDTO> pages = new PageImpl<CplDTO>(exp, pageable, page.getTotalElements());
-        return pages;
+            });
+            return new PageImpl<>(exp, pageable, page.getTotalElements());
+        } else {
+            return null;
+        }
     }
 
     // UPDATE
@@ -185,8 +172,7 @@ public class CplBusiness {
         Filter request = new Filter();
         request.setDateFrom(LocalDate.of(anno, mese, giorno));
         request.setDateTo(LocalDate.of(anno, mese, giorno));
-        if (affilaiteId != null)
-            request.setAffiliateid(affilaiteId);
+        if (affilaiteId != null) request.setAffiliateid(affilaiteId);
         Page<Cpl> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CplDTO::from);
     }
@@ -226,7 +212,7 @@ public class CplBusiness {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
             if (request.getRefferal() != null) {
-                predicates.add(cb.like(cb.upper(root.get("refferal")), "%" + request.getRefferal().toUpperCase() + "%"));
+                predicates.add(cb.like(root.get("refferal"), "%" + request.getRefferal() + "%"));
             }
             if (request.getRead() != null) {
                 predicates.add(cb.equal(root.get("read"), request.getRead()));

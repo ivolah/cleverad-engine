@@ -51,8 +51,6 @@ public class ManageCPC {
     @Autowired
     private WalletRepository walletRepository;
     @Autowired
-    private WalletBusiness walletBusiness;
-    @Autowired
     private AffiliateBudgetBusiness affiliateBudgetBusiness;
     @Autowired
     private RevenueFactorBusiness revenueFactorBusiness;
@@ -228,23 +226,13 @@ public class ManageCPC {
                         transaction.setValue(totale);
                         transaction.setClickNumber(Long.valueOf(numer));
 
-                        // incemento valore
-                        if (walletID != null && totale > 0D) walletBusiness.incement(walletID, totale);
+                        // incemento valore scheduled
 
                         // decremento budget Affiliato
                         AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(campaignId, affiliateId).stream().findFirst().orElse(null);
                         if (bb != null && bb.getBudget() != null) {
-                            Double totBudgetDecrementato = bb.getBudget() - totale;
-                            affiliateBudgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
-
-                            // decremento cap affiliato
-                            Integer cap = bb.getCap() - numer;
-                            affiliateBudgetBusiness.updateCap(bb.getId(), cap);
-
                             // setto stato transazione a ovebudget editore se totale < 0
-                            if (totBudgetDecrementato < 0) {
-                                transaction.setDictionaryId(47L);
-                            }
+                            if ((bb.getBudget() - totale) < 0) transaction.setDictionaryId(47L);
                         }
 
                         // Stato Budget Campagna

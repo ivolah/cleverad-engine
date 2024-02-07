@@ -117,19 +117,10 @@ public class ManageCPS {
                 transaction.setCommissionId(commId);
                 transaction.setClickNumber(Long.valueOf(1));
 
-                // incemento valore
-                if (walletID != null && totale > 0D) walletBusiness.incement(walletID, totale);
-
                 // decremento budget Affiliato
                 AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
                 if (bb != null && bb.getBudget() != null) {
-                    Double totBudgetDecrementato = bb.getBudget() - totale;
-                    affiliateBudgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
-
-                    // setto stato transazione a ovebudget editore se totale < 0
-                    if (totBudgetDecrementato < 0) {
-                        transaction.setDictionaryId(47L);
-                    }
+                    if ((bb.getBudget() - totale) < 0) transaction.setDictionaryId(47L);
                 }
 
                 // Stato Budget Campagna

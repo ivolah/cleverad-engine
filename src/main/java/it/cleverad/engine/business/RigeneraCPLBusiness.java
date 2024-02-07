@@ -3,7 +3,6 @@ package it.cleverad.engine.business;
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.Commission;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
-import it.cleverad.engine.persistence.model.service.TransactionCPL;
 import it.cleverad.engine.persistence.model.tracking.Cpl;
 import it.cleverad.engine.persistence.repository.service.CommissionRepository;
 import it.cleverad.engine.persistence.repository.service.TransactionCPLRepository;
@@ -32,8 +31,6 @@ import java.util.Objects;
 @Component
 @Transactional
 public class RigeneraCPLBusiness {
-    @Autowired
-    private TransactionCPLRepository transactionCPLRepository;
 
     @Autowired
     private CplBusiness cplBusiness;
@@ -88,24 +85,13 @@ public class RigeneraCPLBusiness {
             not = new ArrayList<>();
             not.add(74L); // RIGETTATO
             request.setNotInStatusId(not);
-            log.info(request.toString());
             Page<TransactionStatusDTO> ls = transactionAllBusiness.searchPrefiltratoInterno(request);
             log.info(">>> TOT :: " + ls.getTotalElements());
 
             for (TransactionStatusDTO tcpl : ls) {
                 log.trace("CANCELLO PER RIGENERA CP :: {} : {} :: {}", tcpl.getId(), tcpl.getValue(), tcpl.getDateTime());
 
-                TransactionCPL trans = transactionCPLRepository.findById(tcpl.getId()).orElseThrow(() -> new ElementCleveradException("Transaction", 0L));
-                // aggiorno budget affiliato
-                // da gestire in esterna con un azione scheduata
-                AffiliateBudgetDTO budgetAff = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(trans.getCampaign().getId(), trans.getAffiliate().getId()).stream().findFirst().orElse(null);
-                if (budgetAff != null) {
-                    affiliateBudgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + trans.getValue());
-                    affiliateBudgetBusiness.updateCap(budgetAff.getId(), budgetAff.getCap() + 1);
-                }
-
-                // aggiorno budget campagna
-                // - non serve più  abbiamo campagin budget :
+                // aggiorno budget affiliato schedualto
                 // aggiorno wallet in modo schedulato
                 // aggiorno campaign buget in modo schedualto
 
@@ -220,19 +206,13 @@ public class RigeneraCPLBusiness {
                             transaction.setValue(totale);
                             transaction.setLeadNumber(1L);
 
-                            // incemento valore
-                            if (walletID != null && totale > 0D) walletBusiness.incement(walletID, totale);
+                            // incemento valore scheduled
 
                             // decremento budget Affiliato
                             AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
                             if (bb != null && bb.getBudget() != null) {
-                                double totBudgetDecrementato = bb.getBudget() - totale;
-                                affiliateBudgetBusiness.updateBudget(bb.getId(), totBudgetDecrementato);
-
                                 // setto stato transazione a ovebudget editore se totale < 0
-                                if (totBudgetDecrementato < 0) {
-                                    transaction.setDictionaryId(47L);
-                                }
+                                if ((bb.getBudget() - totale) < 0) transaction.setDictionaryId(47L);
                             }
 
                             // setto stato transazione a ovebudget editore se totale < 0
