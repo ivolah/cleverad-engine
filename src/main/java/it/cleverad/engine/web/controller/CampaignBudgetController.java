@@ -45,7 +45,6 @@ public class CampaignBudgetController {
     @PatchMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public CampaignBudgetDTO update(@PathVariable Long id, @RequestBody CampaignBudgetBusiness.Update request) {
-        log.info(">>> " + request);
         return business.update(id, request);
     }
 

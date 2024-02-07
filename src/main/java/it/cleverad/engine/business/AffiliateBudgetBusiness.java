@@ -130,6 +130,13 @@ public class AffiliateBudgetBusiness {
         Page<AffiliateBudget> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(AffiliateBudgetDTO::from);
     }
+    public Page<AffiliateBudgetDTO> getByActiveIdCampaign(Long id) {
+        Filter request = new Filter();
+        request.setCampaignId(id);
+        request.setStatus(true);
+        Page<AffiliateBudget> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
+        return page.map(AffiliateBudgetDTO::from);
+    }
 
     public Page<AffiliateBudgetDTO> getByIdCampaignAndIdAffiliate(Long idCampaign, Long idAffilaite) {
         Filter request = new Filter();

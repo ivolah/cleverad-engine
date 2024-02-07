@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin
 @RestController
 @RequestMapping(value = "/budget")
-public class BudgetController {
+public class AffiliateBudgetController {
 
     @Autowired
     private AffiliateBudgetBusiness business;

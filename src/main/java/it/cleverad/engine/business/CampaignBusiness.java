@@ -341,12 +341,13 @@ public class CampaignBusiness {
 
     public Page<CampaignBaseDTO> getCampaignsNot(Pageable pageable) {
         List<Long> listaId = new ArrayList<>();
+        listaId.add(298L);
         Long affiliateId = jwtUserDetailsService.getAffiliateID();
         affiliateRepository.findById(affiliateId).get().getCampaignAffiliates().stream()
                 .forEach(campaignAffiliate -> listaId.add(campaignAffiliate.getCampaign().getId()));
         Filter requestNot = new Filter();
         requestNot.setStatus(true);
-        if (listaId.size() > 0) requestNot.setIdListNotIn(listaId);
+        requestNot.setIdListNotIn(listaId);
         Page<Campaign> page = repository.findAll(getSpecification(requestNot), pageable);
         return page.map(campaign -> CampaignBaseDTO.from(campaign, affiliateId));
     }
