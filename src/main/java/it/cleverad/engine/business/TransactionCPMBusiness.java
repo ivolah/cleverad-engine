@@ -31,6 +31,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -62,8 +63,7 @@ public class TransactionCPMBusiness {
     private MediaRepository mediaRepository;
     @Autowired
     private DictionaryRepository dictionaryRepository;
-    @Autowired
-    private AffiliateBudgetBusiness affiliateBudgetBusiness;
+
 
     /**
      * ============================================================================================================
@@ -175,15 +175,8 @@ public class TransactionCPMBusiness {
 
     public void delete(Long id) {
         try {
-            TransactionCPMDTO dto = this.findByIdCPM(id);
 
-            // aggiorno budget affiliato
-            AffiliateBudgetDTO budgetAff = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
-            if (budgetAff != null) {
-                affiliateBudgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
-                affiliateBudgetBusiness.updateCap(budgetAff.getId(), Math.toIntExact(budgetAff.getCap() + dto.getImpressionNumber()));
-            }
-
+            // aggiorno budget affiliato in modo schedulato
             // aggiorno budget campagna in modo schedualto
             // aggiorno wallet in modo schedulato
             // aggiorno campaign buget in modo schedualto
@@ -244,6 +237,16 @@ public class TransactionCPMBusiness {
         request.setCampaignId(campaignId);
         return cpmRepository.findAll(getSpecificationCPM(request), Pageable.ofSize(Integer.MAX_VALUE)).stream().collect(Collectors.toList());
     }
+
+    public List<TransactionCPM> searchForCampaignAffiliateBudget(Long campaignId, Long affiliateId, LocalDate start, LocalDate end) {
+        TransactionCPMBusiness.Filter request = new TransactionCPMBusiness.Filter();
+        request.setCampaignId(campaignId);
+        request.setAffiliateId(affiliateId);
+        request.setDateTimeFrom(start.atStartOfDay());
+        request.setDateTimeTo(LocalDateTime.of((end), LocalTime.MAX));
+        return cpmRepository.findAll(getSpecificationCPM(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")))).stream().collect(Collectors.toList());
+
+    }
     /**
      * ============================================================================================================
      **/
@@ -298,6 +301,8 @@ public class TransactionCPMBusiness {
             return completePredicate;
         };
     }
+
+
 
     /**
      * ============================================================================================================

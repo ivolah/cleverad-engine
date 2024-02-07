@@ -56,8 +56,6 @@ public class TransactionCPSBusiness {
     @Autowired
     private WalletRepository walletRepository;
     @Autowired
-    private WalletBusiness walletBusiness;
-    @Autowired
     private ChannelRepository channelRepository;
     @Autowired
     private CommissionRepository commissionRepository;
@@ -166,14 +164,7 @@ public class TransactionCPSBusiness {
 
     public void deletel(Long id) {
         try {
-            TransactionCPSDTO dto = this.findByIdCPS(id);
-
-            // aggiorno budget affiliato
-            AffiliateBudgetDTO budgetAff = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
-            if (budgetAff != null) {
-                affiliateBudgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
-            }
-
+            // aggiorno budget affiliato in modo schedualto
             // aggiorno budget campagna in modo schedualto
             // aggiorno wallet in modo schedulato
             // aggiorno campaign buget in modo schedualto

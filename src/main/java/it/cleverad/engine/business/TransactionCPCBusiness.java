@@ -4,7 +4,6 @@ import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.*;
 import it.cleverad.engine.persistence.repository.service.*;
-import it.cleverad.engine.web.dto.AffiliateBudgetDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.TransactionCPCDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -57,8 +56,6 @@ public class TransactionCPCBusiness {
     @Autowired
     private WalletRepository walletRepository;
     @Autowired
-    private WalletBusiness walletBusiness;
-    @Autowired
     private ChannelRepository channelRepository;
     @Autowired
     private CommissionRepository commissionRepository;
@@ -66,8 +63,6 @@ public class TransactionCPCBusiness {
     private MediaRepository mediaRepository;
     @Autowired
     private DictionaryRepository dictionaryRepository;
-    @Autowired
-    private AffiliateBudgetBusiness affiliateBudgetBusiness;
 
     /**
      * == CREATE =========================================================================================================
@@ -166,19 +161,8 @@ public class TransactionCPCBusiness {
 
         if (statusId == 74L || dictionaryId == 40L) {
 
-            // aggiorno budge e CAP affiliato
-            AffiliateBudgetDTO budgetAff = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(cpc.getCampaign().getId(), cpc.getAffiliate().getId()).stream().findFirst().orElse(null);
-            if (budgetAff != null) {
-                affiliateBudgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + cpc.getValue());
-                affiliateBudgetBusiness.updateCap(budgetAff.getId(), Math.toIntExact(budgetAff.getCap() + cpc.getClickNumber()));
-            }
-
-            // aggiorno wallet
-            Long walletID = null;
-            if (cpc.getAffiliate().getId() != null) {
-                walletID = walletRepository.findByAffiliateId(cpc.getAffiliate().getId()).getId();
-                walletBusiness.decrement(walletID, cpc.getValue());
-            }
+            // aggiorno budget affiliato in modo schedulato
+            // aggiorno wallet in modo schedulato
 
         } else if (dictionaryId == 40L || statusId == 74L) {
             // setto revenue e commission a 0
@@ -220,12 +204,7 @@ public class TransactionCPCBusiness {
             TransactionCPCDTO dto = this.findByIdCPCInterno(id);
 
             // aggiorno budge e CAP affiliato
-            AffiliateBudgetDTO budgetAff = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(dto.getCampaignId(), dto.getAffiliateId()).stream().findFirst().orElse(null);
-            if (budgetAff != null && budgetAff.getId() != null && budgetAff.getBudget() != null) {
-                affiliateBudgetBusiness.updateBudget(budgetAff.getId(), budgetAff.getBudget() + dto.getValue());
-                affiliateBudgetBusiness.updateCap(budgetAff.getId(), Math.toIntExact(budgetAff.getCap() + dto.getClickNumber()));
-            }
-
+            // aggiorno budget affiliato in modo schedulato
             // aggiorno budget campagna in modo schedualto
             // aggiorno wallet in modo schedulato
             // aggiorno campaign buget in modo schedualto
@@ -292,6 +271,19 @@ public class TransactionCPCBusiness {
         request.setCampaignId(id);
         request.setDateTimeFrom(from.atStartOfDay());
         request.setDateTimeTo(LocalDateTime.of((to), LocalTime.MAX));
+        request.setValueNotZero(true);
+        ArrayList not = new ArrayList<>();
+        not.add(74L); // RIGETTATO
+        request.setNotInStatusId(not);
+        return cpcRepository.findAll(getSpecificationCPC(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")))).stream().collect(Collectors.toList());
+    }
+
+    public List<TransactionCPC> searchForCampaignAffiliateBudget(Long campaignId, Long affiliateId, LocalDate start, LocalDate end) {
+        TransactionCPCBusiness.Filter request = new TransactionCPCBusiness.Filter();
+        request.setCampaignId(campaignId);
+        request.setAffiliateId(affiliateId);
+        request.setDateTimeFrom(start.atStartOfDay());
+        request.setDateTimeTo(LocalDateTime.of((end), LocalTime.MAX));
         request.setValueNotZero(true);
         ArrayList not = new ArrayList<>();
         not.add(74L); // RIGETTATO
