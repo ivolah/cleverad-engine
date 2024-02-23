@@ -61,6 +61,13 @@ public class TransactionStatusBusiness {
         return page.map(TransactionStatusDTO::from);
     }
 
+    public Page<TransactionStatusDTO> searchPayout(Filter request) {
+        Page<ViewTransactionStatus> page = repository.findAll(getSpecification(request), Pageable.ofSize(Integer.MAX_VALUE));
+        return page.map(TransactionStatusDTO::from);
+    }
+
+
+
     /**
      * ============================================================================================================
      **/
@@ -237,6 +244,7 @@ public class TransactionStatusBusiness {
         public List<Long> notInStausId;
 
         private String dataList;
+        private String note;
     }
 
 }

@@ -2,13 +2,11 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.config.security.JwtUserDetailsService;
-import it.cleverad.engine.persistence.model.service.Affiliate;
-import it.cleverad.engine.persistence.model.service.AffiliateChannelCommissionCampaign;
-import it.cleverad.engine.persistence.model.service.Campaign;
-import it.cleverad.engine.persistence.model.service.Commission;
+import it.cleverad.engine.persistence.model.service.*;
 import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
+import it.cleverad.engine.web.dto.AgentDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -76,7 +74,8 @@ public class AffiliateChannelCommissionCampaignBusiness {
                 Campaign campaign = campaignRepository.findById(request.getCampaignId()).orElseThrow(() -> new ElementCleveradException("Campaign", request.getCampaignId()));
                 map.setCampaign(campaign);
                 map.setChannel(channelRepository.findById(idCanale).orElseThrow(() -> new ElementCleveradException("Channel", idCanale)));
-                AffiliateChannelCommissionCampaign dto = repository.save(map);
+                map.setBlocked(false);
+                repository.save(map);
             });
 
         } else {
@@ -91,7 +90,8 @@ public class AffiliateChannelCommissionCampaignBusiness {
             map.setCampaign(campaign);
             //canale Singolo
             map.setChannel(channelRepository.findById(request.getChannelId()).orElseThrow(() -> new ElementCleveradException("Channel", request.getChannelId())));
-            AffiliateChannelCommissionCampaignDTO.from(repository.save(map));
+            map.setBlocked(false);
+            repository.save(map);
         }
 
         if (campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(request.getAffiliateId(), request.getCampaignId()).getTotalElements() == 0) {
@@ -105,6 +105,10 @@ public class AffiliateChannelCommissionCampaignBusiness {
         }
         return null;
     }
+
+    /**
+     * ============================================================================================================
+     **/
 
     // DELETE BY ID
     public void delete(Long id) {
@@ -136,6 +140,28 @@ public class AffiliateChannelCommissionCampaignBusiness {
         }
     }
 
+    /**
+     * ============================================================================================================
+     **/
+
+    // BLOCK
+    public AffiliateChannelCommissionCampaignDTO block(Long id) {
+        AffiliateChannelCommissionCampaign accc = repository.findById(id).orElseThrow(() -> new ElementCleveradException("AffiliateChannelCommissionCampaign", id));
+        accc.setBlocked(true);
+        return AffiliateChannelCommissionCampaignDTO.from(repository.save(accc));
+    }
+
+    // UNBLOCK
+    public AffiliateChannelCommissionCampaignDTO unblock(Long id) {
+        AffiliateChannelCommissionCampaign accc = repository.findById(id).orElseThrow(() -> new ElementCleveradException("AffiliateChannelCommissionCampaign", id));
+        accc.setBlocked(false);
+        return AffiliateChannelCommissionCampaignDTO.from(repository.save(accc));
+    }
+
+    /**
+     * ============================================================================================================
+     **/
+
     // GET BY ID
     public AffiliateChannelCommissionCampaignDTO findById(Long id) {
         AffiliateChannelCommissionCampaign affiliateChannelCommissionCampaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("AffiliateChannelCommissionCampaign", id));
@@ -150,7 +176,6 @@ public class AffiliateChannelCommissionCampaignBusiness {
         Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
         return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
-
 
     // GET BY ID CAMPAIGN
     public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignIdAffiliateBrandBuddies(Pageable pageableRequest) {
@@ -172,7 +197,6 @@ public class AffiliateChannelCommissionCampaignBusiness {
         Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
         return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
-
     public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignIdAffiliateNotZero(Long campaignId, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Filter filter = new Filter();
@@ -180,17 +204,6 @@ public class AffiliateChannelCommissionCampaignBusiness {
         if (Boolean.FALSE.equals(jwtUserDetailsService.isAdmin()))
             filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
         filter.setNotzero(true);
-        Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
-        return page.map(AffiliateChannelCommissionCampaignDTO::from);
-    }
-
-    public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignIdAffiliateWithZero(Long campaignId, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-        Filter filter = new Filter();
-        filter.setCampaignId(campaignId);
-        if (Boolean.FALSE.equals(jwtUserDetailsService.isAdmin()))
-            filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-
         Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
         return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
@@ -212,16 +225,6 @@ public class AffiliateChannelCommissionCampaignBusiness {
         return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
 
-    // SEARCH searchScheduledActivities
-    public AffiliateChannelCommissionCampaign searchScheduledActivities(Filter request) {
-        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.asc("id")));
-        Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(request), pageable);
-
-        if (page.getTotalPages() > 0) {
-            return page.getContent().get(0);
-        } else return null;
-    }
-
     public Page<AffiliateChannelCommissionCampaignDTO> search(Filter request, Pageable pageableR) {
         Pageable pageable = PageRequest.of(pageableR.getPageNumber(), pageableR.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(request), pageable);
@@ -229,7 +232,7 @@ public class AffiliateChannelCommissionCampaignBusiness {
     }
 
     public Page<AffiliateChannelCommissionCampaignDTO> search(Filter request) {
-        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, 300, Sort.by(Sort.Order.asc("id")));
         Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(request), pageable);
         return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
@@ -272,6 +275,10 @@ public class AffiliateChannelCommissionCampaignBusiness {
                 predicates.add(cb.equal(root.get("campaign").get("status"), true));
             }
 
+            if (request.getBlocked() != null) {
+                predicates.add(cb.equal(root.get("blocked"), request.getBlocked()));
+            }
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 
             return completePredicate;
@@ -291,7 +298,6 @@ public class AffiliateChannelCommissionCampaignBusiness {
         private Long affiliateId;
         private Long channelId;
         private Long commissionId;
-        private String actionId;
     }
 
     @Data
@@ -307,7 +313,7 @@ public class AffiliateChannelCommissionCampaignBusiness {
         private Boolean notzero;
         private Boolean bb;
         private Long commissionDicId;
-        private String actionId;
+        private Boolean blocked;
     }
 
 }

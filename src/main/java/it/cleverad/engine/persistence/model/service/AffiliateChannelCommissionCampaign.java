@@ -39,7 +39,6 @@ public class AffiliateChannelCommissionCampaign {
     @JoinColumn(name = "campaign_id")
     private Campaign campaign;
 
-    @Column(name = "action_id")
-    private String actionId;
+    private Boolean blocked;
 
 }

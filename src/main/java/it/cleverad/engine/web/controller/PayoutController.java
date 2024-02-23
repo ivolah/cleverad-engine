@@ -1,6 +1,7 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.PayoutBusiness;
+import it.cleverad.engine.business.TransactionStatusBusiness;
 import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.Payout;
 import it.cleverad.engine.web.dto.DictionaryDTO;
@@ -24,16 +25,20 @@ public class PayoutController {
 
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
-
     /**
      * ============================================================================================================
      **/
-
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public List<Payout> create(@ModelAttribute PayoutBusiness.BaseCreateRequest request) {
         return business.create(request);
+    }
+
+    @PostMapping(path = "/all")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public List<Payout> createAll(@RequestBody TransactionStatusBusiness.Filter request) {
+        return business.createAll(request);
     }
 
     @GetMapping
@@ -54,23 +59,23 @@ public class PayoutController {
         return business.findById(id);
     }
 
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public void deleteCpc(@PathVariable Long id) {
-        this.business.delete(id);
-    }
+//    @DeleteMapping("/{id}")
+//    @ResponseStatus(HttpStatus.ACCEPTED)
+//    public void deleteCpc(@PathVariable Long id) {
+//        this.business.delete(id);
+//    }
 
-    @DeleteMapping("/{payoutId}/transaction/{transactionId}/cpc")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public PayoutDTO removeCpc(@PathVariable Long payoutId, @PathVariable Long transactionId) {
-        return this.business.removeCpc(payoutId, transactionId);
-    }
+//    @DeleteMapping("/{payoutId}/transaction/{transactionId}/cpc")
+//    @ResponseStatus(HttpStatus.ACCEPTED)
+//    public PayoutDTO removeCpc(@PathVariable Long payoutId, @PathVariable Long transactionId) {
+//        return this.business.removeCpc(payoutId, transactionId);
+//    }
 
-    @DeleteMapping("/{payoutId}/transaction/{transactionId}/cpl")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public PayoutDTO deleteCpl(@PathVariable Long payoutId, @PathVariable Long transactionId) {
-        return this.business.removeCpl(payoutId, transactionId);
-    }
+//    @DeleteMapping("/{payoutId}/transaction/{transactionId}/cpl")
+//    @ResponseStatus(HttpStatus.ACCEPTED)
+//    public PayoutDTO deleteCpl(@PathVariable Long payoutId, @PathVariable Long transactionId) {
+//        return this.business.removeCpl(payoutId, transactionId);
+//    }
 
     @GetMapping("/{id}/affiliate")
     @ResponseStatus(HttpStatus.OK)

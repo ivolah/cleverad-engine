@@ -23,9 +23,9 @@ public class AffiliateChannelCommissionCampaignDTO {
     private String commissionType;
     private LocalDate commissionDueDate;
     private LocalDateTime creationDate;
-    private String actionId;
+    private Boolean blocked;
 
-    public AffiliateChannelCommissionCampaignDTO(long id, Long campaignId, Long affiliateId, String affilateName, Long channelId, String channelName, Long commissionId, String commissionName, Double commissionValue, String commissionType, LocalDate commissionDate, LocalDateTime creationDate, String actionId) {
+    public AffiliateChannelCommissionCampaignDTO(long id, Long campaignId, Long affiliateId, String affilateName, Long channelId, String channelName, Long commissionId, String commissionName, Double commissionValue, String commissionType, LocalDate commissionDate, LocalDateTime creationDate, Boolean blocked) {
         this.id = id;
         this.campaignId = campaignId;
         this.affiliateId = affiliateId;
@@ -38,11 +38,11 @@ public class AffiliateChannelCommissionCampaignDTO {
         this.commissionType = commissionType;
         this.commissionDueDate = commissionDate;
         this.creationDate = creationDate;
-        this.actionId = actionId;
+        this.blocked = blocked;
     }
 
     public static AffiliateChannelCommissionCampaignDTO from(AffiliateChannelCommissionCampaign accc) {
-        return new AffiliateChannelCommissionCampaignDTO(accc.getId(), accc.getCampaign() != null ? accc.getCampaign().getId() : null, accc.getAffiliate() != null ? accc.getAffiliate().getId() : null, accc.getAffiliate() != null ? accc.getAffiliate().getName() : null, accc.getChannel() != null ? accc.getChannel().getId() : null, accc.getChannel() != null ? accc.getChannel().getName() : null, accc.getCommission() != null ? accc.getCommission().getId() : null, accc.getCommission() != null ? accc.getCommission().getName() : null, accc.getCommission() != null ? accc.getCommission().getValue() : null, accc.getCommission().getDictionary() != null ? accc.getCommission().getDictionary().getName() : null, accc.getCommission() != null ? accc.getCommission().getDueDate() : null, accc.getCreationDate(), accc.getActionId());
+        return new AffiliateChannelCommissionCampaignDTO(accc.getId(), accc.getCampaign() != null ? accc.getCampaign().getId() : null, accc.getAffiliate() != null ? accc.getAffiliate().getId() : null, accc.getAffiliate() != null ? accc.getAffiliate().getName() : null, accc.getChannel() != null ? accc.getChannel().getId() : null, accc.getChannel() != null ? accc.getChannel().getName() : null, accc.getCommission() != null ? accc.getCommission().getId() : null, accc.getCommission() != null ? accc.getCommission().getName() : null, accc.getCommission() != null ? accc.getCommission().getValue() : null, accc.getCommission().getDictionary() != null ? accc.getCommission().getDictionary().getName() : null, accc.getCommission() != null ? accc.getCommission().getDueDate() : null, accc.getCreationDate(),  accc.getBlocked());
     }
 
 }

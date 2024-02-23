@@ -7,6 +7,7 @@ import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.service.WalletService;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.PayoutDTO;
+import it.cleverad.engine.web.dto.TransactionStatusDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -52,10 +53,26 @@ public class PayoutBusiness {
     private WalletService walletService;
     @Autowired
     private MailService mailService;
+    @Autowired
+    private TransactionStatusBusiness transactionStatusBusiness;
 
     /**
      * ============================================================================================================
      **/
+
+    public List<Payout> createAll(TransactionStatusBusiness.Filter request) {
+        Page<TransactionStatusDTO> results = transactionStatusBusiness.searchPayout(request);
+        log.info("TOT elementi: " + results.getTotalElements());
+        List<Long> cpcs = results.stream().filter(x -> x.getTipo().equals("CPC")).map(x -> x.getId()).collect(Collectors.toList());
+        List<Long> cpls = results.stream().filter(x -> x.getTipo().equals("CPL")).map(x -> x.getId()).collect(Collectors.toList());
+        log.info("CPC: {} ----- CPL: {}", cpcs.size(), cpls.size());
+
+        BaseCreateRequest payoutRequest = new BaseCreateRequest();
+        payoutRequest.setTransazioniCpc(cpcs);
+        payoutRequest.setTransazioniCpl(cpls);
+        payoutRequest.setNote(request.getNote());
+        return this.create(payoutRequest);
+    }
 
     public List<Payout> create(BaseCreateRequest request) {
 
@@ -150,6 +167,7 @@ public class PayoutBusiness {
             payout.setTotale(DoubleRounder.round(payout.getImponibile() + payout.getIva(), 2));
         });
 
+        log.info("Numero payout generati :  " + pys.size());
         return pys;
     }
 
@@ -294,6 +312,7 @@ public class PayoutBusiness {
             MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
             mailRequest.setAffiliateId(payout.getAffiliate().getId());
             mailRequest.setPayoutId(payout.getId());
+            mailRequest.setNote(payout.getNote());
             mailService.inviaMailPayout(mailRequest);
         }
         payout.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", dictionaryId)));

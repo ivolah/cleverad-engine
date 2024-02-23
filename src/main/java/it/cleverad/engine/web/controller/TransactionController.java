@@ -138,14 +138,13 @@ public class TransactionController {
     }
 
     /**
-    @GetMapping("/{id}/affiliate/cpl")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<TransactionCPLDTO> getbyAffiliateCpl(@PathVariable Long id, Pageable pageable) {
-        TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
-        request.setAffiliateId(id);
-        return transactionCPLBusiness.searchByAffiliateCpl(request, id, pageable);
-    }
-    **/
+     * @GetMapping("/{id}/affiliate/cpl")
+     * @ResponseStatus(HttpStatus.ACCEPTED) public Page<TransactionCPLDTO> getbyAffiliateCpl(@PathVariable Long id, Pageable pageable) {
+     * TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
+     * request.setAffiliateId(id);
+     * return transactionCPLBusiness.searchByAffiliateCpl(request, id, pageable);
+     * }
+     **/
 
     @GetMapping("/{id}/affiliate/cpm")
     @ResponseStatus(HttpStatus.ACCEPTED)

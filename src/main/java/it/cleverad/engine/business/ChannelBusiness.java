@@ -192,13 +192,9 @@ public class ChannelBusiness {
         filter.setStatus(true);
         filter.setId(id);
         mapper.map(filter, channel);
-        log.info("1");
         channel.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.dictionaryId)));
-        log.info("2");
         channel.setDictionaryType(dictionaryRepository.findById(filter.typeId).orElseThrow(() -> new ElementCleveradException("Type", filter.typeId)));
-        log.info("3");
         channel.setDictionaryOwner(dictionaryRepository.findById(filter.ownerId).orElseThrow(() -> new ElementCleveradException("Owner", filter.ownerId)));
-        log.info("4");
         channel.setDictionaryBusinessType(dictionaryRepository.findById(filter.businessTypeId).orElseThrow(() -> new ElementCleveradException("Business Type", filter.businessTypeId)));
         channel.setLastModificationDate(LocalDateTime.now());
 
@@ -218,20 +214,16 @@ public class ChannelBusiness {
             mailService.invio(mailRequest);
         }
 
-        log.info("5");
-
         // SET Category - cancello precedenti
         channelCategoryBusiness.deleteByChannelID(id);
 
-        log.info("6");
         // setto nuvoi
         if (filter.getCategoryList() != null && !filter.getCategoryList().isEmpty()) {
             Set<ChannelCategory> collect = filter.getCategoryList().stream().map(ss -> channelCategoryBusiness.createEntity(new ChannelCategoryBusiness.BaseCreateRequest(id, ss))).collect(Collectors.toSet());
             channel.setChannelCategories(collect);
         }
-        log.info("7 " + channel.toString());
+
         ChannelDTO dto = ChannelDTO.from(repository.save(channel));
-        log.info("8");
         return dto;
     }
 

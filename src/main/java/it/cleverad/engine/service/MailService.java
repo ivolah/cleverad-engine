@@ -233,6 +233,7 @@ public class MailService {
         private String email;
         private String oggetto;
         private String testo;
+        private String note;
         private ChannelDTO channelDTO;
     }
 

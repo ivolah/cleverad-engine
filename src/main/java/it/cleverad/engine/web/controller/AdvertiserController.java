@@ -19,7 +19,7 @@ public class AdvertiserController {
     @Autowired
     private AdvertiserBusiness business;
 
-        @Autowired
+    @Autowired
     private RepresentativeBusiness representativeBusiness;
 
     /**

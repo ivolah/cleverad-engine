@@ -5,6 +5,7 @@ import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.tracking.Tracking;
 import it.cleverad.engine.persistence.repository.tracking.TrackingRepository;
 import it.cleverad.engine.service.ReferralService;
+import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.dto.MediaDTO;
 import it.cleverad.engine.web.dto.TargetDTO;
 import it.cleverad.engine.web.dto.TrackingDTO;
@@ -43,12 +44,11 @@ public class TrackingBusiness {
     @Autowired
     private MediaBusiness mediaBusiness;
     @Autowired
-    private TargetBusiness targetBusiness;
-    @Autowired
     private CampaignBusiness campaignBusiness;
     @Autowired
     private CampaignAffiliateBusiness campaignAffiliateBusiness;
-
+    @Autowired
+    private AffiliateChannelCommissionCampaignBusiness affiliateChannelCommissionCampaignBusiness;
     @Autowired
     private ReferralService referralService;
 
@@ -80,8 +80,27 @@ public class TrackingBusiness {
             }
         }
 
-        if (refferal != null && refferal.getAffiliateId() != null && refferal.getCampaignId() != null)
+        if (refferal != null && refferal.getAffiliateId() != null && refferal.getCampaignId() != null) {
             campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(refferal.getAffiliateId(), refferal.getCampaignId()).stream().findFirst().ifPresent(campaignAffiliateDTO -> targetDTO.setFollowThorugh(campaignAffiliateDTO.getFollowThrough()));
+
+            // CHECK BLOCKED
+            if (refferal.getChannelId() != null) {
+
+                AffiliateChannelCommissionCampaignBusiness.Filter filter = new AffiliateChannelCommissionCampaignBusiness.Filter();
+                filter.setAffiliateId(refferal.getAffiliateId());
+                filter.setChannelId(refferal.getChannelId());
+                filter.setCampaignId(refferal.getCampaignId());
+                filter.setBlocked(true);
+                Page<AffiliateChannelCommissionCampaignDTO> dtos = affiliateChannelCommissionCampaignBusiness.search(filter, Pageable.ofSize(Integer.MAX_VALUE));
+                if (dtos.getTotalElements() > 1) {
+                    log.warn(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> {} per referral {}",dtos.getTotalElements(), refferal);
+                }
+                if (dtos.getTotalElements() == 1) {
+                    log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> BLOCKED {}", dtos.stream().findFirst().get().getId());
+                    targetDTO.setTarget("https://www.cleverad.it/");
+                }
+            }
+        }
 
         return targetDTO;
     }

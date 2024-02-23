@@ -95,7 +95,6 @@ public class StatisticsController {
     }
 
 
-
     @GetMapping(path = "/cpm/campaign/day")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<WidgetCampaignDayCpm> getStatDayCpm(StatCPMBusiness.Filter request, Pageable pageable) {
@@ -204,7 +203,6 @@ public class StatisticsController {
     public List<WidgetAgent> searchAgentDetailed(AgentBusiness.Filter request) {
         return agentBusiness.searchAgentDetailed(request);
     }
-
 
     /**
      * ============================================================================================================

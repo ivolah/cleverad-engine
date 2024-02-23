@@ -55,13 +55,26 @@ public class AffiliateChannelCommissionCampaignController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<AffiliateChannelCommissionCampaignDTO> getByIdCampaignAffiliate(@PathVariable Long id, Pageable pageable) {
         return business.searchByCampaignIdAffiliateNotZero(id, pageable);
-      //  return business.searchByCampaignIdAffiliateWithZero(id, pageable);
+        //  return business.searchByCampaignIdAffiliateWithZero(id, pageable);
     }
 
     @GetMapping("/{id}/campaign/affiliate/not")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignIdAffiliateNotZero(@PathVariable Long id, Pageable pageable) {
         return business.searchByCampaignIdAffiliateNotZero(id, pageable);
+    }
+
+
+    @GetMapping("/{id}/block")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public AffiliateChannelCommissionCampaignDTO block(@PathVariable Long id) {
+        return business.block(id);
+    }
+
+    @GetMapping("/{id}/unblock")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public AffiliateChannelCommissionCampaignDTO unblock(@PathVariable Long id) {
+        return business.unblock(id);
     }
 
     /**
