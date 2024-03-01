@@ -2,10 +2,7 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.Url;
-import it.cleverad.engine.persistence.repository.service.CampaignRepository;
-import it.cleverad.engine.persistence.repository.service.PlannerRepository;
 import it.cleverad.engine.persistence.repository.service.UrlRepository;
-import it.cleverad.engine.web.dto.PlannerDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -22,7 +19,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.Column;
 import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.util.ArrayList;

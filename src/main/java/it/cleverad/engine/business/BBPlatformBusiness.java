@@ -2,7 +2,6 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.config.security.JwtUserDetailsService;
-import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.BBPlatform;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.BBPlatformRepository;

@@ -1,7 +1,7 @@
 package it.cleverad.engine.business;
 
-import it.cleverad.engine.persistence.model.service.*;
-import it.cleverad.engine.persistence.repository.service.CampaignBudgetRepository;
+import it.cleverad.engine.persistence.model.service.CampaignCost;
+import it.cleverad.engine.persistence.model.service.FileCost;
 import it.cleverad.engine.persistence.repository.service.CampaignCostRepository;
 import it.cleverad.engine.persistence.repository.service.FileCostRepository;
 import it.cleverad.engine.service.FileStoreService;
@@ -17,7 +17,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,12 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.criteria.Predicate;
 import javax.validation.ConstraintViolationException;
 import java.io.IOException;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 

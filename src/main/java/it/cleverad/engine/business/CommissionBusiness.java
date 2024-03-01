@@ -8,7 +8,8 @@ import it.cleverad.engine.persistence.model.service.TransactionCPM;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.CommissionRepository;
 import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
-import it.cleverad.engine.web.dto.*;
+import it.cleverad.engine.web.dto.CommissionDTO;
+import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -104,17 +105,12 @@ public class CommissionBusiness {
     public CommissionDTO update(Long id, Filter filter) {
         Commission com = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Commission", id));
         mapper.map(filter, com);
-        //
-        // log.info("UPDATE COMMISSION {} - {} -> {} - {}", com.getId(), com.getCampaign().getName(), com.getValue(),com.getDueDate());
 
         com.setLastModificationDate(LocalDateTime.now());
         com.setCampaign(campaignRepository.findById(filter.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", filter.campaignId)));
         com.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.dictionaryId)));
 
-        //aggiorno transazioni
-        // cerco tutte le transazioni con quella commissione
-//        TransactionBusiness.Filter request = new TransactionBusiness.Filter();
-//        request.setCommissionId(id);
+        //aggiorno transazioni :: cerco tutte le transazioni con quella commissione
         //CPC
         for (TransactionCPC tcps : com.getTransactionCPCS()) {
             transactionCPCBusiness.updateCPCValue(tcps.getClickNumber() * com.getValue(), tcps.getId());
@@ -143,7 +139,6 @@ public class CommissionBusiness {
         return CommissionDTO.from(repository.save(commission));
     }
 
-
     //  GET TIPI
     public Page<DictionaryDTO> getTypes() {
         return dictionaryBusiness.getTypeCommission();
@@ -155,14 +150,6 @@ public class CommissionBusiness {
         request.setCampaignId(id);
         Page<Commission> page = repository.findAll(getSpecification(request), PageRequest.of(0, 100, Sort.by(Sort.Order.desc("id"))));
         return page.map(CommissionDTO::from);
-    }
-
-    public Commission getByIdCampaignDictionary(Long idC, Long idD) {
-        Filter request = new Filter();
-        request.setCampaignId(idC);
-        request.setDictionaryId(idD);
-        Page<Commission> page = repository.findAll(getSpecification(request), PageRequest.of(0, 100, Sort.by(Sort.Order.desc("id"))));
-        return page.stream().findFirst().orElse(null);
     }
 
     public Page<CommissionDTO> getByIdCampaignAttive(Long id) {
@@ -239,9 +226,11 @@ public class CommissionBusiness {
             if (request.getDueDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), (request.getDueDateTo().plus(1, ChronoUnit.DAYS))));
             }
-
             if (request.getDisableDueDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), request.getDisableDueDateTo()));
+            }
+            if (request.getAction() != null) {
+                predicates.add(cb.equal(root.get("action"), request.getAction()));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -272,6 +261,8 @@ public class CommissionBusiness {
 
         private Long campaignId;
         private Long dictionaryId;
+
+        private String action;
     }
 
     @Data
@@ -308,6 +299,8 @@ public class CommissionBusiness {
 
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate disableDueDateTo;
+
+        private String action;
     }
 
 }

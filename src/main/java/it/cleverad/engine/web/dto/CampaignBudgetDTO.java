@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import javax.persistence.Column;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;

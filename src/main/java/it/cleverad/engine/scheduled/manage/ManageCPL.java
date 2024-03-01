@@ -153,15 +153,25 @@ public class ManageCPL {
                         Long commissionId = 0L;
                         AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
                         if (StringUtils.isNotBlank(cplDTO.getActionId()) && !cplDTO.getActionId().equals(0)) {
-                            // con action Id settanto in cpl vado a cercare la commissione associata
-                            req.setAffiliateId(refferal.getAffiliateId());
-                            req.setChannelId(refferal.getChannelId());
-                            req.setCampaignId(refferal.getCampaignId());
-                            AffiliateChannelCommissionCampaignDTO accc = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
-                            Commission cm = commissionRepository.findById(accc.getCommissionId()).get();
-                            commVal = cm.getValue();
-                            commissionId = cm.getId();
-                            log.warn("Commissione >{}< trovata da action ID >{}<", cm.getId(), cplDTO.getActionId());
+                            Commission cm = commissionRepository.findFirstByActionAndStatus(cplDTO.getActionId(), true);
+                            if (cm != null) {
+                                commissionId = cm.getId();
+                                commVal = cm.getValue();
+                                log.warn("Commissione >{}< trovata da action ID >{}<", cm.getId(), cplDTO.getActionId());
+                            }else {
+                                log.warn("ATTENZIONE !! Non trovato Commission con ACTION :: {}  ---->>>> Setto commissione di default STD ", cplDTO.getActionId() );
+                                // non è settato l'actionId allora faccio il solito giro
+                                req.setAffiliateId(refferal.getAffiliateId());
+                                req.setChannelId(refferal.getChannelId());
+                                req.setCampaignId(refferal.getCampaignId());
+                                req.setCommissionDicId(11L); // CPL
+                                AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
+                                if (acccFirst != null) {
+                                    commVal = acccFirst.getCommissionValue();
+                                    commissionId = acccFirst.getCommissionId();
+                                } else
+                                    log.warn(" :: Non trovato Commission di tipo 11 per campagna {}, setto default", refferal.getCampaignId());
+                            }
                         } else {
                             // non è settato l'actionId allora faccio il solito giro
                             req.setAffiliateId(refferal.getAffiliateId());
@@ -173,7 +183,7 @@ public class ManageCPL {
                                 commVal = acccFirst.getCommissionValue();
                                 commissionId = acccFirst.getCommissionId();
                             } else
-                                log.warn("Non trovato Commission di tipo 10 per campagna {}, setto default", refferal.getCampaignId());
+                                log.warn("Non trovato Commission di tipo 11 per campagna {}, setto default", refferal.getCampaignId());
                         }
                         transaction.setCommissionId(commissionId);
 

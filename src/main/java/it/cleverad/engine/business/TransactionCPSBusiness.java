@@ -6,7 +6,6 @@ import it.cleverad.engine.persistence.model.service.Affiliate;
 import it.cleverad.engine.persistence.model.service.TransactionCPS;
 import it.cleverad.engine.persistence.model.service.Wallet;
 import it.cleverad.engine.persistence.repository.service.*;
-import it.cleverad.engine.web.dto.AffiliateBudgetDTO;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.TransactionCPSDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;

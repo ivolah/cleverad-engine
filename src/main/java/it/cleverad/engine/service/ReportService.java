@@ -3,22 +3,17 @@ package it.cleverad.engine.service;
 import it.cleverad.engine.business.TransactionCPCBusiness;
 import it.cleverad.engine.business.TransactionCPLBusiness;
 import it.cleverad.engine.business.TransactionCPMBusiness;
-import it.cleverad.engine.persistence.model.service.TransactionCPC;
-import it.cleverad.engine.persistence.model.service.TransactionCPL;
-import it.cleverad.engine.web.dto.AffiliateBudgetDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.decimal4j.util.DoubleRounder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 

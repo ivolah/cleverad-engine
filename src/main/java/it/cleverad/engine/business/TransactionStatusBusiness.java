@@ -1,8 +1,8 @@
 package it.cleverad.engine.business;
 
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.ViewTransactionStatus;
 import it.cleverad.engine.persistence.repository.service.ViewTransactionStatusRepository;
-import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.TransactionStatusDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;

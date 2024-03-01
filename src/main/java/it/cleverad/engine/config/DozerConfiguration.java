@@ -4,7 +4,6 @@ import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
 import com.github.dozermapper.core.loader.api.BeanMappingBuilder;
 import it.cleverad.engine.business.*;
-
 import it.cleverad.engine.persistence.model.service.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

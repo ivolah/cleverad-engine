@@ -5,7 +5,6 @@ import it.cleverad.engine.persistence.model.service.Commission;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.model.tracking.Cpl;
 import it.cleverad.engine.persistence.repository.service.CommissionRepository;
-import it.cleverad.engine.persistence.repository.service.TransactionCPLRepository;
 import it.cleverad.engine.persistence.repository.tracking.CplRepository;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.*;
@@ -25,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Component
@@ -177,15 +175,25 @@ public class RigeneraCPLBusiness {
                             Long commissionId = 0L;
                             AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
                             if (StringUtils.isNotBlank(cplDTO.getActionId()) && !cplDTO.getActionId().equals(0)) {
-                                // con action Id settanto in cpl vado a cercare la commissione associata
-                                req.setAffiliateId(refferal.getAffiliateId());
-                                req.setChannelId(refferal.getChannelId());
-                                req.setCampaignId(refferal.getCampaignId());
-                                AffiliateChannelCommissionCampaignDTO accc = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
-                                Commission cm = commissionRepository.findById(Objects.requireNonNull(accc).getCommissionId()).get();
-                                commVal = cm.getValue();
-                                commissionId = cm.getId();
-                                log.warn("Commissione >{}< trovata da action ID >{}<", cm.getId(), cplDTO.getActionId());
+                                Commission cm = commissionRepository.findFirstByActionAndStatus(cplDTO.getActionId(), true);
+                                if (cm != null) {
+                                    commissionId = cm.getId();
+                                    commVal = cm.getValue();
+                                    log.warn("Commissione >{}< trovata da action ID >{}<", cm.getId(), cplDTO.getActionId());
+                                }else {
+                                    log.warn("ATTENZIONE !! Non trovato Commission con ACTION :: {}  ---->>>> Setto commissione di default STD ", cplDTO.getActionId() );
+                                    // non è settato l'actionId allora faccio il solito giro
+                                    req.setAffiliateId(refferal.getAffiliateId());
+                                    req.setChannelId(refferal.getChannelId());
+                                    req.setCampaignId(refferal.getCampaignId());
+                                    req.setCommissionDicId(11L); // CPL
+                                    AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
+                                    if (acccFirst != null) {
+                                        commVal = acccFirst.getCommissionValue();
+                                        commissionId = acccFirst.getCommissionId();
+                                    } else
+                                        log.warn(" :: Non trovato Commission di tipo 11 per campagna {}, setto default", refferal.getCampaignId());
+                                }
                             } else {
                                 // non è settato l'actionId allora faccio il solito giro
                                 req.setAffiliateId(refferal.getAffiliateId());

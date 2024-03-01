@@ -38,11 +38,7 @@ public class CplDTO {
     private Long cpcId;
     private String actionId;
 
-    public CplDTO(long id, String refferal, String ip, String agent, String data, LocalDateTime date,
-                  Boolean read, String info, String country,
-                  Long mediaId, Long campaignId, Long affiliateId, Long channelId, Long targetId,
-                  Boolean blacklisted, Boolean multiple,
-                  Long cpcId, String actionId) {
+    public CplDTO(long id, String refferal, String ip, String agent, String data, LocalDateTime date, Boolean read, String info, String country, Long mediaId, Long campaignId, Long affiliateId, Long channelId, Long targetId, Boolean blacklisted, Boolean multiple, Long cpcId, String actionId) {
         this.id = id;
         this.refferal = refferal;
         this.ip = ip;
@@ -64,9 +60,7 @@ public class CplDTO {
     }
 
     public static CplDTO from(Cpl cpl) {
-        return new CplDTO(cpl.getId(), cpl.getRefferal(), cpl.getIp(), cpl.getAgent(), cpl.getData(), cpl.getDate(), cpl.getRead(), cpl.getInfo(), cpl.getCountry(),
-                cpl.getMediaId(), cpl.getCampaignId(), cpl.getAffiliateId(), cpl.getChannelId(), cpl.getTargetId(),
-                cpl.getBlacklisted(), cpl.getMultiple(), cpl.getCpcId(), cpl.getActionId());
+        return new CplDTO(cpl.getId(), cpl.getRefferal(), cpl.getIp(), cpl.getAgent(), cpl.getData(), cpl.getDate(), cpl.getRead(), cpl.getInfo(), cpl.getCountry(), cpl.getMediaId(), cpl.getCampaignId(), cpl.getAffiliateId(), cpl.getChannelId(), cpl.getTargetId(), cpl.getBlacklisted(), cpl.getMultiple(), cpl.getCpcId(), cpl.getActionId());
     }
 
 }

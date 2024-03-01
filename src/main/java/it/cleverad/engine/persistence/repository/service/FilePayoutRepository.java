@@ -1,6 +1,5 @@
 package it.cleverad.engine.persistence.repository.service;
 
-import it.cleverad.engine.persistence.model.service.FileAffiliate;
 import it.cleverad.engine.persistence.model.service.FilePayout;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;

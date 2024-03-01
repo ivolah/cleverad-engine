@@ -3,7 +3,6 @@ package it.cleverad.engine.persistence.repository.service;
 import it.cleverad.engine.persistence.model.service.TopCampagne;
 import it.cleverad.engine.persistence.model.service.TotaleCampagne;
 import it.cleverad.engine.persistence.model.service.TransactionCPC;
-import org.hibernate.sql.Select;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;

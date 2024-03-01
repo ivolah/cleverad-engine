@@ -1,6 +1,5 @@
 package it.cleverad.engine.web.dto;
 
-import it.cleverad.engine.persistence.model.service.FileCampaignBudgetInvoice;
 import it.cleverad.engine.persistence.model.service.FileCost;
 import lombok.AllArgsConstructor;
 import lombok.Data;

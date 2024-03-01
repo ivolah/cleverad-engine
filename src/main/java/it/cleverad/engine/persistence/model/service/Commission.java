@@ -59,4 +59,7 @@ public class Commission {
     @OneToMany(mappedBy = "commission")
     private Set<BBLink> bbLinks;
 
+    @Column(name = "action")
+    private String action;
+
 }
