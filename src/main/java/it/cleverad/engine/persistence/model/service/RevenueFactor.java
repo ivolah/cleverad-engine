@@ -40,4 +40,6 @@ public class RevenueFactor {
     @JoinColumn(name = "dictionary_id")
     private Dictionary dictionary;
 
+    private String action;
+
 }

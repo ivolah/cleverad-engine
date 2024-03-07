@@ -22,8 +22,9 @@ public class RevenueFactorDTO {
     private Boolean status;
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
+    private String action;
 
-    public RevenueFactorDTO(Long id, Double revenue, LocalDate startDate, LocalDate dueDate, Long campaignId, String campaignName, Long dictionaryId, String divtionaryName, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate) {
+    public RevenueFactorDTO(Long id, Double revenue, LocalDate startDate, LocalDate dueDate, Long campaignId, String campaignName, Long dictionaryId, String divtionaryName, Boolean status, LocalDateTime creationDate, LocalDateTime lastModificationDate, String action) {
         this.id = id;
         this.revenue = revenue;
         this.startDate = startDate;
@@ -35,6 +36,7 @@ public class RevenueFactorDTO {
         this.status = status;
         this.creationDate = creationDate;
         this.lastModificationDate = lastModificationDate;
+        this.action = action;
     }
 
     public static RevenueFactorDTO from(RevenueFactor revenueFactor) {
@@ -46,7 +48,7 @@ public class RevenueFactorDTO {
                 revenueFactor.getCampaign() != null ? revenueFactor.getCampaign().getName() : null,
                 revenueFactor.getDictionary() != null ? revenueFactor.getDictionary().getId() : null,
                 revenueFactor.getDictionary() != null ? revenueFactor.getDictionary().getName() : null,
-                revenueFactor.getStatus(), revenueFactor.getCreationDate(), revenueFactor.getLastModificationDate());
+                revenueFactor.getStatus(), revenueFactor.getCreationDate(), revenueFactor.getLastModificationDate(), revenueFactor.getAction());
     }
 
 }

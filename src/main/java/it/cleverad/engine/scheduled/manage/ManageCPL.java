@@ -6,6 +6,7 @@ import it.cleverad.engine.persistence.model.service.Commission;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.model.tracking.Cpl;
 import it.cleverad.engine.persistence.repository.service.CommissionRepository;
+import it.cleverad.engine.persistence.repository.service.RevenueFactorRepository;
 import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.persistence.repository.tracking.CplRepository;
 import it.cleverad.engine.service.ReferralService;
@@ -41,6 +42,8 @@ public class ManageCPL {
     private CampaignBusiness campaignBusiness;
     @Autowired
     private RevenueFactorBusiness revenueFactorBusiness;
+    @Autowired
+    private RevenueFactorRepository revenueFactorRepository;
     @Autowired
     private AffiliateChannelCommissionCampaignBusiness affiliateChannelCommissionCampaignBusiness;
     @Autowired
@@ -139,51 +142,61 @@ public class ManageCPL {
                             transaction.setWalletId(walletID);
                         }
 
+
+                        // check Action ID
+                        boolean checkAction = false;
+                        if (StringUtils.isNotBlank(cplDTO.getActionId()) && !cplDTO.getActionId().equals(0)) {
+                            log.info(">>>>>>>>>> TROVATO ACTION : {}", cplDTO.getActionId());
+                            checkAction = true;
+                        }
+
                         // trovo revenue
-                        RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 11L);
-                        if (rf != null) {
-                            transaction.setRevenueId(rf.getId());
-                        } else {
-                            log.warn("Non trovato revenue factor di tipo 11 per campagna {} , setto default", refferal.getCampaignId());
-                            transaction.setRevenueId(2L);
+                        if (checkAction) {
+                            RevenueFactor rf = revenueFactorRepository.findFirstByActionAndStatus(cplDTO.getActionId(), true);
+                            if (rf != null) {
+                                transaction.setRevenueId(rf.getId());
+                                log.warn("Revenue >{}< trovata da action ID >{}<", rf.getId(), cplDTO.getActionId());
+                            } else {
+                                checkAction = false;
+                            }
+                        }
+                        if (!checkAction) {
+                            // GIRO STANDARD
+                            RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 11L);
+                            if (rf != null) {
+                                transaction.setRevenueId(rf.getId());
+                            } else {
+                                log.warn("Non trovato revenue factor di tipo 11 per campagna {} , setto default", refferal.getCampaignId());
+                                transaction.setRevenueId(2L);
+                            }
                         }
 
                         // gesione commisione
                         Double commVal = 0D;
                         Long commissionId = 0L;
                         AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
-                        if (StringUtils.isNotBlank(cplDTO.getActionId()) && !cplDTO.getActionId().equals(0)) {
+                        if (checkAction) {
                             Commission cm = commissionRepository.findFirstByActionAndStatus(cplDTO.getActionId(), true);
                             if (cm != null) {
                                 commissionId = cm.getId();
                                 commVal = cm.getValue();
                                 log.warn("Commissione >{}< trovata da action ID >{}<", cm.getId(), cplDTO.getActionId());
-                            }else {
-                                log.warn("ATTENZIONE !! Non trovato Commission con ACTION :: {}  ---->>>> Setto commissione di default STD ", cplDTO.getActionId() );
-                                // non è settato l'actionId allora faccio il solito giro
-                                req.setAffiliateId(refferal.getAffiliateId());
-                                req.setChannelId(refferal.getChannelId());
-                                req.setCampaignId(refferal.getCampaignId());
-                                req.setCommissionDicId(11L); // CPL
-                                AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
-                                if (acccFirst != null) {
-                                    commVal = acccFirst.getCommissionValue();
-                                    commissionId = acccFirst.getCommissionId();
-                                } else
-                                    log.warn(" :: Non trovato Commission di tipo 11 per campagna {}, setto default", refferal.getCampaignId());
+                            } else {
+                                checkAction = false;
                             }
-                        } else {
+                        }
+                        if (!checkAction) {
                             // non è settato l'actionId allora faccio il solito giro
                             req.setAffiliateId(refferal.getAffiliateId());
                             req.setChannelId(refferal.getChannelId());
                             req.setCampaignId(refferal.getCampaignId());
-                            req.setCommissionDicId(11L); // CPL
+                            req.setCommissionDicId(11L);
                             AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
                             if (acccFirst != null) {
                                 commVal = acccFirst.getCommissionValue();
                                 commissionId = acccFirst.getCommissionId();
                             } else
-                                log.warn("Non trovato Commission di tipo 11 per campagna {}, setto default", refferal.getCampaignId());
+                                log.warn("No Commission CPL C: {} e A: {}, setto default ({})", refferal.getCampaignId(), refferal.getAffiliateId(), cplDTO.getRefferal());
                         }
                         transaction.setCommissionId(commissionId);
 

@@ -226,6 +226,7 @@ public class RevenueFactorBusiness {
         private Boolean status;
         private Long campaignId;
         private Long dictionaryId;
+        private String action;
     }
 
     @Data
@@ -259,6 +260,8 @@ public class RevenueFactorBusiness {
 
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate disableDueDateTo;
+
+        private String action;
     }
 
 }

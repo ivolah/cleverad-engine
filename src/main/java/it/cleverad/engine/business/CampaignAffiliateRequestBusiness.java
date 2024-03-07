@@ -80,13 +80,13 @@ public class CampaignAffiliateRequestBusiness {
 
     // SEARCH PAGINATED
     public Page<CampaignAffiliateRequestDTO> search(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("requestDate")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("requestDate")));
         Page<CampaignAffiliateRequest> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CampaignAffiliateRequestDTO::from);
     }
 
     public Page<CampaignAffiliateRequestDTO> searchByCampaignID(Long campaignId, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("requestDate")));
+        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("requestDate")));
         Filter request = new Filter();
         request.setCampaignId(campaignId);
         Page<CampaignAffiliateRequest> page = repository.findAll(getSpecification(request), pageable);
