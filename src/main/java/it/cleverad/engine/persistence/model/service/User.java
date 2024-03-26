@@ -41,6 +41,10 @@ public class User {
     private Affiliate affiliate;
 
     @ManyToOne
+    @JoinColumn(name = "advertiser_id")
+    private Advertiser advertiser;
+
+    @ManyToOne
     @JoinColumn(name = "role_id")
     private Dictionary dictionary;
 

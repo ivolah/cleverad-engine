@@ -67,7 +67,7 @@ public class MailController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "/campagna/affiliate")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public MailDTO inviaInvitoCampagnaAffiliate(@ModelAttribute MailService.BaseCreateRequest request) {
-        request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+        request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
         return business.invitoCampagna(request);
     }
 

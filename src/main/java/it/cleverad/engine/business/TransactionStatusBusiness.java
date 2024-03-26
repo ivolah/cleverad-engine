@@ -46,7 +46,7 @@ public class TransactionStatusBusiness {
     // GET BY ID
     public TransactionStatusDTO findById(Long id) {
         ViewTransactionStatus transaction = null;
-        if (jwtUserDetailsService.getRole().equals("Admin")) {
+        if (jwtUserDetailsService.isAdmin()) {
             transaction = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction Status", id));
         }
         return TransactionStatusDTO.from(transaction);
@@ -55,8 +55,11 @@ public class TransactionStatusBusiness {
     // SEARCH PAGINATED
     public Page<TransactionStatusDTO> searchPrefiltrato(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("dateTime")));
-        if (!jwtUserDetailsService.getRole().equals("Admin"))
-            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+
+
+
+        if (!jwtUserDetailsService.isAdmin())
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
         Page<ViewTransactionStatus> page = repository.findAll(getSpecification(request), pageable);
         return page.map(TransactionStatusDTO::from);
     }
@@ -122,15 +125,12 @@ public class TransactionStatusBusiness {
             if (request.getStatusId() != null) {
                 predicates.add(cb.equal(root.get("statusId"), request.getStatusId()));
             }
-
             if (request.getPayoutPresent() != null) {
                 predicates.add(cb.equal(root.get("payoutPresent"), request.getPayoutPresent()));
             }
-
             if (request.getValueNotZero() != null && request.getValueNotZero()) {
                 predicates.add(cb.notEqual(root.get("value"), "0"));
             }
-
             if (request.getInDictionaryId() != null) {
                 CriteriaBuilder.In<Long> inClause = cb.in(root.get("dictionaryId"));
                 for (Long id : request.getInDictionaryId()) {
@@ -138,7 +138,6 @@ public class TransactionStatusBusiness {
                 }
                 predicates.add(inClause);
             }
-
             if (request.getInStausId() != null) {
                 CriteriaBuilder.In<Long> inClause = cb.in(root.get("statusId"));
                 for (Long id : request.getInStausId()) {
@@ -146,7 +145,6 @@ public class TransactionStatusBusiness {
                 }
                 predicates.add(inClause);
             }
-
             if (request.getNotInDictionaryId() != null) {
                 CriteriaBuilder.In<Long> inClauseNot = cb.in(root.get("dictionaryId"));
                 for (Long id : request.getNotInDictionaryId()) {
@@ -154,7 +152,6 @@ public class TransactionStatusBusiness {
                 }
                 predicates.add(inClauseNot.not());
             }
-
             if (request.getNotInStausId() != null) {
                 CriteriaBuilder.In<Long> inClauseNot = cb.in(root.get("statusId"));
                 for (Long id : request.getNotInStausId()) {

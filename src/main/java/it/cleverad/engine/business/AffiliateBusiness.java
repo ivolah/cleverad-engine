@@ -106,7 +106,7 @@ public class AffiliateBusiness {
 
     // UPADTE
     public AffiliateDTO update(Filter filter) {
-        Affiliate affiliate = repository.findById(jwtUserDetailsService.getAffiliateID()).orElseThrow(() -> new ElementCleveradException("Affiliate", jwtUserDetailsService.getAffiliateID()));
+        Affiliate affiliate = repository.findById(jwtUserDetailsService.getAffiliateId()).orElseThrow(() -> new ElementCleveradException("Affiliate", jwtUserDetailsService.getAffiliateId()));
 
         affiliate.setCountry(filter.getCountry());
         affiliate.setPhoneNumber(filter.getPhoneNumber());

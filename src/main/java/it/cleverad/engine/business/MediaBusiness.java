@@ -103,7 +103,6 @@ public class MediaBusiness {
 
     // GET BY ID
     public MediaDTO findById(Long id) {
-//        Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Media", id));
         Media media = repository.findById(id).orElse(null);
         MediaDTO dto = null;
         if (media != null) {
@@ -183,9 +182,7 @@ public class MediaBusiness {
     // SEARCH PAGINATED
     public Page<MediaDTO> search(Filter request, Pageable pageableRequest) {
 
-        log.info(">>> " + request);
-
-        if (jwtUserDetailsService.getRole().equals("Admin")) {
+        if (jwtUserDetailsService.isAdmin()) {
             if (request.getCampaignId() != null) {
                 Campaign cc = campaignRepository.findById(request.getCampaignId()).orElseThrow(() -> new ElementCleveradException("Campaign", request.getCampaignId()));
                 Set<Media> list = cc.getMedias();
@@ -201,7 +198,7 @@ public class MediaBusiness {
                 return page.map(media -> MediaDTO.from(media));
             }
         } else {
-            Affiliate cc = affiliateRepository.findById(jwtUserDetailsService.getAffiliateID()).orElseThrow(() -> new ElementCleveradException("Affiliate", jwtUserDetailsService.getAffiliateID()));
+            Affiliate cc = affiliateRepository.findById(jwtUserDetailsService.getAffiliateId()).orElseThrow(() -> new ElementCleveradException("Affiliate", jwtUserDetailsService.getAffiliateId()));
 
             List<Campaign> campaigns = new ArrayList<>();
             if (cc.getCampaignAffiliates() != null) {
@@ -232,7 +229,7 @@ public class MediaBusiness {
     public Page<MediaDTO> getByCampaignId(Long campaignId, Pageable pageableRequest) {
         Campaign cc = campaignRepository.findById(campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", campaignId));
         Set<Media> list = new HashSet<>();
-        if (jwtUserDetailsService.getRole().equals("Admin")) {
+        if (jwtUserDetailsService.isAdmin()) {
             list = cc.getMedias();
         } else {
             list = cc.getMedias().stream().filter(media -> media.getStatus().booleanValue()).collect(Collectors.toSet());
@@ -260,7 +257,7 @@ public class MediaBusiness {
 
     public Page<MediaDTO> searchBB() {
 
-        Affiliate cc = affiliateRepository.findById(jwtUserDetailsService.getAffiliateID()).orElseThrow(() -> new ElementCleveradException("Affiliate", jwtUserDetailsService.getAffiliateID()));
+        Affiliate cc = affiliateRepository.findById(jwtUserDetailsService.getAffiliateId()).orElseThrow(() -> new ElementCleveradException("Affiliate", jwtUserDetailsService.getAffiliateId()));
 
         List<Campaign> campaigns = new ArrayList<>();
         if (cc.getCampaignAffiliates() != null) {
@@ -339,15 +336,15 @@ public class MediaBusiness {
             if (StringUtils.isNotBlank(tt.getTarget())) bannerCode = bannerCode.replace("{{target}}", tt.getTarget());
         }
 
-        if (!jwtUserDetailsService.getRole().equals("Admin")) {
-            bannerCode = bannerCode.replace("{{refferalId}}", referralService.creaEncoding(Long.toString(campaignId), Long.toString(mediaId), String.valueOf(jwtUserDetailsService.getAffiliateID()), Long.toString(channelID), Long.toString(targetId)));
+        if (!jwtUserDetailsService.isAdmin()) {
+            bannerCode = bannerCode.replace("{{refferalId}}", referralService.creaEncoding(Long.toString(campaignId), Long.toString(mediaId), String.valueOf(jwtUserDetailsService.getAffiliateId()), Long.toString(channelID), Long.toString(targetId)));
         }
 
         return bannerCode;
     }
 
     private String setUrlTarget(String target, Long mediaId, Long campaignId, Long channelID, Long targetId) {
-        target = target.replace("{{refferalId}}", referralService.creaEncoding(Long.toString(campaignId), Long.toString(mediaId), String.valueOf(jwtUserDetailsService.getAffiliateID()), Long.toString(channelID), Long.toString(targetId)));
+        target = target.replace("{{refferalId}}", referralService.creaEncoding(Long.toString(campaignId), Long.toString(mediaId), String.valueOf(jwtUserDetailsService.getAffiliateId()), Long.toString(channelID), Long.toString(targetId)));
         Url urlRicercato = urlBusiness.findByLong(target);
         if (urlRicercato == null || urlRicercato.getTiny() == null) {
             // INTEGRAZIONE TINY URL

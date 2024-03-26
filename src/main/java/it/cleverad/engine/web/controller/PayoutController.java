@@ -86,10 +86,10 @@ public class PayoutController {
     @GetMapping("/affiliate")
     @ResponseStatus(HttpStatus.OK)
     public Page<PayoutDTO> findByAffilaite(Pageable pageable) {
-        if (jwtUserDetailsService.getRole().equals("Admin")) {
+        if (jwtUserDetailsService.isAdmin()) {
             return business.findByIdAffilaite(null, pageable);
         } else {
-            return business.findByIdAffilaite(jwtUserDetailsService.getAffiliateID(), pageable);
+            return business.findByIdAffilaite(jwtUserDetailsService.getAffiliateId(), pageable);
         }
     }
 

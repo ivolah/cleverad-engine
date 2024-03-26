@@ -136,7 +136,7 @@ public class CampaignAffiliateBusiness {
         request.setBrandbuddies(false);
 
         if (!jwtUserDetailsService.getRole().equals("Admin"))
-            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
 
         Page<CampaignAffiliate> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id"))));
         return page.map(CampaignAffiliateDTO::from);
@@ -148,7 +148,7 @@ public class CampaignAffiliateBusiness {
         request.setBrandbuddies(true);
 
         if (!jwtUserDetailsService.getRole().equals("Admin"))
-            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
 
         Page<CampaignAffiliate> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id"))));
         return page.map(CampaignAffiliateDTO::from);

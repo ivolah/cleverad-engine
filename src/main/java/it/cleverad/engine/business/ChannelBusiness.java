@@ -88,7 +88,7 @@ public class ChannelBusiness {
         if (request.affiliateId != null) {
             map.setAffiliate(affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId)));
         } else {
-            map.setAffiliate(affiliateRepository.findById(jwtUserDetailsService.getAffiliateID()).orElseThrow(() -> new ElementCleveradException("Affiliate", jwtUserDetailsService.getAffiliateID())));
+            map.setAffiliate(affiliateRepository.findById(jwtUserDetailsService.getAffiliateId()).orElseThrow(() -> new ElementCleveradException("Affiliate", jwtUserDetailsService.getAffiliateId())));
         }
 
         ChannelDTO channelDTO = ChannelDTO.from(repository.save(map));
@@ -161,11 +161,11 @@ public class ChannelBusiness {
     public Page<ChannelDTO> search(Filter request, Pageable pageableRequest) {
         Page<AffiliateChannelCommissionCampaignDTO> searchACCC = null;
         if (!jwtUserDetailsService.isAdmin()) {
-            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
             request.setDictionaryId(13L);
 
             AffiliateChannelCommissionCampaignBusiness.Filter rr = new AffiliateChannelCommissionCampaignBusiness.Filter();
-            rr.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+            rr.setAffiliateId(jwtUserDetailsService.getAffiliateId());
             searchACCC = accc.search(rr, pageableRequest);
         }
 
@@ -237,23 +237,12 @@ public class ChannelBusiness {
     }
 
     public Page<ChannelDTO> getbyIdAffiliateAll(Pageable pageableRequest) {
-        if (jwtUserDetailsService.getRole().equals("Admin")) {
+        if (jwtUserDetailsService.isAdmin()) {
             Filter request = new Filter();
             Page<Channel> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id"))));
             return page.map(ChannelDTO::from);
         } else {
-            Page<Channel> page = repository.findByAffiliateId(jwtUserDetailsService.getAffiliateID(), pageableRequest);
-            return page.map(ChannelDTO::from);
-        }
-    }
-
-    public Page<ChannelDTO> getbyIdAffiliateAllActivePrefiltrato(Pageable pageableRequest) {
-        if (jwtUserDetailsService.getRole().equals("Admin")) {
-            Filter request = new Filter();
-            Page<Channel> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id"))));
-            return page.map(ChannelDTO::from);
-        } else {
-            Page<Channel> page = repository.findByAffiliateIdAndStatus(jwtUserDetailsService.getAffiliateID(), true, pageableRequest);
+            Page<Channel> page = repository.findByAffiliateId(jwtUserDetailsService.getAffiliateId(), pageableRequest);
             return page.map(ChannelDTO::from);
         }
     }
@@ -285,7 +274,7 @@ public class ChannelBusiness {
 
     public Page<ChannelDTO> getbyIdCampaignPrefiltrato(Long campaignId, Pageable pageableRequest) {
         AffiliateChannelCommissionCampaignBusiness.Filter rr = new AffiliateChannelCommissionCampaignBusiness.Filter();
-        rr.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+        rr.setAffiliateId(jwtUserDetailsService.getAffiliateId());
         rr.setCampaignId(campaignId);
         Page<AffiliateChannelCommissionCampaignDTO> search = accc.search(rr, pageableRequest);
 

@@ -84,7 +84,7 @@ public class AgentBusiness {
         if (Boolean.TRUE.equals(jwtUserDetailsService.isAdmin())) {
             return repository.geOs(request.getCampaignId(), request.getAffiliateId());
         } else {
-            return repository.geOs(request.getCampaignId(), String.valueOf(jwtUserDetailsService.getAffiliateID()));
+            return repository.geOs(request.getCampaignId(), String.valueOf(jwtUserDetailsService.getAffiliateId()));
         }
     }
 
@@ -92,7 +92,7 @@ public class AgentBusiness {
         if (Boolean.TRUE.equals(jwtUserDetailsService.isAdmin())) {
             return repository.getDevice(request.getCampaignId(), request.getAffiliateId());
         } else {
-            return repository.getDevice(request.getCampaignId(), String.valueOf(jwtUserDetailsService.getAffiliateID()));
+            return repository.getDevice(request.getCampaignId(), String.valueOf(jwtUserDetailsService.getAffiliateId()));
         }
     }
 
@@ -101,7 +101,7 @@ public class AgentBusiness {
         if (Boolean.TRUE.equals(jwtUserDetailsService.isAdmin())) {
             return repository.searchAgentDetailed(request.getCampaignId(), request.getAffiliateId());
         } else {
-            return repository.searchAgentDetailed(request.getCampaignId(), String.valueOf(jwtUserDetailsService.getAffiliateID()));
+            return repository.searchAgentDetailed(request.getCampaignId(), String.valueOf(jwtUserDetailsService.getAffiliateId()));
         }
     }
 
@@ -109,7 +109,7 @@ public class AgentBusiness {
         if (Boolean.TRUE.equals(jwtUserDetailsService.isAdmin())) {
             return repository.getAgent(request.getCampaignId(), request.getAffiliateId());
         } else {
-            return repository.getAgent(request.getCampaignId(), String.valueOf(jwtUserDetailsService.getAffiliateID()));
+            return repository.getAgent(request.getCampaignId(), String.valueOf(jwtUserDetailsService.getAffiliateId()));
         }
     }
 

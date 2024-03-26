@@ -64,7 +64,7 @@ public class WalletController {
     @GetMapping("/affiliate")
     @ResponseStatus(HttpStatus.OK)
     public Page<WalletDTO> findByAffilaite() {
-        return business.findByIdAffilaite(jwtUserDetailsService.getAffiliateID());
+        return business.findByIdAffilaite(jwtUserDetailsService.getAffiliateId());
     }
 
     /**

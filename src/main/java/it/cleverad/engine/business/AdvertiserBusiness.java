@@ -5,6 +5,7 @@ import it.cleverad.engine.persistence.model.service.Advertiser;
 import it.cleverad.engine.persistence.repository.service.AdvertiserRepository;
 import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
 import it.cleverad.engine.web.dto.AdvertiserDTO;
+import it.cleverad.engine.web.dto.UserDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -42,6 +44,8 @@ public class AdvertiserBusiness {
     private Mapper mapper;
     @Autowired
     private DictionaryRepository dictionaryRepository;
+    @Autowired
+    private UserBusiness userBusiness;
 
     /**
      * ============================================================================================================
@@ -55,7 +59,47 @@ public class AdvertiserBusiness {
         map.setStatus(true);
         map.setDictionaryTermType(dictionaryRepository.findById(request.termId).orElseThrow(() -> new ElementCleveradException("TERM", request.termId)));
         map.setDictionaryVatType(dictionaryRepository.findById(request.vatId).orElseThrow(() -> new ElementCleveradException("VAT", request.vatId)));
-        return AdvertiserDTO.from(repository.save(map));
+        AdvertiserDTO dto = AdvertiserDTO.from(repository.save(map));
+
+
+        // crea user associato ad Advertiser
+        UserBusiness.BaseCreateRequest operatoreAdvertiser = new UserBusiness.BaseCreateRequest();
+        operatoreAdvertiser.setAffiliateId(dto.getId());
+        operatoreAdvertiser.setStatus(false);
+        operatoreAdvertiser.setName("Operatore");
+        if (request.getName() == null)
+            operatoreAdvertiser.setSurname("Aggiorna");
+        else
+            operatoreAdvertiser.setSurname(request.getName());
+        operatoreAdvertiser.setEmail(request.primaryMail);
+        operatoreAdvertiser.setRoleId(555L);
+        operatoreAdvertiser.setRole("Advertiser");
+        operatoreAdvertiser.setUsername(UUID.randomUUID().toString());
+        operatoreAdvertiser.setPassword("piciulin");
+        UserDTO userDto = userBusiness.create(operatoreAdvertiser);
+
+        // crea utente shadow
+        UserBusiness.BaseCreateRequest opertatoreOmbra = new UserBusiness.BaseCreateRequest();
+        opertatoreOmbra.setAffiliateId(dto.getId());
+        opertatoreOmbra.setStatus(true);
+        opertatoreOmbra.setName("Cleverad " + dto.getId());
+        opertatoreOmbra.setEmail(dto.getId() + "_ombra@cleverad.it");
+        opertatoreOmbra.setSurname("Ombra");
+        opertatoreOmbra.setRoleId(555L);
+        opertatoreOmbra.setRole("AdvertiserOmbra");
+        opertatoreOmbra.setUsername("cleverad" + dto.getId());
+        opertatoreOmbra.setPassword("2!3_ClEvEr_2!3");
+        userBusiness.create(opertatoreOmbra);
+
+        // invio mail ad opertatore Advertiser
+//        MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
+//        mailRequest = new MailService.BaseCreateRequest();
+//        mailRequest.setAffiliateId(dto.getId());
+//        mailRequest.setUserId(userDto.getId());
+//        else mailRequest.setTemplateId(XXXXXL);
+//        mailService.invio(mailRequest);
+
+        return dto;
     }
 
     // GET BY ID
@@ -68,6 +112,7 @@ public class AdvertiserBusiness {
     public void delete(Long id) {
         try {
             representativeBusiness.findByIdAdvertiser(id).forEach(representativeDTO -> representativeBusiness.delete(representativeDTO.getId()));
+            userBusiness.deleteByIdAdvertiser(id);
             repository.deleteById(id);
         } catch (ConstraintViolationException ex) {
             throw ex;

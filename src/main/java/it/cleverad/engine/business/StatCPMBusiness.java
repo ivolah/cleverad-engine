@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -53,46 +54,86 @@ public class StatCPMBusiness {
      * ===========================================================================================================
      **/
 
-    public String getStatTotaleDayCpm() {
+    public String getStatTotaleGiorno(StatCPCBusiness.FilterStatistics request) {
+        if (jwtUserDetailsService.isAffiliate()) {
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
+        } else if (jwtUserDetailsService.isAdvertiser()) {
+            request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
+        }
         JSONObject mainObj = new JSONObject();
         JSONArray data = new JSONArray();
         JSONArray xSeries = new JSONArray();
-
-        for (int i = 6; i >= 0; i--) {
-            Long nu = repository.totaleGiorno(i).get(0).gettotale();
+        for (int i = request.getDays(); i >= 0; i--) {
+            Long nu = repository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).stream().mapToLong(value -> value.gettotale()).sum();
+            if (nu == null)
+                nu = 0L;
             data.put(nu);
             xSeries.put(LocalDate.now().minusDays(i).toString());
         }
-
-        Long totale = 0L;
-        for (Object tot : data)
-            totale += (Long) tot;
-
-        mainObj.put("totale", totale);
+        AtomicReference<Long> totale = new AtomicReference<>(0L);
+        data.forEach(elem -> totale.updateAndGet(v -> v + (Long) elem));
+        mainObj.put("totale", totale.get());
         mainObj.put("data", data);
         mainObj.put("xSeries", xSeries);
-
+        log.info("CPM {}", mainObj.toString());
         return mainObj.toString();
     }
 
-    public Page<WidgetCampaignDayCpm> getStatCampaignDayCpm(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("totale")));
-        if (!jwtUserDetailsService.isAdmin()) request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-        return widgetCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(request), pageable);
+    public String get10DayTotal() {
+        StatCPCBusiness.FilterStatistics request = new StatCPCBusiness.FilterStatistics();
+        request.setDays(10);
+        if (jwtUserDetailsService.isAffiliate()) {
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
+        } else if (jwtUserDetailsService.isAdvertiser()) {
+            request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
+        }
+        JSONArray jsonArray = new JSONArray();
+        for (int i = request.getDays(); i >= 0; i--) {
+            Long nu = repository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).stream().mapToLong(value -> value.gettotale()).sum();
+            if (nu == null)
+                nu = 0L;
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put(LocalDate.now().minusDays(i).toString(), nu);
+            jsonArray.put(jsonObject);
+        }
+        return jsonArray.toString();
     }
 
-    public Page<WidgetCampaignDayCpm> getTopCampaignsDayCpm() {
-        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.desc("totale")));
-
-        LocalDate oggi = LocalDate.now();
-        Integer week = YearWeek.from(LocalDate.of(oggi.getYear(), oggi.getMonth(), oggi.getDayOfMonth())).getWeek();
-
-        Filter request = new Filter();
-        request.setWeek(week + 1);
-        request.setWeekMeno(week - 1);
-        if (!jwtUserDetailsService.isAdmin()) request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-        return widgetCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(request), pageable);
+    public List<TopCampagne> getTopCampaignsDayRange(StatCPCBusiness.FilterStatistics request) {
+        if (jwtUserDetailsService.isAffiliate()) {
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
+        } else if (jwtUserDetailsService.isAdvertiser()) {
+            request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
+        }
+        return repository.listaTopCampagneTotale(request.getDays(), request.getAffiliateId(), request.getAdvertiserId());
     }
+
+    public List<TopCampagne> getValueTopCampaignsDayRange(StatCPCBusiness.FilterStatistics request) {
+        if (jwtUserDetailsService.isAffiliate()) {
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
+        } else if (jwtUserDetailsService.isAdvertiser()) {
+            request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
+        }
+        return repository.listaTopCampagneValore(request.getDays(), request.getAffiliateId(), request.getAdvertiserId());
+    }
+
+    /**
+     * ============================================================================================================
+     **/
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @ToString
+    public static class FilterStatistics {
+        private Long affiliateId;
+        private Long advertiserId;
+        private Integer days;
+    }
+
+    /**
+     * ============================================================================================================
+     **/
 
     public String getWidgetCampaignsDayCpm() {
 
@@ -100,7 +141,7 @@ public class StatCPMBusiness {
         request.setDoyMenoDieci(LocalDate.now().getDayOfYear() - 6);
         request.setYear((long) LocalDate.now().getYear());
 
-        if (!jwtUserDetailsService.isAdmin()) request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+        if (!jwtUserDetailsService.isAdmin()) request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
         Page<WidgetCampaignDayCpm> tutto = widgetCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("totale"))));
 
         Set<Long> doys = tutto.stream().map(WidgetCampaignDayCpm::getDoy).collect(Collectors.toSet());
@@ -144,7 +185,7 @@ public class StatCPMBusiness {
                 Filter filter = new Filter();
                 filter.setDoy(gg);
                 filter.setCampaign(campagna);
-                if (!jwtUserDetailsService.isAdmin()) filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+                if (!jwtUserDetailsService.isAdmin()) filter.setAffiliateId(jwtUserDetailsService.getAffiliateId());
                 List<WidgetCampaignDayCpm> giornato = widgetCampaignDayCpmRepository.findAll(getSpecificationCampaignDayCpm(filter), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("doy")))).stream().collect(Collectors.toList());
                 for (WidgetCampaignDayCpm w : giornato)
                     dd = dd + w.getTotale();
@@ -228,5 +269,6 @@ public class StatCPMBusiness {
         private Integer doyMenoDieci;
 
     }
+
 
 }

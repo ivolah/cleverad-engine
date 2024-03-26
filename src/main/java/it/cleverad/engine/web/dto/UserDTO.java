@@ -27,8 +27,10 @@ public class UserDTO {
     private Boolean status;
     private LocalDateTime creationDate;
     private List<FileUserDTO> fileUser;
+    private Long advertiserId;
+    private String advertiserName;
 
-    public UserDTO(long id, String username, String password, String name, String surname, String email, Long affiliateId, String affiliateName, Long roleId, String role, Boolean status, LocalDateTime creationDate, List<FileUserDTO> fileUsers) {
+    public UserDTO(long id, String username, String password, String name, String surname, String email, Long affiliateId, String affiliateName, Long roleId, String role, Boolean status, LocalDateTime creationDate, List<FileUserDTO> fileUsers, Long advertiserId, String advertiserName) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -42,6 +44,8 @@ public class UserDTO {
         this.status = status;
         this.creationDate = creationDate;
         this.fileUser = fileUsers;
+        this.advertiserId = advertiserId;
+        this.advertiserName = advertiserName;
     }
 
     public static UserDTO from(User user) {
@@ -70,7 +74,9 @@ public class UserDTO {
                 user.getDictionary().getId(), user.getDictionary().getName(),
                 user.getStatus(),
                 user.getCreationDate() != null ? user.getCreationDate() : null,
-                listaFile);
+                listaFile,
+                user.getAdvertiser() != null ? user.getAdvertiser().getId() : null,
+                user.getAdvertiser() != null ? user.getAdvertiser().getName() : null);
     }
 
 }

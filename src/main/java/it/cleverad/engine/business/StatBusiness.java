@@ -1,22 +1,16 @@
 package it.cleverad.engine.business;
 
 import it.cleverad.engine.config.security.JwtUserDetailsService;
-import it.cleverad.engine.persistence.model.service.WidgetCampaignDayCpc;
-import it.cleverad.engine.persistence.repository.service.WidgetCampaignDayCpcRepository;
-import it.cleverad.engine.persistence.repository.service.WidgetCampaignDayCplRepository;
+import it.cleverad.engine.persistence.repository.service.TransactionCPCRepository;
+import it.cleverad.engine.persistence.repository.service.TransactionCPLRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @Component
@@ -24,18 +18,11 @@ import java.util.Map;
 public class StatBusiness {
 
     @Autowired
-    private WidgetCampaignDayCpcRepository widgetCampaignDayCpcRepository;
+    private TransactionCPCRepository cpcRepository;
     @Autowired
-    private StatCPCBusiness statCPCBusiness;
-    @Autowired
-    private WidgetCampaignDayCplRepository widgetCampaignDayCplRepository;
-    @Autowired
-    private StatCPLBusiness statCPLBusiness;
-
+    private TransactionCPLRepository cplRepository;
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
-
-    private final Pageable pageableDoy = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("year").descending().and(Sort.by("doy").descending()));
 
     /**
      * ===========================================================================================================
@@ -44,78 +31,47 @@ public class StatBusiness {
 
     public String getLast10Days() {
 
-        LocalDate today = LocalDate.now();
-        Map<Integer, Integer> dayOfYearMap = new HashMap<>();
-        for (int i = 0; i <= 9; i++) {
-            LocalDate previousDay = today.minusDays(i);
-            dayOfYearMap.put(previousDay.getDayOfYear(), previousDay.getYear());
+        StatCPCBusiness.FilterStatistics request = new StatCPCBusiness.FilterStatistics();
+        if (jwtUserDetailsService.isAffiliate()) {
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
+        } else if (jwtUserDetailsService.isAdvertiser()) {
+            request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
         }
 
-
+        // Elementi padre
         JSONObject root = new JSONObject();
         JSONArray series = new JSONArray();
 
-        // gestione totale click
+        // CLICK :: gestione totale click
         JSONArray seriesCpc = new JSONArray();
-        dayOfYearMap.forEach((doy, year) -> {
-            StatCPCBusiness.Filter filterCPC = new StatCPCBusiness.Filter();
-            filterCPC.setDoy(Long.valueOf(doy));
-            filterCPC.setYear(Long.valueOf(year));
-            if (Boolean.FALSE.equals(jwtUserDetailsService.isAdmin()))
-                filterCPC.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-            Double tot = 0D;
-            for (WidgetCampaignDayCpc w : widgetCampaignDayCpcRepository.findAll(statCPCBusiness.getSpecificationCampaignDayCpc(filterCPC), pageableDoy))
-                tot = tot + w.getTotale();
+        for (int i = 9; i >= 0; i--) {
+            Long tot = cpcRepository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).get(0).gettotale();
             seriesCpc.put(tot);
-        });
+        }
         JSONObject cpc = new JSONObject();
         cpc.put("name", "Click");
         cpc.put("data", seriesCpc);
         series.put(cpc);
 
-        // gestione totale lead
-
+        // LEAD :: gestione totale lead
         JSONArray seriesCpl = new JSONArray();
-        dayOfYearMap.forEach((doy, year) -> {
-            StatCPLBusiness.Filter filterCPL = new StatCPLBusiness.Filter();
-            filterCPL.setDoy(Long.valueOf(doy));
-            filterCPL.setYear(Long.valueOf(year));
-            if (Boolean.FALSE.equals(jwtUserDetailsService.isAdmin()))
-                filterCPL.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-            Long totCpl = widgetCampaignDayCplRepository.findAll(statCPLBusiness.getSpecificationCampaignDayCpl(filterCPL), pageableDoy).getTotalElements();
-            seriesCpl.put(totCpl);
-        });
+        for (int i = 9; i >= 0; i--) {
+            Long tot = cplRepository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).get(0).gettotale();
+            seriesCpl.put(tot);
+        }
         JSONObject cpl = new JSONObject();
         cpl.put("name", "Lead");
         cpl.put("data", seriesCpl);
         series.put(cpl);
 
-        // gestione totale Valore
-
+        // VALORE GIORNO :: gestione totale Valore
         JSONArray seriesVal = new JSONArray();
-        dayOfYearMap.forEach((doy, year) -> {
-            Double tot = 0D;
-
-            StatCPCBusiness.Filter filterCPC = new StatCPCBusiness.Filter();
-            filterCPC.setDoy(Long.valueOf(doy));
-            filterCPC.setYear(Long.valueOf(year));
-            if (Boolean.FALSE.equals(jwtUserDetailsService.isAdmin()))
-                filterCPC.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-            for (WidgetCampaignDayCpc w : widgetCampaignDayCpcRepository.findAll(statCPCBusiness.getSpecificationCampaignDayCpc(filterCPC), pageableDoy))
-                tot = tot + w.getValore();
-
-            StatCPLBusiness.Filter filterCPL = new StatCPLBusiness.Filter();
-
-            filterCPL.setDoy(Long.valueOf(doy));
-            filterCPL.setYear(Long.valueOf(year));
-            if (Boolean.FALSE.equals(jwtUserDetailsService.isAdmin()))
-                filterCPL.setAffiliateId(jwtUserDetailsService.getAffiliateID());
-            for (WidgetCampaignDayCpc w : widgetCampaignDayCpcRepository.findAll(statCPCBusiness.getSpecificationCampaignDayCpc(filterCPC), pageableDoy))
-                tot = tot + w.getValore();
-
-            seriesVal.put(tot);
-        });
-        JSONObject val = new JSONObject();
+        for (int i = 9; i >= 0; i--) {
+            Double totCpc = cpcRepository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).get(0).getvalore();
+            Double totCpl = cplRepository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).get(0).getvalore();
+            seriesVal.put(totCpc + totCpl);
+        }
+                JSONObject val = new JSONObject();
         val.put("name", "Totale (€)");
         val.put("data", seriesVal);
         series.put(val);
@@ -123,7 +79,10 @@ public class StatBusiness {
         root.put("series", series);
 
         JSONArray x = new JSONArray();
-        dayOfYearMap.forEach((doy, year) -> x.put(today.withDayOfYear(Math.toIntExact(doy)).toString()));
+        for (int i = 9; i >= 0; i--) {
+            x.put(LocalDate.now().minusDays(i).toString());
+        }
+
         root.put("x", x);
 
         return root.toString();

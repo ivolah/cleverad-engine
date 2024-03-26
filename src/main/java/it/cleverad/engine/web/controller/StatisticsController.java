@@ -1,10 +1,9 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.*;
-import it.cleverad.engine.persistence.model.service.*;
+import it.cleverad.engine.persistence.model.service.TopCampagne;
+import it.cleverad.engine.persistence.model.service.WidgetAgent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,17 +15,15 @@ import java.util.List;
 public class StatisticsController {
 
     @Autowired
-    private ViewBusiness business;
-    @Autowired
     private StatCPCBusiness statCPCBusiness;
     @Autowired
     private StatCPLBusiness statCPLBusiness;
     @Autowired
     private StatCPMBusiness statCPMBusiness;
-
+    @Autowired
+    private StatCPSBusiness statCPSBusiness;
     @Autowired
     private StatBusiness statBusiness;
-
     @Autowired
     private AgentBusiness agentBusiness;
 
@@ -36,40 +33,64 @@ public class StatisticsController {
 
     @GetMapping(path = "/cpc/top")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<WidgetCampaignDayCpc> getStatTopCpc(@PathVariable(value = "6") Integer giorni) {
-        return statCPCBusiness.getTopCampaignsDayCpc(giorni);
+    public List<TopCampagne> getCPCTopCampaigns6DayRange() {
+        StatCPCBusiness.FilterStatistics request = new StatCPCBusiness.FilterStatistics();
+        request.setDays(6);
+        return statCPCBusiness.getTopCampaignsDayRange(request);
+    }
+
+    @GetMapping(path = "/cpc/top/valore")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public List<TopCampagne> getCPCValueTopCampaigns6DayRange() {
+        StatCPCBusiness.FilterStatistics request = new StatCPCBusiness.FilterStatistics();
+        request.setDays(6);
+        return statCPCBusiness.getValueTopCampaignsDayRange(request);
     }
 
     @GetMapping(path = "/cpc/campaign/day/total")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public String getStatTotaleDayCpc() {
-        return statCPCBusiness.getStatTotaleDayCpc();
-    }
-
-    @GetMapping(path = "/cpc/campaign/day")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<WidgetCampaignDayCpc> getStatCpcCampaignDay(StatCPCBusiness.Filter request, Pageable pageable) {
-        return statCPCBusiness.getStatCampaignDayCpc(request, pageable);
-    }
-
-    @GetMapping(path = "/cpc/campaign/{id}/day")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<WidgetCampaignDayCpc> getStatCpcCampaignDay(@PathVariable Long id, Pageable pageable) {
-        StatCPCBusiness.Filter request = new StatCPCBusiness.Filter();
-        request.setCampaignId(id);
-        return statCPCBusiness.getStatCampaignDayCpc(request, pageable);
-    }
-
-    @GetMapping(path = "/cpc/campaign/day/widget")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public String getStatCpcDayWidget() {
-        return statCPCBusiness.getWidgetCampaignsDayCpc();
+    public String getCPCStatTotale6Giorni(StatCPCBusiness.FilterStatistics request) {
+        if (request.getDays() == null) request.setDays(6);
+        return statCPCBusiness.getStatTotaleGiorno(request);
     }
 
     @GetMapping(path = "/dashboard/cpc/total/ten")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public String get10DayTotal() {
+    public String getCPC10DayTotal() {
         return statCPCBusiness.get10DayTotal();
+    }
+
+    /**
+     * ============================================================================================================
+     **/
+
+    @GetMapping(path = "/cpl/top")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public List<TopCampagne> getCPLTopCampaigns6DayRange() {
+        StatCPCBusiness.FilterStatistics request = new StatCPCBusiness.FilterStatistics();
+        request.setDays(6);
+        return statCPLBusiness.getTopCampaignsDayRange(request);
+    }
+
+    @GetMapping(path = "/cpl/top/valore")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public List<TopCampagne> getCPLValueTopCampaigns6DayRange() {
+        StatCPCBusiness.FilterStatistics request = new StatCPCBusiness.FilterStatistics();
+        request.setDays(6);
+        return statCPLBusiness.getValueTopCampaignsDayRange(request);
+    }
+
+    @GetMapping(path = "/cpl/campaign/day/total")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public String getCPLStatTotale6Giorni(StatCPCBusiness.FilterStatistics request) {
+        if (request.getDays() == null) request.setDays(6);
+        return statCPLBusiness.getStatTotaleGiorno(request);
+    }
+
+    @GetMapping(path = "/dashboard/cpl/total/ten")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public String getCPL10DayTotal() {
+        return statCPLBusiness.get10DayTotal();
     }
 
     /**
@@ -82,68 +103,33 @@ public class StatisticsController {
         return statCPMBusiness.getWidgetCampaignsDayCpm();
     }
 
-    @GetMapping(path = "/cpm/campaign/day/total")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public String getStatTotaleDayCpm(StatCPMBusiness.Filter request) {
-        return statCPMBusiness.getStatTotaleDayCpm();
-    }
-
     @GetMapping(path = "/cpm/top")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<WidgetCampaignDayCpm> getStatTopCpm() {
-        return statCPMBusiness.getTopCampaignsDayCpm();
+    public List<TopCampagne> getCPMTopCampaigns6DayRange() {
+        StatCPCBusiness.FilterStatistics request = new StatCPCBusiness.FilterStatistics();
+        request.setDays(6);
+        return statCPMBusiness.getTopCampaignsDayRange(request);
     }
 
-
-    @GetMapping(path = "/cpm/campaign/day")
+    @GetMapping(path = "/cpm/top/valore")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<WidgetCampaignDayCpm> getStatDayCpm(StatCPMBusiness.Filter request, Pageable pageable) {
-        return statCPMBusiness.getStatCampaignDayCpm(request, pageable);
+    public List<TopCampagne> getCPMValueTopCampaigns6DayRange() {
+        StatCPCBusiness.FilterStatistics request = new StatCPCBusiness.FilterStatistics();
+        request.setDays(6);
+        return statCPMBusiness.getValueTopCampaignsDayRange(request);
     }
 
-    @GetMapping(path = "/cpm/campaign/{id}/day")
+    @GetMapping(path = "/cpm/campaign/day/total")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<WidgetCampaignDayCpm> getStatCampaignDayCpm(@PathVariable Long id, Pageable pageable) {
-        StatCPMBusiness.Filter request = new StatCPMBusiness.Filter();
-        request.setCampaignId(id);
-        return statCPMBusiness.getStatCampaignDayCpm(request, pageable);
+    public String getCPMStatTotale6Giorni(StatCPCBusiness.FilterStatistics request) {
+        if (request.getDays() == null) request.setDays(6);
+        return statCPMBusiness.getStatTotaleGiorno(request);
     }
 
-
-    /**
-     * ============================================================================================================
-     **/
-
-    @GetMapping(path = "/cpl/top")
+    @GetMapping(path = "/dashboard/cpm/total/ten")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<WidgetCampaignDayCpl> getStatTopCpl() {
-        return statCPLBusiness.getTopCampaignsDayCpl();
-    }
-
-    @GetMapping(path = "/cpl/campaign/day/total")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public String getStatTotaleDayCpl(StatCPLBusiness.Filter request) {
-        return statCPLBusiness.getStatTotaleDayCpl(request);
-    }
-
-    @GetMapping(path = "/cpl/campaign/day")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<WidgetCampaignDayCpl> getStatCplDay(StatCPLBusiness.Filter request, Pageable pageable) {
-        return statCPLBusiness.getStatCampaignDayCpl(request, pageable);
-    }
-
-    @GetMapping(path = "/cpl/campaign/{id}/day")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<WidgetCampaignDayCpl> getStatCplCampaignDay(@PathVariable Long id, Pageable pageable) {
-        StatCPLBusiness.Filter request = new StatCPLBusiness.Filter();
-        request.setCampaignId(id);
-        return statCPLBusiness.getStatCampaignDayCpl(request, pageable);
-    }
-
-    @GetMapping(path = "/cpl/campaign/day/widget")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public String getStatCplDayWidget() {
-        return statCPLBusiness.getWidgetCampaignsDayCpl();
+    public String getCPM10DayTotal() {
+        return statCPMBusiness.get10DayTotal();
     }
 
     /**
@@ -152,28 +138,31 @@ public class StatisticsController {
 
     @GetMapping(path = "/cps/top")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<WidgetCampaignDayCps> getStatTopCps() {
-        return business.getTopCampaignsDayCps();
+    public List<TopCampagne> getCPSTopCampaigns6DayRange() {
+        StatCPCBusiness.FilterStatistics request = new StatCPCBusiness.FilterStatistics();
+        request.setDays(6);
+        return statCPSBusiness.getTopCampaignsDayRange(request);
     }
 
-    @GetMapping(path = "/cps/campaign/day")
+    @GetMapping(path = "/cps/top/valore")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<WidgetCampaignDayCps> getStatCpsCampaignDay(ViewBusiness.Filter request, Pageable pageable) {
-        return business.getStatCampaignDayCps(request, pageable);
+    public List<TopCampagne> getCPSValueTopCampaigns6DayRange() {
+        StatCPCBusiness.FilterStatistics request = new StatCPCBusiness.FilterStatistics();
+        request.setDays(6);
+        return statCPSBusiness.getValueTopCampaignsDayRange(request);
     }
 
-    @GetMapping(path = "/cps/campaign/{id}/day")
+    @GetMapping(path = "/cps/campaign/day/total")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<WidgetCampaignDayCps> getStatCpsCampaignDay(@PathVariable Long id, Pageable pageable) {
-        ViewBusiness.Filter request = new ViewBusiness.Filter();
-        request.setCampaignId(id);
-        return business.getStatCampaignDayCps(request, pageable);
+    public String getCPSStatTotale6Giorni(StatCPCBusiness.FilterStatistics request) {
+        if (request.getDays() == null) request.setDays(6);
+        return statCPSBusiness.getStatTotaleGiorno(request);
     }
 
-    @GetMapping(path = "/cps/campaign/day/widget")
+    @GetMapping(path = "/dashboard/cps/total/ten")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public String getStatCpsDayWidget() {
-        return business.getWidgetCampaignsDayCps();
+    public String getCPS10DayTotal() {
+        return statCPSBusiness.get10DayTotal();
     }
 
     /**

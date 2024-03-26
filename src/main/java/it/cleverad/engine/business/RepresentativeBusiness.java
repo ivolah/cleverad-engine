@@ -34,14 +34,12 @@ public class RepresentativeBusiness {
 
     @Autowired
     private RepresentativeRepository repository;
-
     @Autowired
     private AffiliateRepository affiliateRepository;
     @Autowired
     private AdvertiserRepository advertiserRepository;
     @Autowired
     private DictionaryRepository dictionaryRepository;
-
     @Autowired
     private Mapper mapper;
 
@@ -169,7 +167,6 @@ public class RepresentativeBusiness {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class BaseCreateRequest {
-
         private String name;
         private String surname;
         private String email;
@@ -177,7 +174,6 @@ public class RepresentativeBusiness {
         private String phone;
         private String mobilePrefix;
         private String mobile;
-
         private Long affiliateId;
         private Long advertiserId;
         private Long roleId;
@@ -188,7 +184,6 @@ public class RepresentativeBusiness {
     @AllArgsConstructor
     public static class Filter {
         private Long id;
-
         private String name;
         private String surname;
         private String email;
@@ -196,11 +191,9 @@ public class RepresentativeBusiness {
         private String phone;
         private String mobilePrefix;
         private String mobile;
-
         private Long affiliateId;
         private Long advertiserId;
         private Long roleId;
-
         private Boolean status;
     }
 

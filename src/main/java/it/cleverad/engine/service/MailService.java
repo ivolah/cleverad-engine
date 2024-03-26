@@ -197,7 +197,7 @@ public class MailService {
     }
 
     public void invioRichiesta(BaseCreateRequest request) {
-        AffiliateDTO affiliato = affiliateBusiness.findById(jwtUserDetailsService.getAffiliateID());
+        AffiliateDTO affiliato = affiliateBusiness.findById(jwtUserDetailsService.getAffiliateId());
         CampaignDTO campaign = campaignBusiness.findById(request.getCampaignId());
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(MAIL_INFO);

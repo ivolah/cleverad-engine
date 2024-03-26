@@ -262,7 +262,7 @@ public class TransactionCPLBusiness {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         if (!jwtUserDetailsService.getRole().equals("Admin")) {
             //      request.setApproved(true);
-            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
         }
         Page<TransactionCPL> page = cplRepository.findAll(getSpecificationCPL(request), pageable);
         return page.map(TransactionCPLDTO::from);
@@ -272,7 +272,7 @@ public class TransactionCPLBusiness {
         TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
         request.setCampaignId(id);
         if (!jwtUserDetailsService.getRole().equals("Admin")) {
-            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
         }
         Page<TransactionCPL> page = cplRepository.findAll(getSpecificationCPL(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id"))));
         return page.map(TransactionCPLDTO::from);

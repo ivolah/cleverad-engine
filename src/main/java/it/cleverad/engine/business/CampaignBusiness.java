@@ -2,10 +2,7 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.config.security.JwtUserDetailsService;
-import it.cleverad.engine.persistence.model.service.Affiliate;
-import it.cleverad.engine.persistence.model.service.Campaign;
-import it.cleverad.engine.persistence.model.service.CampaignCategory;
-import it.cleverad.engine.persistence.model.service.Media;
+import it.cleverad.engine.persistence.model.service.*;
 import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
@@ -37,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -71,8 +69,6 @@ public class CampaignBusiness {
     private CampaignAffiliateBusiness campaignAffiliateBusiness;
     @Autowired
     private AffiliateChannelCommissionCampaignBusiness affiliateChannelCommissionCampaignBusiness;
-    @Autowired
-    private MediaRepository mediaRepository;
     @Autowired
     private MediaBusiness mediaBusiness;
 
@@ -161,20 +157,30 @@ public class CampaignBusiness {
 
     // GET BY ID
     public CampaignDTO findById(Long id) {
-
         Campaign campaign = null;
-
-        if (jwtUserDetailsService.getRole().equals("Admin")) {
+        if (jwtUserDetailsService.isAdmin()) {
             campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
-        } else {
+        } else if (jwtUserDetailsService.isAdvertiser()) {
             Filter request = new Filter();
+            request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
             request.setId(id);
             campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
+        } else if (jwtUserDetailsService.isAffiliate()) {
+            Affiliate affiliate = affiliateRepository.findById(jwtUserDetailsService.getAffiliateId()).orElseThrow(() -> new ElementCleveradException("Affiliate", jwtUserDetailsService.getAffiliateId()));
+            AtomicReference<Boolean> boo = new AtomicReference<>(false);
+            affiliate.getCampaignAffiliates().stream().forEach(campaignAffiliate -> {
+                if (campaignAffiliate.getCampaign().getId().equals(id)) {
+                    boo.set(true);
+                }
+            });
+            if (boo.get()) {
+                campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
+            }
         }
 
-        if (campaign != null) return CampaignDTO.from(campaign);
-        else return null;
-
+        if (campaign != null) {
+            return CampaignDTO.from(campaign);
+        } else return null;
     }
 
     public CampaignDTO findByIdAdmin(Long id) {
@@ -212,11 +218,15 @@ public class CampaignBusiness {
     public Page<CampaignDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("name")));
         Page<Campaign> page;
-        if (jwtUserDetailsService.getRole().equals("Admin")) {
+        if (jwtUserDetailsService.isAdmin()) {
+            page = repository.findAll(getSpecification(request), pageable);
+            return page.map(CampaignDTO::from);
+        } else if (jwtUserDetailsService.isAdvertiser()) {
+            request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
             page = repository.findAll(getSpecification(request), pageable);
             return page.map(CampaignDTO::from);
         } else {
-            Affiliate cc = affiliateRepository.findById(jwtUserDetailsService.getAffiliateID()).orElseThrow(() -> new ElementCleveradException("Affiliate", jwtUserDetailsService.getAffiliateID()));
+            Affiliate cc = affiliateRepository.findById(jwtUserDetailsService.getAffiliateId()).orElseThrow(() -> new ElementCleveradException("Affiliate", jwtUserDetailsService.getAffiliateId()));
             List<Campaign> campaigns = new ArrayList<>();
             if (cc.getCampaignAffiliates() != null) {
                 campaigns = cc.getCampaignAffiliates().stream().map(campaignAffiliate -> {
@@ -268,7 +278,6 @@ public class CampaignBusiness {
     // TROVA LE CAMPAGNE DELL AFFILIATE
     public Page<CampaignDTO> getCampaignsAffiliate(Long affiliateId) {
         Affiliate cc = affiliateRepository.findById(affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", affiliateId));
-
         List<Campaign> campaigns = new ArrayList<>();
         if (cc.getCampaignAffiliates() != null) {
             campaigns = cc.getCampaignAffiliates().stream().map(campaignAffiliate -> {
@@ -276,14 +285,21 @@ public class CampaignBusiness {
                 return ccc;
             }).collect(Collectors.toList());
         }
+        Page<Campaign> page = new PageImpl<>(campaigns.stream().distinct().collect(Collectors.toList()));
+        return page.map(CampaignDTO::from);
+    }
 
+    // TROVA LE CAMPAGNE DELL ADVERTISER
+    public Page<CampaignDTO> getCampaignsAdvertiser(Long advertiserId) {
+        Advertiser advertiser = advertiserRepository.findById(advertiserId).orElseThrow(() -> new ElementCleveradException("Advertiser", advertiserId));
+        List<Campaign> campaigns = advertiser.getCampaigns().stream().collect(Collectors.toList());
         Page<Campaign> page = new PageImpl<>(campaigns.stream().distinct().collect(Collectors.toList()));
         return page.map(CampaignDTO::from);
     }
 
     public Page<CampaignBaseDTO> getCampaignsActive(Filter req, Pageable pageable) {
 
-        Long affiliateId = jwtUserDetailsService.getAffiliateID();
+        Long affiliateId = jwtUserDetailsService.getAffiliateId();
         List<Long> listaId = new ArrayList<>();
         affiliateRepository.findById(affiliateId).get().getCampaignAffiliates().stream().filter(campaignAffiliate -> campaignAffiliate.getCampaign().getStatus()).forEach(campaignAffiliate -> listaId.add(campaignAffiliate.getCampaign().getId()));
 
@@ -342,7 +358,7 @@ public class CampaignBusiness {
     public Page<CampaignBaseDTO> getCampaignsNot(Pageable pageable) {
         List<Long> listaId = new ArrayList<>();
         listaId.add(298L);
-        Long affiliateId = jwtUserDetailsService.getAffiliateID();
+        Long affiliateId = jwtUserDetailsService.getAffiliateId();
         affiliateRepository.findById(affiliateId).get().getCampaignAffiliates().stream()
                 .forEach(campaignAffiliate -> listaId.add(campaignAffiliate.getCampaign().getId()));
         Filter requestNot = new Filter();
@@ -387,7 +403,7 @@ public class CampaignBusiness {
 
         if (listaId.size() > 0) {
 
-            Long affiliateId = jwtUserDetailsService.getAffiliateID();
+            Long affiliateId = jwtUserDetailsService.getAffiliateId();
 
             Page<Campaign> page = null;
             Filter request = new Filter();
@@ -461,28 +477,24 @@ public class CampaignBusiness {
             if (request.getCreationDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("creationDate"), LocalDateTime.ofInstant(request.getCreationDateTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
             }
-
             if (request.getLastModificationDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("lastModificationDate"), LocalDateTime.ofInstant(request.getLastModificationDateFrom(), ZoneOffset.UTC)));
             }
             if (request.getLastModificationDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("lastModificationDate"), LocalDateTime.ofInstant(request.getLastModificationDateTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
             }
-
             if (request.getStartDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), request.getStartDateFrom()));
             }
             if (request.getStartDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), (request.getStartDateTo().plus(1, ChronoUnit.DAYS))));
             }
-
             if (request.getEndDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("endDate"), (request.getEndDateFrom())));
             }
             if (request.getEndDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("endDate"), (request.getEndDateTo().plus(1, ChronoUnit.DAYS))));
             }
-
             if (request.getIdListIn() != null) {
                 CriteriaBuilder.In<Long> inClause = cb.in(root.get("id"));
                 for (Long id : request.getIdListIn()) {
@@ -490,7 +502,6 @@ public class CampaignBusiness {
                 }
                 predicates.add(inClause);
             }
-
             if (request.getIdListNotIn() != null) {
                 CriteriaBuilder.In<Long> inClauseNot = cb.in(root.get("id"));
                 for (Long id : request.getIdListNotIn()) {
@@ -498,26 +509,20 @@ public class CampaignBusiness {
                 }
                 predicates.add(inClauseNot.not());
             }
-
             if (request.getCheckPhoneNumber() != null) {
                 predicates.add(cb.equal(root.get("checkPhoneNumber"), request.getCheckPhoneNumber()));
             }
-
             if (request.getCategoryId() != null) {
                 CriteriaBuilder.In<Long> inClause = cb.in(root.get("campaigncategory").get("id"));
                 predicates.add(inClause.value(request.getCategoryId()));
             }
-
             if (request.getDisableDueDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("endDate"), request.getDisableDueDateTo()));
             }
-
             if (request.getAdvertiserId() != null) {
                 predicates.add(cb.equal(root.get("advertiser").get("id"), request.getAdvertiserId()));
             }
-
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
-
             return completePredicate;
         };
     }

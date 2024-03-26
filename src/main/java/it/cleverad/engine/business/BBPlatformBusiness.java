@@ -49,8 +49,8 @@ public class BBPlatformBusiness {
     // CREATE
     public BBPlatformDTO create(BaseCreateRequest request) {
         BBPlatform map = mapper.map(request, BBPlatform.class);
-        if (!jwtUserDetailsService.getRole().equals("Admin")) {
-            map.setAffiliate(affiliateRepository.findById(jwtUserDetailsService.getAffiliateID()).orElseThrow(() -> new ElementCleveradException("Affilaite", jwtUserDetailsService.getAffiliateID())));
+        if (!jwtUserDetailsService.isAdmin()) {
+            map.setAffiliate(affiliateRepository.findById(jwtUserDetailsService.getAffiliateId()).orElseThrow(() -> new ElementCleveradException("Affilaite", jwtUserDetailsService.getAffiliateId())));
         }else{
             map.setAffiliate(affiliateRepository.findById(request.getBrandbuddiesId()).orElseThrow(() -> new ElementCleveradException("Affilaite", request.getBrandbuddiesId())));
         }

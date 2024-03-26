@@ -6,6 +6,7 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 @Service
@@ -20,7 +21,13 @@ public class FileStoreService {
 
     public byte[] retrieveFile(String filePath) throws IOException {
         File daScaricare = new File(filePath);
-        return FileUtils.readFileToByteArray(daScaricare);
+        byte[] bytes = null;
+        try{
+            FileUtils.readFileToByteArray(daScaricare);
+        }catch (FileNotFoundException exception){
+            log.error("File " + filePath + " not found.");
+        }
+        return bytes;
     }
 
     public Boolean deleteFile(String filePath) {

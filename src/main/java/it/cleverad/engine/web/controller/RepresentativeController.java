@@ -82,7 +82,7 @@ public class RepresentativeController {
     @GetMapping("/affiliate")
     @ResponseStatus(HttpStatus.OK)
     public Page<RepresentativeDTO> findByAffilaite() {
-        return business.findByIdAffilaite(jwtUserDetailsService.getAffiliateID());
+        return business.findByIdAffilaite(jwtUserDetailsService.getAffiliateId());
     }
 
 

@@ -86,6 +86,8 @@ public class CampaignBudgetBusiness {
         map.setCanali(dictionaryRepository.findById(request.canaleId).orElseThrow(() -> new ElementCleveradException("Dictionary-canale", request.canaleId)));
         map.setStatus(true);
         map.setBudgetIniziale(DoubleRounder.round(request.getPayout() * request.capIniziale, 2));
+        map.setStatoPagato(false);
+        map.setStatoFatturato(false);
         if (request.getScarto() == null) map.setScarto(0D);
         return CampaignBudgetDTO.from(repository.save(map));
     }
@@ -254,7 +256,6 @@ public class CampaignBudgetBusiness {
         return page.map(CampaignBudgetDTO::from);
     }
 
-
     /**
      * ============================================================================================================
      **/
@@ -293,6 +294,12 @@ public class CampaignBudgetBusiness {
             }
             if (request.getStatus() != null) {
                 predicates.add(cb.equal(root.get("status"), request.getStatus()));
+            }
+            if (request.getStatoFatturato() != null) {
+                predicates.add(cb.equal(root.get("statoFatturato"), request.getStatoFatturato()));
+            }
+            if (request.getStatoPagato() != null) {
+                predicates.add(cb.equal(root.get("statoPagato"), request.getStatoPagato()));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -390,6 +397,8 @@ public class CampaignBudgetBusiness {
         private Double fatturato;
         private Long fatturaId;
         private Boolean status;
+        private Boolean statoFatturato;
+        private Boolean statoPagato;
     }
 
     @Data

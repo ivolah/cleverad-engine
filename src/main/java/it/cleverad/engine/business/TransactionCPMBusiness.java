@@ -65,7 +65,6 @@ public class TransactionCPMBusiness {
     @Autowired
     private DictionaryRepository dictionaryRepository;
 
-
     /**
      * ============================================================================================================
      **/
@@ -203,7 +202,7 @@ public class TransactionCPMBusiness {
         if (jwtUserDetailsService.getRole().equals("Admin")) {
         } else {
             //    request.setApproved(true);
-            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
         }
         Page<TransactionCPM> page = cpmRepository.findAll(getSpecificationCPM(request), pageable);
         return page.map(TransactionCPMDTO::from);

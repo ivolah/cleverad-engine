@@ -80,7 +80,7 @@ public class BBLinkBusiness {
         mediaBusiness.searchBB().stream().forEach(mediaDTO -> {
 
             // trova target
-            List<Long> chanelBBs = channelBusiness.getBrandBuddies(jwtUserDetailsService.getAffiliateID());
+            List<Long> chanelBBs = channelBusiness.getBrandBuddies(jwtUserDetailsService.getAffiliateId());
             String channelId = "0";
             if (chanelBBs.size() > 0) channelId = String.valueOf(chanelBBs.get(0));
 
@@ -92,7 +92,7 @@ public class BBLinkBusiness {
             if (link.startsWith(url)) {
                 //log.info("LINK {} :: >>> TARGET :: {}", link, url);
                 Long campaignId = mediaDTO.getCampaignId();
-                String referral = referralService.creaEncoding(Long.toString(campaignId), String.valueOf(mediaDTO.getId()), String.valueOf(jwtUserDetailsService.getAffiliateID()), channelId, "0");
+                String referral = referralService.creaEncoding(Long.toString(campaignId), String.valueOf(mediaDTO.getId()), String.valueOf(jwtUserDetailsService.getAffiliateId()), channelId, "0");
                 //generazione short link
                 String alias = "BB-" + RandomStringUtils.randomAlphanumeric(6);
                 TinyData tinyUrlData = tinyUrlService.createShort(alias, "https://tracking.cleveradserver.com/click?refId=" + referral + "&urlRef=" + request.getLink());
@@ -115,7 +115,7 @@ public class BBLinkBusiness {
                         map.setCommission(commission);
                     }
 
-                    map.setAffiliate(affiliateRepository.findById(jwtUserDetailsService.getAffiliateID()).orElseThrow(() -> new ElementCleveradException("Affilaite", jwtUserDetailsService.getAffiliateID())));
+                    map.setAffiliate(affiliateRepository.findById(jwtUserDetailsService.getAffiliateId()).orElseThrow(() -> new ElementCleveradException("Affilaite", jwtUserDetailsService.getAffiliateId())));
                     map.setCampaign(campaignRepository.findById(campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", campaignId)));
 
                     dto[0] = BBLinkDTO.from(repository.save(map));

@@ -44,7 +44,7 @@ public class TransactionAllBusiness {
     // GET BY ID
     public TransactionStatusDTO findById(Long id) {
         ViewTransactionStatus transaction = null;
-        if (jwtUserDetailsService.getRole().equals("Admin")) {
+        if (jwtUserDetailsService.isAdmin()) {
             transaction = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction ALL", id));
         }
         return TransactionStatusDTO.from(transaction);
@@ -55,10 +55,14 @@ public class TransactionAllBusiness {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("dateTime")));
 
         // gestione api .../all/affiliate
-        if (!jwtUserDetailsService.getRole().equals("Admin")) {
+        if (jwtUserDetailsService.isAffiliate()) {
             filter.setValueNotZero(true);
-            filter.setForAffiliate(true);
-            filter.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+            filter.setForAffiliate(true);// nascodne delle transazioni
+            filter.setAffiliateId(jwtUserDetailsService.getAffiliateId());
+        } else if (jwtUserDetailsService.isAdvertiser()) {
+            filter.setValueNotZero(true);
+            filter.setForAffiliate(true); // nascodne delle transazioni
+            filter.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
         }
 
         Page<ViewTransactionStatus> page = repository.findAll(getSpecification(filter), pageable);
@@ -94,7 +98,6 @@ public class TransactionAllBusiness {
         Page<ViewTransactionStatus> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(TransactionStatusDTO::from);
     }
-
 
     /**
      * ============================================================================================================
@@ -168,33 +171,27 @@ public class TransactionAllBusiness {
             if (request.getDictionaryId() != null) {
                 predicates.add(cb.equal(root.get("dictionaryId"), request.getDictionaryId()));
             }
-
             if (request.getStatusId() != null) {
                 predicates.add(cb.equal(root.get("statusId"), request.getStatusId()));
             }
-
             if (request.getCreationDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("dateTime"), request.getCreationDateFrom()));
             }
             if (request.getCreationDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), request.getCreationDateTo()));
             }
-
             if (request.getDateTimeFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("dateTime"), request.getDateTimeFrom()));
             }
             if (request.getDateTimeTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), request.getDateTimeTo()));
             }
-
             if (request.getValueNotZero() != null && request.getValueNotZero()) {
                 predicates.add(cb.notEqual(root.get("value"), "0"));
             }
-
             if (request.getPayoutPresent() != null) {
                 predicates.add(cb.equal(root.get("payoutPresent"), request.getPayoutPresent()));
             }
-
             if (request.getDictionaryIdIn() != null) {
                 CriteriaBuilder.In<Long> inClause = cb.in(root.get("dictionaryId"));
                 for (Long id : request.getDictionaryIdIn()) {
@@ -202,7 +199,6 @@ public class TransactionAllBusiness {
                 }
                 predicates.add(inClause);
             }
-
             if (request.getStatusIdIn() != null) {
                 CriteriaBuilder.In<Long> inClause = cb.in(root.get("statusId"));
                 for (Long id : request.getStatusIdIn()) {
@@ -210,7 +206,6 @@ public class TransactionAllBusiness {
                 }
                 predicates.add(inClause);
             }
-
             if (request.getNotInDictionaryId() != null) {
                 CriteriaBuilder.In<Long> inClauseNot = cb.in(root.get("dictionaryId"));
                 for (Long id : request.getNotInDictionaryId()) {
@@ -218,7 +213,6 @@ public class TransactionAllBusiness {
                 }
                 predicates.add(inClauseNot.not());
             }
-
             if (request.getNotInStatusId() != null) {
                 CriteriaBuilder.In<Long> inClauseNot = cb.in(root.get("statusId"));
                 for (Long id : request.getNotInStatusId()) {
@@ -226,7 +220,6 @@ public class TransactionAllBusiness {
                 }
                 predicates.add(inClauseNot.not());
             }
-
             if (request.getDataList() != null && request.getDataList().length() > 3) {
                 log.info("Dentro :: ", request.getDataList());
                 CriteriaBuilder.In<String> inClause = cb.in(cb.upper(root.get("data")));
@@ -235,7 +228,6 @@ public class TransactionAllBusiness {
                 });
                 predicates.add((inClause));
             }
-
             // filtro solo per affiliati transazioni non mostrate
             if (request.getForAffiliate()) {
                 // prendo gli approvati
@@ -299,7 +291,6 @@ public class TransactionAllBusiness {
         private Boolean payoutPresent;
         private String dataList;
         private Boolean forAffiliate = false;
-
     }
 
 }

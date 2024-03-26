@@ -2,7 +2,9 @@ package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.AdvertiserBusiness;
 import it.cleverad.engine.business.RepresentativeBusiness;
+import it.cleverad.engine.business.UserBusiness;
 import it.cleverad.engine.web.dto.AdvertiserDTO;
+import it.cleverad.engine.web.dto.UserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +22,7 @@ public class AdvertiserController {
     private AdvertiserBusiness business;
 
     @Autowired
-    private RepresentativeBusiness representativeBusiness;
+    private UserBusiness userBusiness;
 
     /**
      * ============================================================================================================
@@ -68,6 +70,36 @@ public class AdvertiserController {
         return business.enable(id);
     }
 
+    /**
+     * ============================================================================================================
+     **/
+
+
+    @GetMapping("/{id}/operators")
+    @ResponseStatus(HttpStatus.OK)
+    public Page<UserDTO> getOperators(@PathVariable Long id, @PageableDefault(value = Integer.MAX_VALUE) Pageable pageable) {
+        return userBusiness.searchByAdvertiserId(id, pageable);
+    }
+
+    @PostMapping(value = "/{id}/operator", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public UserDTO create(@ModelAttribute UserBusiness.BaseCreateRequest request) {
+        request.setRoleId(555L);
+        request.setRole("Advertiser");
+        return userBusiness.create(request);
+    }
+
+    @DeleteMapping("/{id}/operator")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void deleteOperator(@PathVariable Long id) {
+        this.userBusiness.delete(id);
+    }
+
+    @PatchMapping(path = "/{id}/operator")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public UserDTO updateOperator(@PathVariable Long id, @RequestBody UserBusiness.Filter request) {
+        return userBusiness.update(id, request);
+    }
 
     /**
      * ============================================================================================================

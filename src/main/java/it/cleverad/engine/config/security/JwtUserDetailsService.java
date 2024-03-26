@@ -45,7 +45,7 @@ public class JwtUserDetailsService implements UserDetailsService {
         return new JSONObject(payload).getString("sub");
     }
 
-    public Long getAffiliateID() {
+    public Long getAffiliateId() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         if (userBusiness.findByUsername(username).getAffiliateId() != null)
             return userBusiness.findByUsername(username).getAffiliateId();
@@ -58,11 +58,19 @@ public class JwtUserDetailsService implements UserDetailsService {
             return userBusiness.findByUsername(username).getId();
         else return 0L;
     }
+    public Long getAdvertiserId() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (userBusiness.findByUsername(username).getAdvertiserId() != null)
+            return userBusiness.findByUsername(username).getAdvertiserId();
+        else return 0L;
+    }
 
     public String getRole() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         if (username.equals("anonymousUser") || userBusiness.findByUsername(username).getRoleId() == 3) {
             return "Admin";
+        } else if (userBusiness.findByUsername(username).getRoleId() == 555) {
+            return "Advertiser";
         } else {
             return "User";
         }
@@ -70,8 +78,16 @@ public class JwtUserDetailsService implements UserDetailsService {
 
     public Boolean isAdmin() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
         return username.equals("anonymousUser") || userBusiness.findByUsername(username).getRoleId() == 3;
+    }
+
+    public Boolean isAdvertiser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userBusiness.findByUsername(username).getRoleId() == 555;
+    }
+    public Boolean isAffiliate() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userBusiness.findByUsername(username).getRoleId() == 4;
     }
 
     public Long getAffilaite() {

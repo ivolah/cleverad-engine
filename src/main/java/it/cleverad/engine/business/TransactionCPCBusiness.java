@@ -247,7 +247,7 @@ public class TransactionCPCBusiness {
     public Page<TransactionCPCDTO> searchByAffiliateCpc(Filter request, Long id, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         if (!jwtUserDetailsService.getRole().equals("Admin")) {
-            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
         }
         Page<TransactionCPC> page = cpcRepository.findAll(getSpecificationCPC(request), pageable);
         return page.map(TransactionCPCDTO::from);

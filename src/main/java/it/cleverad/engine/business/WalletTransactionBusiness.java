@@ -78,7 +78,7 @@ public class WalletTransactionBusiness {
     // SEARCH PAGINATED
     public Page<WalletTransactionDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-        if (!jwtUserDetailsService.isAdmin()) request.setWalletId(jwtUserDetailsService.getAffiliateID());
+        if (!jwtUserDetailsService.isAdmin()) request.setWalletId(jwtUserDetailsService.getAffiliateId());
         Page<WalletTransaction> page = repository.findAll(getSpecification(request), pageable);
         return page.map(WalletTransactionDTO::from);
     }
@@ -86,7 +86,7 @@ public class WalletTransactionBusiness {
     public Page<WalletTransactionDTO> findByIdAffilaite(Long id) {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")));
         Filter request = new Filter();
-        if (!jwtUserDetailsService.isAdmin() && id == null) id = jwtUserDetailsService.getAffiliateID();
+        if (!jwtUserDetailsService.isAdmin() && id == null) id = jwtUserDetailsService.getAffiliateId();
         WalletDTO dto = walletBusiness.findByIdAffilaite(id).stream().findFirst().get();
         request.setWalletId(dto.getId());
         Page<WalletTransaction> page = repository.findAll(getSpecification(request), pageable);
@@ -102,7 +102,7 @@ public class WalletTransactionBusiness {
 
     public Page<WalletTransactionDTO> searchLast7Days(Filter request) {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")));
-        if (!jwtUserDetailsService.isAdmin()) request.setWalletId(jwtUserDetailsService.getAffiliateID());
+        if (!jwtUserDetailsService.isAdmin()) request.setWalletId(jwtUserDetailsService.getAffiliateId());
         Page<WalletTransaction> page = repository.findAll(getSpecification(request), pageable);
         return page.map(WalletTransactionDTO::from);
     }

@@ -34,7 +34,7 @@ public class BBLinkController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<BBLinkDTO> search(BBLinkBusiness.Filter request, Pageable pageable) {
         if (!jwtUserDetailsService.getRole().equals("Admin")) {
-            request.setBrandbuddiesId(jwtUserDetailsService.getAffiliateID());
+            request.setBrandbuddiesId(jwtUserDetailsService.getAffiliateId());
         }
         return business.search(request, pageable);
     }

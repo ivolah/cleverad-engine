@@ -189,7 +189,7 @@ public class TransactionCPSBusiness {
         if (jwtUserDetailsService.getRole().equals("Admin")) {
         } else {
             //    request.setApproved(true);
-            request.setAffiliateId(jwtUserDetailsService.getAffiliateID());
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
         }
         Page<TransactionCPS> page = cpsRepository.findAll(getSpecificationCPS(request), pageable);
         return page.map(TransactionCPSDTO::from);

@@ -2,10 +2,12 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.persistence.model.service.User;
+import it.cleverad.engine.persistence.repository.service.AdvertiserRepository;
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
 import it.cleverad.engine.persistence.repository.service.UserRepository;
 import it.cleverad.engine.service.MailService;
+import it.cleverad.engine.web.dto.AdvertiserDTO;
 import it.cleverad.engine.web.dto.AffiliateDTO;
 import it.cleverad.engine.web.dto.UserDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -43,19 +45,20 @@ public class UserBusiness {
 
     @Autowired
     private UserRepository repository;
-
     @Autowired
     private AffiliateBusiness affiliateBusiness;
     @Autowired
-    private MailService mailService;
-    @Autowired
     private AffiliateRepository affiliateRepository;
     @Autowired
+    private AdvertiserBusiness advertiserBusiness;
+    @Autowired
+    private AdvertiserRepository advertiserRepository;
+    @Autowired
+    private MailService mailService;
+    @Autowired
     private DictionaryRepository dictionaryRepository;
-
     @Autowired
     private Mapper mapper;
-
     @Autowired
     private PasswordEncoder bcryptEncoder;
 
@@ -66,13 +69,17 @@ public class UserBusiness {
     // CREATE
     public UserDTO create(BaseCreateRequest request) {
         User map = mapper.map(request, User.class);
-        map.setRole("User");
+        if (map.getRole() == null)
+            map.setRole("User");
         map.setCreationDate(LocalDateTime.now());
         map.setPassword(bcryptEncoder.encode(request.getPassword()));
-        map.setAffiliate(affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId)));
+        if (request.getAffiliateId() != null)
+            map.setAffiliate(affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId)));
+        if (request.getAdvertiserId() != null)
+            map.setAdvertiser(advertiserRepository.findById(request.advertiserId).orElseThrow(() -> new ElementCleveradException("Advertser", request.advertiserId)));
         map.setDictionary(dictionaryRepository.findById(request.roleId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.roleId)));
         UserDTO dto = UserDTO.from(repository.save(map));
-        log.info("CREATO UTENTE  :: " + dto);
+        log.info("::: CREATO UTENTE ::: {}", dto);
         return dto;
     }
 
@@ -85,7 +92,6 @@ public class UserBusiness {
     // GET BY username
     public UserDTO findByUsername(String username) {
         try {
-            // log.debug("USER ::" + username);
             if (username.equals("anonymousUser")) {
                 UserDTO dto = new UserDTO();
                 dto.setRole("Admin");
@@ -99,11 +105,16 @@ public class UserBusiness {
 
                     if (dto.getRoleId() == 3) {
                         dto.setRole("Admin");
-                    } else {
+                    } else if (dto.getRoleId() == 4) {
                         dto.setRole("User");
                         AffiliateDTO affiliate = affiliateBusiness.findById(dto.getAffiliateId());
                         dto.setAffiliateName(affiliate.getName());
+                    } else if (dto.getRoleId() == 555) {
+                        dto.setRole("Advertiser");
+                        AdvertiserDTO advertiserDTO = advertiserBusiness.findById(dto.getAdvertiserId());
+                        dto.setAdvertiserName(advertiserDTO.getName());
                     }
+
                     return dto;
                 } else {
                     log.warn("No username found :: {}", username);
@@ -112,9 +123,9 @@ public class UserBusiness {
             } else {
                 UserDTO dto = new UserDTO();
                 dto.setRole("Admin");
+                log.warn("USERNAME VUOTO?? - setto Administrator");
                 return dto;
             }
-
         } catch (Exception e) {
             log.error("Errore in findByUsername", e);
             return null;
@@ -152,7 +163,6 @@ public class UserBusiness {
         }
     }
 
-
     // DELETE BY ID
     public void delete(Long id) {
         try {
@@ -167,6 +177,19 @@ public class UserBusiness {
     public void deleteByIdAffiliate(Long affiliateId) {
         try {
             Page<UserDTO> page = this.searchByAffiliateID(affiliateId, PageRequest.of(0, Integer.MAX_VALUE));
+            page.stream().forEach(userDTO -> {
+                repository.deleteById(userDTO.getId());
+            });
+        } catch (ConstraintViolationException ex) {
+            throw ex;
+        } catch (Exception ee) {
+            throw new PostgresDeleteCleveradException(ee);
+        }
+    }
+
+    public void deleteByIdAdvertiser(Long advertiserId) {
+        try {
+            Page<UserDTO> page = this.searchByAdvertiserId(advertiserId, PageRequest.of(0, Integer.MAX_VALUE));
             page.stream().forEach(userDTO -> {
                 repository.deleteById(userDTO.getId());
             });
@@ -192,17 +215,19 @@ public class UserBusiness {
         return this.search(request, pageable);
     }
 
+    // SEARCH By AFFILIATE ID
+    public Page<UserDTO> searchByAdvertiserId(Long advertiserId, Pageable pageable) {
+        Filter request = new Filter();
+        request.setAdvertiserId(advertiserId);
+        return this.search(request, pageable);
+    }
+
     // UPDATE
     public UserDTO update(Long id, Filter filter) {
-        User wser = repository.findById(id).get();
-
-        UserDTO userDTOfrom = UserDTO.from(wser);
-        mapper.map(filter, userDTOfrom);
-
-        User mappedEntity = mapper.map(wser, User.class);
-        mapper.map(userDTOfrom, mappedEntity);
-
-        return UserDTO.from(repository.save(mappedEntity));
+        User wser = repository.findById(id).orElseThrow(() -> new ElementCleveradException("User", id));
+        filter.setId(id);
+        mapper.map(filter, wser);
+        return UserDTO.from(repository.save(wser));
     }
 
     public UserDTO resetPassword(Long id, String password) throws Exception {
@@ -274,7 +299,10 @@ public class UserBusiness {
         request.setSurname(user.getSurname());
         request.setName(user.getName());
         request.setStatus(true);
-        request.setAffiliateId(user.getAffiliate().getId());
+        if (user.getAffiliate() != null)
+            request.setAffiliateId(user.getAffiliate().getId());
+        if (user.getAdvertiser() != null)
+            request.setAffiliateId(user.getAdvertiser().getId());
         request.setRoleId(4L);
         request.setEmail(user.getEmail());
         request.setRole("User");
@@ -323,6 +351,9 @@ public class UserBusiness {
             if (request.getAffiliateId() != null) {
                 predicates.add(cb.equal(root.get("affiliate").get("id"), request.getAffiliateId()));
             }
+            if (request.getAdvertiserId() != null) {
+                predicates.add(cb.equal(root.get("advertiser").get("id"), request.getAdvertiserId()));
+            }
             if (request.getRoleId() != null) {
                 predicates.add(cb.equal(root.get("dictionary").get("id"), request.getRoleId()));
             }
@@ -355,6 +386,7 @@ public class UserBusiness {
         private String email;
         private Boolean status;
         private Long affiliateId;
+        private Long advertiserId;
         private Long roleId;
         private String password;
         private String role;
@@ -376,6 +408,7 @@ public class UserBusiness {
         private Instant lastLoginTo;
         private String uuid;
         private String password;
+        private Long advertiserId;
     }
 
     @Data
