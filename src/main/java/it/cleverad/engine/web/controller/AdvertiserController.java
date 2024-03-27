@@ -97,9 +97,29 @@ public class AdvertiserController {
 
     @PatchMapping(path = "/{id}/operator")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public UserDTO updateOperator(@PathVariable Long id, @RequestBody UserBusiness.Filter request) {
+    public UserDTO update(@PathVariable Long id, @RequestBody UserBusiness.Filter request) {
         return userBusiness.update(id, request);
     }
+
+    @PatchMapping(path = "/{id}/operator/reset")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public UserDTO reset(@PathVariable Long id, @RequestBody UserBusiness.Confirm request) throws Exception {
+        return userBusiness.resetPassword(id, request.getPassword());
+    }
+
+    @PatchMapping(path = "/operator/reset/user")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public UserDTO reset(@RequestBody UserBusiness.Confirm request) throws Exception {
+        return userBusiness.resetPasswordUsername(request.getUsername(), request.getPassword());
+    }
+
+    @PatchMapping(path = "/operator/reset/request")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public UserDTO resetRequest(@RequestBody UserBusiness.Confirm request) throws Exception {
+        return userBusiness.requestResetPassword(request.getUsername(), false);
+    }
+
+
 
     /**
      * ============================================================================================================

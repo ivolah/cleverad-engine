@@ -243,31 +243,37 @@ public class UserBusiness {
         return UserDTO.from(repository.save(wser));
     }
 
-    public UserDTO requestResetPassword(String username) throws Exception {
+    public UserDTO requestResetPassword(String username, Boolean tipoAffilaite) throws Exception {
 
         if (StringUtils.isNotBlank(username)) {
-            UserDTO u = this.findByUsername(username);
 
-            String uuid = UUID.randomUUID().toString();
-            log.info("RESET PASSWORD sostituisco nome utenza  " + username + "(" + u.getId() + ") in uuid " + uuid);
+            UserDTO userDTO = this.findByUsername(username);
+            if (userDTO != null) {
+                String uuid = UUID.randomUUID().toString();
+                log.info("RESET PASSWORD sostituisco nome utenza  " + username + " (" + userDTO.getId() + ") in uuid " + uuid);
 
-            User wser = repository.findById(u.getId()).orElseThrow(() -> new ElementCleveradException("User", u.getId()));
-            wser.setPassword(uuid);
-            repository.save(wser);
+                User wser = repository.findById(userDTO.getId()).orElse(null);
+                wser.setPassword(uuid);
+                repository.save(wser);
 
-            if (u != null) {
-                AffiliateDTO affiliate = affiliateBusiness.findById(u.getAffiliateId());
-
-                // invio mail USER
-                MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
-                if (affiliate.getBrandbuddies()) mailRequest.setTemplateId(23L);
-                else mailRequest.setTemplateId(3L);
-                mailRequest.setAffiliateId(u.getAffiliateId());
-                mailRequest.setUserId(u.getId());
-                mailRequest.setEmail(u.getEmail());
-
-                mailService.invio(mailRequest);
-
+                if (userDTO != null) {
+                    MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
+                    if(tipoAffilaite) {
+                        AffiliateDTO affiliate = affiliateBusiness.findById(userDTO.getAffiliateId());
+                        // invio mail USER Affilaite
+                        if (affiliate.getBrandbuddies()) mailRequest.setTemplateId(23L);
+                        else mailRequest.setTemplateId(3L);
+                        mailRequest.setAffiliateId(userDTO.getAffiliateId());
+                    }
+                    else {
+                        // invio mail USER ADVERTISER
+                        mailRequest.setAdvertiserId(userDTO.getAdvertiserId());
+                        mailRequest.setTemplateId(3L);
+                    }
+                    mailRequest.setUserId(userDTO.getId());
+                    mailRequest.setEmail(userDTO.getEmail());
+                    mailService.invio(mailRequest);
+                }
             }
             return null;
         } else {

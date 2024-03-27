@@ -45,6 +45,8 @@ public class MailService {
     @Autowired
     PayoutBusiness payoutBusiness;
     @Autowired
+    AdvertiserBusiness advertiserBusiness;
+    @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
     @Autowired
     private JavaMailSender emailSender;
@@ -104,6 +106,7 @@ public class MailService {
         ChannelDTO channelDTO = request.channelId != null ? channelBusiness.findById(request.channelId) : null;
         PlannerDTO plannerDTO = request.plannerId != null ? plannerBusiness.findById(request.plannerId) : null;
         PayoutDTO payoutDTO = request.payoutId != null ? payoutBusiness.findById(request.payoutId) : null;
+        AdvertiserDTO advertiserDTO = request.advertiserId != null ?  advertiserBusiness.findById(request.advertiserId) : null;
 
         if (affiliate != null && StringUtils.isBlank(affiliate.getIban()))
             affiliate.setIban(">>> INSERISCI IL TUO IBAN <<<");
@@ -116,6 +119,7 @@ public class MailService {
         if (request.campaignId != null) model.put("plannerName", campaign.getPlannerName());
         if (request.status != null) model.put("status", request.status);
         model.put("affiliate", affiliate);
+        model.put("advertiser", advertiserDTO);
         model.put("campaign", campaign);
         model.put("channel", channelDTO);
         model.put("planner", plannerDTO);
@@ -227,6 +231,7 @@ public class MailService {
         private Long templateId;
         private Long campaignId;
         private Long affiliateId;
+        private Long advertiserId;
         private Long channelId;
         private Long userId;
         private Long payoutId;

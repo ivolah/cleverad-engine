@@ -49,6 +49,18 @@ public class RigeneraController {
         rigeneraCPMBusiness.rigenera(request.getYear(), request.getMonth(), request.getDay());
     }
 
+    @PostMapping("/cpl/revenue")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void manageCPLRevenue(@ModelAttribute RigeneraCPLBusiness.FilterUpdate request) {
+        rigeneraCPLBusiness.ricalcola(request.getYear(), request.getMonth(), request.getDay(), request.getAffiliateId(), request.getCampaignId());
+    }
+
+    @PostMapping("/cpc/revenue")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void manageCPCRvenu(@ModelAttribute RigeneraCPCBusiness.FilterUpdate request) {
+        rigeneraCPCBusiness.ricalcola(request.getYear(), request.getMonth(), request.getDay(), request.getAffiliateId(), request.getCampaignId());
+    }
+
     /**
      * ============================================================================================================
      **/
