@@ -88,7 +88,6 @@ public class ManageCPC {
 
         // cerco gli ip vicini
 
-
         // GESTICO I CLICK E CREO TRANSAZIONE
         trasformaTrackingCPC();
 
