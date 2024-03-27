@@ -354,4 +354,8 @@ public class RigeneraCPCBusiness {
         private Long campaignId;
     }
 
+
+
+
+
 }

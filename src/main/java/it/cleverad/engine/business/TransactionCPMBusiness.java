@@ -76,15 +76,14 @@ public class TransactionCPMBusiness {
             request.setDictionaryId(68L);
             request.setStatusId(73L);
             request.setImpressionNumber(1L);
-            // trovo revenue
-            RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(request.getCampaignId(), 50L);
-            if (rf != null) {
-                map.setRevenueId(rf.getId());
-            } else {
-                map.setRevenueId(2L);
-            }
         }
-
+        // trovo revenue
+        RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(request.getCampaignId(), 50L);
+        if (rf != null) {
+            map.setRevenueId(rf.getId());
+        } else {
+            map.setRevenueId(2L);
+        }
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
 
         Affiliate aa = null;
@@ -211,8 +210,8 @@ public class TransactionCPMBusiness {
     public Page<DictionaryDTO> getTypes() {
         return dictionaryBusiness.getTransactionTypes();
     }
-    
-    
+
+
     //    >>>>>>>>> RICERCE PER RIGENERAZIONE
     public List<TransactionCPM> searchStatusIdAndDateNotManual(Long statusId, LocalDate dataDaGestireStart, LocalDate dataDaGestireEnd, Long affiliateId, Long campaignId) {
         TransactionCPMBusiness.Filter request = new TransactionCPMBusiness.Filter();
@@ -247,6 +246,7 @@ public class TransactionCPMBusiness {
         return cpmRepository.findAll(getSpecificationCPM(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")))).stream().collect(Collectors.toList());
 
     }
+
     /**
      * ============================================================================================================
      **/
@@ -301,7 +301,6 @@ public class TransactionCPMBusiness {
             return completePredicate;
         };
     }
-
 
 
     /**

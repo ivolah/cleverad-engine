@@ -262,6 +262,49 @@ public class RigeneraCPLBusiness {
         }
     }
 
+    public void ricalcola(Integer anno, Integer mese, Integer giorno, Long affiliateId, Long camapignId) {
+
+            int start = (giorno == null) ? 1 : giorno;
+            int end = (giorno == null) ? LocalDate.of(anno, mese, 1).lengthOfMonth() : giorno;
+
+            LocalDate dataDaGestireStart = LocalDate.of(anno, mese, start);
+            LocalDate dataDaGestireEnd = LocalDate.of(anno, mese, end);
+
+            log.info(anno + "-" + mese + "-" + giorno + " >> " + dataDaGestireStart + " || " + dataDaGestireEnd + " per " + affiliateId + " e " + camapignId);
+
+            // cerco le transazioni
+            TransactionAllBusiness.Filter request = new TransactionAllBusiness.Filter();
+            request.setCreationDateFrom(dataDaGestireStart);
+            request.setCreationDateTo(dataDaGestireEnd);
+            request.setTipo("CPL");
+            List<Long> not = new ArrayList<>();
+            not.add(68L); // MANUALE
+            request.setNotInDictionaryId(not);
+            not = new ArrayList<>();
+            not.add(74L); // RIGETTATO
+            request.setNotInStatusId(not);
+            Page<TransactionStatusDTO> ls = transactionAllBusiness.searchPrefiltratoInterno(request);
+            log.info(">>> TOT :: " + ls.getTotalElements());
+
+            for (TransactionStatusDTO tcpl : ls) {
+                log.info("trovo PER ricalcola CPL :: {} : {} :: {}", tcpl.getId(), tcpl.getValue(), tcpl.getDateTime());
+
+
+
+                // trovo revenue
+                           RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 11L);
+                    if (rf != null) {
+                        transaction.setRevenueId(rf.getId());
+                    } else {
+                        log.warn("Non trovato revenue factor di tipo 11 per campagna {} , setto default", refferal.getCampaignId());
+                        transaction.setRevenueId(2L);
+                    }
+
+
+            }
+
+    }
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor

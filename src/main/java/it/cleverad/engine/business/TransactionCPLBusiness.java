@@ -87,16 +87,15 @@ public class TransactionCPLBusiness {
             request.setDictionaryId(68L);
             request.setStatusId(73L);
             newCplTransaction.setData(request.getData().trim().replace("[REPLACE]", ""));
-
-            // trovo revenue
-            RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(request.getCampaignId(), 11L);
-            if (rf != null) {
-                newCplTransaction.setRevenueId(rf.getId());
-            } else {
-                newCplTransaction.setRevenueId(2L);
-            }
         }
 
+        // trovo revenue
+        RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(request.getCampaignId(), 11L);
+        if (rf != null) {
+            newCplTransaction.setRevenueId(rf.getId());
+        } else {
+            newCplTransaction.setRevenueId(2L);
+        }
         newCplTransaction.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
 
         if (request.commissionId != null)
@@ -145,21 +144,19 @@ public class TransactionCPLBusiness {
         if (statusId == null && cpl.getDictionaryStatus() != null) statusId = cpl.getDictionaryStatus().getId();
         if (dictionaryId == null && cpl.getDictionary() != null) dictionaryId = cpl.getDictionary().getId();
 
-        if (statusId == 74L || dictionaryId == 40L) {
-
-            // aggiorno budget affiliato in modo schedulato
-            // aggiorno wallet in modo schedulato
-
-        } else if (dictionaryId == 40L || statusId == 74L) {
+        // se rigettato
+        if (dictionaryId == 40L || statusId == 74L) {
             // setto revenue e commission a 0
             cpl.setRevenueId(1L);
             cpl.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
             cpl.setValue(0D);
         }
+
         if (dictionaryId != null) {
             Long finalDictionaryId1 = dictionaryId;
             cpl.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", finalDictionaryId1)));
         } else dictionaryId = 0L;
+
         if (statusId != null) {
             Long finalStatusId1 = statusId;
             log.info("SETTO STATUS :: {}", statusId);
@@ -293,20 +290,20 @@ public class TransactionCPLBusiness {
         request.setDateTimeFrom(from.atStartOfDay());
         request.setDateTimeTo(LocalDateTime.of((to), LocalTime.MAX));
         request.setValueNotZero(true);
-        ArrayList  not = new ArrayList<>();
+        ArrayList not = new ArrayList<>();
         not.add(74L); // RIGETTATO
         request.setNotInStatusId(not);
         return cplRepository.findAll(getSpecificationCPL(request), Pageable.ofSize(Integer.MAX_VALUE)).stream().collect(Collectors.toList());
     }
 
-    public List<TransactionCPL> searchForCampaignAffiliateBudget(Long campaignId,Long affiliateId, LocalDate from, LocalDate to) {
+    public List<TransactionCPL> searchForCampaignAffiliateBudget(Long campaignId, Long affiliateId, LocalDate from, LocalDate to) {
         TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
         request.setCampaignId(campaignId);
         request.setAffiliateId(affiliateId);
         request.setDateTimeFrom(from.atStartOfDay());
         request.setDateTimeTo(LocalDateTime.of((to), LocalTime.MAX));
         request.setValueNotZero(true);
-        ArrayList  not = new ArrayList<>();
+        ArrayList not = new ArrayList<>();
         not.add(74L); // RIGETTATO
         request.setNotInStatusId(not);
         return cplRepository.findAll(getSpecificationCPL(request), Pageable.ofSize(Integer.MAX_VALUE)).stream().collect(Collectors.toList());
@@ -325,22 +322,22 @@ public class TransactionCPLBusiness {
     public List<TransactionCPL> searchLastModified() {
         TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
         request.setValueNotZero(true);
-        ArrayList  not = new ArrayList<>();
+        ArrayList not = new ArrayList<>();
         not.add(74L); // RIGETTATO
         request.setNotInStatusId(not);
         request.setLastModificationDateTimeFrom(LocalDateTime.now().minusHours(24));
-        return cplRepository.findAll(getSpecificationCPL(request), PageRequest.of(0,Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")))).stream().collect(Collectors.toList());
+        return cplRepository.findAll(getSpecificationCPL(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")))).stream().collect(Collectors.toList());
     }
 
     public List<TransactionCPL> searchForAffiliateBudget(Long affiliateId, Long campaignId) {
         TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
         request.setValueNotZero(true);
-        ArrayList  not = new ArrayList<>();
+        ArrayList not = new ArrayList<>();
         not.add(74L); // RIGETTATO
         request.setNotInStatusId(not);
         request.setAffiliateId(affiliateId);
         request.setCampaignId(campaignId);
-        return cplRepository.findAll(getSpecificationCPL(request), PageRequest.of(0,Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")))).stream().collect(Collectors.toList());
+        return cplRepository.findAll(getSpecificationCPL(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")))).stream().collect(Collectors.toList());
     }
 
     /**
