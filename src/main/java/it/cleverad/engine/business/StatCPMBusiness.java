@@ -35,11 +35,7 @@ import java.util.stream.Collectors;
 public class StatCPMBusiness {
 
     @Autowired
-    private WidgetCampaignDayCpmRepository widgetCampaignDayCpmRepository;
-    @Autowired
     private CampaignBusiness campaignBusiness;
-    @Autowired
-    private WidgetTopCPMRepository widgetTopCPMRepository;
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
     @Autowired
@@ -72,7 +68,7 @@ public class StatCPMBusiness {
         mainObj.put("totale", totale.get());
         mainObj.put("data", data);
         mainObj.put("xSeries", xSeries);
-        log.info("CPM {}", mainObj.toString());
+        log.trace("CPM {}", mainObj.toString());
         return mainObj.toString();
     }
 
@@ -134,10 +130,7 @@ public class StatCPMBusiness {
         }
 
         // metto in lista in modo che non ci siano doppioni
-        log.trace("Campagne pre :: {}", listaIdCamapgne.size());
         listaIdCamapgne = listaIdCamapgne.stream().distinct().collect(Collectors.toList());
-        log.trace("Campagne post:: {}", listaIdCamapgne.size());
-        listaIdCamapgne.stream().forEach(aLong -> log.info("Campagne {}", aLong));
 
         // setto gionri da verifica
         List<LocalDate> giorniDaVerificare = new ArrayList<>();
@@ -156,7 +149,6 @@ public class StatCPMBusiness {
 
             // cerco giorno e calcolo totale
             giorniDaVerificare.stream().sorted().forEach(gg -> {
-
                 Double dd = 0D;
                 FilterStatistics filter = new FilterStatistics();
                 if (jwtUserDetailsService.isAffiliate()) {

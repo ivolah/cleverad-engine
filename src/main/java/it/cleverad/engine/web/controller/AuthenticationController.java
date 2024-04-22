@@ -48,9 +48,9 @@ public class AuthenticationController {
 
         UserDTO user = userBusiness.findByUsername(authenticationRequest.getUsername());
         if (user != null) {
-            return ResponseEntity.ok(new JwtResponse(token, user.getId()));
+            return ResponseEntity.ok(new JwtResponse(token, user.getId(), user.getRoleId()));
         } else {
-            return ResponseEntity.ok(new JwtResponse(token, 0L));
+            return ResponseEntity.ok(new JwtResponse(token, 0L, 0L));
         }
 
     }

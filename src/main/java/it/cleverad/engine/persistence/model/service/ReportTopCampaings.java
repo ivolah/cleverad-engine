@@ -54,4 +54,6 @@ public interface ReportTopCampaings {
 
     String getChannelName();
 
+
+
 }

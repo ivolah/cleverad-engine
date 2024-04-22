@@ -72,7 +72,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/reset/request",
                         "/reset/user",
                         "/short/*",
-                        "whatsapp/check"
+                        "/whatsapp/check"
                 ).permitAll().
                 // TUTTE LE ALTRE RICHIESTO SONO AUTENTICATE
                         anyRequest().authenticated().and().

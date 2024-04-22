@@ -22,10 +22,10 @@ public class FileStoreService {
     public byte[] retrieveFile(String filePath) throws IOException {
         File daScaricare = new File(filePath);
         byte[] bytes = null;
-        try{
-            FileUtils.readFileToByteArray(daScaricare);
-        }catch (FileNotFoundException exception){
-            log.error("File " + filePath + " not found.");
+        try {
+            bytes = FileUtils.readFileToByteArray(daScaricare);
+        } catch (FileNotFoundException exception) {
+            log.trace("File " + filePath + " not found.");
         }
         return bytes;
     }

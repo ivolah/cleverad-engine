@@ -13,6 +13,7 @@ import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,13 +135,25 @@ public class CampaignAffiliateBusiness {
         Filter request = new Filter();
         request.setCampaignId(campaignId);
         request.setBrandbuddies(false);
-
         if (!jwtUserDetailsService.getRole().equals("Admin"))
             request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
-
+        log.info(request.toString());
         Page<CampaignAffiliate> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id"))));
         return page.map(CampaignAffiliateDTO::from);
     }
+
+    public Page<CampaignAffiliateDTO> searchByCampaignIDAll(Long campaignId, Pageable pageableRequest) {
+        Filter request = new Filter();
+        request.setCampaignId(campaignId);
+        request.setBrandbuddies(false);
+        if (!jwtUserDetailsService.getRole().equals("Admin"))
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
+        request.setFollowNull(null);
+        log.info(request.toString());
+        Page<CampaignAffiliate> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id"))));
+        return page.map(CampaignAffiliateDTO::from);
+    }
+
 
     public Page<CampaignAffiliateDTO> searchByCampaignIDBrandBuddies(Long campaignId, Pageable pageableRequest) {
         Filter request = new Filter();
@@ -166,7 +179,7 @@ public class CampaignAffiliateBusiness {
     // UPDATE
     public CampaignAffiliateDTO update(Long id, Filter filter) {
         CampaignAffiliate channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignAffiliate", id));
-        if(filter.brandbuddies == null)
+        if (filter.brandbuddies == null)
             filter.setBrandbuddies(false);
         mapper.map(filter, channel);
         return CampaignAffiliateDTO.from(repository.save(channel));
@@ -185,22 +198,19 @@ public class CampaignAffiliateBusiness {
             Predicate completePredicate = null;
             List<Predicate> predicates = new ArrayList<>();
 
-            if (request.getId() != null) {
+            if (request.getId() != null)
                 predicates.add(cb.equal(root.get("id"), request.getId()));
-            }
 
-            if (request.getAffiliateId() != null) {
+            if (request.getAffiliateId() != null)
                 predicates.add(cb.equal(root.get("affiliate").get("id"), request.getAffiliateId()));
-            }
-            if (request.getCampaignId() != null) {
+
+            if (request.getCampaignId() != null)
                 predicates.add(cb.equal(root.get("campaign").get("id"), request.getCampaignId()));
-            }
 
-            if (request.getBrandbuddies() != null) {
+            if (request.getBrandbuddies() != null)
                 predicates.add(cb.equal(root.get("brandbuddies"), request.getBrandbuddies()));
-            }
 
-            if (request.getFollowNull()) predicates.add(cb.isNotNull(root.get("followThrough")));
+            if (request.getFollowNull() != null && request.getFollowNull()) predicates.add(cb.isNotNull(root.get("followThrough")));
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
 
@@ -225,6 +235,7 @@ public class CampaignAffiliateBusiness {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @ToString
     public static class Filter {
         private Long id;
         private String followThrough;

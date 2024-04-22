@@ -37,7 +37,7 @@ public class PayoutController {
 
     @PostMapping(path = "/all")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public List<Payout> createAll(@RequestBody TransactionStatusBusiness.Filter request) {
+    public List<Payout> createAll(@RequestBody TransactionStatusBusiness.QueryFilter request) {
         return business.createAll(request);
     }
 

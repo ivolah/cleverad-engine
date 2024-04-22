@@ -60,11 +60,11 @@ public class PayoutBusiness {
      * ============================================================================================================
      **/
 
-    public List<Payout> createAll(TransactionStatusBusiness.Filter request) {
-        Page<TransactionStatusDTO> results = transactionStatusBusiness.searchPayout(request);
+    public List<Payout> createAll(TransactionStatusBusiness.QueryFilter request) {
+        Page<QueryTransaction> results = transactionStatusBusiness.searchPrefiltratoN(request, Pageable.ofSize(Integer.MAX_VALUE));
         log.info("TOT elementi: " + results.getTotalElements());
-        List<Long> cpcs = results.stream().filter(x -> x.getTipo().equals("CPC")).map(x -> x.getId()).collect(Collectors.toList());
-        List<Long> cpls = results.stream().filter(x -> x.getTipo().equals("CPL")).map(x -> x.getId()).collect(Collectors.toList());
+        List<Long> cpcs = results.stream().filter(x -> x.getTipo().equals("CPC")).map(x -> x.getid()).collect(Collectors.toList());
+        List<Long> cpls = results.stream().filter(x -> x.getTipo().equals("CPL")).map(x -> x.getid()).collect(Collectors.toList());
         log.info("CPC: {} ----- CPL: {}", cpcs.size(), cpls.size());
 
         BaseCreateRequest payoutRequest = new BaseCreateRequest();

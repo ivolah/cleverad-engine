@@ -152,7 +152,16 @@ public class FileUserBusiness {
         request.setAvatar(true);
         request.setUserId(jwtUserDetailsService.getUserID());
         User user = userRepository.findById(jwtUserDetailsService.getUserID()).orElseThrow(() -> new ElementCleveradException("User", jwtUserDetailsService.getUserID()));
-        String path = fileStoreService.storeFile(user.getAffiliate().getId(), "user", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), file.getBytes());
+        Long id = null;
+        if ((user.getAffiliate() == null) || (user.getAdvertiser() != null))
+        {
+            id=     user.getAdvertiser().getId();
+        }
+          else if (user.getAffiliate() != null) {
+            id= user.getAffiliate().getId();
+        }
+
+        String path = fileStoreService.storeFile(id, "user", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), file.getBytes());
         FileUser fileDB = new FileUser(filename, file.getContentType(), user, request.avatar, path);
         return repository.save(fileDB).getId();
     }

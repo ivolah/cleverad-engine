@@ -1,32 +1,25 @@
 package it.cleverad.engine.business;
 
 import it.cleverad.engine.config.security.JwtUserDetailsService;
-import it.cleverad.engine.persistence.model.service.ViewTransactionStatus;
-import it.cleverad.engine.persistence.repository.service.ViewTransactionStatusRepository;
-import it.cleverad.engine.web.dto.TransactionStatusDTO;
-import it.cleverad.engine.web.exception.ElementCleveradException;
+import it.cleverad.engine.persistence.model.service.QueryTransaction;
+import it.cleverad.engine.persistence.repository.service.QueryRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -34,181 +27,86 @@ import java.util.List;
 public class TransactionStatusBusiness {
 
     @Autowired
-    private JwtUserDetailsService jwtUserDetailsService;
+    private QueryRepository queryRepository;
     @Autowired
-    private ViewTransactionStatusRepository repository;
+    private JwtUserDetailsService jwtUserDetailsService;
 
     /**
      * ============================================================================================================
      **/
-
 
     // GET BY ID
-    public TransactionStatusDTO findById(Long id) {
-        ViewTransactionStatus transaction = null;
-        if (jwtUserDetailsService.isAdmin()) {
-            transaction = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction Status", id));
-        }
-        return TransactionStatusDTO.from(transaction);
-    }
-
-    // SEARCH PAGINATED
-    public Page<TransactionStatusDTO> searchPrefiltrato(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("dateTime")));
-
-
-
-        if (!jwtUserDetailsService.isAdmin())
+    public QueryTransaction findById(Long id) {
+        QueryFilter request = new QueryFilter();
+        if (jwtUserDetailsService.isAffiliate()) {
             request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
-        Page<ViewTransactionStatus> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(TransactionStatusDTO::from);
+        } else if (jwtUserDetailsService.isAdvertiser()) {
+            request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
+        }
+        // setto tipo
+        QueryTransaction tq = queryRepository.listaTransazioni(
+                        request.getCreationDateFrom(), request.getCreationDateTo(), request.getStatusId(),
+                        request.getDictionaryId(), request.getAffiliateId(), request.getChannelId(), request.getCampaignId(),
+                        request.getMediaId(), request.getCommissionId(), request.getRevenueId(), request.getPayoutPresent(),
+                        request.getPayoutId(), request.getAdvertiserId(), request.getValueNotZero(), request.getInDictionaryId(),
+                        request.getNotInDictionaryId(), request.getInStausId(), request.getNotInStausId())
+                .stream().findFirst().orElse(null);
+        return tq;
     }
 
-    public Page<TransactionStatusDTO> searchPayout(Filter request) {
-        Page<ViewTransactionStatus> page = repository.findAll(getSpecification(request), Pageable.ofSize(Integer.MAX_VALUE));
-        return page.map(TransactionStatusDTO::from);
-    }
+    public Page<QueryTransaction> searchPrefiltratoN(TransactionStatusBusiness.QueryFilter request, Pageable pageableRequest) {
 
+        if (jwtUserDetailsService.isAffiliate())
+            request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
+        else if (jwtUserDetailsService.isAdvertiser())
+            request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
 
+        List<QueryTransaction> listaTransazioni = new ArrayList<>();
+        if (request.getTipo() == null) {
+            listaTransazioni = queryRepository.listaTransazioni(request.getCreationDateFrom(), request.getCreationDateTo().plusDays(1), request.getStatusId(), request.getDictionaryId(), request.getAffiliateId(), request.getChannelId(), request.getCampaignId(), request.getMediaId(), request.getCommissionId(), request.getRevenueId(), request.getPayoutPresent(), request.getPayoutId(), request.getAdvertiserId(), request.getValueNotZero(), request.getInDictionaryId(), request.getNotInDictionaryId(), request.getInStausId(), request.getNotInStausId());
+        } else if (request.getTipo().equals("CPC")) {
+            listaTransazioni = queryRepository.listaTransazioniCPC(request.getCreationDateFrom(), request.getCreationDateTo().plusDays(1), request.getStatusId(), request.getDictionaryId(), request.getAffiliateId(), request.getChannelId(), request.getCampaignId(), request.getMediaId(), request.getCommissionId(), request.getRevenueId(), request.getPayoutPresent(), request.getPayoutId(), request.getAdvertiserId(), request.getValueNotZero(), request.getInDictionaryId(), request.getNotInDictionaryId(), request.getInStausId(), request.getNotInStausId());
+        } else if (request.getTipo().equals("CPL")) {
+            listaTransazioni = queryRepository.listaTransazioniCPL(request.getCreationDateFrom(), request.getCreationDateTo().plusDays(1), request.getStatusId(), request.getDictionaryId(), request.getAffiliateId(), request.getChannelId(), request.getCampaignId(), request.getMediaId(), request.getCommissionId(), request.getRevenueId(), request.getPayoutPresent(), request.getPayoutId(), request.getAdvertiserId(), request.getValueNotZero(), request.getInDictionaryId(), request.getNotInDictionaryId(), request.getInStausId(), request.getNotInStausId());
+        } else if (request.getTipo().equals("CPM")) {
+            listaTransazioni = queryRepository.listaTransazioniCPM(request.getCreationDateFrom(), request.getCreationDateTo().plusDays(1), request.getStatusId(), request.getDictionaryId(), request.getAffiliateId(), request.getChannelId(), request.getCampaignId(), request.getMediaId(), request.getCommissionId(), request.getRevenueId(), request.getPayoutPresent(), request.getPayoutId(), request.getAdvertiserId(), request.getValueNotZero(), request.getInDictionaryId(), request.getNotInDictionaryId(), request.getInStausId(), request.getNotInStausId());
+        } else if (request.getTipo().equals("CPS")) {
+        } else {
+            listaTransazioni = queryRepository.listaTransazioni(
+                    request.getCreationDateFrom(), request.getCreationDateTo().plusDays(1), request.getStatusId(), request.getDictionaryId(), request.getAffiliateId(), request.getChannelId(), request.getCampaignId(), request.getMediaId(), request.getCommissionId(), request.getRevenueId(), request.getPayoutPresent(), request.getPayoutId(), request.getAdvertiserId(), request.getValueNotZero(), request.getInDictionaryId(), request.getNotInDictionaryId(), request.getInStausId(), request.getNotInStausId());
+        }
 
-    /**
-     * ============================================================================================================
-     **/
-
-    private Specification<ViewTransactionStatus> getSpecification(Filter request) {
-        return (root, query, cb) -> {
-            Predicate completePredicate = null;
-            List<Predicate> predicates = new ArrayList<>();
-
-            if (request.getId() != null) {
-                predicates.add(cb.equal(root.get("id"), request.getId()));
-            }
-            if (request.getPayoutReference() != null) {
-                predicates.add(cb.equal(root.get("payoutReference"), request.getPayoutReference()));
-            }
-            if (request.getValue() != null) {
-                predicates.add(cb.equal(root.get("value"), request.getValue()));
-            }
-            if (request.getAffiliateId() != null) {
-                predicates.add(cb.equal(root.get("affiliateId"), request.getAffiliateId()));
-            }
-            if (request.getCampaignId() != null) {
-                predicates.add(cb.equal(root.get("campaignId"), request.getCampaignId()));
-            }
-            if (request.getChannelId() != null) {
-                predicates.add(cb.equal(root.get("channelId"), request.getChannelId()));
-            }
-            if (request.getCommissionId() != null) {
-                predicates.add(cb.equal(root.get("commissionId"), request.getCommissionId()));
-            }
-            if (request.getPayoutId() != null) {
-                predicates.add(cb.equal(root.get("payoutId"), request.getPayoutId()));
-            }
-            if (request.getWalletId() != null) {
-                predicates.add(cb.equal(root.get("walletId"), request.getWalletId()));
-            }
-            if (request.getMediaId() != null) {
-                predicates.add(cb.equal(root.get("mediaId"), request.getMediaId()));
-            }
-            if (request.getClickNumber() != null) {
-                predicates.add(cb.equal(root.get("clickNumber"), request.getClickNumber()));
-            }
-            if (request.getData() != null) {
-                predicates.add(cb.like(cb.upper(root.get("data")), "%" + request.getData().toUpperCase() + "%"));
-            }
-            if (request.getTipo() != null) {
-                predicates.add(cb.equal(root.get("tipo"), request.getTipo()));
-            }
-            if (request.getDictionaryId() != null) {
-                predicates.add(cb.equal(root.get("dictionaryId"), request.getDictionaryId()));
-            }
-            if (request.getStatusId() != null) {
-                predicates.add(cb.equal(root.get("statusId"), request.getStatusId()));
-            }
-            if (request.getPayoutPresent() != null) {
-                predicates.add(cb.equal(root.get("payoutPresent"), request.getPayoutPresent()));
-            }
-            if (request.getValueNotZero() != null && request.getValueNotZero()) {
-                predicates.add(cb.notEqual(root.get("value"), "0"));
-            }
-            if (request.getInDictionaryId() != null) {
-                CriteriaBuilder.In<Long> inClause = cb.in(root.get("dictionaryId"));
-                for (Long id : request.getInDictionaryId()) {
-                    inClause.value(id);
-                }
-                predicates.add(inClause);
-            }
-            if (request.getInStausId() != null) {
-                CriteriaBuilder.In<Long> inClause = cb.in(root.get("statusId"));
-                for (Long id : request.getInStausId()) {
-                    inClause.value(id);
-                }
-                predicates.add(inClause);
-            }
-            if (request.getNotInDictionaryId() != null) {
-                CriteriaBuilder.In<Long> inClauseNot = cb.in(root.get("dictionaryId"));
-                for (Long id : request.getNotInDictionaryId()) {
-                    inClauseNot.value(id);
-                }
-                predicates.add(inClauseNot.not());
-            }
-            if (request.getNotInStausId() != null) {
-                CriteriaBuilder.In<Long> inClauseNot = cb.in(root.get("statusId"));
-                for (Long id : request.getNotInStausId()) {
-                    inClauseNot.value(id);
-                }
-                predicates.add(inClauseNot.not());
-            }
-
-            if (request.getCreationDateFrom() != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("dateTime"), request.getCreationDateFrom()));
-            }
-            if (request.getCreationDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("dateTime"), request.getCreationDateTo()));
-            }
-
-            if (request.getDataList() != null && request.getDataList().length()>3) {
-                CriteriaBuilder.In<String> inClause = cb.in(root.get("data"));
-                Arrays.stream(request.getDataList().split(",")).distinct().forEach(s -> {
-                    inClause.value(StringUtils.trim(s));
-                });
-                predicates.add(inClause);
-            }
-
-            completePredicate = cb.and(predicates.toArray(new Predicate[0]));
-            return completePredicate;
-        };
+        final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), listaTransazioni.size());
+        return new PageImpl<>(listaTransazioni.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, listaTransazioni.size());
     }
 
     /**
      * ============================================================================================================
      **/
-
 
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     @ToString
-    public static class Filter {
-
+    public static class QueryFilter {
+        public List<Long> inDictionaryId = new ArrayList<>();
+        public List<Long> inStausId = new ArrayList<>();
+        public List<Long> notInDictionaryId = new ArrayList<>();
+        public List<Long> notInStausId = new ArrayList<>();
         private Long id;
         private String tipo;
-
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate creationDateFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate creationDateTo;
-
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dateTimeFrom;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dateTimeTo;
-
         private Long statusId;
         private String statusName;
         private Long dictionaryId;
         private String dictionaryName;
-
         private Long affiliateId;
         private String affiliateName;
         private Long channelId;
@@ -220,11 +118,9 @@ public class TransactionStatusBusiness {
         private Long commissionId;
         private String commissionName;
         private Double commissionValue;
-
         private Double value;
         private Long revenueId;
         private Long revenue;
-
         private Long clickNumber;
         private Long impressionNumber;
         private Long leadNumber;
@@ -233,15 +129,10 @@ public class TransactionStatusBusiness {
         private Boolean payoutPresent;
         private Long payoutId;
         private String payoutReference;
-
         private Boolean valueNotZero;
-        public List<Long> inDictionaryId;
-        public List<Long> inStausId;
-        public List<Long> notInDictionaryId;
-        public List<Long> notInStausId;
-
         private String dataList;
         private String note;
+        private Long advertiserId;
     }
 
 }

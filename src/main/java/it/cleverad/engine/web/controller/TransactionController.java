@@ -1,6 +1,7 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.*;
+import it.cleverad.engine.persistence.model.service.QueryTransaction;
 import it.cleverad.engine.web.dto.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -219,16 +220,28 @@ public class TransactionController {
      * ============================================================================================================
      **/
 
+//    @GetMapping("/status")
+//    @ResponseStatus(HttpStatus.ACCEPTED)
+//    public Page<TransactionStatusDTO> searchAll(TransactionStatusBusiness.Filter request, Pageable pageable) {
+//        return statusBusiness.searchPrefiltrato(request, pageable);
+//    }
+//
+//    @GetMapping("/status/affiliate")
+//    @ResponseStatus(HttpStatus.ACCEPTED)
+//    public Page<TransactionStatusDTO> searchAllPrefiltrato(TransactionStatusBusiness.Filter request, Pageable pageable) {
+//        return statusBusiness.searchPrefiltrato(request, pageable);
+//    }
+
     @GetMapping("/status")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<TransactionStatusDTO> searchAll(TransactionStatusBusiness.Filter request, Pageable pageable) {
-        return statusBusiness.searchPrefiltrato(request, pageable);
+    public Page<QueryTransaction> searchAll(TransactionStatusBusiness.QueryFilter request, Pageable pageable) {
+        return statusBusiness.searchPrefiltratoN(request, pageable);
     }
 
     @GetMapping("/status/affiliate")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<TransactionStatusDTO> searchAllPrefiltrato(TransactionStatusBusiness.Filter request, Pageable pageable) {
-        return statusBusiness.searchPrefiltrato(request, pageable);
+    public Page<QueryTransaction> searchAllPrefiltrato(TransactionStatusBusiness.QueryFilter request, Pageable pageable) {
+        return statusBusiness.searchPrefiltratoN(request, pageable);
     }
 
     /**

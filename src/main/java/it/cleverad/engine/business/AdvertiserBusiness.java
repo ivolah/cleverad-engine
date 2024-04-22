@@ -64,7 +64,7 @@ public class AdvertiserBusiness {
 
         // crea user associato ad Advertiser
         UserBusiness.BaseCreateRequest operatoreAdvertiser = new UserBusiness.BaseCreateRequest();
-        operatoreAdvertiser.setAffiliateId(dto.getId());
+        operatoreAdvertiser.setAdvertiserId(dto.getId());
         operatoreAdvertiser.setStatus(false);
         operatoreAdvertiser.setName("Operatore");
         if (request.getName() == null)
@@ -80,7 +80,7 @@ public class AdvertiserBusiness {
 
         // crea utente shadow
         UserBusiness.BaseCreateRequest opertatoreOmbra = new UserBusiness.BaseCreateRequest();
-        opertatoreOmbra.setAffiliateId(dto.getId());
+        opertatoreOmbra.setAdvertiserId(dto.getId());
         opertatoreOmbra.setStatus(true);
         opertatoreOmbra.setName("Cleverad " + dto.getId());
         opertatoreOmbra.setEmail(dto.getId() + "_ombra@cleverad.it");

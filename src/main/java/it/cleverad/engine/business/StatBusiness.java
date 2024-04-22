@@ -1,6 +1,7 @@
 package it.cleverad.engine.business;
 
 import it.cleverad.engine.config.security.JwtUserDetailsService;
+import it.cleverad.engine.persistence.model.service.TopCampagne;
 import it.cleverad.engine.persistence.repository.service.TransactionCPCRepository;
 import it.cleverad.engine.persistence.repository.service.TransactionCPLRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +46,11 @@ public class StatBusiness {
         // CLICK :: gestione totale click
         JSONArray seriesCpc = new JSONArray();
         for (int i = 9; i >= 0; i--) {
-            Long tot = cpcRepository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).get(0).gettotale();
+            Long tot = 0L;
+            TopCampagne topCampagne = cpcRepository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).stream().findFirst().orElse(null);
+            if (topCampagne != null) {
+                tot = topCampagne.gettotale();
+            }
             seriesCpc.put(tot);
         }
         JSONObject cpc = new JSONObject();
@@ -56,7 +61,11 @@ public class StatBusiness {
         // LEAD :: gestione totale lead
         JSONArray seriesCpl = new JSONArray();
         for (int i = 9; i >= 0; i--) {
-            Long tot = cplRepository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).get(0).gettotale();
+            Long tot = 0L;
+            TopCampagne topCampagne = cplRepository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).stream().findFirst().orElse(null);
+            if (topCampagne != null) {
+                tot = topCampagne.gettotale();
+            }
             seriesCpl.put(tot);
         }
         JSONObject cpl = new JSONObject();
@@ -67,11 +76,19 @@ public class StatBusiness {
         // VALORE GIORNO :: gestione totale Valore
         JSONArray seriesVal = new JSONArray();
         for (int i = 9; i >= 0; i--) {
-            Double totCpc = cpcRepository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).get(0).getvalore();
-            Double totCpl = cplRepository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).get(0).getvalore();
+            Double totCpc = 0D;
+            TopCampagne topCampagneCPC = cpcRepository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).stream().findFirst().orElse(null);
+            if (topCampagneCPC != null)
+                totCpc = topCampagneCPC.getvalore();
+
+            Double totCpl = 0D;
+            TopCampagne topCampagneCPL = cplRepository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).stream().findFirst().orElse(null);
+            if (topCampagneCPL != null)
+                totCpl = topCampagneCPL.getvalore();
+
             seriesVal.put(totCpc + totCpl);
         }
-                JSONObject val = new JSONObject();
+        JSONObject val = new JSONObject();
         val.put("name", "Totale (€)");
         val.put("data", seriesVal);
         series.put(val);
@@ -84,7 +101,6 @@ public class StatBusiness {
         }
 
         root.put("x", x);
-
         return root.toString();
     }
 

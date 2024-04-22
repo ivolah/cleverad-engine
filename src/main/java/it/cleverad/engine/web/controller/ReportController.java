@@ -1,10 +1,7 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.ReportBusiness;
-import it.cleverad.engine.persistence.model.service.ReportDaily;
-import it.cleverad.engine.persistence.model.service.ReportTopAffiliates;
-import it.cleverad.engine.persistence.model.service.ReportTopCampaings;
-import it.cleverad.engine.web.dto.ReportDTO;
+import it.cleverad.engine.persistence.model.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,19 +25,19 @@ public class ReportController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public ReportDTO create(@ModelAttribute ReportBusiness.BaseCreateRequest request) {
+    public it.cleverad.engine.web.dto.ReportDTO create(@ModelAttribute ReportBusiness.BaseCreateRequest request) {
         return reportBusiness.create(request);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<ReportDTO> search(ReportBusiness.Filter request, Pageable pageable) {
+    public Page<it.cleverad.engine.web.dto.ReportDTO> search(ReportBusiness.Filter request, Pageable pageable) {
         return reportBusiness.search(request, pageable);
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ReportDTO getByUuid(@PathVariable Long id) {
+    public it.cleverad.engine.web.dto.ReportDTO getByUuid(@PathVariable Long id) {
         return reportBusiness.findById(id);
     }
 
@@ -50,49 +47,47 @@ public class ReportController {
         this.reportBusiness.delete(id);
     }
 
-    @GetMapping(path = "/campagne/top")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<ReportTopCampaings> getCamapgneTop(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
-        return reportBusiness.searchTopCampaigns(request, pageable);
-    }
+    /**
+     * ============================================================================================================
+     **/
 
     @GetMapping(path = "/campagne/orderby/imp")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<ReportTopCampaings> getCamapgneTopOBI(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
+    public Page<QueryTopElenco> searchCampaginsOrderedStatWidget(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
         request.setDictionaryIds(null);
-        Page<ReportTopCampaings> lista = reportBusiness.searchTopCampaignsSORT(request, pageable);
+        Page<QueryTopElenco> lista = reportBusiness.searchCampaginsOrderedStatWidget(request, pageable);
         return lista;
-    }
-
-    @GetMapping(path = "/campagne/top/channel")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<ReportTopCampaings> getCamapgneTopChannel(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
-        return reportBusiness.searchTopCampaignsChannel(request, pageable);
-    }
-
-    @GetMapping(path = "/affiliates/top")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<ReportTopAffiliates> getAffiliatiTop(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
-        return reportBusiness.searchTopAffilaitesChannel(request, pageable);
-    }
-
-    @GetMapping(path = "/affiliates")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<ReportTopAffiliates> getAffiliati(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
-        return reportBusiness.searchTopAffilaites(request, pageable);
     }
 
     @GetMapping(path = "/daily")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<ReportDaily> getDaily(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
-        return reportBusiness.searchDaily(request, pageable);
+    public Page<ReportDailyDTO> getDaily(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
+        return reportBusiness.searchReportDaily(request, pageable);
     }
 
-//    @GetMapping(path = "/cpc/click/grouped/day")
-//    @ResponseStatus(HttpStatus.ACCEPTED)
-//    public Page<StatClickCpc> getGroupedCpcClicks(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
-//        return reportBusiness.getGroupedCpcClicks(request, pageable);
-//    }
+    @GetMapping(path = "/campagne/top")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<ReportCampagneDTO> getCamapgneTop(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
+        return reportBusiness.searchReportCampaign(request, pageable);
+    }
+
+    @GetMapping(path = "/affiliates")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<ReportAffiliatesDTO> getAffiliati(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
+        return reportBusiness.searchReportAffiliate(request, pageable);
+    }
+
+    @GetMapping(path = "/affiliates/top")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<ReportAffiliatesChannelDTO> searchReportAffiliateChannel(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
+        return reportBusiness.searchReportAffiliateChannel(request, pageable);
+    }
+
+    @GetMapping(path = "/campagne/top/channel")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Page<ReportAffiliatesChannelCampaignDTO> searchReportAffiliateChannelCampaign(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
+        return reportBusiness.searchReportAffiliateChannelCampaign(request, pageable);
+    }
 
     /**
      * ============================================================================================================
