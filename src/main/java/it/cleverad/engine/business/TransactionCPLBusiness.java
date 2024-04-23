@@ -201,13 +201,13 @@ public class TransactionCPLBusiness {
     // GET BY ID CPL
     public TransactionCPLDTO findByIdCPL(Long id) {
         TransactionCPL transaction = null;
-        if (jwtUserDetailsService.getRole().equals("Admin")) {
+//        if (jwtUserDetailsService.isAdmin()) {
             transaction = cplRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
-        } else {
-            CampaignBusiness.Filter request = new CampaignBusiness.Filter();
-            request.setId(id);
-            transaction = cplRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
-        }
+//        } else {
+//            CampaignBusiness.Filter request = new CampaignBusiness.Filter();
+//            request.setId(id);
+//            transaction = cplRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
+//        }
         return TransactionCPLDTO.from(transaction);
     }
 

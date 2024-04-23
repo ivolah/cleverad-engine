@@ -21,8 +21,12 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -41,6 +45,8 @@ public class ManageCPL {
     @Autowired
     private CampaignBusiness campaignBusiness;
     @Autowired
+    private CampaignAffiliateBusiness campaignAffiliateBusiness;
+    @Autowired
     private RevenueFactorBusiness revenueFactorBusiness;
     @Autowired
     private RevenueFactorRepository revenueFactorRepository;
@@ -54,6 +60,18 @@ public class ManageCPL {
     private CplRepository cplRepository;
     @Autowired
     private TransactionCPLBusiness transactionCPLBusiness;
+
+    public static String extractValue(String input, String key) {
+        String patternString = key + ":\\s*([^,]+)";
+        Pattern pattern = Pattern.compile(patternString);
+        Matcher matcher = pattern.matcher(input);
+
+        if (matcher.find()) {
+            return matcher.group(1).trim();
+        }
+
+        return null;
+    }
 
     /**
      * ============================================================================================================
@@ -233,8 +251,56 @@ public class ManageCPL {
 
                         // setto a gestito
                         cplBusiness.setRead(cplDTO.getId());
+
+                        // verifico il Postback ed eventualemnte faccio chiamata
+                        try {
+                            //not manuale
+                            if (transaction.getManualDate() != null) {
+                                List<CampaignAffiliateDTO> campaignAffiliateDTOS = campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(refferal.getAffiliateId(), refferal.getCampaignId()).toList();
+                                campaignAffiliateDTOS.stream().forEach(campaignAffiliateDTO -> {
+                                    String followThrough = campaignAffiliateDTO.getFollowThrough();
+                                    String info = cplDTO.getInfo();
+                                    if (StringUtils.isNotBlank(followThrough)) {
+                                        log.info(followThrough + " :: " + info);
+                                        String refId = extractValue(info, "refId");
+                                        String urlRef = extractValue(info, "urlRef");
+                                        String orderId = extractValue(info, "orderId");
+                                        String lead = extractValue(info, "lead");
+                                        String subId = extractValue(info, "subId");
+                                        String transactionId = extractValue(info, "transaction_id");
+                                        String affSub = extractValue(info, "aff_sub");
+                                        String tduid = extractValue(info, "tduid");
+
+                                        followThrough.replace("[ORDER_ID]", orderId);
+                                        followThrough.replace("[SUB_ID]", subId);
+                                        followThrough.replace("[transaction_id]", transactionId);
+                                        followThrough.replace("{transaction_id}", transactionId);
+                                        followThrough.replace("[refId]", refId);
+                                        followThrough.replace("[subId]", subId);
+                                        followThrough.replace("[aff_sub}", affSub);
+                                        followThrough.replace("{aff_sub}", affSub);
+                                        followThrough.replace("[tduid]", tduid);
+
+                                        // se target presente faccio chiamata
+                                        try {
+                                            URL url = new URL(followThrough);
+                                            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                                            con.setRequestMethod("GET");
+//                                            log.info("Chiamo PB  :: " + con.getResponseCode() + " :: " + followThrough);
+                                            log.info("Chiamo : " + followThrough);
+                                        } catch (Exception e) {
+                                            throw new RuntimeException(e);
+                                        }
+                                    }
+                                });
+                            }
+                        } catch (Exception e) {
+                            log.warn("Errore in gestione post back");
+                        }
+
+
                     } catch (Exception ecc) {
-                        log.error("ECCEZIONE CPL :> ", ecc);
+                        log.error("\n\n\n >>>>>>>>>>>>> ECCEZIONE CPL : >>>>>>>>>>>>> ", ecc);
                     }
                 }// creo solo se ho affiliate
             });

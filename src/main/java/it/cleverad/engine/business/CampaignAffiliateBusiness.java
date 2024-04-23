@@ -79,7 +79,6 @@ public class CampaignAffiliateBusiness {
         return repository.save(map);
     }
 
-
     // GET BY ID
     public CampaignAffiliateDTO findById(Long id) {
         CampaignAffiliate channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("CampaignAffiliate", id));

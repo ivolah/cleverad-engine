@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecificationExecutor<Report> {
@@ -540,7 +541,7 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
     )
     List<QueryTransaction> listaTransazioni(
             @Param("dateFrom") LocalDate dateFrom,
-            @Param("dateTo") LocalDate dateTo,
+            @Param("dateTo") LocalDateTime dateTo,
             @Param("statusId") Long statusId,
             @Param("dictionaryId") Long dictionaryId,
             @Param("affiliateId") Long affiliateId,
@@ -707,7 +708,7 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
     )
     List<QueryTransaction>  listaTransazioniCPC(
             @Param("dateFrom") LocalDate dateFrom,
-            @Param("dateTo") LocalDate dateTo,
+            @Param("dateTo") LocalDateTime dateTo,
             @Param("statusId") Long statusId,
             @Param("dictionaryId") Long dictionaryId,
             @Param("affiliateId") Long affiliateId,
@@ -876,7 +877,7 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
     )
     List<QueryTransaction> listaTransazioniCPL(
             @Param("dateFrom") LocalDate dateFrom,
-            @Param("dateTo") LocalDate dateTo,
+            @Param("dateTo") LocalDateTime dateTo,
             @Param("statusId") Long statusId,
             @Param("dictionaryId") Long dictionaryId,
             @Param("affiliateId") Long affiliateId,
@@ -971,7 +972,7 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
     )
     List<QueryTransaction> listaTransazioniCPM(
             @Param("dateFrom") LocalDate dateFrom,
-            @Param("dateTo") LocalDate dateTo,
+            @Param("dateTo") LocalDateTime dateTo,
             @Param("statusId") Long statusId,
             @Param("dictionaryId") Long dictionaryId,
             @Param("affiliateId") Long affiliateId,
