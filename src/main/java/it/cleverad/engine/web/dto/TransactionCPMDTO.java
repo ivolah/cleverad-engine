@@ -76,7 +76,7 @@ public class TransactionCPMDTO {
                 transaction.getDictionary().getId(), transaction.getDictionary().getName(),
                 transaction.getImpressionNumber(),
                 transaction.getRevenueId(),
-                transaction.getWallet().getId(),
+                transaction.getWallet() != null ? transaction.getWallet().getId() : null,
                 transaction.getPayoutPresent(),
                 transaction.getDictionaryStatus() != null ? transaction.getDictionaryStatus().getId() : null,
                 transaction.getNote());

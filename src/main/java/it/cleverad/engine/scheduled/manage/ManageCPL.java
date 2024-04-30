@@ -24,7 +24,9 @@ import org.springframework.stereotype.Component;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -61,16 +63,36 @@ public class ManageCPL {
     @Autowired
     private TransactionCPLBusiness transactionCPLBusiness;
 
-    public static String extractValue(String input, String key) {
-        String patternString = key + ":\\s*([^,]+)";
-        Pattern pattern = Pattern.compile(patternString);
+    public static Map<String, String> extractKeyValuePairs(String input) {
+        Map<String, String> keyValueMap = new HashMap<>();
+
+        // Define the pattern for key-value pairs with the format "xxx: value"
+        Pattern pattern = Pattern.compile("(\\w+)\\s*:\\s*([^,]+)");
+
         Matcher matcher = pattern.matcher(input);
 
-        if (matcher.find()) {
-            return matcher.group(1).trim();
+        // Find all matches and extract the keys and values
+        while (matcher.find()) {
+            String key = matcher.group(1).trim();
+            String value = matcher.group(2).trim();
+            keyValueMap.put(key, value);
         }
 
-        return null;
+        return keyValueMap;
+    }
+
+    public static String replacePlaceholders(String input, Map<String, String> keyValueMap) {
+        for (Map.Entry<String, String> entry : keyValueMap.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            input = input
+                    .replaceAll("\\{" + key + "\\}", value)
+                    .replaceAll("\\{" + key.toUpperCase() + "\\}", value)
+                    .replaceAll("\\[" + key + "\\]", value)
+                    .replaceAll("\\[" + key.toUpperCase() + "\\]", value);
+            log.trace(">" + key + "< : >" + value + "< = " + input);
+        }
+        return input;
     }
 
     /**
@@ -118,6 +140,11 @@ public class ManageCPL {
                     if (cccpl.getData().equals("[REPLACE]")) {
                         cccpl.setData("");
                         cplDTO.setData("");
+                    }
+                    if (StringUtils.isBlank(cccpl.getInfo()) && idCpc != null) {
+                        CpcDTO cpc = cpcBusiness.findById(idCpc);
+                        cccpl.setInfo(cpc.getInfo());
+                        cplDTO.setInfo(cpc.getInfo());
                     }
                     cplRepository.save(cccpl);
 
@@ -254,51 +281,43 @@ public class ManageCPL {
 
                         // verifico il Postback ed eventualemnte faccio chiamata
                         try {
-                            //not manuale
-                            if (transaction.getManualDate() != null) {
-                                List<CampaignAffiliateDTO> campaignAffiliateDTOS = campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(refferal.getAffiliateId(), refferal.getCampaignId()).toList();
-                                campaignAffiliateDTOS.stream().forEach(campaignAffiliateDTO -> {
-                                    String followThrough = campaignAffiliateDTO.getFollowThrough();
-                                    String info = cplDTO.getInfo();
-                                    if (StringUtils.isNotBlank(followThrough)) {
-                                        log.info(followThrough + " :: " + info);
-                                        String refId = extractValue(info, "refId");
-                                        String urlRef = extractValue(info, "urlRef");
-                                        String orderId = extractValue(info, "orderId");
-                                        String lead = extractValue(info, "lead");
-                                        String subId = extractValue(info, "subId");
-                                        String transactionId = extractValue(info, "transaction_id");
-                                        String affSub = extractValue(info, "aff_sub");
-                                        String tduid = extractValue(info, "tduid");
-
-                                        followThrough.replace("[ORDER_ID]", orderId);
-                                        followThrough.replace("[SUB_ID]", subId);
-                                        followThrough.replace("[transaction_id]", transactionId);
-                                        followThrough.replace("{transaction_id}", transactionId);
-                                        followThrough.replace("[refId]", refId);
-                                        followThrough.replace("[subId]", subId);
-                                        followThrough.replace("[aff_sub}", affSub);
-                                        followThrough.replace("{aff_sub}", affSub);
-                                        followThrough.replace("[tduid]", tduid);
-
-                                        // se target presente faccio chiamata
-                                        try {
-                                            URL url = new URL(followThrough);
-                                            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                                            con.setRequestMethod("GET");
-//                                            log.info("Chiamo PB  :: " + con.getResponseCode() + " :: " + followThrough);
-                                            log.info("Chiamo : " + followThrough);
-                                        } catch (Exception e) {
-                                            throw new RuntimeException(e);
+                            // solo se campagna attiva
+                            if (transaction.getDictionaryId() != 49L) {
+                                //not manuale
+                                if (transaction.getManualDate() == null) {
+                                    List<CampaignAffiliateDTO> campaignAffiliateDTOS = campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(refferal.getAffiliateId(), refferal.getCampaignId()).toList();
+                                    campaignAffiliateDTOS.stream().forEach(campaignAffiliateDTO -> {
+                                        String followThrough = campaignAffiliateDTO.getFollowThrough();
+                                        String info = cplDTO.getInfo();
+                                        log.info("POST BACK INFO ::: " + info);
+                                        if (StringUtils.isNotBlank(followThrough)) {
+                                            log.info(followThrough + " :: " + info);
+                                            // trovo tutte le chiavi
+                                            Map<String, String> keyValueMap = extractKeyValuePairs(info);
+                                            // keyValueMap.forEach((s, s2) -> log.info(">{}< :: >{}<", s, s2));
+                                            // aggiungo order_id
+                                            keyValueMap.put("orderid", cpl.getData());
+                                            keyValueMap.put("order_id", cpl.getData());
+                                            followThrough = replacePlaceholders(followThrough, keyValueMap);
+                                            // se target presente faccio chiamata
+                                            try {
+                                                URL url = new URL(followThrough);
+                                                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                                                con.setRequestMethod("GET");
+                                                con.getInputStream();
+                                                log.info("Chiamo PB  :: " + con.getResponseCode() + " :: " + followThrough);
+                                            } catch (Exception e) {
+                                                throw new RuntimeException(e);
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                                }
+                            } else {
+                                log.warn("Campagna scaduta non faccio postback :: {}", cpl.getId());
                             }
                         } catch (Exception e) {
-                            log.warn("Errore in gestione post back");
+                            log.error("Errore in gestione post back", e);
                         }
-
-
                     } catch (Exception ecc) {
                         log.error("\n\n\n >>>>>>>>>>>>> ECCEZIONE CPL : >>>>>>>>>>>>> ", ecc);
                     }

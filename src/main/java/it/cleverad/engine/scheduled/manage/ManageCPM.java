@@ -163,8 +163,12 @@ public class ManageCPM {
 
                             Long walletID = null;
                             if (affiliateID != null) {
-                                walletID = walletRepository.findByAffiliateId(affiliateID).getId();
-                                transaction.setWalletId(walletID);
+                                try {
+                                    walletID = walletRepository.findByAffiliateId(affiliateID).getId();
+                                    transaction.setWalletId(walletID);
+                                }catch (NullPointerException exception){
+                                    log.warn("Non trovo wallet per affiliate {}", affiliateID);
+                                }
                             }
 
                             // trovo revenue

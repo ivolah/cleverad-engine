@@ -41,7 +41,7 @@ public class AuthenticationController {
     @PostMapping(value = "/authenticate")
     public ResponseEntity<JwtResponse> generateAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws DisabledException, BadCredentialsException {
 
-        log.info(">>>>> LOGIN <<<<<");
+        log.info(">>>>> LOGIN <<<<< >{}< :: >{}<", authenticationRequest.getUsername(), authenticationRequest.getPassword());
         this.authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
         final UserDetails userDetails = jwtInMemoryUserDetailsService.loadUserByUsername(authenticationRequest.getUsername());
         final String token = jwtTokenUtil.generateToken(userDetails);

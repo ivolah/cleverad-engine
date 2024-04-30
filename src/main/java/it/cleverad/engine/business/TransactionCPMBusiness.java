@@ -104,7 +104,8 @@ public class TransactionCPMBusiness {
         if (request.walletId != null) {
             ww = walletRepository.findById(request.walletId).orElseThrow(() -> new ElementCleveradException("Wallet", request.walletId));
         } else if (aa != null) {
-            ww = aa.getWallets().stream().findFirst().get();
+            if (aa.getWallets().size() > 0)
+                ww = aa.getWallets().stream().findFirst().get();
         }
         map.setWallet(ww);
         if (request.mediaId != null)
