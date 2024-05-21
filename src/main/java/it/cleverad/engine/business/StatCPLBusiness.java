@@ -55,7 +55,7 @@ public class StatCPLBusiness {
         mainObj.put("totale", totale.get());
         mainObj.put("data", data);
         mainObj.put("xSeries", xSeries);
-        log.info("CPL {}", mainObj.toString());
+        log.trace("CPL {}", mainObj.toString());
         return mainObj.toString();
     }
 

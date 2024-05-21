@@ -1,7 +1,9 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.Feed;
+import it.cleverad.engine.persistence.repository.service.AdvertiserRepository;
 import it.cleverad.engine.persistence.repository.service.FeedRepository;
 import it.cleverad.engine.web.dto.FeedDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -33,9 +35,14 @@ public class FeedBusiness {
 
     @Autowired
     private FeedRepository repository;
-
+    @Autowired
+    private AdvertiserRepository advertiserRepository;
+    @Autowired
+    private FileFeedBusiness fileFeedBusiness;
     @Autowired
     private Mapper mapper;
+    @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
 
     /**
      * ============================================================================================================
@@ -43,7 +50,11 @@ public class FeedBusiness {
 
     // CREATE
     public FeedDTO create(BaseCreateRequest request) {
+        if (jwtUserDetailsService.isAdvertiser())
+            request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
+
         Feed map = mapper.map(request, Feed.class);
+        map.setAdvertiser(advertiserRepository.findById(request.advertiserId).orElseThrow(() -> new ElementCleveradException("Advertiser", request.advertiserId)));
         return FeedDTO.from(repository.save(map));
     }
 
@@ -56,6 +67,7 @@ public class FeedBusiness {
     // DELETE BY ID
     public void delete(Long id) {
         try {
+            fileFeedBusiness.deleteByFeedID(id);
             repository.deleteById(id);
         } catch (ConstraintViolationException ex) {
             throw ex;
@@ -73,10 +85,13 @@ public class FeedBusiness {
 
     // UPDATE
     public FeedDTO update(Long id, Filter filter) {
-        Feed Feed = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Feed", id));
-        Feed.setId(id);
-        mapper.map(filter, Feed);
-        return FeedDTO.from(repository.save(Feed));
+        if (jwtUserDetailsService.isAdvertiser())
+            filter.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
+        Feed feed = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Feed", id));
+        mapper.map(filter, feed);
+        feed.setId(id);
+        feed.setAdvertiser(advertiserRepository.findById(filter.advertiserId).orElseThrow(() -> new ElementCleveradException("Advertiser", filter.advertiserId)));
+        return FeedDTO.from(repository.save(feed));
     }
 
     /**
@@ -107,6 +122,9 @@ public class FeedBusiness {
             if (request.getEndTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("end"), request.getEndTo()));
             }
+            if (request.getAdvertiserId() != null) {
+                predicates.add(cb.equal(root.get("advertiser").get("id"), request.getAdvertiserId()));
+            }
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
@@ -122,12 +140,13 @@ public class FeedBusiness {
     public static class BaseCreateRequest {
         private String name;
         private String description;
-        private String url;
+        private String urlPromo;
         private Boolean status;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate startDate;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate endDate;
+        private Long advertiserId;
     }
 
     @Data
@@ -137,7 +156,7 @@ public class FeedBusiness {
         private Long id;
         private String name;
         private String description;
-        private String url;
+        private String urlPromo;
         private Boolean status;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate startDate;
@@ -147,6 +166,7 @@ public class FeedBusiness {
         private LocalDate startTo;
         private LocalDate endFrom;
         private LocalDate endTo;
+        private Long advertiserId;
     }
 
 }

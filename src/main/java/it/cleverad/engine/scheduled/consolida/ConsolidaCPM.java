@@ -34,11 +34,6 @@ public class ConsolidaCPM {
         LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
         consolidaCPM(oraSpaccata);
         consolidaCPM(LocalDate.now().minusDays(1).atTime(LocalTime.MAX));
-
-        // CONSOLIDA DATE PASSATE
-        //        for (int i = 45; i < 60; i++) {
-        //               consolidaCPM(LocalDate.now().minusDays(i).atTime(LocalTime.MAX));
-        //        }
     }//trasformaTrackingCPC
 
     public void consolidaCPM(LocalDateTime oraSpaccata) {

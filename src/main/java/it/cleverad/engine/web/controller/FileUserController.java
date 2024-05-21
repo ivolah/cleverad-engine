@@ -39,9 +39,9 @@ public class FileUserController {
 
     @GetMapping(path = "/user/{userId}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<FileUserDTO> search(@PathVariable Long affiliateId, Pageable pageable) {
+    public Page<FileUserDTO> search(@PathVariable Long userId, Pageable pageable) {
         FileUserBusiness.Filter request = new FileUserBusiness.Filter();
-        request.setUserId(affiliateId);
+        request.setUserId(userId);
         return business.search(request, pageable);
     }
 

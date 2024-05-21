@@ -2,6 +2,7 @@ package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.ReportBusiness;
 import it.cleverad.engine.persistence.model.service.*;
+import it.cleverad.engine.web.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -55,8 +56,7 @@ public class ReportController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<QueryTopElenco> searchCampaginsOrderedStatWidget(@Valid ReportBusiness.TopFilter request, Pageable pageable) {
         request.setDictionaryIds(null);
-        Page<QueryTopElenco> lista = reportBusiness.searchCampaginsOrderedStatWidget(request, pageable);
-        return lista;
+        return reportBusiness.searchCampaginsOrderedStatWidget(request);
     }
 
     @GetMapping(path = "/daily")
@@ -89,7 +89,7 @@ public class ReportController {
         return reportBusiness.searchReportAffiliateChannelCampaign(request, pageable);
     }
 
-    /**
+    /*
      * ============================================================================================================
      **/
 

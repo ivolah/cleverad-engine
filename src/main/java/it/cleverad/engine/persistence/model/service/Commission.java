@@ -62,4 +62,6 @@ public class Commission {
     @Column(name = "action")
     private String action;
 
+    private Double sale;
+
 }

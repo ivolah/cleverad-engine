@@ -43,7 +43,6 @@ public class CampaignBaseDTO {
                 mediaDTO.setId(media.getId());
                 mediaDTO.setName(media.getName());
                 mediaDTO.setNote(media.getNote());
-                //   mediaDTO.setTarget((List<Target>) media.getTargets());
                 mediaDTO.setUrl(media.getUrl());
                 if (media.getMediaType() != null && media.getMediaType().getId() != null)
                     mediaDTO.setTypeId(String.valueOf(media.getMediaType().getId()));
@@ -72,6 +71,48 @@ public class CampaignBaseDTO {
 
         List<Long> listaIDS = accc.stream().mapToLong(value -> value.getCommissionId()).boxed().collect(Collectors.toList());
 
+        List<CommissionDTO> commissions = null;
+        if (campaign.getCommissionCampaigns() != null) {
+            commissions = campaign.getCommissionCampaigns().stream()
+                    .filter(commissionCampaign -> listaIDS.contains(commissionCampaign.getId()))
+                    .map(commissionCampaign -> {
+                        CommissionDTO dto = new CommissionDTO();
+                        dto.setId(commissionCampaign.getId());
+                        dto.setName(commissionCampaign.getName());
+                        dto.setValue(commissionCampaign.getValue());
+                        dto.setDescription(commissionCampaign.getDescription());
+                        dto.setStatus(commissionCampaign.getStatus());
+                        dto.setDueDate(commissionCampaign.getDueDate());
+                        dto.setCampaignId(commissionCampaign.getCampaign().getId());
+                        dto.setCreationDate(commissionCampaign.getCreationDate());
+                        dto.setLastModificationDate(commissionCampaign.getLastModificationDate());
+                        return dto;
+                    }).collect(Collectors.toList());
+        }
+
+        return new CampaignBaseDTO(
+                campaign.getId(),
+                campaign.getName(),
+                campaign.getShortDescription(),
+                campaign.getLongDescription(),
+                campaign.getStartDate(),
+                campaign.getEndDate(),
+                campaign.getIdFile(),
+                campaign.getValuta(),
+                campaign.getPlanner() != null ? campaign.getPlanner().getId() : null,
+                campaign.getPlanner() != null ? campaign.getPlanner().getName() : null,
+                campaign.getPlanner() != null ? campaign.getPlanner().getEmail() : null,
+                campaign.getPlanner() != null ? campaign.getPlanner().getSkype() : null,
+                medias, commissions, accc, affiliateId);
+    }
+
+
+    public static CampaignBaseDTO fromList(Campaign campaign, Long affiliateId) {
+
+        List<BasicMediaDTO> medias = null;
+        List<AffiliateChannelCommissionCampaignDTO> accc = null;
+
+        List<Long> listaIDS = accc.stream().mapToLong(value -> value.getCommissionId()).boxed().collect(Collectors.toList());
         List<CommissionDTO> commissions = null;
         if (campaign.getCommissionCampaigns() != null) {
             commissions = campaign.getCommissionCampaigns().stream()

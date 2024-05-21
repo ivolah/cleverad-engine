@@ -10,7 +10,6 @@ import lombok.ToString;
 public class Refferal {
 
     private String refferal;
-
     private Long mediaId;
     private Long campaignId;
     private Long affiliateId;

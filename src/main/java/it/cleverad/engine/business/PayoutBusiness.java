@@ -7,17 +7,17 @@ import it.cleverad.engine.service.MailService;
 import it.cleverad.engine.service.WalletService;
 import it.cleverad.engine.web.dto.DictionaryDTO;
 import it.cleverad.engine.web.dto.PayoutDTO;
-import it.cleverad.engine.web.dto.TransactionStatusDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
-import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.decimal4j.util.DoubleRounder;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
@@ -171,107 +171,10 @@ public class PayoutBusiness {
         return pys;
     }
 
-    public Page<PayoutDTO> createCps(List<Long> listaTransactions) {
-
-        //prndo tutti gli affigliati
-        List<Long> affiliatesList = new ArrayList<>();
-        listaTransactions.stream().forEach(id -> {
-            TransactionCPS transaction = cpsRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction CPS", id));
-            affiliatesList.add(transaction.getAffiliate().getId());
-        });
-
-        // faccio distinct e creo un pqyout vuoto per ognuno
-        HashMap<Long, Long> affiliatoPayout = new HashMap<>();
-        affiliatesList.stream().distinct().forEach(idAffiliate -> {
-            Payout map = new Payout();
-            Affiliate affiliate = affiliateRepository.findById(idAffiliate).orElseThrow(() -> new ElementCleveradException("Affiliate", idAffiliate));
-            map.setAffiliate(affiliate);
-            map.setData(LocalDate.now());
-            map.setValuta("EUR");
-            map.setCreationDate(LocalDateTime.now());
-            map.setLastModificationDate(LocalDateTime.now());
-            map.setTotale(0.0);
-            Dictionary dictionary = dictionaryRepository.findById(18L).orElseThrow(() -> new ElementCleveradException("Dictionary", 18L));
-            map.setDictionary(dictionary);
-            map = repository.save(map);
-            affiliatoPayout.put(idAffiliate, map.getId());
-        });
-
-        Set<Payout> list = new HashSet<>();
-        // per ogni singola transazione
-        listaTransactions.stream().forEach(id -> {
-            TransactionCPS transaction = cpsRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction CPs", id));
-            Long payoutId = affiliatoPayout.get(transaction.getAffiliate().getId());
-            Payout payout = repository.findById(payoutId).orElseThrow(() -> new ElementCleveradException("PAYOUT CPs", payoutId));
-
-            //aumento il valore
-            Double totale = DoubleRounder.round(payout.getTotale() + transaction.getValue(), 2);
-
-            //aggiorno payout
-            payout.setTotale(totale);
-            Payout pp = repository.save(payout);
-            list.add(pp);
-
-            //aggiorno transazione e setto riferimento a payout
-            transaction.setPayout(payout);
-            transaction.setPayoutReference("Payout " + payoutId);
-            transaction.setPayoutPresent(true);
-            cpsRepository.save(transaction);
-        });
-
-        Set<Payout> list2 = new HashSet<>();
-        list.forEach(payout -> {
-            list2.add(repository.findById(payout.getId()).orElseThrow(() -> new ElementCleveradException("PAYOUT CPL", payout.getId())));
-        });
-
-        // rigenero tutti i wallet
-        affiliatoPayout.forEach((idAffiliate, longTwo) -> walletService.rigenera(idAffiliate));
-
-        Page<Payout> page = new PageImpl<>(list2.stream().distinct().collect(Collectors.toList()));
-        return page.map(PayoutDTO::from);
-    }
-
     // GET BY ID
     public PayoutDTO findById(Long id) {
         Payout payout = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Payout", id));
         return PayoutDTO.from(payout);
-    }
-
-    // DELETE BY ID
-    public void delete(Long id) {
-        try {
-            Payout payout = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Payout", id));
-            payout.getTransactionCPCS().forEach(transactionCPC -> {
-                // rimuovo relazione
-                TransactionCPC cpc = cpcRepository.findById(transactionCPC.getId()).orElseThrow(() -> new ElementCleveradException("Transaction CPC", transactionCPC.getId()));
-                cpc.setPayout(null);
-                cpc.setPayoutReference(null);
-                cpcRepository.save(cpc);
-            });
-            payout.getTransactionCPLS().forEach(transactionCPL -> {
-                // rimuovo relazione
-                TransactionCPL cpl = cplRepository.findById(transactionCPL.getId()).orElseThrow(() -> new ElementCleveradException("Transaction CPL", transactionCPL.getId()));
-                cpl.setPayout(null);
-                cpl.setPayoutReference(null);
-                cplRepository.save(cpl);
-            });
-            payout.getTransactionCPSS().forEach(transactionCPS -> {
-                // rimuovo relazione
-                TransactionCPS cps = cpsRepository.findById(transactionCPS.getId()).orElseThrow(() -> new ElementCleveradException("Transaction CPS", transactionCPS.getId()));
-                cps.setPayout(null);
-                cps.setPayoutReference(null);
-                cpsRepository.save(cps);
-            });
-
-            // rigenero wallet affiliato
-            walletService.rigenera(payout.getAffiliate().getId());
-
-            repository.deleteById(id);
-        } catch (ConstraintViolationException ex) {
-            throw ex;
-        } catch (Exception ee) {
-            throw new PostgresDeleteCleveradException(ee);
-        }
     }
 
     // SEARCH PAGINATED
@@ -281,7 +184,7 @@ public class PayoutBusiness {
 //            request.setDictionaryIdNotConcluso(true);
 //        }
         Page<Payout> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(PayoutDTO::from);
+        return page.map(PayoutDTO::fromNoTransazioni);
     }
 
     public Page<PayoutDTO> findByIdAffilaite(Long id, Pageable pageableRequest) {
@@ -289,7 +192,7 @@ public class PayoutBusiness {
         Filter request = new Filter();
         if (id != null) request.setAffiliateId(id);
         Page<Payout> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(PayoutDTO::from);
+        return page.map(PayoutDTO::fromNoTransazioni);
     }
 
     // UPDATE

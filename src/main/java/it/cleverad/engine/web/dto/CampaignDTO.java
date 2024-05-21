@@ -57,7 +57,6 @@ public class CampaignDTO {
                 mediaDTO.setId(media.getId());
                 mediaDTO.setName(media.getName());
                 mediaDTO.setNote(media.getNote());
-                //   mediaDTO.setTarget((List<Target>) media.getTargets());
                 mediaDTO.setUrl(media.getUrl());
                 if (media.getMediaType() != null && media.getMediaType().getId() != null)
                     mediaDTO.setTypeId(String.valueOf(media.getMediaType().getId()));
@@ -158,6 +157,26 @@ public class CampaignDTO {
                 campaign.getPlanner() != null ? campaign.getPlanner().getName() : null,
                 campaign.getPlanner() != null ? campaign.getPlanner().getEmail() : null,
                 medias, affiliateDTOList, commissions, categoryDTOS, revenues, accc, categoryList,
+                campaign.getCheckPhoneNumber());
+    }
+ public static CampaignDTO fromList(Campaign campaign) {
+
+           return new CampaignDTO(campaign.getId(), campaign.getName(), campaign.getShortDescription(),
+                campaign.getLongDescription(), campaign.getNote(), campaign.getStatus(),
+                campaign.getCreationDate(), campaign.getLastModificationDate(),
+                campaign.getStartDate(), campaign.getEndDate(), campaign.getIdFile(),
+                campaign.getValuta(),
+                campaign.getEncodedId(),
+                campaign.getCookie().getId(),
+                campaign.getCookie().getName(),
+                campaign.getCookie().getValue(),
+                campaign.getAdvertiser().getId(), campaign.getAdvertiser().getName(),
+                campaign.getDealer() != null ? campaign.getDealer().getId() : null,
+                campaign.getDealer() != null ? campaign.getDealer().getName() : null,
+                campaign.getPlanner() != null ? campaign.getPlanner().getId() : null,
+                campaign.getPlanner() != null ? campaign.getPlanner().getName() : null,
+                campaign.getPlanner() != null ? campaign.getPlanner().getEmail() : null,
+                null, null, null, null, null, null, null,
                 campaign.getCheckPhoneNumber());
     }
 

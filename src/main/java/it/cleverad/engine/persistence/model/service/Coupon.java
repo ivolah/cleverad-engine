@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Entity
 @Table(name = "t_coupon")
@@ -22,6 +23,8 @@ public class Coupon {
     private String name;
     private String description;
     private String code;
+    @Column(name = "url")
+    private String urlPromo;
     private Integer initial;
     private Integer actual;
     private Boolean status;
@@ -29,5 +32,12 @@ public class Coupon {
     private LocalDate startDate;
     @Column(name = "end_date")
     private LocalDate endDate;
+
+    @ManyToOne
+    @JoinColumn(name = "advertiser_id")
+    private Advertiser advertiser;
+
+    @OneToMany(mappedBy = "coupon")
+    private Set<FileCoupon> files;
 
 }

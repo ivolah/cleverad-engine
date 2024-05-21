@@ -5,6 +5,7 @@ import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.*;
 import it.cleverad.engine.persistence.repository.service.QueryRepository;
 import it.cleverad.engine.persistence.repository.service.ReportRepository;
+import it.cleverad.engine.web.dto.*;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -41,7 +42,6 @@ public class ReportBusiness {
     private Mapper mapper;
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
-
 
     /**
      * ============================================================================================================
@@ -94,7 +94,7 @@ public class ReportBusiness {
      * ============================================================================================================
      **/
 
-    public Page<QueryTopElenco> searchCampaginsOrderedStatWidget(TopFilter request, Pageable pageableRequest) {
+    public Page<QueryTopElenco> searchCampaginsOrderedStatWidget(TopFilter request) {
 
         if (jwtUserDetailsService.isAffiliate()) {
             request.setAffiliateid(jwtUserDetailsService.getAffiliateId());
@@ -102,33 +102,14 @@ public class ReportBusiness {
             request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
         }
 
-        log.info(request.toString());
+        log.trace(request.toString());
         List<QueryTopElenco> listaCampaigns = queryRepository.listaTopCampagneSortate(request.getDateTimeFrom(), request.getDateTimeTo(), request.getAffiliateid(), request.getCampaignId(), request.getAdvertiserId());
-        listaCampaigns.stream().forEach(reportTopCampaings -> log.info("ListaCampaign " + reportTopCampaings.getCampaignId() + " " + reportTopCampaings.getCampaignName()));
-        return new PageImpl<>(listaCampaigns.stream().collect(Collectors.toList()));
+        return new PageImpl<>(new ArrayList<>(listaCampaigns));
     }
 
     /**
      * ============================================================================================================
      **/
-
-//    public Page<ReportTopCampaings> searchTopCampaigns(TopFilter request, Pageable pageableRequest) {
-//        request = prepareRequest(request);
-//        List<ReportTopCampaings> listaCampaigns = null;
-//
-//        if (jwtUserDetailsService.isAdmin()) {
-//            listaCampaigns = reportRepository.searchTopCampaigns(request.getDateTimeFrom(), request.getDateTimeTo(), request.getAffiliateid(), request.getCampaignId(), request.getDictionaryIds(), request.getStatusIds());
-//        } else if (jwtUserDetailsService.isAffiliate()) {
-//            listaCampaigns = reportRepository.searchTopCampaigns(request.getDateTimeFrom(), request.getDateTimeTo(), jwtUserDetailsService.getAffiliateId(), request.getCampaignId(), request.getDictionaryIds(), request.getStatusIds());
-//        } else if (jwtUserDetailsService.isAdvertiser()) {
-//            //nulla
-//        }
-//
-//        final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), listaCampaigns.size());
-//        return new PageImpl<>(listaCampaigns.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, listaCampaigns.size());
-//    }
-
-
     public Page<ReportCampagneDTO> searchReportCampaign(TopFilter request, Pageable pageableRequest) {
         request = prepareRequest(request);
         if (jwtUserDetailsService.isAffiliate()) {
@@ -136,7 +117,6 @@ public class ReportBusiness {
         } else if (jwtUserDetailsService.isAdvertiser()) {
             request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
         }
-        log.info(request + "");
         Long dictId = null;
         if (request.getDictionaryIds().size() > 0) {
             dictId = request.getDictionaryIds().get(0);
@@ -212,7 +192,6 @@ public class ReportBusiness {
         } else if (jwtUserDetailsService.isAdvertiser()) {
             request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
         }
-        log.info(request + "");
         Long dictId = null;
         if (request.getDictionaryIds().size() > 0) {
             dictId = request.getDictionaryIds().get(0);
@@ -236,11 +215,11 @@ public class ReportBusiness {
         report.setImpressionNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getImpressionNumber()).sum());
         if (report.getImpressionNumber() != null && report.getImpressionNumber() > 0) {
             double ctr = (report.getClickNumber().doubleValue() / report.getImpressionNumber().doubleValue()) * 100;
-            report.setCtr("" + ctr + "");
+            report.setCtr("" + DoubleRounder.round(ctr, 2));
         }
         if (report.getClickNumber() != null && report.getClickNumber() > 0) {
             double lr = (report.getLeadNumber().doubleValue() / report.getClickNumber().doubleValue()) * 100;
-            report.setLr("" + lr);
+            report.setLr("" + DoubleRounder.round(lr, 2));
         }
         report.setCommission(lista.stream().mapToDouble(reportDaily -> reportDaily.getCommission()).sum());
         report.setCommissionRigettato(lista.stream().mapToDouble(reportDaily -> reportDaily.getCommissionRigettato()).sum());
@@ -289,7 +268,6 @@ public class ReportBusiness {
         } else if (jwtUserDetailsService.isAdvertiser()) {
             request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
         }
-        log.info(request + "");
         Long dictId = null;
         if (request.getDictionaryIds().size() > 0) {
             dictId = request.getDictionaryIds().get(0);
@@ -312,11 +290,11 @@ public class ReportBusiness {
         report.setImpressionNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getImpressionNumber()).sum());
         if (report.getImpressionNumber() != null && report.getImpressionNumber() > 0) {
             double ctr = (report.getClickNumber().doubleValue() / report.getImpressionNumber().doubleValue()) * 100;
-            report.setCtr("" + ctr + "");
+            report.setCtr("" + DoubleRounder.round(ctr, 2));
         }
         if (report.getClickNumber() != null && report.getClickNumber() > 0) {
             double lr = (report.getLeadNumber().doubleValue() / report.getClickNumber().doubleValue()) * 100;
-            report.setLr("" + lr);
+            report.setLr("" + DoubleRounder.round(lr, 2));
         }
         report.setCommission(lista.stream().mapToDouble(reportDaily -> reportDaily.getCommission()).sum());
         report.setCommissionRigettato(lista.stream().mapToDouble(reportDaily -> reportDaily.getCommissionRigettato()).sum());
@@ -365,7 +343,6 @@ public class ReportBusiness {
         } else if (jwtUserDetailsService.isAdvertiser()) {
             request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
         }
-        log.info(request + "");
         Long dictId = null;
         if (request.getDictionaryIds().size() > 0) {
             dictId = request.getDictionaryIds().get(0);
@@ -388,11 +365,11 @@ public class ReportBusiness {
         report.setImpressionNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getImpressionNumber()).sum());
         if (report.getImpressionNumber() != null && report.getImpressionNumber() > 0) {
             double ctr = (report.getClickNumber().doubleValue() / report.getImpressionNumber().doubleValue()) * 100;
-            report.setCtr("" + ctr + "");
+            report.setCtr("" + DoubleRounder.round(ctr, 2));
         }
         if (report.getClickNumber() != null && report.getClickNumber() > 0) {
             double lr = (report.getLeadNumber().doubleValue() / report.getClickNumber().doubleValue()) * 100;
-            report.setLr("" + lr);
+            report.setCtr("" + DoubleRounder.round(lr, 2));
         }
         report.setCommission(lista.stream().mapToDouble(reportDaily -> reportDaily.getCommission()).sum());
         report.setCommissionRigettato(lista.stream().mapToDouble(reportDaily -> reportDaily.getCommissionRigettato()).sum());
@@ -434,7 +411,6 @@ public class ReportBusiness {
         } else if (jwtUserDetailsService.isAdvertiser()) {
             request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
         }
-        log.info(request + "");
         Long dictId = null;
         if (request.getDictionaryIds().size() > 0) {
             dictId = request.getDictionaryIds().get(0);
@@ -457,11 +433,11 @@ public class ReportBusiness {
         report.setImpressionNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getImpressionNumber()).sum());
         if (report.getImpressionNumber() != null && report.getImpressionNumber() > 0) {
             double ctr = (report.getClickNumber().doubleValue() / report.getImpressionNumber().doubleValue()) * 100;
-            report.setCtr("" + ctr + "");
+            report.setCtr("" + DoubleRounder.round(ctr, 2));
         }
         if (report.getClickNumber() != null && report.getClickNumber() > 0) {
             double lr = (report.getLeadNumber().doubleValue() / report.getClickNumber().doubleValue()) * 100;
-            report.setLr("" + lr);
+            report.setCtr("" + DoubleRounder.round(lr, 2));
         }
         report.setCommission(lista.stream().mapToDouble(reportDaily -> reportDaily.getCommission()).sum());
         report.setCommissionRigettato(lista.stream().mapToDouble(reportDaily -> reportDaily.getCommissionRigettato()).sum());
@@ -491,55 +467,6 @@ public class ReportBusiness {
         Page<ReportAffiliatesChannelCampaignDTO> pp = new PageImpl<>(lista.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, lista.size());
         return pp;
     }
-
-
-    /**
-     * ============================================================================================================
-     **/
-
-
-//    public Page<ReportDaily> searchDaily(TopFilter request, Pageable pageableRequest) {
-//        request = prepareRequest(request);
-//        if (Boolean.FALSE.equals(jwtUserDetailsService.isAdmin()))
-//            request.setAffiliateid(jwtUserDetailsService.getAffiliateId());
-//        List<ReportDaily> lista = reportRepository.searchDaily(request.getDateTimeFrom(), request.getDateTimeTo().plusDays(1),
-//        request.getAffiliateid(), request.getCampaignId(), request.getDictionaryIds(), request.getStatusIds());
-//        final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), lista.size());
-//        return new PageImpl<>(lista.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, lista.size());
-//    }
-    //    public Page<ReportTopAffiliates> searchTopAffilaites(TopFilter request, Pageable pageableRequest) {
-//        request = prepareRequest(request);
-//        List<ReportTopAffiliates> listaAffiliates;
-//        if (Boolean.FALSE.equals(jwtUserDetailsService.isAdmin())) {
-//            listaAffiliates = reportRepository.searchTopAffilaites(request.getDateTimeFrom(), request.getDateTimeTo(), jwtUserDetailsService.getAffiliateId(), request.getCampaignId(), request.getDictionaryIds(), request.getStatusIds());
-//        } else {
-//            listaAffiliates = reportRepository.searchTopAffilaites(request.getDateTimeFrom(), request.getDateTimeTo(), request.getAffiliateid(), request.getCampaignId(), request.getDictionaryIds(), request.getStatusIds());
-//        }
-//        final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), listaAffiliates.size());
-//        return new PageImpl<>(listaAffiliates.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, listaAffiliates.size());
-//    }
-//    public Page<ReportTopCampaings> searchTopCampaignsChannel(TopFilter request, Pageable pageableRequest) {
-//        request = prepareRequest(request);
-//        List<ReportTopCampaings> listaCampaigns;
-//        if (Boolean.FALSE.equals(jwtUserDetailsService.isAdmin())) {
-//            listaCampaigns = reportRepository.searchTopCampaignsChannel(request.getDateTimeFrom(), request.getDateTimeTo().plusDays(1), jwtUserDetailsService.getAffiliateId(), request.getCampaignId(), request.getDictionaryIds(), request.getStatusIds());
-//        } else {
-//            listaCampaigns = reportRepository.searchTopCampaignsChannel(request.getDateTimeFrom(), request.getDateTimeTo().plusDays(1), request.getAffiliateid(), request.getCampaignId(), request.getDictionaryIds(), request.getStatusIds());
-//        }
-//        final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), listaCampaigns.size());
-//        return new PageImpl<>(listaCampaigns.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, listaCampaigns.size());
-//    }
-//    public Page<ReportTopAffiliates> searchTopAffilaitesChannel(TopFilter request, Pageable pageableRequest) {
-//        request = prepareRequest(request);
-//        List<ReportTopAffiliates> listaAffiliates;
-//        if (Boolean.FALSE.equals(jwtUserDetailsService.isAdmin())) {
-//            listaAffiliates = reportRepository.searchTopAffilaitesChannel(request.getDateTimeFrom(), request.getDateTimeTo(), jwtUserDetailsService.getAffiliateId(), request.getCampaignId(), request.getDictionaryIds(), request.getStatusIds());
-//        } else {
-//            listaAffiliates = reportRepository.searchTopAffilaitesChannel(request.getDateTimeFrom(), request.getDateTimeTo(), request.getAffiliateid(), request.getCampaignId(), request.getDictionaryIds(), request.getStatusIds());
-//        }
-//        final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), listaAffiliates.size());
-//        return new PageImpl<>(listaAffiliates.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, listaAffiliates.size());
-//    }
 
     /**
      * ============================================================================================================

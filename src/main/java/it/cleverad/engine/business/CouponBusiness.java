@@ -1,7 +1,9 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
+import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.Coupon;
+import it.cleverad.engine.persistence.repository.service.AdvertiserRepository;
 import it.cleverad.engine.persistence.repository.service.CouponRepository;
 import it.cleverad.engine.web.dto.CouponDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -21,7 +23,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.Column;
 import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -34,9 +35,14 @@ public class CouponBusiness {
 
     @Autowired
     private CouponRepository repository;
-
+    @Autowired
+    private AdvertiserRepository advertiserRepository;
+    @Autowired
+    private FileCouponBusiness fileCouponBusiness;
     @Autowired
     private Mapper mapper;
+    @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
 
     /**
      * ============================================================================================================
@@ -45,7 +51,12 @@ public class CouponBusiness {
     // CREATE
     public CouponDTO create(BaseCreateRequest request) {
         Coupon map = mapper.map(request, Coupon.class);
-        return CouponDTO.from(repository.save(map));
+        if (jwtUserDetailsService.isAdvertiser())
+            request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
+        map.setAdvertiser(advertiserRepository.findById(request.advertiserId).orElseThrow(() -> new ElementCleveradException("Advertiser", request.advertiserId)));
+        CouponDTO coupon = CouponDTO.from(repository.save(map));
+        fileCouponBusiness.updateFile(request.fileId, coupon.getId());
+        return coupon;
     }
 
     // GET BY ID
@@ -57,6 +68,7 @@ public class CouponBusiness {
     // DELETE BY ID
     public void delete(Long id) {
         try {
+            fileCouponBusiness.deleteByCouponID(id);
             repository.deleteById(id);
         } catch (ConstraintViolationException ex) {
             throw ex;
@@ -74,9 +86,14 @@ public class CouponBusiness {
 
     // UPDATE
     public CouponDTO update(Long id, Filter filter) {
+
+        if (jwtUserDetailsService.isAdvertiser())
+            filter.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
+
         Coupon coupon = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Coupon", id));
-        coupon.setId(id);
         mapper.map(filter, coupon);
+        coupon.setId(id);
+        coupon.setAdvertiser(advertiserRepository.findById(filter.advertiserId).orElseThrow(() -> new ElementCleveradException("Advertiser", filter.advertiserId)));
         return CouponDTO.from(repository.save(coupon));
     }
 
@@ -108,6 +125,9 @@ public class CouponBusiness {
             if (request.getEndTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("end"), request.getEndTo()));
             }
+            if (request.getAdvertiserId() != null) {
+                predicates.add(cb.equal(root.get("advertiser").get("id"), request.getAdvertiserId()));
+            }
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
@@ -124,6 +144,7 @@ public class CouponBusiness {
         private String name;
         private String description;
         private String code;
+        private String urlPromo;
         private Integer initial;
         private Integer actual;
         private Boolean status;
@@ -131,6 +152,8 @@ public class CouponBusiness {
         private LocalDate startDate;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate endDate;
+        private Long advertiserId;
+        private Long fileId;
     }
 
     @Data
@@ -141,6 +164,7 @@ public class CouponBusiness {
         private String name;
         private String description;
         private String code;
+        private String urlPromo;
         private Integer initial;
         private Integer actual;
         private Boolean status;
@@ -152,6 +176,8 @@ public class CouponBusiness {
         private LocalDate startTo;
         private LocalDate endFrom;
         private LocalDate endTo;
+        private Long advertiserId;
+        private Long fileId;
     }
 
 }

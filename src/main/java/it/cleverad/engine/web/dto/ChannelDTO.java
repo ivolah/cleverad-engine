@@ -83,8 +83,7 @@ public class ChannelDTO {
         }
 
         List<Long> categoryList = new ArrayList<>();
-        //        String catergoryList = "";
-        if (categories != null && categories.size() > 0)
+        if (categories != null && !categories.isEmpty())
             for (CategoryDTO basicCategoryDTO : Objects.requireNonNull(categories)) {
                 categoryList.add(basicCategoryDTO.getId());
             }

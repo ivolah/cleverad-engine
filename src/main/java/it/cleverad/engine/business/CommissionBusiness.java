@@ -263,6 +263,7 @@ public class CommissionBusiness {
         private Long dictionaryId;
 
         private String action;
+        private Double sale;
     }
 
     @Data
@@ -301,6 +302,8 @@ public class CommissionBusiness {
         private LocalDate disableDueDateTo;
 
         private String action;
+
+        private Double sale;
     }
 
 }

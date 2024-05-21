@@ -1,4 +1,4 @@
-package it.cleverad.engine.persistence.model.service;
+package it.cleverad.engine.web.dto;
 
 import lombok.*;
 
@@ -7,11 +7,8 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReportAffiliatesChannelDTO {
-    private Long affiliateId;
-    private String affiliateName;
-    private Long channelId;
-    private String channelName;
+public class ReportDailyDTO {
+    private String giorno;
     private Double commission;
     private Double commissionRigettato;
     private Double revenue;

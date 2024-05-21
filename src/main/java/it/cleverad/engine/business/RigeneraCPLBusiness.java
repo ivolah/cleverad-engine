@@ -2,6 +2,7 @@ package it.cleverad.engine.business;
 
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.Commission;
+import it.cleverad.engine.persistence.model.service.QueryTransaction;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
 import it.cleverad.engine.persistence.model.tracking.Cpl;
 import it.cleverad.engine.persistence.repository.service.CommissionRepository;
@@ -19,12 +20,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.decimal4j.util.DoubleRounder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -34,7 +39,7 @@ public class RigeneraCPLBusiness {
     @Autowired
     private CplBusiness cplBusiness;
     @Autowired
-    private TransactionAllBusiness transactionAllBusiness;
+    private TransactionStatusBusiness transactionStatusBusiness;
     @Autowired
     private WalletBusiness walletBusiness;
     @Autowired
@@ -59,6 +64,8 @@ public class RigeneraCPLBusiness {
     private TransactionCPLBusiness transactionCPLBusiness;
     @Autowired
     private CampaignBudgetBusiness campaignBudgetBusiness;
+    @Autowired
+    private CampaignAffiliateBusiness campaignAffiliateBusiness;
 
     public void rigenera(Integer anno, Integer mese, Integer giorno, Long affiliateId, Long camapignId) {
         try {
@@ -72,31 +79,28 @@ public class RigeneraCPLBusiness {
             log.info(anno + "-" + mese + "-" + giorno + " >> " + dataDaGestireStart + " || " + dataDaGestireEnd + " per " + affiliateId + " e " + camapignId);
 
             // cancello le transazioni
-            TransactionAllBusiness.Filter request = new TransactionAllBusiness.Filter();
+            TransactionStatusBusiness.QueryFilter request = new TransactionStatusBusiness.QueryFilter();
             request.setCreationDateFrom(dataDaGestireStart);
             request.setCreationDateTo(dataDaGestireEnd);
             request.setTipo("CPL");
-            if (affiliateId != null)
-                request.setAffiliateId(affiliateId);
-            if (camapignId != null)
-                request.setCampaignId(camapignId);
+            if (affiliateId != null) request.setAffiliateId(affiliateId);
+            if (camapignId != null) request.setCampaignId(camapignId);
             List<Long> not = new ArrayList<>();
             not.add(68L); // MANUALE
             request.setNotInDictionaryId(not);
             not = new ArrayList<>();
             not.add(74L); // RIGETTATO
-            request.setNotInStatusId(not);
-            Page<TransactionStatusDTO> ls = transactionAllBusiness.searchPrefiltratoInterno(request);
+            request.setNotInStausId(not);
+            Page<QueryTransaction> ls = transactionStatusBusiness.searchPrefiltratoN(request, Pageable.ofSize(Integer.MAX_VALUE));
             log.info(">>> TOT :: " + ls.getTotalElements());
-
-            for (TransactionStatusDTO tcpl : ls) {
-                log.trace("CANCELLO PER RIGENERA CP :: {} : {} :: {}", tcpl.getId(), tcpl.getValue(), tcpl.getDateTime());
+            for (QueryTransaction tcpl : ls) {
+                log.trace("CANCELLO PER RIGENERA CP :: {} : {} :: {}", tcpl.getid(), tcpl.getValue(), tcpl.getDateTime());
 
                 // aggiorno budget affiliato schedualto
                 // aggiorno wallet in modo schedulato
                 // aggiorno campaign buget in modo schedualto
 
-                transactionCPLBusiness.delete(tcpl.getId());
+                transactionCPLBusiness.delete(tcpl.getid());
                 Thread.sleep(50L);
             }
 
@@ -104,13 +108,10 @@ public class RigeneraCPLBusiness {
                 cplBusiness.getAllDay(anno, mese, gg, affiliateId).stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
 
                     // leggo sempre i cpc precedenti per trovare il click riferito alla lead
-                    cpcBusiness.findByIp24HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal())
-                            .stream()
-                            .filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal()))
-                            .forEach(cpcDTO -> {
-                                cplDTO.setRefferal(cpcDTO.getRefferal());
-                                cplDTO.setCpcId(cpcDTO.getId());
-                            });
+                    cpcBusiness.findByIp24HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal()).stream().filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal())).forEach(cpcDTO -> {
+                        cplDTO.setRefferal(cpcDTO.getRefferal());
+                        cplDTO.setCpcId(cpcDTO.getId());
+                    });
                     log.trace("Refferal :: {} con ID CPC {}", cplDTO.getRefferal(), cplDTO.getCpcId());
                     cplBusiness.setCpcId(cplDTO.getId(), cplDTO.getCpcId());
 
@@ -140,6 +141,7 @@ public class RigeneraCPLBusiness {
                         transaction.setData(cplDTO.getData().trim().replace("[REPLACE]", ""));
                         transaction.setMediaId(refferal.getMediaId());
                         transaction.setCpcId(cplDTO.getCpcId());
+                        transaction.setCplId(cplDTO.getId());
 
                         if (StringUtils.isNotBlank(cplDTO.getAgent())) transaction.setAgent(cplDTO.getAgent());
                         else transaction.setAgent("");
@@ -159,15 +161,14 @@ public class RigeneraCPLBusiness {
                             // associo a wallet
                             Long affiliateID = refferal.getAffiliateId();
 
-                            Long walletID = null;
                             if (affiliateID != null) {
-                                walletID = walletBusiness.findByIdAffilaite(refferal.getAffiliateId()).stream().findFirst().get().getId();
+                                Long walletID = walletBusiness.findByIdAffilaite(refferal.getAffiliateId()).stream().findFirst().get().getId();
                                 transaction.setWalletId(walletID);
                             }
 
                             // check Action ID
                             boolean checkAction = false;
-                            if (StringUtils.isNotBlank(cplDTO.getActionId()) && !cplDTO.getActionId().equals(0)) {
+                            if (StringUtils.isNotBlank(cplDTO.getActionId())) {
                                 log.info(">>>>>>>>>> TROVATO ACTION : {}", cplDTO.getActionId());
                                 checkAction = true;
                             }
@@ -218,7 +219,7 @@ public class RigeneraCPLBusiness {
                                     commVal = acccFirst.getCommissionValue();
                                     commissionId = acccFirst.getCommissionId();
                                 } else
-                                    log.warn("No Commission CPL C: {} e A: {}, setto default ({})", refferal.getCampaignId(), refferal.getAffiliateId(), cplDTO.getRefferal());
+                                    log.warn("No Commission CPL C :: {} e A :0: {}, setto default ({})", refferal.getCampaignId(), refferal.getAffiliateId(), cplDTO.getRefferal());
                             }
                             transaction.setCommissionId(commissionId);
 
@@ -226,22 +227,23 @@ public class RigeneraCPLBusiness {
                             transaction.setValue(totale);
                             transaction.setLeadNumber(1L);
 
-                            // incemento valore scheduled
-
                             // decremento budget Affiliato
                             AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
-                            if (bb != null && bb.getBudget() != null) {
-                                // setto stato transazione a ovebudget editore se totale < 0
-                                if ((bb.getBudget() - totale) < 0) transaction.setDictionaryId(47L);
+                            if (bb != null && bb.getBudget() != null && ((bb.getBudget() - totale) < 0)) {
+                                transaction.setDictionaryId(47L);
                             }
 
                             // setto stato transazione a ovebudget editore se totale < 0
                             CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(camapignId, cplDTO.getDate().toLocalDate()).stream().findFirst().orElse(null);
-                            if (campBudget != null && campBudget.getBudgetErogato() != null)
-                                if (campBudget.getBudgetErogato() - totale < 0) transaction.setDictionaryId(48L);
+                            if (campBudget != null && campBudget.getBudgetErogato() != null && (campBudget.getBudgetErogato() - totale < 0)) {
+                                transaction.setDictionaryId(48L);
+                            }
 
-                            if (cccpl.getBlacklisted() != null && cccpl.getBlacklisted()) transaction.setStatusId(74L);
-                            else transaction.setStatusId(72L);
+                            if (cccpl.getBlacklisted() != null && cccpl.getBlacklisted()) {
+                                transaction.setStatusId(74L);
+                            } else {
+                                transaction.setStatusId(72L);
+                            }
 
                             // creo la transazione
                             TransactionCPLDTO cpl = transactionCPLBusiness.createCpl(transaction);
@@ -249,6 +251,42 @@ public class RigeneraCPLBusiness {
 
                             // setto a gestito
                             cplBusiness.setRead(cplDTO.getId());
+
+                            // verifico il Postback ed eventualemnte faccio chiamata solo se campagna attiva
+                            if (transaction.getDictionaryId() != 49L) {
+                                //not manuale
+                                if (transaction.getManualDate() == null) {
+                                    List<CampaignAffiliateDTO> campaignAffiliateDTOS = campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(refferal.getAffiliateId(), refferal.getCampaignId()).toList();
+                                    campaignAffiliateDTOS.forEach(campaignAffiliateDTO -> {
+                                        String followThrough = campaignAffiliateDTO.getFollowThrough();
+                                        String info = cplDTO.getInfo();
+                                        String data = cplDTO.getData();
+                                        log.info("RCPLB POST BACK ::: " + followThrough + " :: " + info + " :: " + data);
+                                        if (StringUtils.isNotBlank(followThrough)) {
+                                            // trovo tutte le chiavi
+                                            Map<String, String> keyValueMap = referralService.estrazioneInfo(info);
+                                            // aggiungo order_id / transaction_id
+                                            keyValueMap.put("orderid", data);
+                                            keyValueMap.put("order_id", data);
+                                            keyValueMap.put("transaction_id", data);
+                                            keyValueMap.put("transactionid", data);
+                                            followThrough = referralService.replacePlaceholders(followThrough, keyValueMap);
+                                            log.info("RCPLB FT :: " + followThrough);
+                                            try {
+                                                URL url = new URL(followThrough);
+                                                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                                                con.setRequestMethod("GET");
+                                                con.getInputStream();
+                                                log.info("RCPLB Chiamo PB  :: " + con.getResponseCode() + " :: " + followThrough);
+                                            } catch (Exception e) {
+                                                log.error("RCPLB Eccezione chianata Post Back", e);
+                                            }
+                                        }
+                                    });
+                                }
+                            } else {
+                                log.warn("Campagna scaduta non faccio postback :: {}", cpl.getId());
+                            }
 
                         } catch (Exception ecc) {
                             log.error("ECCEZIONE CPL :> ", ecc);
@@ -258,7 +296,7 @@ public class RigeneraCPLBusiness {
             }// ciclo se prendo in considerazione tutto il mese
 
         } catch (Exception e) {
-            log.error("CUSTOM Eccezione Scheduler CPL --  {}", e.getMessage(), e);
+            log.error("CUSTOM Eccezione Scheduler CPL --  {} - " + anno + "-" + mese + "-" + giorno + " ::: " + affiliateId + " e " + camapignId, e.getMessage(), e);
         }
     }
 

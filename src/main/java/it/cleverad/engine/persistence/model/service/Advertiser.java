@@ -43,25 +43,32 @@ public class Advertiser {
     @Column(name = "last_modification_date")
     private LocalDateTime lastModificationDate = LocalDateTime.now();
 
+    /**
+     * ONE TO MANY
+     */
     @OneToMany(mappedBy = "advertiser")
     private Set<TransactionCPL> transactionCPLS;
-
     @OneToMany(mappedBy = "advertiser")
     private Set<Campaign> campaigns;
-
     @OneToMany(mappedBy = "advertiser")
     private Set<Representative> representatives;
-
     @OneToMany(mappedBy = "advertiser")
     private Set<CampaignBudget> campaignBudgets;
     @OneToMany(mappedBy = "advertiser")
     private Set<FileAdvertiser> fileAdvertisers;
+    @OneToMany(mappedBy = "advertiser")
+    private Set<Feed> feeds;
+    @OneToMany(mappedBy = "advertiser")
+    private Set<Coupon> coupons;
 
+    /**
+     * MANY TO ONE
+     */
     @ManyToOne
     @JoinColumn(name = "term_id")
     private Dictionary dictionaryTermType;
-
     @ManyToOne
     @JoinColumn(name = "vat_id")
     private Dictionary dictionaryVatType;
+
 }

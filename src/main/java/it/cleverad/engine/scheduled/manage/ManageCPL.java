@@ -24,16 +24,14 @@ import org.springframework.stereotype.Component;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class ManageCPL {
+
     @Autowired
     CampaignBudgetBusiness campaignBudgetBusiness;
     @Autowired
@@ -62,38 +60,6 @@ public class ManageCPL {
     private CplRepository cplRepository;
     @Autowired
     private TransactionCPLBusiness transactionCPLBusiness;
-
-    public static Map<String, String> extractKeyValuePairs(String input) {
-        Map<String, String> keyValueMap = new HashMap<>();
-
-        // Define the pattern for key-value pairs with the format "xxx: value"
-        Pattern pattern = Pattern.compile("(\\w+)\\s*:\\s*([^,]+)");
-
-        Matcher matcher = pattern.matcher(input);
-
-        // Find all matches and extract the keys and values
-        while (matcher.find()) {
-            String key = matcher.group(1).trim();
-            String value = matcher.group(2).trim();
-            keyValueMap.put(key, value);
-        }
-
-        return keyValueMap;
-    }
-
-    public static String replacePlaceholders(String input, Map<String, String> keyValueMap) {
-        for (Map.Entry<String, String> entry : keyValueMap.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            input = input
-                    .replaceAll("\\{" + key + "\\}", value)
-                    .replaceAll("\\{" + key.toUpperCase() + "\\}", value)
-                    .replaceAll("\\[" + key + "\\]", value)
-                    .replaceAll("\\[" + key.toUpperCase() + "\\]", value);
-            log.trace(">" + key + "< : >" + value + "< = " + input);
-        }
-        return input;
-    }
 
     /**
      * ============================================================================================================
@@ -167,164 +133,163 @@ public class ManageCPL {
                     transaction.setMediaId(refferal.getMediaId());
 
                     // controlla data scadneza camapgna
-                    try {
-                        CampaignDTO campaignDTO = campaignBusiness.findByIdAdmin(refferal.getCampaignId());
-                        LocalDate endDate = campaignDTO.getEndDate();
-                        if (endDate.isBefore(LocalDate.now())) {
-                            // setto a campagna scaduta
-                            transaction.setDictionaryId(49L);
-                        } else {
-                            //setto pending
-                            transaction.setDictionaryId(42L);
-                        }
+                    CampaignDTO campaignDTO = campaignBusiness.findByIdAdmin(refferal.getCampaignId());
+                    LocalDate endDate = campaignDTO.getEndDate();
+                    if (endDate.isBefore(LocalDate.now())) {
+                        // setto a campagna scaduta
+                        transaction.setDictionaryId(49L);
+                    } else {
+                        //setto pending
+                        transaction.setDictionaryId(42L);
+                    }
 
-                        // associo a wallet
-                        Long affiliateID = refferal.getAffiliateId();
+                    // associo a wallet
+                    Long affiliateID = refferal.getAffiliateId();
+                    Long walletID;
+                    if (affiliateID != null) {
+                        walletID = walletRepository.findByAffiliateId(affiliateID).getId();
+                        transaction.setWalletId(walletID);
+                    }
 
-                        Long walletID = null;
-                        if (affiliateID != null) {
-                            walletID = walletRepository.findByAffiliateId(affiliateID).getId();
-                            transaction.setWalletId(walletID);
-                        }
-
-
-                        // check Action ID
-                        boolean checkAction = false;
-                        if (StringUtils.isNotBlank(cplDTO.getActionId()) && !cplDTO.getActionId().equals(0)) {
+                    // check Action ID
+                    boolean checkAction = false;
+                    if (StringUtils.isNotBlank(cplDTO.getActionId()) && (cplDTO.getActionId().equals("0"))) {
                             log.info(">>>>>>>>>> TROVATO ACTION : {}", cplDTO.getActionId());
                             checkAction = true;
-                        }
 
-                        // trovo revenue
-                        if (checkAction) {
-                            RevenueFactor rf = revenueFactorRepository.findFirstByActionAndStatus(cplDTO.getActionId(), true);
-                            if (rf != null) {
-                                transaction.setRevenueId(rf.getId());
-                                log.warn("Revenue >{}< trovata da action ID >{}<", rf.getId(), cplDTO.getActionId());
-                            } else {
-                                checkAction = false;
-                            }
-                        }
-                        if (!checkAction) {
-                            // GIRO STANDARD
-                            RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 11L);
-                            if (rf != null) {
-                                transaction.setRevenueId(rf.getId());
-                            } else {
-                                log.warn("Non trovato revenue factor di tipo 11 per campagna {} , setto default", refferal.getCampaignId());
-                                transaction.setRevenueId(2L);
-                            }
-                        }
-
-                        // gesione commisione
-                        Double commVal = 0D;
-                        Long commissionId = 0L;
-                        AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
-                        if (checkAction) {
-                            Commission cm = commissionRepository.findFirstByActionAndStatus(cplDTO.getActionId(), true);
-                            if (cm != null) {
-                                commissionId = cm.getId();
-                                commVal = cm.getValue();
-                                log.warn("Commissione >{}< trovata da action ID >{}<", cm.getId(), cplDTO.getActionId());
-                            } else {
-                                checkAction = false;
-                            }
-                        }
-                        if (!checkAction) {
-                            // non è settato l'actionId allora faccio il solito giro
-                            req.setAffiliateId(refferal.getAffiliateId());
-                            req.setChannelId(refferal.getChannelId());
-                            req.setCampaignId(refferal.getCampaignId());
-                            req.setCommissionDicId(11L);
-                            AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
-                            if (acccFirst != null) {
-                                commVal = acccFirst.getCommissionValue();
-                                commissionId = acccFirst.getCommissionId();
-                            } else
-                                log.warn("No Commission CPL C: {} e A: {}, setto default ({})", refferal.getCampaignId(), refferal.getAffiliateId(), cplDTO.getRefferal());
-                        }
-                        transaction.setCommissionId(commissionId);
-
-                        Double totale = commVal * 1;
-                        transaction.setValue(DoubleRounder.round(totale, 2));
-                        transaction.setLeadNumber(Long.valueOf(1));
-
-                        // incemento valore schedled
-
-                        // decremento budget Affiliato
-                        AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
-                        if (bb != null && bb.getBudget() != null) {
-                            if ((bb.getBudget() - totale) < 0) transaction.setDictionaryId(47L);
-                        }
-
-                        // Stato Budget Campagna
-                        CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(refferal.getCampaignId(), transaction.getDateTime().toLocalDate()).stream().findFirst().orElse(null);
-                        if (campBudget != null && campBudget.getBudgetErogato() != null) {
-                            Double budgetCampagna = campBudget.getBudgetErogato() - totale;
-                            // setto stato transazione a ovebudget editore se totale < 0
-                            if (budgetCampagna < 0) {
-                                transaction.setDictionaryId(48L);
-                            }
-                        }
-                        //setto pending
-                        transaction.setStatusId(72L);
-
-                        // setto id CPC
-                        transaction.setCpcId(idCpc);
-
-                        // creo la transazione
-                        TransactionCPLDTO cpl = transactionCPLBusiness.createCpl(transaction);
-                        log.info(">>> CREATO TRANSAZIONE :::: CPL :::: {} ", cpl.getId());
-
-                        // setto a gestito
-                        cplBusiness.setRead(cplDTO.getId());
-
-                        // verifico il Postback ed eventualemnte faccio chiamata
-                        try {
-                            // solo se campagna attiva
-                            if (transaction.getDictionaryId() != 49L) {
-                                //not manuale
-                                if (transaction.getManualDate() == null) {
-                                    List<CampaignAffiliateDTO> campaignAffiliateDTOS = campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(refferal.getAffiliateId(), refferal.getCampaignId()).toList();
-                                    campaignAffiliateDTOS.stream().forEach(campaignAffiliateDTO -> {
-                                        String followThrough = campaignAffiliateDTO.getFollowThrough();
-                                        String info = cplDTO.getInfo();
-                                        log.info("POST BACK INFO ::: " + info);
-                                        if (StringUtils.isNotBlank(followThrough)) {
-                                            log.info(followThrough + " :: " + info);
-                                            // trovo tutte le chiavi
-                                            Map<String, String> keyValueMap = extractKeyValuePairs(info);
-                                            // keyValueMap.forEach((s, s2) -> log.info(">{}< :: >{}<", s, s2));
-                                            // aggiungo order_id
-                                            keyValueMap.put("orderid", cpl.getData());
-                                            keyValueMap.put("order_id", cpl.getData());
-                                            followThrough = replacePlaceholders(followThrough, keyValueMap);
-                                            // se target presente faccio chiamata
-                                            try {
-                                                URL url = new URL(followThrough);
-                                                HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                                                con.setRequestMethod("GET");
-                                                con.getInputStream();
-                                                log.info("Chiamo PB  :: " + con.getResponseCode() + " :: " + followThrough);
-                                            } catch (Exception e) {
-                                                throw new RuntimeException(e);
-                                            }
-                                        }
-                                    });
-                                }
-                            } else {
-                                log.warn("Campagna scaduta non faccio postback :: {}", cpl.getId());
-                            }
-                        } catch (Exception e) {
-                            log.error("Errore in gestione post back", e);
-                        }
-                    } catch (Exception ecc) {
-                        log.error("\n\n\n >>>>>>>>>>>>> ECCEZIONE CPL : >>>>>>>>>>>>> ", ecc);
                     }
+
+                    // trovo revenue
+                    if (checkAction) {
+                        RevenueFactor rf = revenueFactorRepository.findFirstByActionAndStatus(cplDTO.getActionId(), true);
+                        if (rf != null) {
+                            transaction.setRevenueId(rf.getId());
+                            log.warn("Revenue >{}< trovata da action ID >{}<", rf.getId(), cplDTO.getActionId());
+                        } else {
+                            checkAction = false;
+                        }
+                    }
+                    if (!checkAction) {
+                        // GIRO STANDARD
+                        RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 11L);
+                        if (rf != null) {
+                            transaction.setRevenueId(rf.getId());
+                        } else {
+                            log.warn("Non trovato revenue factor di tipo 11 per campagna {} , setto default", refferal.getCampaignId());
+                            transaction.setRevenueId(2L);
+                        }
+                    }
+
+                    // gesione commisione
+                    Double commVal = 0D;
+                    Long commissionId = 0L;
+                    AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
+                    if (checkAction) {
+
+
+                        // TODO SE ACTION ID IDENTICI??? COSA FACCIAMO
+
+                        Commission cm = commissionRepository.findFirstByActionAndStatus(cplDTO.getActionId(), true);
+                        if (cm != null) {
+                            commissionId = cm.getId();
+                            commVal = cm.getValue();
+                            log.warn("Commissione >{}< trovata da action ID >{}<", cm.getId(), cplDTO.getActionId());
+                        } else {
+                            checkAction = false;
+                        }
+                    }
+                    if (!checkAction) {
+                        // non è settato l'actionId allora faccio il solito giro
+                        req.setAffiliateId(refferal.getAffiliateId());
+                        req.setChannelId(refferal.getChannelId());
+                        req.setCampaignId(refferal.getCampaignId());
+                        req.setCommissionDicId(11L);
+                        AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
+                        if (acccFirst != null) {
+                            commVal = acccFirst.getCommissionValue();
+                            commissionId = acccFirst.getCommissionId();
+                        } else
+                            log.warn("No Commission CPL C: {} e A: {}, setto default ({})", refferal.getCampaignId(), refferal.getAffiliateId(), cplDTO.getRefferal());
+                    }
+                    transaction.setCommissionId(commissionId);
+
+                    Double totale = commVal * 1;
+                    transaction.setValue(DoubleRounder.round(totale, 2));
+                    transaction.setLeadNumber(1L);
+
+                    // incemento valore schedled
+
+                    // decremento budget Affiliato
+                    AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
+                    if (bb != null && bb.getBudget() != null && (bb.getBudget() - totale) < 0)
+                        transaction.setDictionaryId(47L);
+
+                    // Stato Budget Campagna
+                    CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(refferal.getCampaignId(), transaction.getDateTime().toLocalDate()).stream().findFirst().orElse(null);
+                    if (campBudget != null && campBudget.getBudgetErogato() != null) {
+                        Double budgetCampagna = campBudget.getBudgetErogato() - totale;
+                        // setto stato transazione a ovebudget editore se totale < 0
+                        if (budgetCampagna < 0) {
+                            transaction.setDictionaryId(48L);
+                        }
+                    }
+
+                    //setto pending
+                    transaction.setStatusId(72L);
+                    // setto id CPC
+                    transaction.setCpcId(idCpc);
+                    // setto id CPL
+                    transaction.setCplId(cplDTO.getId());
+
+                    // creo la transazione
+                    TransactionCPLDTO cpl = transactionCPLBusiness.createCpl(transaction);
+                    log.info(">>> CREATO TRANSAZIONE :::: CPL :::: {} ", cpl.getId());
+
+                    // setto a gestito
+                    cplBusiness.setRead(cplDTO.getId());
+
+                    // verifico il Postback ed eventualemnte faccio chiamata
+                    // solo se campagna attiva
+                    if (transaction.getDictionaryId() != 49L) {
+                        //not manuale
+                        if (transaction.getManualDate() == null) {
+                            List<CampaignAffiliateDTO> campaignAffiliateDTOS = campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(refferal.getAffiliateId(), refferal.getCampaignId()).toList();
+                            campaignAffiliateDTOS.stream().forEach(campaignAffiliateDTO -> {
+                                String followThrough = campaignAffiliateDTO.getFollowThrough();
+                                String info = cplDTO.getInfo();
+                                String data = cplDTO.getData();
+                                log.info("POST BACK ::: " + followThrough + " :: " + info + " :: " + data);
+                                if (StringUtils.isNotBlank(followThrough)) {
+                                    // trovo tutte le chiavi
+                                    Map<String, String> keyValueMap = referralService.estrazioneInfo(info);
+                                    // aggiungo order_id / transaction_id
+                                    keyValueMap.put("orderid", data);
+                                    keyValueMap.put("order_id", data);
+                                    keyValueMap.put("transaction_id", data);
+                                    keyValueMap.put("transactionid", data);
+                                    followThrough = referralService.replacePlaceholders(followThrough, keyValueMap);
+                                    log.info("FT :: " + followThrough);
+                                    try {
+                                        URL url = new URL(followThrough);
+                                        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                                        con.setRequestMethod("GET");
+                                        con.getInputStream();
+                                        log.info("Chiamo PB  :: " + con.getResponseCode() + " :: " + followThrough);
+                                    } catch (Exception e) {
+                                        log.error("Eccezione chianata Post Back", e);
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                            });
+                        }
+                    } else {
+                        log.warn("Campagna scaduta non faccio postback :: {}", cpl.getId());
+                    }
+
                 }// creo solo se ho affiliate
             });
         } catch (Exception e) {
-            log.error("Eccezione Scheduler CPL --  {}", e.getMessage(), e);
+            log.error("MANAGE CPL EXCEPTION --  {}", e.getMessage(), e);
         }
     }//trasformaTrackingCPL
 
@@ -376,10 +341,7 @@ public class ManageCPL {
                     transaction.setData(cplDTO.getData().trim().replace("[REPLACE]", ""));
                     transaction.setMediaId(refferal.getMediaId());
 
-                    // controlla data scadneza camapgna
                     try {
-                        CampaignDTO campaignDTO = campaignBusiness.findByIdAdmin(refferal.getCampaignId());
-
                         // associo a wallet
                         Long affiliateID = refferal.getAffiliateId();
                         if (affiliateID != null) {

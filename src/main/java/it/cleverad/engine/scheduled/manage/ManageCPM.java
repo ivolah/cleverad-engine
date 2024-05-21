@@ -58,7 +58,6 @@ public class ManageCPM {
     @Async
     public void gestisciTransazioni() {
         trasformaTrackingCPM(true);
-        //  trasformaTrackingCPM(false);
         gestisciBlacklisted();
     }
 
@@ -68,7 +67,6 @@ public class ManageCPM {
 
     public void trasformaTrackingCPM(boolean today) {
         try {
-
             // trovo tutti i tracking con read == false
             Map<String, Integer> mappa = new HashMap<>();
             List<Long> lstaID = new ArrayList<>();
@@ -218,7 +216,7 @@ public class ManageCPM {
 
                             // creo la transazione
                             TransactionCPMDTO tcpm = transactionCPMBusiness.createCpm(transaction);
-                            //  log.info(">>> CREATO TRANSAZIONE :::: CPM :::: {}", tcpm.getId());
+                            log.trace(">>> CREATO TRANSAZIONE :::: CPM :::: {}", tcpm.getId());
                         }
 
                     }// refferal not null

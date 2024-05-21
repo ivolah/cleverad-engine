@@ -19,6 +19,12 @@ public class FileStoreService {
         return filePath;
     }
 
+    public String storeFileNew(Long id, String tipo, String fileName, byte[] bytes) throws IOException {
+        String filePath = "/media/cleverad/" + tipo + "/" + id + "/" + fileName;
+        FileUtils.writeByteArrayToFile(new File(filePath), bytes);
+        return filePath;
+    }
+
     public byte[] retrieveFile(String filePath) throws IOException {
         File daScaricare = new File(filePath);
         byte[] bytes = null;

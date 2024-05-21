@@ -42,13 +42,6 @@ public class ManageAgent {
                 this.generaAgent(uaa.parse(dto.getAgent()), dto.getRefferal(), "CPC");
         });
 
-        // inserisco info Agent CPM
-//        cpmBusiness.darivederegetAllDaysBefore().stream().filter(dto -> dto.getRefferal() != null).forEach(dto -> {
-//            // valorizzo agent
-//            if (StringUtils.isNotBlank(dto.getAgent()))
-//                this.generaAgent(uaa.parse(dto.getAgent()), dto.getRefferal(), "CPM");
-//        });
-
         // inserisco info Agent CPL
         cplBusiness.getAllDayBefore().stream().filter(dto -> dto.getRefferal() != null).forEach(dto -> {
             // valorizzo agent

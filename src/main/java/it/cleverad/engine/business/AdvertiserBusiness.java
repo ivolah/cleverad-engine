@@ -76,7 +76,7 @@ public class AdvertiserBusiness {
         operatoreAdvertiser.setRole("Advertiser");
         operatoreAdvertiser.setUsername(UUID.randomUUID().toString());
         operatoreAdvertiser.setPassword("piciulin");
-        UserDTO userDto = userBusiness.create(operatoreAdvertiser);
+        userBusiness.create(operatoreAdvertiser);
 
         // crea utente shadow
         UserBusiness.BaseCreateRequest opertatoreOmbra = new UserBusiness.BaseCreateRequest();
@@ -104,8 +104,8 @@ public class AdvertiserBusiness {
 
     // GET BY ID
     public AdvertiserDTO findById(Long id) {
-        Advertiser Advertiser = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Advertiser", id));
-        return AdvertiserDTO.from(Advertiser);
+        Advertiser advertiser = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Advertiser", id));
+        return AdvertiserDTO.from(advertiser);
     }
 
     // DELETE BY ID

@@ -10,8 +10,6 @@ public interface QueryTransaction {
 
     String getDateTime();
 
-//    String getDatetime();
-
     Long getStatusId();
 
     String getStatusName();

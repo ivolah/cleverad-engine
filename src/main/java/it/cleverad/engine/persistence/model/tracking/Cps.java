@@ -19,15 +19,16 @@ public class Cps {
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String refferal;
     private String ip;
     private String agent;
     private String data;
-
+    private String info;
+    private String country;
     private LocalDateTime date = LocalDateTime.now();
     private Boolean read = false;
-
+    private Boolean blacklisted = false;
+    private Boolean multiple = false;
     //dati refferal
     @Column(name = "media_id")
     private Long mediaId;
@@ -39,6 +40,10 @@ public class Cps {
     private Long channelId;
     @Column(name = "target_id")
     private Long targetId;
+    // altro
+    @Column(name = "cpc_id")
+    private Long cpcId;
+    @Column(name = "action_id")
+    private String actionId;
 
-    private Boolean blacklisted = false;
 }

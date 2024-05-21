@@ -94,5 +94,7 @@ public class TransactionCPL {
 
     @Column(name = "cpc_id")
     private Long cpcId;
+    @Column(name = "cpl_id")
+    private Long cplId;
 
 }

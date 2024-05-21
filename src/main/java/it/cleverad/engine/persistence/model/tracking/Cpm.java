@@ -20,25 +20,22 @@ public class Cpm {
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String ip;
+    private String agent;
+    @CreatedDate
+    private LocalDateTime date = LocalDateTime.now();
+    @Column(nullable = false)
+    private Boolean read = false;
+    private Boolean blacklisted = false;
 
+    //dati refferal
+    private String refferal;
     @Column(name = "campaign_id")
     private Long campaignId;
     @Column(name = "image_id")
     private Long imageId;
     @Column(name = "media_id")
     private Long mediaId;
-
-    private String refferal;
-    private String ip;
-    private String agent;
-
-    @CreatedDate
-    private LocalDateTime date = LocalDateTime.now();
-
-    @Column(nullable = false)
-    private Boolean read = false;
-
-    //dati refferal
     @Column(name = "affiliate_id")
     private Long affiliateId;
     @Column(name = "channel_id")
@@ -46,5 +43,4 @@ public class Cpm {
     @Column(name = "target_id")
     private Long targetId;
 
-    private Boolean blacklisted = false;
 }

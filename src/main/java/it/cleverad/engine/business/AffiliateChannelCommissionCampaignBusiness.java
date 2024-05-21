@@ -219,14 +219,6 @@ public class AffiliateChannelCommissionCampaignBusiness {
         return page.map(AffiliateChannelCommissionCampaignDTO::from);
     }
 
-    public Page<AffiliateChannelCommissionCampaignDTO> searchByCampaignIdAffiliate(Long campaignId, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-        Filter filter = new Filter();
-        filter.setCampaignId(campaignId);
-        Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(filter), pageable);
-        return page.map(AffiliateChannelCommissionCampaignDTO::from);
-    }
-
     public Page<AffiliateChannelCommissionCampaignDTO> search(Filter request, Pageable pageableR) {
         Pageable pageable = PageRequest.of(pageableR.getPageNumber(), pageableR.getPageSize(), Sort.by(Sort.Order.asc("id")));
         Page<AffiliateChannelCommissionCampaign> page = repository.findAll(getSpecification(request), pageable);

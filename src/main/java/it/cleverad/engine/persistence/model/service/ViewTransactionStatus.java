@@ -23,13 +23,10 @@ public class ViewTransactionStatus {
     @Column(name = "id", nullable = false)
     private Long id;
     private String tipo;
-
     @Column(name = "creation_date")
     private LocalDateTime creationDate;
     @Column(name = "date_time")
     private LocalDate dateTime;
-
-
     @Column(name = "status_id")
     private Long statusId;
     @Column(name = "status_name")
@@ -38,8 +35,6 @@ public class ViewTransactionStatus {
     private Long dictionaryId;
     @Column(name = "dictionary_name")
     private String dictionaryName;
-
-
     @Column(name = "affiliate_id")
     private Long affiliateId;
     @Column(name = "affiliate_name")
@@ -64,7 +59,6 @@ public class ViewTransactionStatus {
     private Double commissionValue;
     @Column(name = "commission_value_rigettato")
     private Double commissionValueRigettato;
-
     private Double value;
     @Column(name = "value_rigettato")
     private Double valueRigettato;
@@ -74,7 +68,6 @@ public class ViewTransactionStatus {
     private Long revenue;
     @Column(name = "revenue_rigettato")
     private Long revenueRigettato;
-
     @Column(name = "click_number")
     private Long clickNumber;
     @Column(name = "click_number_rigettato")
@@ -83,10 +76,7 @@ public class ViewTransactionStatus {
     private Long impressionNumber;
     @Column(name = "lead_number")
     private Long leadNumber;
-
     private String data;
-
-
     @Column(name = "wallet_id")
     private Long walletId;
     @Column(name = "payout_present")

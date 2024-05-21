@@ -104,4 +104,22 @@ public class AffiliateDTO {
                 affiliate.getDictionaryVatType() != null ? affiliate.getDictionaryVatType().getName() : null);
     }
 
+    public static AffiliateDTO fromList(Affiliate affiliate) {
+
+
+        return new AffiliateDTO(affiliate.getId(), affiliate.getName(), affiliate.getVatNumber(), affiliate.getStreet(), affiliate.getStreetNumber(), affiliate.getCity(), affiliate.getProvince(), affiliate.getZipCode(), affiliate.getPrimaryMail(), affiliate.getSecondaryMail(), affiliate.getCountry(), affiliate.getPhonePrefix(), affiliate.getPhoneNumber(), affiliate.getNote(), affiliate.getBank(), affiliate.getIban(), affiliate.getSwift(), affiliate.getPaypal(), affiliate.getFirstName(), affiliate.getLastName(),
+                affiliate.getDictionaryCompanyType() != null ? affiliate.getDictionaryCompanyType().getId() : null,
+                affiliate.getDictionaryCompanyType() != null ? affiliate.getDictionaryCompanyType().getName() : null,
+                affiliate.getStatus(),
+                affiliate.getDictionaryStatusType() != null ? affiliate.getDictionaryStatusType().getId() : null,
+                affiliate.getDictionaryStatusType() != null ? affiliate.getDictionaryStatusType().getName() : null,
+                affiliate.getCreationDate(), affiliate.getLastModificationDate(), null, null, affiliate.getCb(), affiliate.getBrandbuddies(),
+
+                affiliate.getDictionaryTermType() != null ? affiliate.getDictionaryTermType().getId() : null,
+                affiliate.getDictionaryTermType() != null ? affiliate.getDictionaryTermType().getName() : null,
+
+                affiliate.getDictionaryVatType() != null ? affiliate.getDictionaryVatType().getId() : null,
+                affiliate.getDictionaryVatType() != null ? affiliate.getDictionaryVatType().getName() : null);
+    }
+
 }

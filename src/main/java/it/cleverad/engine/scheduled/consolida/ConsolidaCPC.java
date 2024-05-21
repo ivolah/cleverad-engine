@@ -39,7 +39,7 @@ public class ConsolidaCPC {
         TransactionCPCBusiness.Filter request = new TransactionCPCBusiness.Filter();
         request.setDateTimeFrom(oraSpaccata.toLocalDate().atStartOfDay());
         request.setDateTimeTo(oraSpaccata);
-        if(blacklisted) {
+        if(Boolean.TRUE.equals(blacklisted)) {
             // setto rifiutato
             request.setStatusId(74L);
             // setto blacklisted
@@ -51,7 +51,7 @@ public class ConsolidaCPC {
 
         Page<TransactionCPCDTO> cpcs = transactionCPCBusiness.searchCpc(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
 
-        List<Triple> triples = new ArrayList<>();
+        ArrayList<Triple> triples = new ArrayList<>();
         for (TransactionCPCDTO tcpm : cpcs) {
             Triple<Long, Long, Long> triple = new ImmutableTriple<>(tcpm.getCampaignId(), tcpm.getAffiliateId(), tcpm.getChannelId());
             triples.add(triple);

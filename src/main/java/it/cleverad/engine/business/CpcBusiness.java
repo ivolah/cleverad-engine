@@ -218,8 +218,8 @@ public class CpcBusiness {
         return page.map(CpcDTO::from);
     }
 
-    public List<ClickMultipli> getListaClickMultipliDaDisabilitare(LocalDate dateFrom, LocalDate dateTo) {
-        return repository.getListaClickMultipliDaDisabilitare(dateFrom, dateTo.plusDays(1));
+    public List<ClickMultipli> getListaClickMultipliDaDisabilitare(LocalDate dateFrom, LocalDate dateTo, Long affiliateId, Long campaignId) {
+        return repository.getListaClickMultipliDaDisabilitare(dateFrom, dateTo.plusDays(1), affiliateId, campaignId);
     }
 
     public void setRead(long id) {

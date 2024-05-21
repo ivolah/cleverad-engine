@@ -188,7 +188,6 @@ public class CplBusiness {
         return page.map(CplDTO::from);
     }
 
-
     public Page<CplDTO> getUnreadBlacklisted() {
         Filter request = new Filter();
         request.setRead(false);
@@ -226,25 +225,21 @@ public class CplBusiness {
             if (request.getDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("date"), LocalDateTime.of(request.getDateTo(), LocalTime.MAX)));
             }
-
             if (request.getDatetimeFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("date"), request.getDatetimeFrom()));
             }
             if (request.getDatetimeTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("date"), request.getDatetimeTo()));
             }
-
             if (request.getCountry() != null) {
                 predicates.add(cb.equal(root.get("country"), request.getCountry()));
             }
-
             if (request.getAffiliateid() != null) {
                 predicates.add(cb.equal(root.get("affiliateId"), request.getAffiliateid()));
             }
             if (request.getCampaignid() != null) {
                 predicates.add(cb.equal(root.get("campaignId"), request.getCampaignid()));
             }
-
             if (request.getBlacklisted() != null) {
                 predicates.add(cb.equal(root.get("blacklisted"), request.getBlacklisted()));
             }

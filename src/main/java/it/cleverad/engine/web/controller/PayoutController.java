@@ -9,6 +9,7 @@ import it.cleverad.engine.web.dto.PayoutDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,7 @@ public class PayoutController {
 
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
+
     /**
      * ============================================================================================================
      **/
@@ -43,7 +45,7 @@ public class PayoutController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<PayoutDTO> search(PayoutBusiness.Filter request, Pageable pageable) {
+    public Page<PayoutDTO> search(PayoutBusiness.Filter request, @PageableDefault(value = Integer.MAX_VALUE) Pageable pageable) {
         return business.search(request, pageable);
     }
 
@@ -59,34 +61,17 @@ public class PayoutController {
         return business.findById(id);
     }
 
-//    @DeleteMapping("/{id}")
-//    @ResponseStatus(HttpStatus.ACCEPTED)
-//    public void deleteCpc(@PathVariable Long id) {
-//        this.business.delete(id);
-//    }
-
-//    @DeleteMapping("/{payoutId}/transaction/{transactionId}/cpc")
-//    @ResponseStatus(HttpStatus.ACCEPTED)
-//    public PayoutDTO removeCpc(@PathVariable Long payoutId, @PathVariable Long transactionId) {
-//        return this.business.removeCpc(payoutId, transactionId);
-//    }
-
-//    @DeleteMapping("/{payoutId}/transaction/{transactionId}/cpl")
-//    @ResponseStatus(HttpStatus.ACCEPTED)
-//    public PayoutDTO deleteCpl(@PathVariable Long payoutId, @PathVariable Long transactionId) {
-//        return this.business.removeCpl(payoutId, transactionId);
-//    }
 
     @GetMapping("/{id}/affiliate")
     @ResponseStatus(HttpStatus.OK)
-    public Page<PayoutDTO> findByIdAffilaite(@PathVariable Long id, Pageable pageable) {
+    public Page<PayoutDTO> findByIdAffilaite(@PathVariable Long id, @PageableDefault(value = Integer.MAX_VALUE) Pageable pageable) {
         return business.findByIdAffilaite(id, pageable);
     }
 
     @GetMapping("/affiliate")
     @ResponseStatus(HttpStatus.OK)
     public Page<PayoutDTO> findByAffilaite(Pageable pageable) {
-        if (jwtUserDetailsService.isAdmin()) {
+        if (Boolean.TRUE.equals(jwtUserDetailsService.isAdmin())) {
             return business.findByIdAffilaite(null, pageable);
         } else {
             return business.findByIdAffilaite(jwtUserDetailsService.getAffiliateId(), pageable);

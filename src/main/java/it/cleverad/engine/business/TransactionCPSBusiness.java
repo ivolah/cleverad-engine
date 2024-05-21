@@ -62,8 +62,6 @@ public class TransactionCPSBusiness {
     private MediaRepository mediaRepository;
     @Autowired
     private DictionaryRepository dictionaryRepository;
-    @Autowired
-    private AffiliateBudgetBusiness affiliateBudgetBusiness;
 
     /**
      * ============================================================================================================
@@ -111,11 +109,10 @@ public class TransactionCPSBusiness {
         return TransactionCPSDTO.from(cpsRepository.save(cps));
     }
 
-
     //  quando campbio stato devo ricalcolare i budget affilitato e campagna
     //  nuovi tre stati  : pending, approvato e rifutato
 
-    public void updateStatusl(Long id, Long dictionaryId, String tipo, Boolean approved, Long statusId) {
+    public void updateStatus(Long id, Long dictionaryId, String tipo, Boolean approved, Long statusId) {
 
         TransactionCPS cps = cpsRepository.findById(id).get();
         if (dictionaryId != null) {
@@ -151,7 +148,7 @@ public class TransactionCPSBusiness {
     }
 
     // DELETE BY ID
-    public void deleteInternol(Long id) {
+    public void deleteInterno(Long id) {
         try {
             cpsRepository.deleteById(id);
         } catch (ConstraintViolationException ex) {
@@ -161,7 +158,7 @@ public class TransactionCPSBusiness {
         }
     }
 
-    public void deletel(Long id) {
+    public void delete(Long id) {
         try {
             // aggiorno budget affiliato in modo schedualto
             // aggiorno budget campagna in modo schedualto

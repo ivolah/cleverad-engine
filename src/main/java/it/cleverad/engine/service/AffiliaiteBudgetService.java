@@ -53,7 +53,6 @@ public class AffiliaiteBudgetService {
         // 2. --- Gli AFFILAITE BUDGET attivi sulle campagne
         List<AffiliateBudgetDTO> allBudgets = new ArrayList<>();
         campaignIdsCPL.stream().forEach(id -> {
-            //List<AffiliateBudgetDTO> budgetDTOS = affiliateBudgetBusiness.getByActiveIdCampaign(id).getContent();
             List<AffiliateBudgetDTO> budgetDTOS = affiliateBudgetBusiness.getByIdCampaign(id).getContent();
             allBudgets.addAll(budgetDTOS);
         });

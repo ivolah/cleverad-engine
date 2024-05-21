@@ -68,7 +68,6 @@ public class MediaDTO {
         this.campaignName = campaignName;
         this.typeId = typeId;
         this.typeName = typeName;
-        // this.targets = targets;
         this.sender = sender;
         this.target = target;
         this.visibile = visibile;
@@ -81,16 +80,6 @@ public class MediaDTO {
     public static MediaDTO from(Media media) {
         Campaign campaign = media.getCampaigns().stream().findFirst().orElse(null);
 
-        List<TargetDTO> targets = null;
-        if (media.getTargets() != null) {
-            targets = media.getTargets().stream().map(tt -> {
-                TargetDTO dto = new TargetDTO();
-                dto.setId(tt.getId());
-                dto.setTarget(tt.getTarget());
-                return dto;
-            }).collect(Collectors.toList());
-        }
-
         return new MediaDTO(media.getId(), media.getName(), media.getUrl(), media.getMailSubject(),
                 media.getBannerCode(), media.getNote(), media.getIdFile(), media.getStatus(),
                 media.getCreationDate(), media.getLastModificationDate(),
@@ -98,7 +87,6 @@ public class MediaDTO {
                 campaign != null ? campaign.getName() : "NON ASSOCIATO A CAMPAGNA",
                 media.getMediaType().getId(),
                 media.getMediaType().getName(),
-                //targets,
                 media.getSender(),
                 media.getTarget()
                 , media.getVisibile()

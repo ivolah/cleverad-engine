@@ -31,26 +31,26 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         final String requestTokenHeader = request.getHeader("Authorization");
         String uri = request.getRequestURI();
-        if (!uri.contains("encoded") && !uri.contains("target") && !uri.contains("cleverad/file")
-                && !uri.contains("cleverad/cpc/refferal") && !uri.contains("cleverad/cpm/refferal"))
-            log.info("> " + request.getMethod() + " > " + uri);
-
         String username = null;
         String jwtToken = null;
+
         // JWT Token is in the form "Bearer token". Remove Bearer word and get only the Token
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ") && requestTokenHeader.length() > 20) {
             jwtToken = requestTokenHeader.substring(7);
             try {
                 username = jwtTokenUtil.getUsernameFromToken(jwtToken);
-                log.trace(">>>> USERNAME " + username);
             } catch (IllegalArgumentException e) {
                 log.error("Unable to get JWT Token");
             } catch (ExpiredJwtException e) {
-                log.error("JWT Token has expired");
+                log.trace("JWT Token has expired");
             }
         } else {
             log.trace("JWT Token does not begin with Bearer String");
         }
+
+        if (!uri.contains("encoded") && !uri.contains("target") && !uri.contains("cleverad/file")
+                && !uri.contains("cleverad/cpc/refferal") && !uri.contains("cleverad/cpm/refferal"))
+            log.info("{}>{}>{}", username, request.getMethod(), uri);
 
         //Once we get the token validate it.
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

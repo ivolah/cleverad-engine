@@ -3,7 +3,6 @@ package it.cleverad.engine.config.security;
 
 import it.cleverad.engine.business.UserBusiness;
 import it.cleverad.engine.web.dto.UserDTO;
-import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,7 +17,6 @@ import java.util.Base64;
 import java.util.Objects;
 
 @Service
-@Slf4j
 public class JwtUserDetailsService implements UserDetailsService {
 
     @Autowired
@@ -27,7 +25,6 @@ public class JwtUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserDTO userDTO = userBusiness.findByUsername(username);
-        //log.info(">>>" + username + " --- " + userDTO.getUsername() + " " + userDTO.getAffiliateId());
         if (userDTO != null) {
             return new User(userDTO.getUsername(), userDTO.getPassword(), new ArrayList<>());
         } else {
@@ -36,12 +33,9 @@ public class JwtUserDetailsService implements UserDetailsService {
     }
 
     public String getUserFromToken(String token) {
-
         String[] chunks = token.split("\\.");
         Base64.Decoder decoder = Base64.getUrlDecoder();
-        //String header = new String(decoder.decode(chunks[0]));
         String payload = new String(decoder.decode(chunks[1]));
-
         return new JSONObject(payload).getString("sub");
     }
 
@@ -58,6 +52,7 @@ public class JwtUserDetailsService implements UserDetailsService {
             return userBusiness.findByUsername(username).getId();
         else return 0L;
     }
+
     public Long getAdvertiserId() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         if (userBusiness.findByUsername(username).getAdvertiserId() != null)
@@ -85,6 +80,7 @@ public class JwtUserDetailsService implements UserDetailsService {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userBusiness.findByUsername(username).getRoleId() == 555;
     }
+
     public Boolean isAffiliate() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userBusiness.findByUsername(username).getRoleId() == 4;

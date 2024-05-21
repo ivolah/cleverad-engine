@@ -206,41 +206,29 @@ public class TransactionController {
 
     @GetMapping("/all")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<TransactionStatusDTO> searchAll(TransactionAllBusiness.Filter request, Pageable pageable) {
-        return allBusiness.searchPrefiltrato(request, pageable);
+    public Page<QueryTransaction> searchAll(TransactionStatusBusiness.QueryFilter request, Pageable pageable) {
+        return statusBusiness.searchPrefiltratoN(request, pageable);
     }
 
     @GetMapping("/all/affiliate")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<TransactionStatusDTO> searchAllPrefiltrato(TransactionAllBusiness.Filter request, Pageable pageable) {
-        return allBusiness.searchPrefiltrato(request, pageable);
+    public Page<QueryTransaction> searchAllPrefiltrato(TransactionStatusBusiness.QueryFilter request, Pageable pageable) {
+        return statusBusiness.searchPrefiltratoN(request, pageable);
     }
 
     /**
      * ============================================================================================================
      **/
 
-//    @GetMapping("/status")
-//    @ResponseStatus(HttpStatus.ACCEPTED)
-//    public Page<TransactionStatusDTO> searchAll(TransactionStatusBusiness.Filter request, Pageable pageable) {
-//        return statusBusiness.searchPrefiltrato(request, pageable);
-//    }
-//
-//    @GetMapping("/status/affiliate")
-//    @ResponseStatus(HttpStatus.ACCEPTED)
-//    public Page<TransactionStatusDTO> searchAllPrefiltrato(TransactionStatusBusiness.Filter request, Pageable pageable) {
-//        return statusBusiness.searchPrefiltrato(request, pageable);
-//    }
-
     @GetMapping("/status")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<QueryTransaction> searchAll(TransactionStatusBusiness.QueryFilter request, Pageable pageable) {
+    public Page<QueryTransaction> searchStatus(TransactionStatusBusiness.QueryFilter request, Pageable pageable) {
         return statusBusiness.searchPrefiltratoN(request, pageable);
     }
 
     @GetMapping("/status/affiliate")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Page<QueryTransaction> searchAllPrefiltrato(TransactionStatusBusiness.QueryFilter request, Pageable pageable) {
+    public Page<QueryTransaction> searchStatusPrefiltrato(TransactionStatusBusiness.QueryFilter request, Pageable pageable) {
         return statusBusiness.searchPrefiltratoN(request, pageable);
     }
 

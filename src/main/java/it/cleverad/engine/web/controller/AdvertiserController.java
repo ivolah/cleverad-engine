@@ -1,7 +1,6 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.AdvertiserBusiness;
-import it.cleverad.engine.business.RepresentativeBusiness;
 import it.cleverad.engine.business.UserBusiness;
 import it.cleverad.engine.web.dto.AdvertiserDTO;
 import it.cleverad.engine.web.dto.UserDTO;
@@ -81,9 +80,10 @@ public class AdvertiserController {
         return userBusiness.searchByAdvertiserId(id, pageable);
     }
 
-    @PostMapping(value = "/{id}/operator", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/{advertiserid}/operator", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public UserDTO create(@ModelAttribute UserBusiness.BaseCreateRequest request) {
+    public UserDTO create(@PathVariable Long advertiserid, @ModelAttribute UserBusiness.BaseCreateRequest request) {
+        request.setAdvertiserId(advertiserid);
         request.setRoleId(555L);
         request.setRole("Advertiser");
         return userBusiness.create(request);
@@ -118,7 +118,6 @@ public class AdvertiserController {
     public UserDTO resetRequest(@RequestBody UserBusiness.Confirm request) throws Exception {
         return userBusiness.requestResetPassword(request.getUsername(), false);
     }
-
 
 
     /**

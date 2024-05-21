@@ -20,7 +20,7 @@ public class WhatsappController {
      * ============================================================================================================
      **/
 
-    @RequestMapping(value = "/check", method = RequestMethod.GET)
+    @GetMapping(value = "/check")
     public Boolean getInfo(@NotNull @RequestParam(value = "phone") String phone) {
         if (phone.charAt(0) == '+') {
             phone = phone.substring(1);

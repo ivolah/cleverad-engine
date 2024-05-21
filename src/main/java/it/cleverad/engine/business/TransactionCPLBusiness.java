@@ -16,7 +16,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -75,7 +74,6 @@ public class TransactionCPLBusiness {
 
     public TransactionCPLDTO createCpl(BaseCreateRequest request) {
         TransactionCPL newCplTransaction = mapper.map(request, TransactionCPL.class);
-
         newCplTransaction.setPayoutPresent(false);
         newCplTransaction.setApproved(true);
         newCplTransaction.setPhoneVerified(false);
@@ -155,34 +153,26 @@ public class TransactionCPLBusiness {
         if (dictionaryId != null) {
             Long finalDictionaryId1 = dictionaryId;
             cpl.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", finalDictionaryId1)));
-        } else dictionaryId = 0L;
+        }
 
         if (statusId != null) {
             Long finalStatusId1 = statusId;
             log.info("SETTO STATUS :: {}", statusId);
             cpl.setDictionaryStatus(dictionaryRepository.findById(statusId).orElseThrow(() -> new ElementCleveradException("Status", finalStatusId1)));
-        } else statusId = 0L;
-        if (approved != null) cpl.setApproved(approved);
+        }
+
+        if (approved != null) {
+            cpl.setApproved(approved);
+        }
 
         cpl.setLastModificationDate(LocalDateTime.now());
         cplRepository.save(cpl);
     }
 
     public void updatePhoneStatus(Long id, String number, Boolean verified) {
-
         TransactionCPL cpl = cplRepository.findById(id).get();
         cpl.setPhoneVerified(verified);
         cpl.setPhoneNumber(number);
-        cplRepository.save(cpl);
-
-        // Setto a rigettato  se stato false e numero non nullo
-        if (!verified && StringUtils.isNotBlank(number)) {
-
-            // aggiorno budget affiliato in modo schedulato
-            // aggiorno wallet in modo schedulato
-
-        }
-
         cplRepository.save(cpl);
     }
 
@@ -202,7 +192,7 @@ public class TransactionCPLBusiness {
     public TransactionCPLDTO findByIdCPL(Long id) {
         TransactionCPL transaction = null;
 //        if (jwtUserDetailsService.isAdmin()) {
-            transaction = cplRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
+        transaction = cplRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
 //        } else {
 //            CampaignBusiness.Filter request = new CampaignBusiness.Filter();
 //            request.setId(id);
@@ -228,15 +218,11 @@ public class TransactionCPLBusiness {
 
     public void delete(Long id) {
         try {
-            TransactionCPLDTO dto = this.findByIdCPL(id);
-
             // aggiorno budget affiliato in modo schedulato
             // aggiorno budget campagna in modo schedualto
             // aggiorno wallet in modo schedulato
             // aggiorno campaign buget in modo schedualto
-
             cplRepository.delete(cplRepository.findById(id).get());
-
         } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
@@ -258,7 +244,6 @@ public class TransactionCPLBusiness {
     public Page<TransactionCPLDTO> searchByAffiliateCpl(Filter request, Long id, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         if (!jwtUserDetailsService.getRole().equals("Admin")) {
-            //      request.setApproved(true);
             request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
         }
         Page<TransactionCPL> page = cplRepository.findAll(getSpecificationCPL(request), pageable);
@@ -290,7 +275,7 @@ public class TransactionCPLBusiness {
         request.setDateTimeFrom(from.atStartOfDay());
         request.setDateTimeTo(LocalDateTime.of((to), LocalTime.MAX));
         request.setValueNotZero(true);
-        ArrayList not = new ArrayList<>();
+        ArrayList<Long> not = new ArrayList<>();
         not.add(74L); // RIGETTATO
         request.setNotInStatusId(not);
         return cplRepository.findAll(getSpecificationCPL(request), Pageable.ofSize(Integer.MAX_VALUE)).stream().collect(Collectors.toList());
@@ -303,7 +288,7 @@ public class TransactionCPLBusiness {
         request.setDateTimeFrom(from.atStartOfDay());
         request.setDateTimeTo(LocalDateTime.of((to), LocalTime.MAX));
         request.setValueNotZero(true);
-        ArrayList not = new ArrayList<>();
+        ArrayList<Long> not = new ArrayList<>();
         not.add(74L); // RIGETTATO
         request.setNotInStatusId(not);
         return cplRepository.findAll(getSpecificationCPL(request), Pageable.ofSize(Integer.MAX_VALUE)).stream().collect(Collectors.toList());
@@ -322,7 +307,7 @@ public class TransactionCPLBusiness {
     public List<TransactionCPL> searchLastModified() {
         TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
         request.setValueNotZero(true);
-        ArrayList not = new ArrayList<>();
+        ArrayList<Long> not = new ArrayList<>();
         not.add(74L); // RIGETTATO
         request.setNotInStatusId(not);
         request.setLastModificationDateTimeFrom(LocalDateTime.now().minusHours(24));
@@ -332,7 +317,7 @@ public class TransactionCPLBusiness {
     public List<TransactionCPL> searchForAffiliateBudget(Long affiliateId, Long campaignId) {
         TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
         request.setValueNotZero(true);
-        ArrayList not = new ArrayList<>();
+        ArrayList<Long> not = new ArrayList<>();
         not.add(74L); // RIGETTATO
         request.setNotInStatusId(not);
         request.setAffiliateId(affiliateId);
@@ -457,6 +442,7 @@ public class TransactionCPLBusiness {
         private Long statusId;
         private Double initialValue;
         private Long cpcId;
+        private Long cplId;
     }
 
     @Data
@@ -464,9 +450,9 @@ public class TransactionCPLBusiness {
     @AllArgsConstructor
     @ToString
     public static class Filter {
-        public List<Long> notInId;
-        public List<Long> notInStatusId;
-        public List<Long> dictionaryIdIn;
+        private List<Long> notInId;
+        private List<Long> notInStatusId;
+        private List<Long> dictionaryIdIn;
         private Long id;
         private Long affiliateId;
         private Long campaignId;

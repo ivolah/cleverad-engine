@@ -1,7 +1,6 @@
 package it.cleverad.engine.persistence.repository.service;
 
 import it.cleverad.engine.persistence.model.service.TopCampagne;
-import it.cleverad.engine.persistence.model.service.TotaleCampagne;
 import it.cleverad.engine.persistence.model.service.TransactionCPM;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -54,6 +53,7 @@ public interface TransactionCPMRepository extends JpaRepository<TransactionCPM, 
                     " order by totale desc " +
                     " limit 100")
     List<TopCampagne> listaTopCampagneTotale(@Param("days") Integer days, @Param("affiliateid") Long affiliateId, @Param("advertiserId") Long advertiserId);
+
     @Query(nativeQuery = true, value =
             "Select campaign_id, tc.name, sum(impression_number) as totale, sum(value) as valore " +
                     " from t_transaction_cpm " +
@@ -66,6 +66,7 @@ public interface TransactionCPMRepository extends JpaRepository<TransactionCPM, 
                     " order by valore desc " +
                     " limit 100")
     List<TopCampagne> listaTopCampagneValore(@Param("days") Integer days, @Param("affiliateid") Long affiliateId, @Param("advertiserId") Long advertiserId);
+
     @Query(nativeQuery = true, value = "SELECT row_number() OVER () AS id, " +
             "       tt.impression_number                        AS totale, " +
             "       tt.value                               AS valore, " +

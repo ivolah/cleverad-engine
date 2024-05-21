@@ -250,10 +250,10 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
             "  AND ((:payoutId) IS NULL OR (t.payout_id = CAST(:payoutId as bigint))) " +
             "  AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
             "  AND ((:valueNotZero) IS NULL OR (t.value <> 0)) " +
-            "  AND (CAST((:inDictionaryId) as bigint[]) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
-            "  AND (CAST((:notInDictionaryId) as bigint[]) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
-            "  AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
-            "  AND (CAST((:notInStausId) as bigint[]) IS NULL OR (t.status_id not in (:notInStausId))) " +
+            "  AND ((:inDictionaryId) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
+            "  AND ((:notInDictionaryId) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
+            "  AND ((:inStausId) IS NULL OR (t.status_id in (:inStausId))) " +
+            "  AND ((:notInStausId) IS NULL OR (t.status_id not in (:notInStausId))) " +
             "UNION " +
             "SELECT DISTINCT row_number() OVER ()                                                     AS rn, " +
             "                CAST('CPC' AS text)                                                      AS tipo, " +
@@ -321,10 +321,10 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
             "  AND ((:payoutId) IS NULL OR (t.payout_id = CAST(:payoutId as bigint))) " +
             "  AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
             "  AND ((:valueNotZero) IS NULL OR (t.value <> 0)) " +
-            "  AND (CAST((:inDictionaryId) as bigint[]) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
-            "  AND (CAST((:notInDictionaryId) as bigint[]) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
-            "  AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
-            "  AND (CAST((:notInStausId) as bigint[]) IS NULL OR (t.status_id not in (:notInStausId))) " +
+            "  AND ((:inDictionaryId) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
+            "  AND ((:notInDictionaryId) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
+            "  AND ((:inStausId) IS NULL OR (t.status_id in (:inStausId))) " +
+            "  AND ((:notInStausId) IS NULL OR (t.status_id not in (:notInStausId))) " +
             "UNION " +
             "SELECT DISTINCT row_number() OVER ()                                                    AS rn, " +
             "                CAST('CPL' AS text)                                                     AS tipo, " +
@@ -392,10 +392,10 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
             "  AND ((:payoutId) IS NULL OR (t.payout_id = CAST(:payoutId as bigint))) " +
             "  AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
             "  AND ((:valueNotZero) IS NULL OR (t.value <> 0)) " +
-            "  AND (CAST((:inDictionaryId) as bigint[]) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
-            "  AND (CAST((:notInDictionaryId) as bigint[]) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
-            "  AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
-            "  AND (CAST((:notInStausId) as bigint[]) IS NULL OR (t.status_id not in (:notInStausId))) " +
+            "  AND ((:inDictionaryId) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
+            "  AND ((:notInDictionaryId) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
+            "  AND ((:inStausId) IS NULL OR (t.status_id in (:inStausId))) " +
+            "  AND ((:notInStausId) IS NULL OR (t.status_id not in (:notInStausId))) " +
             " " +
             "UNION " +
             "SELECT DISTINCT row_number() OVER ()                                                    AS rn, " +
@@ -464,10 +464,10 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
             "  AND ((:payoutId) IS NULL OR (t.payout_id = CAST(:payoutId as bigint))) " +
             "  AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
             "  AND ((:valueNotZero) IS NULL OR (t.value <> 0)) " +
-            "  AND (CAST((:inDictionaryId) as bigint[]) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
-            "  AND (CAST((:notInDictionaryId) as bigint[]) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
-            "  AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
-            "  AND (CAST((:notInStausId) as bigint[]) IS NULL OR (t.status_id not in (:notInStausId))) " +
+            "  AND ((:inDictionaryId) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
+            "  AND ((:notInDictionaryId) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
+            "  AND ((:inStausId) IS NULL OR (t.status_id in (:inStausId))) " +
+            "  AND ((:notInStausId) IS NULL OR (t.status_id not in (:notInStausId))) " +
             " " +
             "UNION " +
             "SELECT DISTINCT row_number() OVER ()                                                          AS rn, " +
@@ -534,10 +534,153 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
             "  AND ((:payoutId) IS NULL OR (t.payout_id = CAST(:payoutId as bigint))) " +
             "  AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
             "  AND ((:valueNotZero) IS NULL OR (t.value <> 0)) " +
-            "  AND (CAST((:inDictionaryId) as bigint[]) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
-            "  AND (CAST((:notInDictionaryId) as bigint[]) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
-            "  AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
-            "  AND (CAST((:notInStausId) as bigint[]) IS NULL OR (t.status_id not in (:notInStausId))); ;"
+            "  AND ((:inDictionaryId) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
+            "  AND ((:notInDictionaryId) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
+            "  AND ((:inStausId) IS NULL OR (t.status_id in (:inStausId))) " +
+            "  AND ((:notInStausId) IS NULL OR (t.status_id not in (:notInStausId)))" +
+            "  UNION " +
+            " SELECT DISTINCT row_number() OVER ()                                                    AS rn, " +
+            "                CAST('CPS' AS text)                                                     AS tipo, " +
+            "                CAST(t.id as bigint)                                                    AS id, " +
+            "                t.creation_date                                                         AS creationdate, " +
+            "                date(t.date_time)                                                       AS datetime, " +
+            "                CAST(t.status_id as bigint)                                             AS statusid, " +
+            "                tdd.name                                                                AS statusname, " +
+            "                CAST(t.dictionary_id as bigint)                                         AS dictionaryid, " +
+            "                td.name                                                                 AS dictionaryname, " +
+            "                CAST(t.affiliate_id as bigint)                                          AS affiliateid, " +
+            "                ta.name                                                                 AS affiliatename, " +
+            "                CAST(tadv.id as bigint)                                                 AS advertiserid, " +
+            "                tadv.name                                                               AS advertisername, " +
+            "                CAST(t.channel_id as bigint)                                            AS channelid, " +
+            "                c.name                                                                  AS channelname, " +
+            "                CAST(t.campaign_id as bigint)                                           AS campaignid, " +
+            "                tc.name                                                                 AS campaignname, " +
+            "                CAST(t.media_id as bigint)                                              AS mediaid, " +
+            "                tm.name                                                                 AS medianame, " +
+            "                CAST(t.commission_id as bigint)                                         AS commissionid, " +
+            "                tco.name                                                                AS commissionname, " +
+            "                tco.value                                                               AS commission_value, " +
+            "                0                                                                       AS commission_value_rigettato, " +
+            "                round(CAST(t.value AS numeric), 2)                                      AS value, " +
+            "                0                                                                       AS value_rigettato, " +
+            "                t.revenue_id                                                            AS revenueid, " +
+            "                trf.revenue                                                             AS revenue_value, " +
+            "                0                                                                       AS revenue_value_rigettato, " +
+            "                round(CAST(trf.revenue AS numeric) , 2)                                 AS revenue, " +
+            "                0                                                                       AS revenue_rigettato, " +
+            "                0                                                                       AS click_number, " +
+            "                0                                                                       AS click_number_rigettato, " +
+            "                0                                                                       AS impression_number, " +
+            "                1                                                                       AS leadnumber, " +
+            "                0                                                                       AS lead_number_rigettato, " +
+            "                t.data                                                                  AS data, " +
+            "                CAST(t.wallet_id as bigint)                                             AS walletid, " +
+            "                t.payout_present                                                        AS payoutpresent, " +
+            "                CAST(t.payout_id as bigint)                                             AS payoutid, " +
+            "                t.payout_reference                                                      AS payoutreference " +
+            "FROM t_transaction_cps t " +
+            "         LEFT JOIN t_campaign tc ON t.campaign_id = tc.id " +
+            "         LEFT JOIN t_media tm ON t.media_id = tm.id " +
+            "         LEFT JOIN t_affiliate ta ON t.affiliate_id = ta.id " +
+            "         LEFT JOIN t_commision tco ON t.commission_id = tco.id " +
+            "         LEFT JOIN t_channel c ON t.channel_id = c.id " +
+            "         LEFT JOIN t_dictionary td ON t.dictionary_id = td.id " +
+            "         LEFT JOIN t_dictionary tdd ON t.status_id = tdd.id " +
+            "         LEFT JOIN t_revenuefactor trf ON t.revenue_id = trf.id " +
+            "         LEFT JOIN t_advertiser tadv ON tc.advertiser_id = tadv.id " +
+            "WHERE (t.status_id = 72 " +
+            "    OR t.status_id = 73) " +
+            "  AND (cast(:dateFrom as date) IS NULL OR (:dateFrom <= t.date_time)) " +
+            "  AND (cast(:dateTo as date) IS NULL OR (:dateTo >= t.date_time)) " +
+            "  AND ((:statusId) IS NULL OR (t.status_id = CAST(:statusId as bigint))) " +
+            "  AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
+            "  AND ((:affiliateId) IS NULL OR (t.affiliate_id = CAST(:affiliateId as bigint))) " +
+            "  AND ((:channelId) IS NULL OR (t.channel_id = CAST(:channelId as bigint))) " +
+            "  AND ((:campaignId) IS NULL OR (t.campaign_id = CAST(:campaignId as bigint))) " +
+            "  AND ((:mediaId) IS NULL OR (t.media_id = CAST(:mediaId as bigint))) " +
+            "  AND ((:commissionId) IS NULL OR (t.commission_id = CAST(:commissionId as bigint))) " +
+            "  AND ((:revenueId) IS NULL OR (t.revenue_id = CAST(:revenueId as bigint))) " +
+            "  AND ((:payoutPresent) IS NULL OR (t.payout_present = (:payoutPresent))) " +
+            "  AND ((:payoutId) IS NULL OR (t.payout_id = CAST(:payoutId as bigint))) " +
+            "  AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
+            "  AND ((:valueNotZero) IS NULL OR (t.value <> 0)) " +
+            "  AND ((:inDictionaryId) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
+            "  AND ((:notInDictionaryId) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
+            "  AND ((:inStausId) IS NULL OR (t.status_id in (:inStausId))) " +
+            "  AND ((:notInStausId) IS NULL OR (t.status_id not in (:notInStausId))) " +
+            " " +
+            "UNION " +
+            "SELECT DISTINCT row_number() OVER ()                                                    AS rn, " +
+            "                CAST('CPS' AS text)                                                     AS tipo, " +
+            "                CAST(t.id as bigint)                                                    AS id, " +
+            "                t.creation_date                                                         AS creationdate, " +
+            "                date(t.date_time)                                                       AS datetime, " +
+            "                CAST(t.status_id as bigint)                                             AS statusid, " +
+            "                tdd.name                                                                AS statusname, " +
+            "                CAST(t.dictionary_id as bigint)                                         AS dictionaryid, " +
+            "                td.name                                                                 AS dictionaryname, " +
+            "                CAST(t.affiliate_id as bigint)                                          AS affiliateid, " +
+            "                ta.name                                                                 AS affiliatename, " +
+            "                CAST(tadv.id as bigint)                                                 AS advertiserid, " +
+            "                tadv.name                                                               AS advertisername, " +
+            "                CAST(t.channel_id as bigint)                                            AS channelid, " +
+            "                c.name                                                                  AS channelname, " +
+            "                CAST(t.campaign_id as bigint)                                           AS campaignid, " +
+            "                tc.name                                                                 AS campaignname, " +
+            "                CAST(t.media_id as bigint)                                              AS mediaid, " +
+            "                tm.name                                                                 AS medianame, " +
+            "                CAST(t.commission_id as bigint)                                         AS commissionid, " +
+            "                tco.name                                                                AS commissionname, " +
+            "                0                                                                       AS commission_value, " +
+            "                tco.value                                                               AS commission_value_rigettato, " +
+            "                0                                                                       AS value, " +
+            "                round(CAST(t.value AS numeric), 2)                                      AS value_rigettato, " +
+            "                t.revenue_id                                                            AS revenueid, " +
+            "                0                                                                       AS revenue_value, " +
+            "                trf.revenue                                                             AS revenue_value_rigettato, " +
+            "                0                                                                       AS revenue, " +
+            "                round(CAST(trf.revenue AS numeric), 2)                                  AS revenue_rigettato, " +
+            "                0                                                                       AS click_number, " +
+            "                0                                                                       AS click_number_rigettato, " +
+            "                0                                                                       AS impression_number, " +
+            "                0                                                                       AS lead_number, " +
+            "                1                                                                       AS lead_number_rigettato, " +
+            "                t.data                                                                  AS data, " +
+            "                CAST(t.wallet_id as bigint)                                             AS walletid, " +
+            "                t.payout_present                                                        AS payoutpresent, " +
+            "                CAST(t.payout_id as bigint)                                             AS payoutid, " +
+            "                t.payout_reference                                                      AS payoutreference " +
+            "FROM t_transaction_cps t " +
+            "         LEFT JOIN t_campaign tc ON t.campaign_id = tc.id " +
+            "         LEFT JOIN t_media tm ON t.media_id = tm.id " +
+            "         LEFT JOIN t_affiliate ta ON t.affiliate_id = ta.id " +
+            "         LEFT JOIN t_commision tco ON t.commission_id = tco.id " +
+            "         LEFT JOIN t_channel c ON t.channel_id = c.id " +
+            "         LEFT JOIN t_dictionary td ON t.dictionary_id = td.id " +
+            "         LEFT JOIN t_dictionary tdd ON t.status_id = tdd.id " +
+            "         LEFT JOIN t_revenuefactor trf ON t.revenue_id = trf.id " +
+            "         LEFT JOIN t_advertiser tadv ON tc.advertiser_id = tadv.id " +
+            "WHERE (t.status_id = 74 " +
+            "    OR t.status_id = 70) " +
+            "  AND (cast(:dateFrom as date) IS NULL OR (:dateFrom <= t.date_time)) " +
+            "  AND (cast(:dateTo as date) IS NULL OR (:dateTo >= t.date_time)) " +
+            "  AND ((:statusId) IS NULL OR (t.status_id = CAST(:statusId as bigint))) " +
+            "  AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
+            "  AND ((:affiliateId) IS NULL OR (t.affiliate_id = CAST(:affiliateId as bigint))) " +
+            "  AND ((:channelId) IS NULL OR (t.channel_id = CAST(:channelId as bigint))) " +
+            "  AND ((:campaignId) IS NULL OR (t.campaign_id = CAST(:campaignId as bigint))) " +
+            "  AND ((:mediaId) IS NULL OR (t.media_id = CAST(:mediaId as bigint))) " +
+            "  AND ((:commissionId) IS NULL OR (t.commission_id = CAST(:commissionId as bigint))) " +
+            "  AND ((:revenueId) IS NULL OR (t.revenue_id = CAST(:revenueId as bigint))) " +
+            "  AND ((:payoutPresent) IS NULL OR (t.payout_present = (:payoutPresent))) " +
+            "  AND ((:payoutId) IS NULL OR (t.payout_id = CAST(:payoutId as bigint))) " +
+            "  AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
+            "  AND ((:valueNotZero) IS NULL OR (t.value <> 0)) " +
+            "  AND ((:inDictionaryId) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
+            "  AND ((:notInDictionaryId) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
+            "  AND ((:inStausId) IS NULL OR (t.status_id in (:inStausId))) " +
+            "  AND ((:notInStausId) IS NULL OR (t.status_id not in (:notInStausId))) ;"
     )
     List<QueryTransaction> listaTransazioni(
             @Param("dateFrom") LocalDate dateFrom,
@@ -630,10 +773,10 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
             "  AND ((:payoutId) IS NULL OR (t.payout_id = CAST(:payoutId as bigint))) " +
             "  AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
             "  AND ((:valueNotZero) IS NULL OR (t.value <> 0)) " +
-            "  AND (CAST((:inDictionaryId) as bigint[]) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
-            "  AND (CAST((:notInDictionaryId) as bigint[]) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
-            "  AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
-            "  AND (CAST((:notInStausId) as bigint[]) IS NULL OR (t.status_id not in (:notInStausId))) " +
+            "  AND ((:inDictionaryId) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
+            "  AND ((:notInDictionaryId) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
+            "  AND ((:inStausId) IS NULL OR (t.status_id in (:inStausId))) " +
+            "  AND ((:notInStausId) IS NULL OR (t.status_id not in (:notInStausId))) " +
             "UNION " +
             "SELECT DISTINCT row_number() OVER ()                                                     AS rn, " +
             "                CAST('CPC' AS text)                                                      AS tipo, " +
@@ -701,12 +844,12 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
             "  AND ((:payoutId) IS NULL OR (t.payout_id = CAST(:payoutId as bigint))) " +
             "  AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
             "  AND ((:valueNotZero) IS NULL OR (t.value <> 0)) " +
-            "  AND (CAST((:inDictionaryId) as bigint[]) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
-            "  AND (CAST((:notInDictionaryId) as bigint[]) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
-            "  AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
-            "  AND (CAST((:notInStausId) as bigint[]) IS NULL OR (t.status_id not in (:notInStausId)));"
+            "  AND ((:inDictionaryId) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
+            "  AND ((:notInDictionaryId) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
+            "  AND ((:inStausId) IS NULL OR (t.status_id in (:inStausId))) " +
+            "  AND ((:notInStausId) IS NULL OR (t.status_id not in (:notInStausId)));"
     )
-    List<QueryTransaction>  listaTransazioniCPC(
+    List<QueryTransaction> listaTransazioniCPC(
             @Param("dateFrom") LocalDate dateFrom,
             @Param("dateTo") LocalDateTime dateTo,
             @Param("statusId") Long statusId,
@@ -798,10 +941,10 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
                     "  AND ((:payoutId) IS NULL OR (t.payout_id = CAST(:payoutId as bigint))) " +
                     "  AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
                     "  AND ((:valueNotZero) IS NULL OR (t.value <> 0)) " +
-                    "  AND (CAST((:inDictionaryId) as bigint[]) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
-                    "  AND (CAST((:notInDictionaryId) as bigint[]) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
-                    "  AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
-                    "  AND (CAST((:notInStausId) as bigint[]) IS NULL OR (t.status_id not in (:notInStausId))) " +
+                    "  AND ((:inDictionaryId) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
+                    "  AND ((:notInDictionaryId) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
+                    "  AND ((:inStausId) IS NULL OR (t.status_id in (:inStausId))) " +
+                    "  AND ((:notInStausId) IS NULL OR (t.status_id not in (:notInStausId))) " +
                     " " +
                     "UNION " +
                     "SELECT DISTINCT row_number() OVER ()                                                    AS rn, " +
@@ -870,10 +1013,10 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
                     "  AND ((:payoutId) IS NULL OR (t.payout_id = CAST(:payoutId as bigint))) " +
                     "  AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
                     "  AND ((:valueNotZero) IS NULL OR (t.value <> 0)) " +
-                    "  AND (CAST((:inDictionaryId) as bigint[]) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
-                    "  AND (CAST((:notInDictionaryId) as bigint[]) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
-                    "  AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
-                    "  AND (CAST((:notInStausId) as bigint[]) IS NULL OR (t.status_id not in (:notInStausId))) ;"
+                    "  AND ((:inDictionaryId) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
+                    "  AND ((:notInDictionaryId) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
+                    "  AND ((:inStausId) IS NULL OR (t.status_id in (:inStausId))) " +
+                    "  AND ((:notInStausId) IS NULL OR (t.status_id not in (:notInStausId))) ;"
     )
     List<QueryTransaction> listaTransazioniCPL(
             @Param("dateFrom") LocalDate dateFrom,
@@ -965,10 +1108,10 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
                     "  AND ((:payoutId) IS NULL OR (t.payout_id = CAST(:payoutId as bigint))) " +
                     "  AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
                     "  AND ((:valueNotZero) IS NULL OR (t.value <> 0)) " +
-                    "  AND (CAST((:inDictionaryId) as bigint[]) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
-                    "  AND (CAST((:notInDictionaryId) as bigint[]) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
-                    "  AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
-                    "  AND (CAST((:notInStausId) as bigint[]) IS NULL OR (t.status_id not in (:notInStausId))); ;"
+                    "  AND ((:inDictionaryId) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
+                    "  AND ((:notInDictionaryId) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
+                    "  AND ((:inStausId) IS NULL OR (t.status_id in (:inStausId))) " +
+                    "  AND ((:notInStausId) IS NULL OR (t.status_id not in (:notInStausId))); ;"
     )
     List<QueryTransaction> listaTransazioniCPM(
             @Param("dateFrom") LocalDate dateFrom,
@@ -991,37 +1134,177 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
             @Param("notInStausId") List<Long> notInStausId
     );
 
+
+    //=========================================================================================================================
+    // CPS CPS CPS CPS CPS CPS CPS CPS CPS CPS CPS CPS CPS CPS CPS CPS CPS CPS CPS CPS CPS CPS CPS CPS CPS CPS CPS CPS CPS CPS
+    //=========================================================================================================================
+
+    @Query(nativeQuery = true, value =
+            "SELECT DISTINCT row_number() OVER ()                                                    AS rn, " +
+                    "                CAST('CPS' AS text)                                                     AS tipo, " +
+                    "                CAST(t.id as bigint)                                                    AS id, " +
+                    "                t.creation_date                                                         AS creationdate, " +
+                    "                date(t.date_time)                                                       AS datetime, " +
+                    "                CAST(t.status_id as bigint)                                             AS statusid, " +
+                    "                tdd.name                                                                AS statusname, " +
+                    "                CAST(t.dictionary_id as bigint)                                         AS dictionaryid, " +
+                    "                td.name                                                                 AS dictionaryname, " +
+                    "                CAST(t.affiliate_id as bigint)                                          AS affiliateid, " +
+                    "                ta.name                                                                 AS affiliatename, " +
+                    "                CAST(tadv.id as bigint)                                                 AS advertiserid, " +
+                    "                tadv.name                                                               AS advertisername, " +
+                    "                CAST(t.channel_id as bigint)                                            AS channelid, " +
+                    "                c.name                                                                  AS channelname, " +
+                    "                CAST(t.campaign_id as bigint)                                           AS campaignid, " +
+                    "                tc.name                                                                 AS campaignname, " +
+                    "                CAST(t.media_id as bigint)                                              AS mediaid, " +
+                    "                tm.name                                                                 AS medianame, " +
+                    "                CAST(t.commission_id as bigint)                                         AS commissionid, " +
+                    "                tco.name                                                                AS commissionname, " +
+                    "                tco.value                                                               AS commission_value, " +
+                    "                0                                                                       AS commission_value_rigettato, " +
+                    "                round(CAST(t.value AS numeric), 2)                                      AS value, " +
+                    "                0                                                                       AS value_rigettato, " +
+                    "                t.revenue_id                                                            AS revenueid, " +
+                    "                trf.revenue                                                             AS revenue_value, " +
+                    "                0                                                                       AS revenue_value_rigettato, " +
+                    "                round(CAST(trf.revenue AS numeric) , 2)                                 AS revenue, " +
+                    "                0                                                                       AS revenue_rigettato, " +
+                    "                0                                                                       AS click_number, " +
+                    "                0                                                                       AS click_number_rigettato, " +
+                    "                0                                                                       AS impression_number, " +
+                    "                1                                                                       AS leadnumber, " +
+                    "                0                                                                       AS lead_number_rigettato, " +
+                    "                t.data                                                                  AS data, " +
+                    "                CAST(t.wallet_id as bigint)                                             AS walletid, " +
+                    "                t.payout_present                                                        AS payoutpresent, " +
+                    "                CAST(t.payout_id as bigint)                                             AS payoutid, " +
+                    "                t.payout_reference                                                      AS payoutreference " +
+                    "FROM t_transaction_cps t " +
+                    "         LEFT JOIN t_campaign tc ON t.campaign_id = tc.id " +
+                    "         LEFT JOIN t_media tm ON t.media_id = tm.id " +
+                    "         LEFT JOIN t_affiliate ta ON t.affiliate_id = ta.id " +
+                    "         LEFT JOIN t_commision tco ON t.commission_id = tco.id " +
+                    "         LEFT JOIN t_channel c ON t.channel_id = c.id " +
+                    "         LEFT JOIN t_dictionary td ON t.dictionary_id = td.id " +
+                    "         LEFT JOIN t_dictionary tdd ON t.status_id = tdd.id " +
+                    "         LEFT JOIN t_revenuefactor trf ON t.revenue_id = trf.id " +
+                    "         LEFT JOIN t_advertiser tadv ON tc.advertiser_id = tadv.id " +
+                    "WHERE (t.status_id = 72 " +
+                    "    OR t.status_id = 73) " +
+                    "  AND (cast(:dateFrom as date) IS NULL OR (:dateFrom <= t.date_time)) " +
+                    "  AND (cast(:dateTo as date) IS NULL OR (:dateTo >= t.date_time)) " +
+                    "  AND ((:statusId) IS NULL OR (t.status_id = CAST(:statusId as bigint))) " +
+                    "  AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
+                    "  AND ((:affiliateId) IS NULL OR (t.affiliate_id = CAST(:affiliateId as bigint))) " +
+                    "  AND ((:channelId) IS NULL OR (t.channel_id = CAST(:channelId as bigint))) " +
+                    "  AND ((:campaignId) IS NULL OR (t.campaign_id = CAST(:campaignId as bigint))) " +
+                    "  AND ((:mediaId) IS NULL OR (t.media_id = CAST(:mediaId as bigint))) " +
+                    "  AND ((:commissionId) IS NULL OR (t.commission_id = CAST(:commissionId as bigint))) " +
+                    "  AND ((:revenueId) IS NULL OR (t.revenue_id = CAST(:revenueId as bigint))) " +
+                    "  AND ((:payoutPresent) IS NULL OR (t.payout_present = (:payoutPresent))) " +
+                    "  AND ((:payoutId) IS NULL OR (t.payout_id = CAST(:payoutId as bigint))) " +
+                    "  AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
+                    "  AND ((:valueNotZero) IS NULL OR (t.value <> 0)) " +
+                    "  AND ((:inDictionaryId) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
+                    "  AND ((:notInDictionaryId) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
+                    "  AND ((:inStausId) IS NULL OR (t.status_id in (:inStausId))) " +
+                    "  AND ((:notInStausId) IS NULL OR (t.status_id not in (:notInStausId))) " +
+                    " " +
+                    "UNION " +
+                    "SELECT DISTINCT row_number() OVER ()                                                    AS rn, " +
+                    "                CAST('CPS' AS text)                                                     AS tipo, " +
+                    "                CAST(t.id as bigint)                                                    AS id, " +
+                    "                t.creation_date                                                         AS creationdate, " +
+                    "                date(t.date_time)                                                       AS datetime, " +
+                    "                CAST(t.status_id as bigint)                                             AS statusid, " +
+                    "                tdd.name                                                                AS statusname, " +
+                    "                CAST(t.dictionary_id as bigint)                                         AS dictionaryid, " +
+                    "                td.name                                                                 AS dictionaryname, " +
+                    "                CAST(t.affiliate_id as bigint)                                          AS affiliateid, " +
+                    "                ta.name                                                                 AS affiliatename, " +
+                    "                CAST(tadv.id as bigint)                                                 AS advertiserid, " +
+                    "                tadv.name                                                               AS advertisername, " +
+                    "                CAST(t.channel_id as bigint)                                            AS channelid, " +
+                    "                c.name                                                                  AS channelname, " +
+                    "                CAST(t.campaign_id as bigint)                                           AS campaignid, " +
+                    "                tc.name                                                                 AS campaignname, " +
+                    "                CAST(t.media_id as bigint)                                              AS mediaid, " +
+                    "                tm.name                                                                 AS medianame, " +
+                    "                CAST(t.commission_id as bigint)                                         AS commissionid, " +
+                    "                tco.name                                                                AS commissionname, " +
+                    "                0                                                                       AS commission_value, " +
+                    "                tco.value                                                               AS commission_value_rigettato, " +
+                    "                0                                                                       AS value, " +
+                    "                round(CAST(t.value AS numeric), 2)                                      AS value_rigettato, " +
+                    "                t.revenue_id                                                            AS revenueid, " +
+                    "                0                                                                       AS revenue_value, " +
+                    "                trf.revenue                                                             AS revenue_value_rigettato, " +
+                    "                0                                                                       AS revenue, " +
+                    "                round(CAST(trf.revenue AS numeric), 2)                                  AS revenue_rigettato, " +
+                    "                0                                                                       AS click_number, " +
+                    "                0                                                                       AS click_number_rigettato, " +
+                    "                0                                                                       AS impression_number, " +
+                    "                0                                                                       AS lead_number, " +
+                    "                1                                                                       AS lead_number_rigettato, " +
+                    "                t.data                                                                  AS data, " +
+                    "                CAST(t.wallet_id as bigint)                                             AS walletid, " +
+                    "                t.payout_present                                                        AS payoutpresent, " +
+                    "                CAST(t.payout_id as bigint)                                             AS payoutid, " +
+                    "                t.payout_reference                                                      AS payoutreference " +
+                    "FROM t_transaction_cps t " +
+                    "         LEFT JOIN t_campaign tc ON t.campaign_id = tc.id " +
+                    "         LEFT JOIN t_media tm ON t.media_id = tm.id " +
+                    "         LEFT JOIN t_affiliate ta ON t.affiliate_id = ta.id " +
+                    "         LEFT JOIN t_commision tco ON t.commission_id = tco.id " +
+                    "         LEFT JOIN t_channel c ON t.channel_id = c.id " +
+                    "         LEFT JOIN t_dictionary td ON t.dictionary_id = td.id " +
+                    "         LEFT JOIN t_dictionary tdd ON t.status_id = tdd.id " +
+                    "         LEFT JOIN t_revenuefactor trf ON t.revenue_id = trf.id " +
+                    "         LEFT JOIN t_advertiser tadv ON tc.advertiser_id = tadv.id " +
+                    "WHERE (t.status_id = 74 " +
+                    "    OR t.status_id = 70) " +
+                    "  AND (cast(:dateFrom as date) IS NULL OR (:dateFrom <= t.date_time)) " +
+                    "  AND (cast(:dateTo as date) IS NULL OR (:dateTo >= t.date_time)) " +
+                    "  AND ((:statusId) IS NULL OR (t.status_id = CAST(:statusId as bigint))) " +
+                    "  AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
+                    "  AND ((:affiliateId) IS NULL OR (t.affiliate_id = CAST(:affiliateId as bigint))) " +
+                    "  AND ((:channelId) IS NULL OR (t.channel_id = CAST(:channelId as bigint))) " +
+                    "  AND ((:campaignId) IS NULL OR (t.campaign_id = CAST(:campaignId as bigint))) " +
+                    "  AND ((:mediaId) IS NULL OR (t.media_id = CAST(:mediaId as bigint))) " +
+                    "  AND ((:commissionId) IS NULL OR (t.commission_id = CAST(:commissionId as bigint))) " +
+                    "  AND ((:revenueId) IS NULL OR (t.revenue_id = CAST(:revenueId as bigint))) " +
+                    "  AND ((:payoutPresent) IS NULL OR (t.payout_present = (:payoutPresent))) " +
+                    "  AND ((:payoutId) IS NULL OR (t.payout_id = CAST(:payoutId as bigint))) " +
+                    "  AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
+                    "  AND ((:valueNotZero) IS NULL OR (t.value <> 0)) " +
+                    "  AND ((:inDictionaryId) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
+                    "  AND ((:notInDictionaryId) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
+                    "  AND ((:inStausId) IS NULL OR (t.status_id in (:inStausId))) " +
+                    "  AND ((:notInStausId) IS NULL OR (t.status_id not in (:notInStausId))) ;"
+    )
+    List<QueryTransaction> listaTransazioniCPS(
+            @Param("dateFrom") LocalDate dateFrom,
+            @Param("dateTo") LocalDateTime dateTo,
+            @Param("statusId") Long statusId,
+            @Param("dictionaryId") Long dictionaryId,
+            @Param("affiliateId") Long affiliateId,
+            @Param("channelId") Long channelId,
+            @Param("campaignId") Long campaignId,
+            @Param("mediaId") Long mediaId,
+            @Param("commissionId") Long commissionId,
+            @Param("revenueId") Long revenueId,
+            @Param("payoutPresent") Boolean payoutPresent,
+            @Param("payoutId") Long payoutId,
+            @Param("advertiserId") Long advertiserId,
+            @Param("valueNotZero") Boolean valueNotZero,
+            @Param("inDictionaryId") List<Long> inDictionaryId,
+            @Param("notInDictionaryId") List<Long> notInDictionaryId,
+            @Param("inStausId") List<Long> inStausId,
+            @Param("notInStausId") List<Long> notInStausId
+    );
+
     //=========================================================================================================================
     //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================
-    //=========================================================================================================================r
 
 }

@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -76,7 +77,6 @@ public class RigeneraCPCBusiness {
             return currentTime;
         }) != currentTime;
     }
-
     public void rigenera(Integer anno, Integer mese, Integer giorno, Long affiliateId, Long campaignId) {
 
         int start = (giorno == null) ? 1 : giorno;
@@ -94,8 +94,16 @@ public class RigeneraCPCBusiness {
         // ==========================================================================================================================================
 
         // NEL CASO NON SIA GIA' VERIFICO I CLICK MULTIPLI
-        List<ClickMultipli> listaDaDisabilitare = cpcBusiness.getListaClickMultipliDaDisabilitare(dataDaGestireStart, dataDaGestireEnd);
-        log.info("DA DISABILIATRE :: {}", listaDaDisabilitare.size());
+        List<ClickMultipli> listaDaDisabilitare = new ArrayList<>();
+        Integer numeroGiorniBetween = dataDaGestireEnd.getDayOfYear() - dataDaGestireStart.getDayOfYear();
+        for (int i = 0; i < numeroGiorniBetween; i++) {
+            List<ClickMultipli> ll = cpcBusiness.getListaClickMultipliDaDisabilitare(dataDaGestireStart.plusDays(i), dataDaGestireStart.plusDays(i + 1), affiliateId, campaignId);
+            listaDaDisabilitare.addAll(ll);
+            log.info("Data :: {} :: {}  disabilitati", dataDaGestireStart.plusDays(i).format(DateTimeFormatter.ISO_LOCAL_DATE), ll.size());
+        }
+        //
+        //        List<ClickMultipli> listaDaDisabilitare = cpcBusiness.getListaClickMultipliDaDisabilitare(dataDaGestireStart, dataDaGestireEnd);
+        //        log.info("DA DISABILIATRE :: {}", listaDaDisabilitare.size());
 
         // giro settaggio click multipli
         listaDaDisabilitare.forEach(clickMultipli -> {
@@ -353,9 +361,6 @@ public class RigeneraCPCBusiness {
         private Long affiliateId;
         private Long campaignId;
     }
-
-
-
 
 
 }

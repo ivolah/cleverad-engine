@@ -29,11 +29,7 @@ public class WhatsappService {
                     .build();
             Response response = client.newCall(request).execute();
             Check check = new Gson().fromJson(response.body().string(), Check.class);
-            if (check.getStatus().equals("valid")) {
-                return true;
-            } else {
-                return false;
-            }
+            return check.getStatus().equals("valid");
         } catch (IOException e) {
             log.error("Eccezione check Whatsapp :: " + e.getMessage(), e);
             return false;

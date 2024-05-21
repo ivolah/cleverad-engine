@@ -33,7 +33,4 @@ public class Category {
     @OneToMany(mappedBy = "category")
     private Set<ChannelCategory> channelCategories;
 
-//    @ManyToMany(mappedBy = "categories")
-//    private Collection<Channel> channels;
-
 }

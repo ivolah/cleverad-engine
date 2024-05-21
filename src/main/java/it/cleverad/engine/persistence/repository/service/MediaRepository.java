@@ -18,9 +18,8 @@ public interface MediaRepository extends JpaRepository<Media, Long>, JpaSpecific
     @Query(nativeQuery = true, value = "SELECT tm.*, tmc from t_media tm left join t_media_campaign tmc on tm.id = tmc.media_id ")
     Page<Media> findAllWithCampaign(Specification<Media> specification, Pageable pageable);
 
-    // List<Media> findMediasByCampaingsId(Long campaignId);
     Page<Media> findByIdIn(Collection<Long> states, Pageable pageable);
 
-    Media findByIdFile(String Id);
+    Media findByIdFile(String id);
 
 }

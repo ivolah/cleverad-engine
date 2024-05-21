@@ -220,11 +220,11 @@ public class CampaignBusiness {
         Page<Campaign> page;
         if (jwtUserDetailsService.isAdmin()) {
             page = repository.findAll(getSpecification(request), pageable);
-            return page.map(CampaignDTO::from);
+            return page.map(CampaignDTO::fromList);
         } else if (jwtUserDetailsService.isAdvertiser()) {
             request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
             page = repository.findAll(getSpecification(request), pageable);
-            return page.map(CampaignDTO::from);
+            return page.map(CampaignDTO::fromList);
         } else {
             Affiliate cc = affiliateRepository.findById(jwtUserDetailsService.getAffiliateId()).orElseThrow(() -> new ElementCleveradException("Affiliate", jwtUserDetailsService.getAffiliateId()));
             List<Campaign> campaigns = new ArrayList<>();
@@ -235,7 +235,7 @@ public class CampaignBusiness {
                 }).collect(Collectors.toList());
             }
             page = new PageImpl<>(campaigns.stream().distinct().collect(Collectors.toList()));
-            return page.map(CampaignDTO::from);
+            return page.map(CampaignDTO::fromList);
         }
     }
 
@@ -286,7 +286,7 @@ public class CampaignBusiness {
             }).collect(Collectors.toList());
         }
         Page<Campaign> page = new PageImpl<>(campaigns.stream().distinct().collect(Collectors.toList()));
-        return page.map(CampaignDTO::from);
+        return page.map(CampaignDTO::fromList);
     }
 
     // TROVA LE CAMPAGNE DELL ADVERTISER
@@ -373,7 +373,7 @@ public class CampaignBusiness {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         Page<Campaign> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(CampaignDTO::from);
+        return page.map(CampaignDTO::fromList);
     }
 
     public List<CampaignDTO> getCampaignsToDisable() {
@@ -381,7 +381,7 @@ public class CampaignBusiness {
         request.setStatus(true);
         request.setDisableDueDateTo(LocalDate.now().plusDays(1));
         Page<Campaign> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
-        return page.map(CampaignDTO::from).toList();
+        return page.map(CampaignDTO::fromList).toList();
     }
 
     public List<CampaignDTO> getEnabledCampaigns() {

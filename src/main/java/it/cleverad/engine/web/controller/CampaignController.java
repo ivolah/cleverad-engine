@@ -77,11 +77,6 @@ public class CampaignController {
         return business.getCampaignsActiveBrandBuddies(request, pageable);
     }
 
-//    @GetMapping("/affiliate")
-//    public Page<CampaignDTO> getCampaignAffilaite(Pageable pageable) {
-//        return business.getCampaignsGuest(pageable);
-//    }
-
     /**
      * ============================================================================================================
      **/

@@ -16,29 +16,28 @@ public interface AgentRepository extends JpaRepository<Agent, Long>, JpaSpecific
             " and (:affiliate_id is null or affiliate_id = :affiliate_id) " +
             " group by device_name"+
             " order by count DESC")
-    List<WidgetAgent> getDevice(@Param("campaign_id") String campaign_id, @Param("affiliate_id") String affiliate_id);
+    List<WidgetAgent> getDevice(@Param("campaign_id") String campaignId, @Param("affiliate_id") String affiliateId);
 
     @Query(nativeQuery = true, value = "SELECT count(*) as count, os_name as osName, os_version as osVersion from t_agent " +
             " where  (:campaign_id is null or campaign_id = :campaign_id) " +
             " and (:affiliate_id is null or affiliate_id = :affiliate_id) " +
             " group by os_name, os_version "+
             " order by count DESC")
-    List<WidgetAgent> geOs(@Param("campaign_id") String campaign_id, @Param("affiliate_id") String affiliate_id);
+    List<WidgetAgent> geOs(@Param("campaign_id") String campaignId, @Param("affiliate_id") String affiliateId);
 
     @Query(nativeQuery = true, value = "SELECT count(*) as count, agent_name as agentName, agent_version as agentVersion from t_agent " +
             " where  (:campaign_id is null or campaign_id = :campaign_id) " +
             " and (:affiliate_id is null or affiliate_id = :affiliate_id) " +
             " group by agent_name,agent_version"+
             " order by count DESC")
-    List<WidgetAgent> searchAgentDetailed(@Param("campaign_id") String campaign_id, @Param("affiliate_id") String affiliate_id);
+    List<WidgetAgent> searchAgentDetailed(@Param("campaign_id") String campaignId, @Param("affiliate_id") String affiliateId);
 
     @Query(nativeQuery = true, value = "SELECT count(*) as count, agent_name as agentName from t_agent " +
             " where  (:campaign_id is null or campaign_id = :campaign_id) " +
             " and (:affiliate_id is null or affiliate_id = :affiliate_id) " +
             " group by agent_name" +
             " order by count DESC")
-    List<WidgetAgent> getAgent(@Param("campaign_id") String campaign_id, @Param("affiliate_id") String affiliate_id);
+    List<WidgetAgent> getAgent(@Param("campaign_id") String campaignId, @Param("affiliate_id") String affiliateId);
 
 
 }
-

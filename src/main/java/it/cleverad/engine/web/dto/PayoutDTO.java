@@ -113,5 +113,17 @@ public class PayoutDTO {
                 payout.getDictionary() != null ? payout.getDictionary().getName() : null,
                 payout.getCreationDate(), payout.getLastModificationDate(), transactionCPCS, transactionCPLS, payout.getImponibile());
     }
+    public static PayoutDTO fromNoTransazioni(Payout payout) {
+
+        return new PayoutDTO(payout.getId(),
+                payout.getAffiliate() != null ? payout.getAffiliate().getId() : null,
+                payout.getAffiliate() != null ? payout.getAffiliate().getName() : null,
+                payout.getTotale(), payout.getIva(), payout.getValuta(), payout.getNote(),
+                payout.getData(),
+                payout.getDataScadenza(),
+                payout.getDictionary() != null ? payout.getDictionary().getId() : null,
+                payout.getDictionary() != null ? payout.getDictionary().getName() : null,
+                payout.getCreationDate(), payout.getLastModificationDate(), null, null, payout.getImponibile());
+    }
 
 }

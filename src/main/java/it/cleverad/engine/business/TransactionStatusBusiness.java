@@ -16,6 +16,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,10 +57,24 @@ public class TransactionStatusBusiness {
 
     public Page<QueryTransaction> searchPrefiltratoN(TransactionStatusBusiness.QueryFilter request, Pageable pageableRequest) {
 
-        if (jwtUserDetailsService.isAffiliate())
+        List<Long> statusIds = new ArrayList<>();
+        statusIds.add(72L);
+        List<Long> dictIds = new ArrayList<>();
+        dictIds.add(39L);
+        dictIds.add(42L);
+        dictIds.add(68L);
+
+        if (jwtUserDetailsService.isAffiliate()) {
+            request.setValueNotZero(true);
+            request.setInStausId(statusIds);// nascodne delle transazioni
+            request.setInDictionaryId(dictIds);// nascodne delle transazioni
             request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
-        else if (jwtUserDetailsService.isAdvertiser())
+        } else if (jwtUserDetailsService.isAdvertiser()) {
+            request.setValueNotZero(true);
+            request.setInStausId(statusIds);// nascodne delle transazioni
+            request.setInDictionaryId(dictIds);// nascodne delle transazioni
             request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
+        }
 
         List<QueryTransaction> listaTransazioni = new ArrayList<>();
         if (request != null) {
@@ -72,6 +87,7 @@ public class TransactionStatusBusiness {
             } else if (request.getTipo().equals("CPM")) {
                 listaTransazioni = queryRepository.listaTransazioniCPM(request.getCreationDateFrom(), request.getCreationDateTo() != null ? request.getCreationDateTo().atTime(23, 59, 59, 99999) : null, request.getStatusId(), request.getDictionaryId(), request.getAffiliateId(), request.getChannelId(), request.getCampaignId(), request.getMediaId(), request.getCommissionId(), request.getRevenueId(), request.getPayoutPresent(), request.getPayoutId(), request.getAdvertiserId(), request.getValueNotZero(), request.getInDictionaryId(), request.getNotInDictionaryId(), request.getInStausId(), request.getNotInStausId());
             } else if (request.getTipo().equals("CPS")) {
+                listaTransazioni = queryRepository.listaTransazioniCPS(request.getCreationDateFrom(), request.getCreationDateTo() != null ? request.getCreationDateTo().atTime(23, 59, 59, 99999) : null, request.getStatusId(), request.getDictionaryId(), request.getAffiliateId(), request.getChannelId(), request.getCampaignId(), request.getMediaId(), request.getCommissionId(), request.getRevenueId(), request.getPayoutPresent(), request.getPayoutId(), request.getAdvertiserId(), request.getValueNotZero(), request.getInDictionaryId(), request.getNotInDictionaryId(), request.getInStausId(), request.getNotInStausId());
             }
         } else {
             listaTransazioni = queryRepository.listaTransazioni(

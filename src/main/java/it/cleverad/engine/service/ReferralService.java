@@ -7,10 +7,39 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j
 public class ReferralService {
+
+    public Map<String, String> estrazioneInfo(String input) {
+        Map<String, String> keyValueMap = new HashMap<>();
+        if (StringUtils.isNotEmpty(input)) {
+            // pattern "xxx: value"
+            Pattern pattern = Pattern.compile("(\\w+)\\s*:\\s*([^,]+)");
+            Matcher matcher = pattern.matcher(input);
+            while (matcher.find()) {
+                String key = matcher.group(1).trim();
+                String value = matcher.group(2).trim();
+                keyValueMap.put(key, value);
+            }
+        }
+        return keyValueMap;
+    }
+
+    public String replacePlaceholders(String input, Map<String, String> keyValueMap) {
+        for (Map.Entry<String, String> entry : keyValueMap.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            input = input.replaceAll("\\{" + key + "\\}", value).replaceAll("\\{" + key.toUpperCase() + "\\}", value).replaceAll("\\[" + key + "\\]", value).replaceAll("\\[" + key.toUpperCase() + "\\]", value);
+            log.trace(">" + key + "< : >" + value + "< = " + input);
+        }
+        return input;
+    }
 
     public Refferal decodificaReferral(String refferalString) {
         if (StringUtils.isNotBlank(refferalString) && !refferalString.contains("{{refferalId}}")) {
@@ -27,7 +56,7 @@ public class ReferralService {
                     continua = false;
                 }
             }
-            if (continua && tokens.length > 1 && tokens[1] != null) {
+            if (Boolean.TRUE.equals(continua) && tokens.length > 1 && tokens[1] != null) {
                 try {
                     refferal.setMediaId(Long.valueOf(decodifica(tokens[1])));
                 } catch (Exception nf) {
@@ -35,7 +64,7 @@ public class ReferralService {
                     continua = false;
                 }
             }
-            if (continua && tokens.length > 2 && tokens[2] != null) {
+            if (Boolean.TRUE.equals(continua) && tokens.length > 2 && tokens[2] != null) {
                 try {
                     refferal.setAffiliateId(Long.valueOf(decodifica(tokens[2])));
                 } catch (Exception nf) {
@@ -43,7 +72,7 @@ public class ReferralService {
                     continua = false;
                 }
             }
-            if (continua && tokens.length > 3 && tokens[3] != null) {
+            if (Boolean.TRUE.equals(continua) && tokens.length > 3 && tokens[3] != null) {
                 try {
                     Long cahanneID = Long.valueOf(decodifica(tokens[3]));
                     refferal.setChannelId(cahanneID);
@@ -52,17 +81,13 @@ public class ReferralService {
                     continua = false;
                 }
             }
-            try {
-                if (continua && tokens.length > 4 && tokens[4] != null) {
-                    try {
-                        refferal.setTargetId(Long.valueOf(decodifica(tokens[4])));
-                    } catch (Exception nf) {
-                        log.warn("Error decoding target id : {}", tokens[4]);
-                        refferal.setTargetId(0L);
-                    }
+            if (Boolean.TRUE.equals(continua) && tokens.length > 4 && tokens[4] != null) {
+                try {
+                    refferal.setTargetId(Long.valueOf(decodifica(tokens[4])));
+                } catch (Exception nf) {
+                    log.warn("Error decoding target id : {}", tokens[4]);
+                    refferal.setTargetId(0L);
                 }
-            } catch (Exception cc) {
-                log.warn("Eccezione token 4 :: {}", cc);
             }
             return refferal;
         }

@@ -1,4 +1,4 @@
-package it.cleverad.engine.persistence.model.service;
+package it.cleverad.engine.web.dto;
 
 import lombok.*;
 
@@ -7,7 +7,13 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReportCampagneDTO {
+public class ReportAffiliatesChannelCampaignDTO {
+    private Long affiliateId;
+    private String affiliateName;
+    private Long channelId;
+    private String channelName;
+    private Long campaignId;
+    private String campaignName;
     private Double commission;
     private Double commissionRigettato;
     private Double revenue;
@@ -24,10 +30,4 @@ public class ReportCampagneDTO {
     private String lr;
     private Long leadNumberRigettato;
     private Long clickNumberRigettato;
-    private Double initialBudget;
-    private Double budget;
-    private Double budgetGivenPC;
-    private Double budgetPC;
-    private Long campaignId;
-    private String campaignName;
 }

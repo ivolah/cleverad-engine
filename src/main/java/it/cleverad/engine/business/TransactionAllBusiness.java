@@ -3,18 +3,12 @@ package it.cleverad.engine.business;
 import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.ViewTransactionStatus;
 import it.cleverad.engine.persistence.repository.service.ViewTransactionStatusRepository;
-import it.cleverad.engine.web.dto.TransactionStatusDTO;
-import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
@@ -41,63 +35,30 @@ public class TransactionAllBusiness {
      * ============================================================================================================
      **/
 
-    // GET BY ID
-    public TransactionStatusDTO findById(Long id) {
-        ViewTransactionStatus transaction = null;
-        if (jwtUserDetailsService.isAdmin()) {
-            transaction = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction ALL", id));
-        }
-        return TransactionStatusDTO.from(transaction);
-    }
-
     // SEARCH PAGINATED
-    public Page<TransactionStatusDTO> searchPrefiltrato(Filter filter, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("dateTime")));
+//    public Page<TransactionStatusDTO> searchPrefiltrato(Filter filter, Pageable pageableRequest) {
+//        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("dateTime")));
+//
+//        log.info(">>>> " + filter);
+//        // gestione api .../all/affiliate
+//        if (jwtUserDetailsService.isAffiliate()) {
+//            filter.setValueNotZero(true);
+//            filter.setForAffiliate(true);// nascodne delle transazioni
+//            filter.setAffiliateId(jwtUserDetailsService.getAffiliateId());
+//        } else if (jwtUserDetailsService.isAdvertiser()) {
+//            filter.setValueNotZero(true);
+//            filter.setForAffiliate(true); // nascodne delle transazioni
+//            filter.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
+//        }
+//
+//        Page<ViewTransactionStatus> page = repository.findAll(getSpecification(filter), pageable);
+//        return page.map(TransactionStatusDTO::from);
+//    }
 
-        // gestione api .../all/affiliate
-        if (jwtUserDetailsService.isAffiliate()) {
-            filter.setValueNotZero(true);
-            filter.setForAffiliate(true);// nascodne delle transazioni
-            filter.setAffiliateId(jwtUserDetailsService.getAffiliateId());
-        } else if (jwtUserDetailsService.isAdvertiser()) {
-            filter.setValueNotZero(true);
-            filter.setForAffiliate(true); // nascodne delle transazioni
-            filter.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
-        }
-
-        Page<ViewTransactionStatus> page = repository.findAll(getSpecification(filter), pageable);
-        return page.map(TransactionStatusDTO::from);
-    }
-
-    public Page<TransactionStatusDTO> searchPrefiltratoInterno(Filter filter) {
-        Page<ViewTransactionStatus> page = repository.findAll(getSpecification(filter), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("dateTime"))));
-        return page.map(TransactionStatusDTO::from);
-    }
-
-    public Page<TransactionStatusDTO> searchStatusIdAndDate(Long statusId, LocalDate dataDaGestireStart, LocalDate dataDaGestireEnd, String tipo, Long affiliateId, Long campaignId) {
-        Filter request = new Filter();
-        request.setCreationDateFrom(dataDaGestireStart);
-        request.setCreationDateTo(dataDaGestireEnd);
-        request.setTipo(tipo);
-        request.setStatusId(statusId);
-        request.setAffiliateId(affiliateId);
-        request.setCampaignId(campaignId);
-        Page<ViewTransactionStatus> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
-        return page.map(TransactionStatusDTO::from);
-    }
-
-    public Page<TransactionStatusDTO> searchStatusIdAndDicIdAndDate(Long statusId, Long dicId, LocalDate dataDaGestireStart, LocalDate dataDaGestireEnd, String tipo, Long affiliateId, Long campaignId) {
-        Filter request = new Filter();
-        request.setCreationDateFrom(dataDaGestireStart);
-        request.setCreationDateTo(dataDaGestireEnd);
-        request.setTipo(tipo);
-        request.setStatusId(statusId);
-        request.setDictionaryId(dicId);
-        request.setAffiliateId(affiliateId);
-        request.setCampaignId(campaignId);
-        Page<ViewTransactionStatus> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
-        return page.map(TransactionStatusDTO::from);
-    }
+//    public Page<TransactionStatusDTO> searchPrefiltratoInterno(Filter filter) {
+//        Page<ViewTransactionStatus> page = repository.findAll(getSpecification(filter), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("dateTime"))));
+//        return page.map(TransactionStatusDTO::from);
+//    }
 
     /**
      * ============================================================================================================

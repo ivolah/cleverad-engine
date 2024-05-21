@@ -76,7 +76,6 @@ public class MailService {
     public MailDTO inviaSingola(BaseCreateRequest request) {
 
         AffiliateDTO affiliato = affiliateBusiness.findById(request.getAffiliateId());
-        //CampaignDTO campaign = campaignBusiness.findById(request.getCampaignId());
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(MAIL_INFO);
@@ -101,7 +100,7 @@ public class MailService {
         MailTemplateDTO mailTemplate = mailTempalteBusiness.findById(request.templateId);
 
         AffiliateDTO affiliate = request.affiliateId != null ? affiliateBusiness.findById(request.affiliateId) : null;
-        CampaignDTO campaign = request.campaignId != null ? campaign = campaignBusiness.findById(request.campaignId) : null;
+        CampaignDTO campaign = request.campaignId != null ? campaignBusiness.findById(request.campaignId) : null;
         UserDTO user = request.userId != null ? userBusiness.findById(request.userId) : null;
         ChannelDTO channelDTO = request.channelId != null ? channelBusiness.findById(request.channelId) : null;
         PlannerDTO plannerDTO = request.plannerId != null ? plannerBusiness.findById(request.plannerId) : null;
@@ -226,8 +225,8 @@ public class MailService {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class BaseCreateRequest {
-        public String status;
-        public Long plannerId;
+        private String status;
+        private Long plannerId;
         private Long templateId;
         private Long campaignId;
         private Long affiliateId;

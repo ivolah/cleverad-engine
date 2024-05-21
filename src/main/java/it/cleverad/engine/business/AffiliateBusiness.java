@@ -101,7 +101,7 @@ public class AffiliateBusiness {
     public Page<AffiliateDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Page<Affiliate> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(AffiliateDTO::from);
+        return page.map(AffiliateDTO::fromList);
     }
 
     // UPADTE
@@ -145,32 +145,19 @@ public class AffiliateBusiness {
         Long statusID = filter.statusId;
         if (statusID == 6 && !affiliate.getDictionaryStatusType().getId().equals(statusID)) {
             // invio mail approvato
-            if (affiliate.getBrandbuddies()) mailRequest.setTemplateId(21L);
+            if (Boolean.TRUE.equals(affiliate.getBrandbuddies())) mailRequest.setTemplateId(21L);
             else mailRequest.setTemplateId(7L);
             mailRequest.setAffiliateId(id);
             mailService.invio(mailRequest);
         } else if (statusID == 7 && !affiliate.getDictionaryStatusType().getId().equals(statusID)) {
             // invio mail non approvato
-            if (affiliate.getBrandbuddies()) mailRequest.setTemplateId(22L);
+            if (Boolean.TRUE.equals(affiliate.getBrandbuddies())) mailRequest.setTemplateId(22L);
             else mailRequest.setTemplateId(8L);
             mailRequest.setAffiliateId(id);
             mailService.invio(mailRequest);
         }
+
         log.info("Concluso ::  " + id);
-
-//        Boolean status = affiliate.getStatus();
-//        if (!status && filter.status) {
-//            // invio mail approvato
-//            mailRequest.setTemplateId(7L);
-//            mailRequest.setAffiliateId(id);
-//            mailService.invio(mailRequest);
-//        } else if (!status && !filter.status) {
-//            // invio mail non approvato
-//            mailRequest.setTemplateId(8L);
-//            mailRequest.setAffiliateId(id);
-//            mailService.invio(mailRequest);
-//        }
-
         return dto;
     }
 
@@ -279,10 +266,8 @@ public class AffiliateBusiness {
         uenteOmbra.setPassword("2!3_ClEvEr_2!3");
         userBusiness.create(uenteOmbra);
 
-        MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
-
         // invio mail USER
-        mailRequest = new MailService.BaseCreateRequest();
+        MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
         mailRequest.setAffiliateId(dto.getId());
         mailRequest.setUserId(userDto.getId());
         if (request.brandbuddies != null && request.brandbuddies) mailRequest.setTemplateId(20L);
@@ -290,11 +275,11 @@ public class AffiliateBusiness {
         mailService.invio(mailRequest);
 
         // invio mail Affiliate
-//        mailRequest.setTemplateId(6L);
-//        mailRequest.setAffiliateId(dto.getId());
-//        mailRequest.setEmail(request.primaryMail);
-//        //mailRequest.setUserId();
-//        mailService.invio(mailRequest);
+        //mailRequest.setTemplateId(6L);
+        //mailRequest.setAffiliateId(dto.getId());
+        //mailRequest.setEmail(request.primaryMail);
+        ////mailRequest.setUserId();
+        //mailService.invio(mailRequest);
 
         return dto;
     }

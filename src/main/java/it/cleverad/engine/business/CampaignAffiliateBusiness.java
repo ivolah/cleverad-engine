@@ -29,7 +29,6 @@ import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
 @Component
 @Transactional
 public class CampaignAffiliateBusiness {
@@ -63,20 +62,6 @@ public class CampaignAffiliateBusiness {
         map.setCampaign(campaign);
 
         return CampaignAffiliateDTO.from(repository.save(map));
-    }
-
-    public CampaignAffiliate createEntity(BaseCreateRequest request) {
-        CampaignAffiliate map = mapper.map(request, CampaignAffiliate.class);
-
-        Affiliate cat = new Affiliate();
-        cat.setId(request.getAffiliateId());
-        map.setAffiliate(cat);
-
-        Campaign campaign = new Campaign();
-        campaign.setId(request.getCampaignId());
-        map.setCampaign(campaign);
-
-        return repository.save(map);
     }
 
     // GET BY ID
@@ -123,20 +108,12 @@ public class CampaignAffiliateBusiness {
         return page.map(CampaignAffiliateDTO::from);
     }
 
-    public Page<CampaignAffiliateDTO> searchByAffiliateID(Long affiliateId) {
-        Filter request = new Filter();
-        request.setAffiliateId(affiliateId);
-        Page<CampaignAffiliate> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id"))));
-        return page.map(CampaignAffiliateDTO::from);
-    }
-
     public Page<CampaignAffiliateDTO> searchByCampaignID(Long campaignId, Pageable pageableRequest) {
         Filter request = new Filter();
         request.setCampaignId(campaignId);
         request.setBrandbuddies(false);
         if (!jwtUserDetailsService.getRole().equals("Admin"))
             request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
-        log.info(request.toString());
         Page<CampaignAffiliate> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id"))));
         return page.map(CampaignAffiliateDTO::from);
     }
@@ -148,11 +125,9 @@ public class CampaignAffiliateBusiness {
         if (!jwtUserDetailsService.getRole().equals("Admin"))
             request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
         request.setFollowNull(null);
-        log.info(request.toString());
         Page<CampaignAffiliate> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id"))));
         return page.map(CampaignAffiliateDTO::from);
     }
-
 
     public Page<CampaignAffiliateDTO> searchByCampaignIDBrandBuddies(Long campaignId, Pageable pageableRequest) {
         Filter request = new Filter();

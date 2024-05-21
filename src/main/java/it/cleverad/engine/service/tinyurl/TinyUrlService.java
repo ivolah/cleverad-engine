@@ -30,7 +30,7 @@ public class TinyUrlService {
         return new Gson().fromJson(getRequestBody(client, request), TinyData.class);
     }
 
-    private String getRequestBody(OkHttpClient client, Request request) {
+    private String getRequestBody(OkHttpClient client, Request request) throws IOException {
         String respBody = null;
         String code = null;
         try {
@@ -47,7 +47,7 @@ public class TinyUrlService {
             }
         } catch (IOException e) {
             log.error(" getRequestBody :: " + code + " - " + respBody, e);
-            throw new RuntimeException();
+            throw new IOException();
         }
     }
 }

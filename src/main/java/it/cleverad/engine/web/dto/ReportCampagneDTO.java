@@ -1,4 +1,4 @@
-package it.cleverad.engine.persistence.model.service;
+package it.cleverad.engine.web.dto;
 
 import lombok.*;
 
@@ -7,8 +7,7 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReportDailyDTO {
-    private String giorno;
+public class ReportCampagneDTO {
     private Double commission;
     private Double commissionRigettato;
     private Double revenue;
@@ -25,4 +24,10 @@ public class ReportDailyDTO {
     private String lr;
     private Long leadNumberRigettato;
     private Long clickNumberRigettato;
+    private Double initialBudget;
+    private Double budget;
+    private Double budgetGivenPC;
+    private Double budgetPC;
+    private Long campaignId;
+    private String campaignName;
 }

@@ -72,7 +72,7 @@ public class FileAdvertiserBusiness {
             Advertiser advertiser = advertiserRepository.findById(request.advertiserId).orElseThrow(() -> new ElementCleveradException("Advertiser", request.advertiserId));
             Dictionary dictionary = (dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
             String filename = StringUtils.cleanPath(file.getOriginalFilename());
-            String path = fileStoreService.storeFile(advertiser.getId(), "advertiser", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), file.getBytes());
+            String path = fileStoreService.storeFileNew(advertiser.getId(), "advertiser", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), file.getBytes());
             FileAdvertiser fileDB = new FileAdvertiser(filename, file.getContentType(), request.note, path, LocalDateTime.now(), advertiser, dictionary);
             return repository.save(fileDB).getId();
         } catch (Exception e) {

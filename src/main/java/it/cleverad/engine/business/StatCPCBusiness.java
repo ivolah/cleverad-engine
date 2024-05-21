@@ -63,7 +63,7 @@ public class StatCPCBusiness {
         mainObj.put("totale", totale.get());
         mainObj.put("data", data);
         mainObj.put("xSeries", xSeries);
-        log.info("CPC {}", mainObj.toString());
+        log.trace("CPC {}", mainObj.toString());
         return mainObj.toString();
     }
 

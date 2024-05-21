@@ -2,11 +2,7 @@ package it.cleverad.engine.business;
 
 import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.TopCampagne;
-import it.cleverad.engine.persistence.model.service.WidgetCampaignDayCpm;
-import it.cleverad.engine.persistence.repository.service.TransactionCPMRepository;
 import it.cleverad.engine.persistence.repository.service.TransactionCPSRepository;
-import it.cleverad.engine.persistence.repository.service.WidgetCampaignDayCpmRepository;
-import it.cleverad.engine.persistence.repository.service.WidgetTopCPMRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,21 +11,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component

@@ -55,14 +55,6 @@ public class Channel {
     @JoinColumn(name = "owner_id")
     private Dictionary dictionaryOwner;
 
-
-//    @ManyToMany
-//    @JoinTable(
-//            name = "t_channel_category",
-//            joinColumns = @JoinColumn(name = "channel_id"),
-//            inverseJoinColumns = @JoinColumn(name = "category_id"))
-//    private Collection<Category> categories;
-
     @OneToMany(mappedBy = "channel")
     private Set<ChannelCategory> channelCategories;
 

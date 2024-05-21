@@ -55,11 +55,9 @@ public class CampaignBudgetService {
             List<TransactionCPL> cpls = transactionCPLBusiness.searchForCampaignBudget(dto.getCampaignId(), dto.getStartDate(), dto.getEndDate());
             log.trace("NUMERO TRANS CPL {} :: {} ({})", dto.getCampaignId(), cpls.size(), dto.getCapIniziale());
             for (TransactionCPL cpl : cpls) {
-                // tolgo limite cap if (capErogato < dto.getCapIniziale()) {
                 capErogato += 1;
                 budgetErogato += revenueFactorBusiness.findById(cpl.getRevenueId()).getRevenue();
                 commissioniErogate += cpl.getCommission().getValue();
-                //}
             }
             log.trace("CPL budgetErogato :: {}", budgetErogato);
             log.trace("CPL capErogato :: {} ", capErogato);
@@ -69,12 +67,10 @@ public class CampaignBudgetService {
             List<TransactionCPC> cpcs = transactionCPCBusiness.searchForCampaignBudget(dto.getCampaignId(), dto.getStartDate(), dto.getEndDate());
             log.trace("NUMERO TRANS CPC {} :: {} ({})", dto.getCampaignId(), cpcs.size(), dto.getCapIniziale());
             for (TransactionCPC cpc : cpcs) {
-                // tolgo limite cap if (capErogato < dto.getCapIniziale()) {
-                capErogato += cpc.getClickNumber().intValue();
+                  capErogato += cpc.getClickNumber().intValue();
                 budgetErogato += revenueFactorBusiness.findById(cpc.getRevenueId()).getRevenue() * cpc.getClickNumber().intValue();
                 commissioniErogate += (cpc.getCommission().getValue() * cpc.getClickNumber().intValue());
                 log.trace("{} :: comm value  {} :: {} * {} == {}", capErogato, cpc.getValue(), cpc.getCommission().getValue(), cpc.getClickNumber().intValue(), (cpc.getCommission().getValue() * cpc.getClickNumber().intValue()));
-                //  }
             }
             log.trace("CPC budgetErogato :: {}", budgetErogato);
             log.trace("CPC capErogato :: {} ", capErogato);
@@ -95,7 +91,7 @@ public class CampaignBudgetService {
             request.setBudgetErogato(budgetErogato);
             request.setCapErogato(capErogato);
 
-            double revenue = 0D;
+            double revenue;
             // nel caso venga valorizzato il volume erogato
             if (dto.getVolume() != null && dto.getVolume() > 0) {
                 request.setVolume(dto.getVolume());
@@ -107,11 +103,6 @@ public class CampaignBudgetService {
                 revenue = budgetErogato - commissioniErogate;
             }
             request.setVolumeDate(dto.getVolumeDate());
-
-
-            //Come calcolo il budget erogato se non ho la revenue?
-            // messo qui nel caso il capErogato venga modificato dal campo Volume
-           // double revenue = budgetErogato - commissioniErogate;
 
             // Cap Percentuale
             Double ce = 0D;
@@ -162,20 +153,10 @@ public class CampaignBudgetService {
             //  ASSEGNO ORDER A NUOVO BUDGET
             dto.getFileCampaignBudgetOrders().stream().forEach(order -> fileCampaignBudgetBusiness.updateInterno(order.getId(), "ORDER", cb.getId()));
 
-            // cancello se la data di creazione e oggi
-            // in questo modo mantendo solo l'utimo budget del giorno precedente
-//            if (dto.getCreationDate().getDayOfYear() < LocalDateTime.now().getDayOfYear()) {
-//                // lo setto a non attivo
-//                campaignBudgetBusiness.disable(dto.getId());
-//                log.trace("Disabilito :: {}", dto.getId());
-//            } else {
-                // cancello
-                campaignBudgetBusiness.delete(dto.getId());
-                log.trace("ELIMINO {}", dto.getId());
-//            }
-
+            // cancello
+            campaignBudgetBusiness.delete(dto.getId());
+            log.trace("ELIMINO {}", dto.getId());
         }
-
         log.trace("END");
     }
 

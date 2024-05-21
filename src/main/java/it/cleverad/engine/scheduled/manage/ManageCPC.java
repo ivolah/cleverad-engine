@@ -40,7 +40,8 @@ public class ManageCPC {
 
     @Autowired
     CampaignBudgetBusiness campaignBudgetBusiness;
-    /**
+
+    /*
      * ============================================================================================================
      **/
 
@@ -63,10 +64,7 @@ public class ManageCPC {
     @Autowired
     private CampaignRepository campaignRepository;
 
-    long TIME_THRESHOLD = 60000 * 60; // Time threshold in milliseconds (e.g., 1 minute)
-    Map<String, Instant> ipTimestampMap = new HashMap<>();
-
-    /**
+    /*
      * ============================================================================================================
      **/
 
@@ -75,10 +73,13 @@ public class ManageCPC {
     public void gestiusciTransazioni() {
 
         // Setto a  Blacklisted + Multiple i click mulipli
-        List<ClickMultipli> listaDaDisabilitare = cpcBusiness.getListaClickMultipliDaDisabilitare(LocalDate.now(), LocalDate.now());
+
+        //TODO logica non va bene perchè dovrei lavorqre sempre per affiliato e campagna
+
+        List<ClickMultipli> listaDaDisabilitare = cpcBusiness.getListaClickMultipliDaDisabilitare(LocalDate.now(), LocalDate.now(), null, null);
         // giro settaggio click multipli
         listaDaDisabilitare.stream().forEach(clickMultipli -> {
-            // log.info("Disabilito {} :: {}", clickMultipli.getId(), clickMultipli.getTotale());
+            log.trace("Disabilito {} :: {}", clickMultipli.getId(), clickMultipli.getTotale());
             Cpc cccp = repository.findById(clickMultipli.getId()).orElseThrow(() -> new ElementCleveradException("Cpc", clickMultipli.getId()));
             cccp.setRead(false);
             cccp.setBlacklisted(true);
@@ -212,7 +213,6 @@ public class ManageCPC {
 
                         AffiliateChannelCommissionCampaignDTO accc = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
                         if (accc != null) {
-                            // log.info(accc.getCommissionId() + " " + accc.getCommissionValue());
                             commVal = accc.getCommissionValue();
                             transaction.setCommissionId(accc.getCommissionId());
                         } else {
@@ -229,9 +229,9 @@ public class ManageCPC {
 
                         // decremento budget Affiliato
                         AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(campaignId, affiliateId).stream().findFirst().orElse(null);
-                        if (bb != null && bb.getBudget() != null) {
-                            // setto stato transazione a ovebudget editore se totale < 0
-                            if ((bb.getBudget() - totale) < 0) transaction.setDictionaryId(47L);
+                        // setto stato transazione a ovebudget editore se totale < 0
+                        if (bb != null && bb.getBudget() != null && ((bb.getBudget() - totale) < 0)) {
+                            transaction.setDictionaryId(47L);
                         }
 
                         // Stato Budget Campagna
@@ -244,23 +244,10 @@ public class ManageCPC {
                             }
                         }
 
-                        if (accc != null && accc.getCommissionDueDate() != null) {
-                            // commissione scaduta
-                            if (accc.getCommissionDueDate().isBefore(LocalDate.now())) {
-                                transaction.setDictionaryId(49L);
-                            }
+                        // commissione scaduta
+                        if (accc != null && accc.getCommissionDueDate() != null && (accc.getCommissionDueDate().isBefore(LocalDate.now()))) {
+                            transaction.setDictionaryId(49L);
                         }
-
-//                        if (totale > 0) {
-//                            // trovo CampaignBudget
-//                            CampaignBudget cb = campaignBudgetBusiness.findByCampaignIdAndDate(campaignId, LocalDateTime.now());
-//                            if (cb != null) {
-//                                //incremento budget erogato
-//                                campaignBudgetBusiness.incrementoBudgetErogato(cb.getId(), totale);
-//                                // incremento cap
-//                                campaignBudgetBusiness.incrementoCapErogato(cb.getId(), numer);
-//                            }
-//                        }
 
                         transaction.setAgent("");
                         //setto pending
@@ -281,7 +268,7 @@ public class ManageCPC {
 
     }//trasformaTrackingCPC
 
-    /**
+    /*
      * ============================================================================================================
      **/
 

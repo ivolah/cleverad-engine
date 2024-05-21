@@ -75,9 +75,6 @@ public class Affiliate {
     @OneToMany(mappedBy = "affiliate")
     private Set<AffiliateChannelCommissionCampaign> affiliateChannelCommissionCampaigns;
 
-//    @OneToMany(mappedBy = "affiliate")
-//    private Set<AffiliateChannelCommissionCampaign> commissionCampaigns;
-
     @OneToMany(mappedBy = "affiliate")
     private Set<Wallet> wallets;
 
@@ -112,9 +109,6 @@ public class Affiliate {
 
     @OneToMany(mappedBy = "affiliate")
     private Set<CampaignAffiliate> campaignAffiliates;
-
-//    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "affiliates")
-//    private Set<Campaign> campaigns = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "term_id")

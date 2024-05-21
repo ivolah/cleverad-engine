@@ -21,7 +21,6 @@ public class Cpl {
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String refferal;
     private String ip;
     private String agent;
@@ -30,7 +29,8 @@ public class Cpl {
     private String country;
     private LocalDateTime date = LocalDateTime.now();
     private Boolean read = false;
-
+    private Boolean blacklisted = false;
+    private Boolean multiple = false;
     //dati refferal
     @Column(name = "media_id")
     private Long mediaId;
@@ -42,13 +42,9 @@ public class Cpl {
     private Long channelId;
     @Column(name = "target_id")
     private Long targetId;
-
-    private Boolean blacklisted = false;
-    private Boolean multiple = false;
-
+    // altro
     @Column(name = "cpc_id")
     private Long cpcId;
-
     @Column(name = "action_id")
     private String actionId;
 

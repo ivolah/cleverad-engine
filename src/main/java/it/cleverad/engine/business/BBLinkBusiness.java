@@ -82,7 +82,7 @@ public class BBLinkBusiness {
             // trova target
             List<Long> chanelBBs = channelBusiness.getBrandBuddies(jwtUserDetailsService.getAffiliateId());
             String channelId = "0";
-            if (chanelBBs.size() > 0) channelId = String.valueOf(chanelBBs.get(0));
+            if (!chanelBBs.isEmpty()) channelId = String.valueOf(chanelBBs.get(0));
 
             // pulisco indirizzi
             String link = request.getLink().replace("http://", "").replace("https://", "").replace("www.", "");
@@ -90,7 +90,6 @@ public class BBLinkBusiness {
 
             //verifica se link viene accettato
             if (link.startsWith(url)) {
-                //log.info("LINK {} :: >>> TARGET :: {}", link, url);
                 Long campaignId = mediaDTO.getCampaignId();
                 String referral = referralService.creaEncoding(Long.toString(campaignId), String.valueOf(mediaDTO.getId()), String.valueOf(jwtUserDetailsService.getAffiliateId()), channelId, "0");
                 //generazione short link
@@ -104,7 +103,7 @@ public class BBLinkBusiness {
                     map.setReferral(referral);
                     map.setCreationDate(LocalDateTime.now());
 
-                    if (campaignRepository.findByIdAndCommissionCampaigns_Dictionary_Id(campaignId, 84L).size() > 0 || campaignRepository.findByIdAndCommissionCampaigns_Dictionary_Id(campaignId, 85L).size() > 0) {
+                    if (!campaignRepository.findByIdAndCommissionCampaigns_Dictionary_Id(campaignId, 84L).isEmpty() || !campaignRepository.findByIdAndCommissionCampaigns_Dictionary_Id(campaignId, 85L).isEmpty()) {
                         Long comid = null;
                         comid = campaignRepository.findById(campaignId).get().getCommissionCampaigns().stream().filter(commission -> {
                             if (commission.getDictionary().getId().equals(84L) || commission.getDictionary().getId().equals(85L))
