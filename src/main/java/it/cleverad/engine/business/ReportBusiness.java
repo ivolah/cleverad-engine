@@ -2,7 +2,8 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.config.security.JwtUserDetailsService;
-import it.cleverad.engine.persistence.model.service.*;
+import it.cleverad.engine.persistence.model.service.QueryTopElenco;
+import it.cleverad.engine.persistence.model.service.Report;
 import it.cleverad.engine.persistence.repository.service.QueryRepository;
 import it.cleverad.engine.persistence.repository.service.ReportRepository;
 import it.cleverad.engine.web.dto.*;
@@ -38,6 +39,8 @@ public class ReportBusiness {
     private ReportRepository reportRepository;
     @Autowired
     private QueryRepository queryRepository;
+    @Autowired
+    private CampaignBusiness campaignBusiness;
     @Autowired
     private Mapper mapper;
     @Autowired
@@ -121,16 +124,13 @@ public class ReportBusiness {
         if (request.getDictionaryIds().size() > 0) {
             dictId = request.getDictionaryIds().get(0);
         }
-        List<ReportCampagneDTO> lista = reportRepository.searchReportCampaign(
-                request.getDateTimeFrom().atStartOfDay(),
-                request.getDateTimeTo().atTime(23, 59, 59, 99999),
-                request.getStatusId(), null,
-                request.getAffiliateid(), null,
-                request.getCampaignId(),
-                request.getAdvertiserId(),
-                dictId,
-                request.getStatusIds()
-        );
+        if (request.campaignActive != null && request.campaignActive && request.getDateTimeFrom() != null) {
+            List<Long> cids = campaignBusiness.getCampaignsinDateRange(request.getDateTimeFrom(), request.getDateTimeTo()).stream().mapToLong(value -> value.getId()).boxed().collect(Collectors.toList());
+            log.info(cids.size() + " !!!");
+            cids.stream().forEach(aLong -> log.info("Campaign {} ", aLong));
+            request.setCampaignIds(cids);
+        }
+        List<ReportCampagneDTO> lista = reportRepository.searchReportCampaign(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(23, 59, 59, 99999), request.getStatusId(), null, request.getAffiliateid(), null, request.getCampaignId(), request.getAdvertiserId(), dictId, request.getStatusIds(), request.getCampaignIds());
         ReportCampagneDTO ultimaThule = new ReportCampagneDTO();
         ultimaThule.setClickNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getClickNumber()).sum());
         ultimaThule.setClickNumberRigettato(lista.stream().mapToLong(reportDaily -> reportDaily.getClickNumberRigettato()).sum());
@@ -153,8 +153,7 @@ public class ReportBusiness {
         if (ultimaThule.getRevenue() != null && ultimaThule.getRevenue() > 0) {
             Double marginePC = ((ultimaThule.getRevenue().doubleValue() - ultimaThule.getCommission().doubleValue()) / ultimaThule.getRevenue().doubleValue() * 100);
             ultimaThule.setMarginePC(DoubleRounder.round(marginePC, 2));
-        } else
-            ultimaThule.setMarginePC(0d);
+        } else ultimaThule.setMarginePC(0d);
         if (ultimaThule.getImpressionNumber() != null && ultimaThule.getImpressionNumber() > 0) {
             Double ecpm = ultimaThule.getCommission().doubleValue() / ultimaThule.getImpressionNumber().doubleValue() * 1000;
             ultimaThule.setEcpm(DoubleRounder.round(ecpm, 2) + "");
@@ -196,16 +195,11 @@ public class ReportBusiness {
         if (request.getDictionaryIds().size() > 0) {
             dictId = request.getDictionaryIds().get(0);
         }
-        List<ReportDailyDTO> lista = reportRepository.searchReportDaily(
-                request.getDateTimeFrom().atStartOfDay(),
-                request.getDateTimeTo().atTime(23, 59, 59, 99999),
-                request.getStatusId(), null,
-                request.getAffiliateid(), null,
-                request.getCampaignId(),
-                request.getAdvertiserId(),
-                dictId,
-                request.getStatusIds()
-        );
+        if (request.campaignActive != null && request.campaignActive && request.getDateTimeFrom() != null) {
+            List<Long> cids = campaignBusiness.getCampaignsinDateRange(request.getDateTimeFrom(), request.getDateTimeTo()).stream().mapToLong(value -> value.getId()).boxed().collect(Collectors.toList());
+            request.setCampaignIds(cids);
+        }
+        List<ReportDailyDTO> lista = reportRepository.searchReportDaily(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(23, 59, 59, 99999), request.getStatusId(), null, request.getAffiliateid(), null, request.getCampaignId(), request.getAdvertiserId(), dictId, request.getStatusIds(), request.getCampaignIds());
         ReportDailyDTO report = new ReportDailyDTO();
         report.setGiorno("Total : ");
         report.setClickNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getClickNumber()).sum());
@@ -229,8 +223,7 @@ public class ReportBusiness {
         if (report.getRevenue() != null && report.getRevenue() > 0) {
             Double marginePC = ((report.getRevenue().doubleValue() - report.getCommission().doubleValue()) / report.getRevenue().doubleValue() * 100);
             report.setMarginePC(DoubleRounder.round(marginePC, 2));
-        } else
-            report.setMarginePC(0d);
+        } else report.setMarginePC(0d);
         if (report.getImpressionNumber() != null && report.getImpressionNumber() > 0) {
             Double ecpm = report.getCommission().doubleValue() / report.getImpressionNumber().doubleValue() * 1000;
             report.setEcpm(DoubleRounder.round(ecpm, 2) + "");
@@ -272,16 +265,11 @@ public class ReportBusiness {
         if (request.getDictionaryIds().size() > 0) {
             dictId = request.getDictionaryIds().get(0);
         }
-        List<ReportAffiliatesDTO> lista = reportRepository.searchReportAffiliate(
-                request.getDateTimeFrom().atStartOfDay(),
-                request.getDateTimeTo().atTime(23, 59, 59, 99999),
-                request.getStatusId(), null,
-                request.getAffiliateid(), null,
-                request.getCampaignId(),
-                request.getAdvertiserId(),
-                dictId,
-                request.getStatusIds()
-        );
+        if (request.campaignActive != null && request.campaignActive && request.getDateTimeFrom() != null) {
+            List<Long> cids = campaignBusiness.getCampaignsinDateRange(request.getDateTimeFrom(), request.getDateTimeTo()).stream().mapToLong(value -> value.getId()).boxed().collect(Collectors.toList());
+            request.setCampaignIds(cids);
+        }
+        List<ReportAffiliatesDTO> lista = reportRepository.searchReportAffiliate(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(23, 59, 59, 99999), request.getStatusId(), null, request.getAffiliateid(), null, request.getCampaignId(), request.getAdvertiserId(), dictId, request.getStatusIds(), request.getCampaignIds());
         ReportAffiliatesDTO report = new ReportAffiliatesDTO();
         report.setClickNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getClickNumber()).sum());
         report.setClickNumberRigettato(lista.stream().mapToLong(reportDaily -> reportDaily.getClickNumberRigettato()).sum());
@@ -304,8 +292,7 @@ public class ReportBusiness {
         if (report.getRevenue() != null && report.getRevenue() > 0) {
             Double marginePC = ((report.getRevenue().doubleValue() - report.getCommission().doubleValue()) / report.getRevenue().doubleValue() * 100);
             report.setMarginePC(DoubleRounder.round(marginePC, 2));
-        } else
-            report.setMarginePC(0d);
+        } else report.setMarginePC(0d);
         if (report.getImpressionNumber() != null && report.getImpressionNumber() > 0) {
             Double ecpm = report.getCommission().doubleValue() / report.getImpressionNumber().doubleValue() * 1000;
             report.setEcpm(DoubleRounder.round(ecpm, 2) + "");
@@ -347,16 +334,11 @@ public class ReportBusiness {
         if (request.getDictionaryIds().size() > 0) {
             dictId = request.getDictionaryIds().get(0);
         }
-        List<ReportAffiliatesChannelDTO> lista = reportRepository.searchReportAffiliateChannel(
-                request.getDateTimeFrom().atStartOfDay(),
-                request.getDateTimeTo().atTime(23, 59, 59, 99999),
-                request.getStatusId(), null,
-                request.getAffiliateid(), null,
-                request.getCampaignId(),
-                request.getAdvertiserId(),
-                dictId,
-                request.getStatusIds()
-        );
+        if (request.campaignActive != null && request.campaignActive && request.getDateTimeFrom() != null) {
+            List<Long> cids = campaignBusiness.getCampaignsinDateRange(request.getDateTimeFrom(), request.getDateTimeTo()).stream().mapToLong(value -> value.getId()).boxed().collect(Collectors.toList());
+            request.setCampaignIds(cids);
+        }
+        List<ReportAffiliatesChannelDTO> lista = reportRepository.searchReportAffiliateChannel(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(23, 59, 59, 99999), request.getStatusId(), null, request.getAffiliateid(), null, request.getCampaignId(), request.getAdvertiserId(), dictId, request.getStatusIds(), request.getCampaignIds());
         ReportAffiliatesChannelDTO report = new ReportAffiliatesChannelDTO();
         report.setClickNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getClickNumber()).sum());
         report.setClickNumberRigettato(lista.stream().mapToLong(reportDaily -> reportDaily.getClickNumberRigettato()).sum());
@@ -379,8 +361,7 @@ public class ReportBusiness {
         if (report.getRevenue() != null && report.getRevenue() > 0) {
             Double marginePC = ((report.getRevenue().doubleValue() - report.getCommission().doubleValue()) / report.getRevenue().doubleValue() * 100);
             report.setMarginePC(DoubleRounder.round(marginePC, 2));
-        } else
-            report.setMarginePC(0d);
+        } else report.setMarginePC(0d);
         if (report.getImpressionNumber() != null && report.getImpressionNumber() > 0) {
             Double ecpm = report.getCommission().doubleValue() / report.getImpressionNumber().doubleValue() * 1000;
             report.setEcpm(DoubleRounder.round(ecpm, 2) + "");
@@ -415,16 +396,11 @@ public class ReportBusiness {
         if (request.getDictionaryIds().size() > 0) {
             dictId = request.getDictionaryIds().get(0);
         }
-        List<ReportAffiliatesChannelCampaignDTO> lista = reportRepository.searchReportAffiliateChannelCampaign(
-                request.getDateTimeFrom().atStartOfDay(),
-                request.getDateTimeTo().atTime(23, 59, 59, 99999),
-                request.getStatusId(), null,
-                request.getAffiliateid(), null,
-                request.getCampaignId(),
-                request.getAdvertiserId(),
-                dictId,
-                request.getStatusIds()
-        );
+        if (request.campaignActive != null && request.campaignActive && request.getDateTimeFrom() != null) {
+            List<Long> cids = campaignBusiness.getCampaignsinDateRange(request.getDateTimeFrom(), request.getDateTimeTo()).stream().mapToLong(value -> value.getId()).boxed().collect(Collectors.toList());
+            request.setCampaignIds(cids);
+        }
+        List<ReportAffiliatesChannelCampaignDTO> lista = reportRepository.searchReportAffiliateChannelCampaign(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(23, 59, 59, 99999), request.getStatusId(), null, request.getAffiliateid(), null, request.getCampaignId(), request.getAdvertiserId(), dictId, request.getStatusIds(), request.getCampaignIds());
         ReportAffiliatesChannelCampaignDTO report = new ReportAffiliatesChannelCampaignDTO();
         report.setClickNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getClickNumber()).sum());
         report.setClickNumberRigettato(lista.stream().mapToLong(reportDaily -> reportDaily.getClickNumberRigettato()).sum());
@@ -447,8 +423,7 @@ public class ReportBusiness {
         if (report.getRevenue() != null && report.getRevenue() > 0) {
             Double marginePC = ((report.getRevenue().doubleValue() - report.getCommission().doubleValue()) / report.getRevenue().doubleValue() * 100);
             report.setMarginePC(DoubleRounder.round(marginePC, 2));
-        } else
-            report.setMarginePC(0d);
+        } else report.setMarginePC(0d);
         if (report.getImpressionNumber() != null && report.getImpressionNumber() > 0) {
             Double ecpm = report.getCommission().doubleValue() / report.getImpressionNumber().doubleValue() * 1000;
             report.setEcpm(DoubleRounder.round(ecpm, 2) + "");
@@ -539,11 +514,13 @@ public class ReportBusiness {
         private LocalDate dateTimeTo;
         private List<Long> statusIds = new ArrayList<>();
         private List<Long> dictionaryIds = new ArrayList<>();
+        private List<Long> campaignIds = new ArrayList<>();
         private Long affiliateid = null;
         private Long campaignId = null;
         private Long advertiserId = null;
         private Long statusId;
         private Long channelId;
+        private Boolean campaignActive;
     }
 
 }

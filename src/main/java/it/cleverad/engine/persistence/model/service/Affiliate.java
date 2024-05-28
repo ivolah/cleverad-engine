@@ -55,6 +55,11 @@ public class Affiliate {
     @Column(name = "last_name")
     private String lastName;
 
+    @Column(name = "global_pixel")
+    private String globalPixel;
+    @Column(name = "global_pixel_value")
+    private String globalPixelValue;
+
     @ManyToOne
     @JoinColumn(name = "companytype_id")
     private Dictionary dictionaryCompanyType;

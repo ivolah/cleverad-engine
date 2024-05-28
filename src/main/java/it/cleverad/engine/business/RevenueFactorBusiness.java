@@ -227,6 +227,7 @@ public class RevenueFactorBusiness {
         private Long campaignId;
         private Long dictionaryId;
         private String action;
+        private Double sale;
     }
 
     @Data
@@ -262,6 +263,7 @@ public class RevenueFactorBusiness {
         private LocalDate disableDueDateTo;
 
         private String action;
+        private Double sale;
     }
 
 }

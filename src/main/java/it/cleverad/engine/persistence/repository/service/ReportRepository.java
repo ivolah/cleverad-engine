@@ -22,7 +22,9 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
                                            @Param("campaignId") Long campaignId,
                                            @Param("advertiserId") Long advertiserId,
                                            @Param("dictionaryId") Long inDictionaryId,
-                                           @Param("inStausId") List<Long> inStausId);
+                                           @Param("inStausId") List<Long> inStausId,
+                                           @Param("inCampaignId") List<Long> inCampaignId
+    );
 
     @Query(nativeQuery = true)
     List<ReportCampagneDTO> searchReportCampaign(@Param("dateFrom") LocalDateTime dateFrom,
@@ -34,7 +36,8 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
                                                  @Param("campaignId") Long campaignId,
                                                  @Param("advertiserId") Long advertiserId,
                                                  @Param("dictionaryId") Long inDictionaryId,
-                                                 @Param("inStausId") List<Long> inStausId);
+                                                 @Param("inStausId") List<Long> inStausId,
+                                                 @Param("inCampaignId") List<Long> inCampaignId);
 
     @Query(nativeQuery = true)
     List<ReportAffiliatesDTO> searchReportAffiliate(@Param("dateFrom") LocalDateTime dateFrom,
@@ -46,7 +49,8 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
                                                     @Param("campaignId") Long campaignId,
                                                     @Param("advertiserId") Long advertiserId,
                                                     @Param("dictionaryId") Long inDictionaryId,
-                                                    @Param("inStausId") List<Long> inStausId);
+                                                    @Param("inStausId") List<Long> inStausId,
+                                                    @Param("inCampaignId") List<Long> inCampaignId);
 
     @Query(nativeQuery = true)
     List<ReportAffiliatesChannelDTO> searchReportAffiliateChannel(@Param("dateFrom") LocalDateTime dateFrom,
@@ -58,7 +62,8 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
                                                                   @Param("campaignId") Long campaignId,
                                                                   @Param("advertiserId") Long advertiserId,
                                                                   @Param("dictionaryId") Long inDictionaryId,
-                                                                  @Param("inStausId") List<Long> inStausId);
+                                                                  @Param("inStausId") List<Long> inStausId,
+                                                                  @Param("inCampaignId") List<Long> inCampaignId);
 
     @Query(nativeQuery = true)
     List<ReportAffiliatesChannelCampaignDTO> searchReportAffiliateChannelCampaign(@Param("dateFrom") LocalDateTime dateFrom,
@@ -70,7 +75,8 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
                                                                                   @Param("campaignId") Long campaignId,
                                                                                   @Param("advertiserId") Long advertiserId,
                                                                                   @Param("dictionaryId") Long inDictionaryId,
-                                                                                  @Param("inStausId") List<Long> inStausId);
+                                                                                  @Param("inStausId") List<Long> inStausId,
+                                                                                  @Param("inCampaignId") List<Long> inCampaignId);
 
     //=========================================================================================================================
     //=========================================================================================================================

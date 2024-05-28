@@ -41,5 +41,6 @@ public class RevenueFactor {
     private Dictionary dictionary;
 
     private String action;
+    private Double sale;
 
 }

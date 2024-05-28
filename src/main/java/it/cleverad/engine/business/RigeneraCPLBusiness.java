@@ -95,17 +95,13 @@ public class RigeneraCPLBusiness {
             log.info(">>> TOT :: " + ls.getTotalElements());
             for (QueryTransaction tcpl : ls) {
                 log.trace("CANCELLO PER RIGENERA CP :: {} : {} :: {}", tcpl.getid(), tcpl.getValue(), tcpl.getDateTime());
-
-                // aggiorno budget affiliato schedualto
-                // aggiorno wallet in modo schedulato
-                // aggiorno campaign buget in modo schedualto
-
                 transactionCPLBusiness.delete(tcpl.getid());
                 Thread.sleep(50L);
             }
 
             for (int gg = start; gg <= end; gg++) {
-                cplBusiness.getAllDay(anno, mese, gg, affiliateId).stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
+                log.trace("RIGENERO GIORNO {}-{}-{}", anno, mese, gg);
+                cplBusiness.getAllDay(anno, mese, gg, affiliateId, camapignId).stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
 
                     // leggo sempre i cpc precedenti per trovare il click riferito alla lead
                     cpcBusiness.findByIp24HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal()).stream().filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal())).forEach(cpcDTO -> {
@@ -247,7 +243,7 @@ public class RigeneraCPLBusiness {
 
                             // creo la transazione
                             TransactionCPLDTO cpl = transactionCPLBusiness.createCpl(transaction);
-                            log.trace(">>>RIGENERATO LEAD :::: {} ", cpl.getId());
+                            log.info(">>>RIGENERATO LEAD :::: {} ", cpl.getId());
 
                             // setto a gestito
                             cplBusiness.setRead(cplDTO.getId());
@@ -271,7 +267,7 @@ public class RigeneraCPLBusiness {
                                             keyValueMap.put("transaction_id", data);
                                             keyValueMap.put("transactionid", data);
                                             followThrough = referralService.replacePlaceholders(followThrough, keyValueMap);
-                                            log.info("RCPLB FT :: " + followThrough);
+                                            log.trace("RCPLB FT :: " + followThrough);
                                             try {
                                                 URL url = new URL(followThrough);
                                                 HttpURLConnection con = (HttpURLConnection) url.openConnection();

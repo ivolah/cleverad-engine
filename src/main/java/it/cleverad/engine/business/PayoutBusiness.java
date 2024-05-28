@@ -191,6 +191,9 @@ public class PayoutBusiness {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         if (id != null) request.setAffiliateId(id);
+        if (request.getDictionaryId() == null) {
+            request.setDictionaryIdNotConcluso(true);
+        }
         Page<Payout> page = repository.findAll(getSpecification(request), pageable);
         return page.map(PayoutDTO::fromNoTransazioni);
     }

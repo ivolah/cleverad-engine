@@ -67,8 +67,9 @@ import javax.persistence.*;
                 "                 AND ((:channelId) IS NULL OR (t.channel_id = CAST(:channelId as bigint)))  " +
                 "                 AND ((:campaignId) IS NULL OR (t.campaign_id = CAST(:campaignId as bigint)))  " +
                 "                 AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint)))  " +
-                "                  AND ((:dictionaryId)  IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint)))  " +
+                "                 AND ((:dictionaryId)  IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint)))  " +
                 "                 AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId)))  " +
+                "                 AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
                 "               UNION  " +
                 "               SELECT row_number() OVER ()                                                     AS rn,  " +
                 "                      CAST('CPC' AS text)                                                      AS tipo,  " +
@@ -128,8 +129,9 @@ import javax.persistence.*;
                 "                 AND ((:channelId) IS NULL OR (t.channel_id = CAST(:channelId as bigint)))  " +
                 "                 AND ((:campaignId) IS NULL OR (t.campaign_id = CAST(:campaignId as bigint)))  " +
                 "                 AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint)))  " +
-                "                  AND ((:dictionaryId)  IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint)))  " +
+                "                 AND ((:dictionaryId)  IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint)))  " +
                 "                 AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId)))  " +
+                "                 AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
                 "               UNION  " +
                 "               SELECT row_number() OVER ()                                                    AS rn,  " +
                 "                      CAST('CPL' AS text)                                                     AS tipo,  " +
@@ -189,8 +191,9 @@ import javax.persistence.*;
                 "                 AND ((:channelId) IS NULL OR (t.channel_id = CAST(:channelId as bigint)))  " +
                 "                 AND ((:campaignId) IS NULL OR (t.campaign_id = CAST(:campaignId as bigint)))  " +
                 "                 AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint)))  " +
-                "                  AND ((:dictionaryId)  IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint)))  " +
+                "                 AND ((:dictionaryId)  IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint)))  " +
                 "                 AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId)))  " +
+                "                 AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
                 "               UNION  " +
                 "               SELECT row_number() OVER ()                                                    AS rn,  " +
                 "                      CAST('CPL' AS text)                                                     AS tipo,  " +
@@ -250,8 +253,9 @@ import javax.persistence.*;
                 "                 AND ((:channelId) IS NULL OR (t.channel_id = CAST(:channelId as bigint)))  " +
                 "                 AND ((:campaignId) IS NULL OR (t.campaign_id = CAST(:campaignId as bigint)))  " +
                 "                 AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint)))  " +
-                "                  AND ((:dictionaryId)  IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint)))  " +
+                "                 AND ((:dictionaryId)  IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint)))  " +
                 "                 AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId)))  " +
+                "                 AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
                 "               UNION  " +
                 "               SELECT row_number() OVER ()                                                          AS rn,  " +
                 "                      CAST('CPM' AS text)                                                           AS tipo,  " +
@@ -310,7 +314,9 @@ import javax.persistence.*;
                 "                 AND ((:campaignId) IS NULL OR (t.campaign_id = CAST(:campaignId as bigint)))  " +
                 "                 AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint)))  " +
                 "                 AND ((:dictionaryId)  IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint)))  " +
-                "                 AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))))  " +
+                "                 AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId)))  " +
+                "                 AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
+                "                 ) " +
                 "SELECT trans.datetime                                                                                            as giorno,  " +
                 "       COALESCE(SUM(trans.impressionnumber), 0)                                                                  as impressionNumber,  " +
                 "       COALESCE(SUM(trans.clicknumber), 0)                                                                       as clickNumber,  " +
@@ -416,6 +422,7 @@ import javax.persistence.*;
                 "                       AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
                 "                       AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
                 "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
+                "                       AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
                 "                     UNION " +
                 "                     SELECT row_number() OVER ()                                                     AS rn, " +
                 "                            CAST('CPC' AS text)                                                      AS tipo, " +
@@ -477,6 +484,7 @@ import javax.persistence.*;
                 "                       AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
                 "                       AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
                 "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
+                "                       AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
                 "                     UNION " +
                 "                     SELECT row_number() OVER ()                                                    AS rn, " +
                 "                            CAST('CPL' AS text)                                                     AS tipo, " +
@@ -538,6 +546,7 @@ import javax.persistence.*;
                 "                       AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
                 "                       AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
                 "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
+                "                       AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
                 "                     UNION " +
                 "                     SELECT row_number() OVER ()                                                    AS rn, " +
                 "                            CAST('CPL' AS text)                                                     AS tipo, " +
@@ -599,6 +608,7 @@ import javax.persistence.*;
                 "                       AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
                 "                       AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
                 "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
+                "                       AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
                 "                     UNION " +
                 "                     SELECT row_number() OVER ()                                                          AS rn, " +
                 "                            CAST('CPM' AS text)                                                           AS tipo, " +
@@ -657,7 +667,9 @@ import javax.persistence.*;
                 "                       AND ((:campaignId) IS NULL OR (t.campaign_id = CAST(:campaignId as bigint))) " +
                 "                       AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
                 "                       AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
-                "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId)))) " +
+                "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId)))" +
+                "                       AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
+                ") " +
                 "SELECT transazioni.campaignid                                                                                                as campaignid, " +
                 "       transazioni.campaignname                                                                                              as campaignname, " +
                 "       COALESCE(SUM(transazioni.impressionnumber), 0)                                                                        as impressionNumber, " +
@@ -774,6 +786,7 @@ import javax.persistence.*;
                 "                       AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
                 "                       AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
                 "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
+                "                       AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
                 "                     UNION " +
                 "                     SELECT row_number() OVER ()                                                     AS rn, " +
                 "                            CAST('CPC' AS text)                                                      AS tipo, " +
@@ -835,6 +848,7 @@ import javax.persistence.*;
                 "                       AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
                 "                       AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
                 "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
+                "                       AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
                 "                     UNION " +
                 "                     SELECT row_number() OVER ()                                                    AS rn, " +
                 "                            CAST('CPL' AS text)                                                     AS tipo, " +
@@ -896,6 +910,7 @@ import javax.persistence.*;
                 "                       AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
                 "                       AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
                 "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
+                "                       AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
                 "                     UNION " +
                 "                     SELECT row_number() OVER ()                                                    AS rn, " +
                 "                            CAST('CPL' AS text)                                                     AS tipo, " +
@@ -957,6 +972,7 @@ import javax.persistence.*;
                 "                       AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
                 "                       AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
                 "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
+                "                       AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
                 "                     UNION " +
                 "                     SELECT row_number() OVER ()                                                          AS rn, " +
                 "                            CAST('CPM' AS text)                                                           AS tipo, " +
@@ -1015,7 +1031,9 @@ import javax.persistence.*;
                 "                       AND ((:campaignId) IS NULL OR (t.campaign_id = CAST(:campaignId as bigint))) " +
                 "                       AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
                 "                       AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
-                "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId)))) " +
+                "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId)))" +
+                "                       AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
+                ") " +
                 "SELECT transazioni.affiliateid                                                                                               as affiliateid, " +
                 "       transazioni.affiliatename                                                                                             as affiliatename, " +
                 "       COALESCE(SUM(transazioni.impressionnumber), 0)                                                                        as impressionNumber, " +
@@ -1126,6 +1144,7 @@ import javax.persistence.*;
                 "                       AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
                 "                       AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
                 "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
+                "                       AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
                 "                     UNION " +
                 "                     SELECT row_number() OVER ()                                                     AS rn, " +
                 "                            CAST('CPC' AS text)                                                      AS tipo, " +
@@ -1187,6 +1206,7 @@ import javax.persistence.*;
                 "                       AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
                 "                       AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
                 "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
+                "                       AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
                 "                     UNION " +
                 "                     SELECT row_number() OVER ()                                                    AS rn, " +
                 "                            CAST('CPL' AS text)                                                     AS tipo, " +
@@ -1248,6 +1268,7 @@ import javax.persistence.*;
                 "                       AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
                 "                       AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
                 "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
+                "                       AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
                 "                     UNION " +
                 "                     SELECT row_number() OVER ()                                                    AS rn, " +
                 "                            CAST('CPL' AS text)                                                     AS tipo, " +
@@ -1309,6 +1330,7 @@ import javax.persistence.*;
                 "                       AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
                 "                       AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
                 "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
+                "                       AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
                 "                     UNION " +
                 "                     SELECT row_number() OVER ()                                                          AS rn, " +
                 "                            CAST('CPM' AS text)                                                           AS tipo, " +
@@ -1367,7 +1389,9 @@ import javax.persistence.*;
                 "                       AND ((:campaignId) IS NULL OR (t.campaign_id = CAST(:campaignId as bigint))) " +
                 "                       AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
                 "                       AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
-                "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId)))) " +
+                "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId)))" +
+                "                       AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
+                ") " +
                 "SELECT transazioni.affiliateid                                                                                               as affiliateid, " +
                 "       transazioni.affiliatename                                                                                             as affiliatename, " +
                 "       transazioni.channelid                                                                                                 as channelid, " +
@@ -1482,6 +1506,7 @@ import javax.persistence.*;
                 "                       AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
                 "                       AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
                 "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
+                "                       AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
                 "                     UNION " +
                 "                     SELECT row_number() OVER ()                                                     AS rn, " +
                 "                            CAST('CPC' AS text)                                                      AS tipo, " +
@@ -1543,6 +1568,7 @@ import javax.persistence.*;
                 "                       AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
                 "                       AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
                 "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
+                "                       AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
                 "                     UNION " +
                 "                     SELECT row_number() OVER ()                                                    AS rn, " +
                 "                            CAST('CPL' AS text)                                                     AS tipo, " +
@@ -1604,6 +1630,7 @@ import javax.persistence.*;
                 "                       AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
                 "                       AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
                 "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
+                "                       AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
                 "                     UNION " +
                 "                     SELECT row_number() OVER ()                                                    AS rn, " +
                 "                            CAST('CPL' AS text)                                                     AS tipo, " +
@@ -1665,6 +1692,7 @@ import javax.persistence.*;
                 "                       AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
                 "                       AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
                 "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId))) " +
+                "                       AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
                 "                     UNION " +
                 "                     SELECT row_number() OVER ()                                                          AS rn, " +
                 "                            CAST('CPM' AS text)                                                           AS tipo, " +
@@ -1723,7 +1751,9 @@ import javax.persistence.*;
                 "                       AND ((:campaignId) IS NULL OR (t.campaign_id = CAST(:campaignId as bigint))) " +
                 "                       AND ((:advertiserId) IS NULL OR (tc.advertiser_id = CAST(:advertiserId as bigint))) " +
                 "                       AND ((:dictionaryId) IS NULL OR (t.dictionary_id = CAST(:dictionaryId as bigint))) " +
-                "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId)))) " +
+                "                       AND (CAST((:inStausId) as bigint[]) IS NULL OR (t.status_id in (:inStausId)))" +
+                "                       AND ((:inCampaignId)  IS NULL OR (t.campaign_id in (:inCampaignId))) " +
+                ") " +
                 "SELECT transazioni.affiliateid                                                                                               as affiliateid, " +
                 "       transazioni.affiliatename                                                                                             as affiliatename, " +
                 "       transazioni.channelid                                                                                                 as channelid, " +
