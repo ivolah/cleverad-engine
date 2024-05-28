@@ -45,6 +45,8 @@ public class ManageCPL {
     @Autowired
     private CampaignBusiness campaignBusiness;
     @Autowired
+    private AffiliateBusiness affiliateBusiness;
+    @Autowired
     private CampaignAffiliateBusiness campaignAffiliateBusiness;
     @Autowired
     private RevenueFactorBusiness revenueFactorBusiness;
@@ -154,8 +156,8 @@ public class ManageCPL {
                     // check Action ID
                     boolean checkAction = false;
                     if (StringUtils.isNotBlank(cplDTO.getActionId()) && (cplDTO.getActionId().equals("0"))) {
-                            log.info(">>>>>>>>>> TROVATO ACTION : {}", cplDTO.getActionId());
-                            checkAction = true;
+                        log.info(">>>>>>>>>> TROVATO ACTION : {}", cplDTO.getActionId());
+                        checkAction = true;
 
                     }
 
@@ -255,11 +257,20 @@ public class ManageCPL {
                         if (transaction.getManualDate() == null) {
                             List<CampaignAffiliateDTO> campaignAffiliateDTOS = campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(refferal.getAffiliateId(), refferal.getCampaignId()).toList();
                             campaignAffiliateDTOS.stream().forEach(campaignAffiliateDTO -> {
-                                String followThrough = campaignAffiliateDTO.getFollowThrough();
+                                // cerco global
+                                String globalPixel = affiliateBusiness.getGlobalPixel(affiliateID);
+                                // cerco folow through
+                                String followT = campaignAffiliateDTO.getFollowThrough();
                                 String info = cplDTO.getInfo();
                                 String data = cplDTO.getData();
-                                log.info("POST BACK ::: " + followThrough + " :: " + info + " :: " + data);
-                                if (StringUtils.isNotBlank(followThrough)) {
+                                String url = "";
+                                log.info("POST BACK ::: " + followT + " :: " + globalPixel + " :: " + info + " :: " + data);
+                                if (StringUtils.isNotBlank(globalPixel)) {
+                                    url = globalPixel ;
+                                } else if (StringUtils.isNotBlank(followT)) {
+                                    url = followT;
+                                }
+                                if (StringUtils.isNotBlank(url)) {
                                     // trovo tutte le chiavi
                                     Map<String, String> keyValueMap = referralService.estrazioneInfo(info);
                                     // aggiungo order_id / transaction_id
@@ -267,14 +278,14 @@ public class ManageCPL {
                                     keyValueMap.put("order_id", data);
                                     keyValueMap.put("transaction_id", data);
                                     keyValueMap.put("transactionid", data);
-                                    followThrough = referralService.replacePlaceholders(followThrough, keyValueMap);
-                                    log.info("FT :: " + followThrough);
+                                    url = referralService.replacePlaceholders(url, keyValueMap);
+                                    log.info("URL :: " + url);
                                     try {
-                                        URL url = new URL(followThrough);
-                                        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                                        URL urlGet = new URL(url);
+                                        HttpURLConnection con = (HttpURLConnection) urlGet.openConnection();
                                         con.setRequestMethod("GET");
                                         con.getInputStream();
-                                        log.info("Chiamo PB  :: " + con.getResponseCode() + " :: " + followThrough);
+                                        log.info("Chiamo PB  :: " + con.getResponseCode() + " :: " + url);
                                     } catch (Exception e) {
                                         log.error("Eccezione chianata Post Back", e);
                                         throw new RuntimeException(e);

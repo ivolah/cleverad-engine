@@ -171,6 +171,16 @@ public class AffiliateBusiness {
         return dictionaryBusiness.getChannelTypeAffiliate();
     }
 
+    public String getGlobalPixel(Long id) {
+        Affiliate affiliate = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Affiliate", id));
+        return  affiliate.getGlobalPixel();
+    }
+
+    public String getGlobalPixelValue(Long id) {
+        Affiliate affiliate = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Affiliate", id));
+        return affiliate.getGlobalPixelValue();
+    }
+
     public List<String> listEmails(Long affiliateId) {
         List<String> lista = new ArrayList<>();
         Affiliate affiliate = repository.findById(affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", affiliateId));

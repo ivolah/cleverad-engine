@@ -66,6 +66,8 @@ public class RigeneraCPLBusiness {
     private CampaignBudgetBusiness campaignBudgetBusiness;
     @Autowired
     private CampaignAffiliateBusiness campaignAffiliateBusiness;
+    @Autowired
+    private AffiliateBusiness affiliateBusiness;
 
     public void rigenera(Integer anno, Integer mese, Integer giorno, Long affiliateId, Long camapignId) {
         try {
@@ -254,11 +256,20 @@ public class RigeneraCPLBusiness {
                                 if (transaction.getManualDate() == null) {
                                     List<CampaignAffiliateDTO> campaignAffiliateDTOS = campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(refferal.getAffiliateId(), refferal.getCampaignId()).toList();
                                     campaignAffiliateDTOS.forEach(campaignAffiliateDTO -> {
-                                        String followThrough = campaignAffiliateDTO.getFollowThrough();
+                                        // cerco global
+                                        String globalPixel = affiliateBusiness.getGlobalPixel(affiliateID);
+                                        // cerco folow through
+                                        String followT = campaignAffiliateDTO.getFollowThrough();
                                         String info = cplDTO.getInfo();
                                         String data = cplDTO.getData();
-                                        log.info("RCPLB POST BACK ::: " + followThrough + " :: " + info + " :: " + data);
-                                        if (StringUtils.isNotBlank(followThrough)) {
+                                        String url = "";
+                                        log.info("RCPLB POST BACK ::: " + followT + " :: " + globalPixel + " :: " + info + " :: " + data);
+                                        if (StringUtils.isNotBlank(globalPixel)) {
+                                            url = globalPixel ;
+                                        } else if (StringUtils.isNotBlank(followT)) {
+                                            url = followT;
+                                        }
+                                        if (StringUtils.isNotBlank(url)) {
                                             // trovo tutte le chiavi
                                             Map<String, String> keyValueMap = referralService.estrazioneInfo(info);
                                             // aggiungo order_id / transaction_id
@@ -266,14 +277,14 @@ public class RigeneraCPLBusiness {
                                             keyValueMap.put("order_id", data);
                                             keyValueMap.put("transaction_id", data);
                                             keyValueMap.put("transactionid", data);
-                                            followThrough = referralService.replacePlaceholders(followThrough, keyValueMap);
-                                            log.trace("RCPLB FT :: " + followThrough);
+                                            url = referralService.replacePlaceholders(url, keyValueMap);
+                                            log.trace("RCPLB URL :: " + url);
                                             try {
-                                                URL url = new URL(followThrough);
-                                                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                                                URL urlGet = new URL(url);
+                                                HttpURLConnection con = (HttpURLConnection) urlGet.openConnection();
                                                 con.setRequestMethod("GET");
                                                 con.getInputStream();
-                                                log.info("RCPLB Chiamo PB  :: " + con.getResponseCode() + " :: " + followThrough);
+                                                log.info("RCPLB Chiamo PB  :: " + con.getResponseCode() + " :: " + url);
                                             } catch (Exception e) {
                                                 log.error("RCPLB Eccezione chianata Post Back", e);
                                             }
