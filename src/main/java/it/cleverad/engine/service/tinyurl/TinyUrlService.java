@@ -11,7 +11,7 @@ import java.io.IOException;
 @Slf4j
 public class TinyUrlService {
 
-    public TinyData createShort(String alias, String longUrl) {
+    public TinyData createShort(String alias, String longUrl){
         OkHttpClient client = new OkHttpClient().newBuilder().build();
         MediaType mediaType = MediaType.parse("application/json");
         String content = "{" +
@@ -30,7 +30,7 @@ public class TinyUrlService {
         return new Gson().fromJson(getRequestBody(client, request), TinyData.class);
     }
 
-    private String getRequestBody(OkHttpClient client, Request request) throws IOException {
+    private String getRequestBody(OkHttpClient client, Request request) {
         String respBody = null;
         String code = null;
         try {
@@ -47,7 +47,7 @@ public class TinyUrlService {
             }
         } catch (IOException e) {
             log.error(" getRequestBody :: " + code + " - " + respBody, e);
-            throw new IOException();
+            return null;
         }
     }
 }

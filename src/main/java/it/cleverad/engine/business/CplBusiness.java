@@ -167,12 +167,13 @@ public class CplBusiness {
         return page.map(CplDTO::from);
     }
 
-    public Page<CplDTO> getAllDay(Integer anno, Integer mese, Integer giorno, Long affilaiteId) {
+    public Page<CplDTO> getAllDay(Integer anno, Integer mese, Integer giorno, Long affilaiteId, Long campaginId) {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setDateFrom(LocalDate.of(anno, mese, giorno));
         request.setDateTo(LocalDate.of(anno, mese, giorno));
         if (affilaiteId != null) request.setAffiliateid(affilaiteId);
+        if (campaginId != null) request.setCampaignid(campaginId);
         Page<Cpl> page = repository.findAll(getSpecification(request), pageable);
         return page.map(CplDTO::from);
     }

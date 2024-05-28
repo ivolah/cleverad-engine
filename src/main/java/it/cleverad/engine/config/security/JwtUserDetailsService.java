@@ -71,24 +71,28 @@ public class JwtUserDetailsService implements UserDetailsService {
         }
     }
 
+    public Long getAffilaite() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userBusiness.findByUsername(username).getAffiliateId();
+    }
+
     public Boolean isAdmin() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return username.equals("anonymousUser") || userBusiness.findByUsername(username).getRoleId() == 3;
+        if (username != null)
+            return username.equals("anonymousUser") || userBusiness.findByUsername(username).getRoleId() == 3;
+        else return false;
     }
 
     public Boolean isAdvertiser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userBusiness.findByUsername(username).getRoleId() == 555;
+        if (username != null) return userBusiness.findByUsername(username).getRoleId() == 555;
+        else return false;
     }
 
     public Boolean isAffiliate() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userBusiness.findByUsername(username).getRoleId() == 4;
-    }
-
-    public Long getAffilaite() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userBusiness.findByUsername(username).getAffiliateId();
+        if (username != null) return userBusiness.findByUsername(username).getRoleId() == 4;
+        else return false;
     }
 
 }

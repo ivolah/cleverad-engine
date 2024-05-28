@@ -28,6 +28,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.Column;
 import javax.persistence.criteria.Predicate;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -399,6 +400,9 @@ public class AffiliateBusiness {
 
         private Long termId;
         private Long vatId;
+
+        private String globalPixel;
+        private String globalPixelValue;
     }
 
     @Data
@@ -439,6 +443,9 @@ public class AffiliateBusiness {
         private Boolean brandbuddies;
         private Long termId;
         private Long vatId;
+
+        private String globalPixel;
+        private String globalPixelValue;
     }
 
 }

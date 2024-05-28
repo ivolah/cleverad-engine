@@ -391,6 +391,14 @@ public class CampaignBusiness {
         return page.map(CampaignDTO::from).toList();
     }
 
+    public List<CampaignDTO> getCampaignsinDateRange(LocalDate from, LocalDate to) {
+        Filter request = new Filter();
+        request.setStartDateTo(from);
+        request.setEndDateTo(to);
+        Page<Campaign> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id"))));
+        return page.map(CampaignDTO::from).toList();
+    }
+
     public Page<CampaignBrandBuddiesDTO> getCampaignsActiveBrandBuddies(Filter req, Pageable pageable) {
 
         List<Long> listaId = affiliateChannelCommissionCampaignBusiness.searchByCampaignIdAffiliateBrandBuddies(Pageable.ofSize(Integer.MAX_VALUE)).stream().map(AffiliateChannelCommissionCampaignDTO::getCampaignId).distinct().collect(Collectors.toList());
@@ -522,6 +530,7 @@ public class CampaignBusiness {
             if (request.getAdvertiserId() != null) {
                 predicates.add(cb.equal(root.get("advertiser").get("id"), request.getAdvertiserId()));
             }
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
