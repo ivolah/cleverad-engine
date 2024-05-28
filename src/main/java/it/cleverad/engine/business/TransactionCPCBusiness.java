@@ -13,6 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.decimal4j.util.DoubleRounder;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -72,7 +73,7 @@ public class TransactionCPCBusiness {
     public TransactionCPCDTO createCpc(BaseCreateRequest request) {
         TransactionCPC newCpcTransaction = mapper.map(request, TransactionCPC.class);
 
-        newCpcTransaction.setInitialValue(request.getValue());
+        newCpcTransaction.setInitialValue(DoubleRounder.round(request.getValue(), 2));
         newCpcTransaction.setPayoutPresent(false);
         newCpcTransaction.setApproved(true);
 
@@ -81,7 +82,7 @@ public class TransactionCPCBusiness {
             request.setDictionaryId(68L);
             request.setStatusId(73L);
             BigDecimal dd = BigDecimal.valueOf(request.getValue() * request.getClickNumber());
-            newCpcTransaction.setInitialValue(dd.doubleValue());
+            newCpcTransaction.setInitialValue(DoubleRounder.round(dd.doubleValue(), 2));
             newCpcTransaction.setValue(dd.doubleValue());
         }
 

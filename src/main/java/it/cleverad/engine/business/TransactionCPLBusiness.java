@@ -16,6 +16,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.decimal4j.util.DoubleRounder;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -77,7 +78,7 @@ public class TransactionCPLBusiness {
         newCplTransaction.setPayoutPresent(false);
         newCplTransaction.setApproved(true);
         newCplTransaction.setPhoneVerified(false);
-        newCplTransaction.setInitialValue(request.getValue());
+        newCplTransaction.setInitialValue(DoubleRounder.round(request.getValue(), 2));
 
         if (request.getManualDate() != null) {
             newCplTransaction.setDateTime(request.getManualDate().atStartOfDay());
