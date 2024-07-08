@@ -202,6 +202,11 @@ public class TransactionCPLBusiness {
         return TransactionCPLDTO.from(transaction);
     }
 
+    // GET BY ID CPL
+    public long countByCpcId(Long id) {
+        return cplRepository.countByCpcId(id);
+    }
+
     /**
      * == DELETE =========================================================================================================
      **/

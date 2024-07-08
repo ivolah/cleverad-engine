@@ -2,7 +2,9 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.config.model.Refferal;
+import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.tracking.Tracking;
+import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.tracking.TrackingRepository;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
@@ -14,6 +16,7 @@ import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,13 +37,12 @@ import java.util.List;
 @Component
 @Transactional
 public class TrackingBusiness {
-
+    @Autowired
+    private CampaignRepository campaignRepository;
     @Autowired
     private TrackingRepository repository;
-
     @Autowired
     private Mapper mapper;
-
     @Autowired
     private MediaBusiness mediaBusiness;
     @Autowired
@@ -60,11 +62,14 @@ public class TrackingBusiness {
     public TargetDTO getTarget(BaseCreateRequest request) {
         TargetDTO targetDTO = new TargetDTO();
         Refferal refferal = referralService.decodificaReferral(request.getRefferalId());
+        //log.info("REQ: " + refferal);
 
         if (refferal != null && refferal.getMediaId() != null) {
+
             MediaDTO mediaDTO = null;
             if (mediaBusiness.findById(refferal.getMediaId()) != null) {
                 mediaDTO = mediaBusiness.findById(refferal.getMediaId());
+                //log.info(">>>>>>>> " + mediaDTO.getTarget() + " ------ " + refferal.getMediaId());
                 targetDTO.setTarget(mediaDTO.getTarget());
             }
 
@@ -80,29 +85,48 @@ public class TrackingBusiness {
             }
         }
 
-        if (refferal != null && refferal.getAffiliateId() != null && refferal.getCampaignId() != null) {
-            campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(refferal.getAffiliateId(), refferal.getCampaignId()).stream().findFirst().ifPresent(campaignAffiliateDTO -> targetDTO.setFollowThorugh(campaignAffiliateDTO.getFollowThrough()));
+        //log.info("TT " + targetDTO.getTarget());
 
-            // CHECK BLOCKED
-            if (refferal.getChannelId() != null) {
+        if (refferal != null && refferal.getCampaignId() != null) {
 
-                AffiliateChannelCommissionCampaignBusiness.Filter filter = new AffiliateChannelCommissionCampaignBusiness.Filter();
-                filter.setAffiliateId(refferal.getAffiliateId());
-                filter.setChannelId(refferal.getChannelId());
-                filter.setCampaignId(refferal.getCampaignId());
-                filter.setBlocked(true);
-                Page<AffiliateChannelCommissionCampaignDTO> dtos = affiliateChannelCommissionCampaignBusiness.search(filter, Pageable.ofSize(Integer.MAX_VALUE));
-                if (dtos.getTotalElements() > 1) {
-                    log.warn(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> {} per referral {}",dtos.getTotalElements(), refferal);
-                }
-                if (dtos.getTotalElements() == 1) {
-                    log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> BLOCKED {}", dtos.stream().findFirst().get().getId());
-                    targetDTO.setTarget("https://www.cleverad.it/");
+            if (refferal.getAffiliateId() != null) {
+                campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(refferal.getAffiliateId(), refferal.getCampaignId()).stream().findFirst().ifPresent(campaignAffiliateDTO -> targetDTO.setFollowThorugh(campaignAffiliateDTO.getFollowThrough()));
+                // CHECK BLOCKED
+                if (refferal.getChannelId() != null) {
+
+                    AffiliateChannelCommissionCampaignBusiness.Filter filter = new AffiliateChannelCommissionCampaignBusiness.Filter();
+                    filter.setAffiliateId(refferal.getAffiliateId());
+                    filter.setChannelId(refferal.getChannelId());
+                    filter.setCampaignId(refferal.getCampaignId());
+                    filter.setBlocked(true);
+                    Page<AffiliateChannelCommissionCampaignDTO> dtos = affiliateChannelCommissionCampaignBusiness.search(filter, Pageable.ofSize(Integer.MAX_VALUE));
+                    if (dtos.getTotalElements() > 1) {
+                        log.warn(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> {} per referral {}", dtos.getTotalElements(), refferal);
+                    }
+                    if (dtos.getTotalElements() == 1) {
+                        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> BLOCKED {}", dtos.stream().findFirst().get().getId());
+                        targetDTO.setTarget("https://www.cleverad.it/");
+                    }
                 }
             }
-        }
 
-        //VERIFICA SE OVER CAP PER AFFILIATO
+            // GESTIONE CAMPAGNA SOSPESA
+            Campaign campaign = campaignRepository.findById(refferal.getCampaignId()).orElse(null);
+            if (campaign == null) {
+                // null
+            } else if (campaign.getSuspended() == null) {
+                //null
+            } else if (campaign.getSuspended()) {
+                log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> CAMPAGNA SOSPESA {}", refferal.getCampaignId());
+                targetDTO.setTarget("https://www.cleverad.it/");
+                targetDTO.setFollowThorugh("https://www.cleverad.it/");
+            }
+
+            //TODO VERIFICA SE OVER CAP PER AFFILIATO O PER CAMPAGNA
+
+            //TODO VERIFICA SE OVERBUDGET X AFFILIATO O PER CAMPAGNA
+
+        }// refferal not null
 
         return targetDTO;
     }
@@ -194,6 +218,7 @@ public class TrackingBusiness {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @ToString
     public static class BaseCreateRequest {
         private String refferalId;
         private String ip;

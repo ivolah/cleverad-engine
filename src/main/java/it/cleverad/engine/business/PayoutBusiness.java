@@ -65,11 +65,13 @@ public class PayoutBusiness {
         log.info("TOT elementi: " + results.getTotalElements());
         List<Long> cpcs = results.stream().filter(x -> x.getTipo().equals("CPC")).map(x -> x.getid()).collect(Collectors.toList());
         List<Long> cpls = results.stream().filter(x -> x.getTipo().equals("CPL")).map(x -> x.getid()).collect(Collectors.toList());
-        log.info("CPC: {} ----- CPL: {}", cpcs.size(), cpls.size());
+        List<Long> cpss = results.stream().filter(x -> x.getTipo().equals("CPS")).map(x -> x.getid()).collect(Collectors.toList());
+        log.info("CPC: {} ::: CPL: {} ::: CPA: {}", cpcs.size(), cpls.size(), cpss.size());
 
         BaseCreateRequest payoutRequest = new BaseCreateRequest();
         payoutRequest.setTransazioniCpc(cpcs);
         payoutRequest.setTransazioniCpl(cpls);
+        payoutRequest.setTransazioniCps(cpss);
         payoutRequest.setNote(request.getNote());
         return this.create(payoutRequest);
     }
@@ -88,6 +90,11 @@ public class PayoutBusiness {
             TransactionCPL transaction = cplRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction CPL", id));
             affiliatesList.add(transaction.getAffiliate().getId());
         });
+
+//        request.getTransazioniCps().stream().forEach(id -> {
+//            TransactionCPS transaction = cpsRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction CPS", id));
+//            affiliatesList.add(transaction.getAffiliate().getId());
+//        });
 
         // faccio distinct e creo un pqyout vuoto per ognuno
         HashMap<Long, Long> affiliatoPayout = new HashMap<>();
@@ -156,6 +163,27 @@ public class PayoutBusiness {
             cplRepository.save(transaction);
         });
 
+        // per ogni singola transazione
+//        request.getTransazioniCps().stream().forEach(id -> {
+//            TransactionCPS transaction = cpsRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction CPL", id));
+//            Long payoutId = affiliatoPayout.get(transaction.getAffiliate().getId());
+//            Payout payout = repository.findById(payoutId).orElseThrow(() -> new ElementCleveradException("PAYOUT CPL", payoutId));
+//
+//            //aumento il valore
+//            Double imponibile = DoubleRounder.round(payout.getImponibile() + transaction.getValue(), 2);
+//
+//            //aggiorno payout
+//            payout.setImponibile(imponibile);
+//            Payout pp = repository.save(payout);
+//            listaPayout.add(pp);
+//
+//            //aggiorno transazione e setto riferimento a payout
+//            transaction.setPayout(payout);
+//            transaction.setPayoutReference("Payout " + payoutId);
+//            transaction.setPayoutPresent(true);
+//            cpsRepository.save(transaction);
+//        });
+
         // rigenero tutti i wallet
         affiliatoPayout.forEach((idAffiliate, longTwo) -> walletService.rigenera(idAffiliate));
 
@@ -190,10 +218,8 @@ public class PayoutBusiness {
     public Page<PayoutDTO> findByIdAffilaite(Long id, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
+        request.setDictionaryIdNotApprovato(true);
         if (id != null) request.setAffiliateId(id);
-        if (request.getDictionaryId() == null) {
-            request.setDictionaryIdNotConcluso(true);
-        }
         Page<Payout> page = repository.findAll(getSpecification(request), pageable);
         return page.map(PayoutDTO::fromNoTransazioni);
     }
@@ -290,11 +316,23 @@ public class PayoutBusiness {
             if (request.getDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("data"), request.getDateTo().plus(1, ChronoUnit.DAYS)));
             }
+
+            if (request.getDataScadenzaFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("dataScadenza"), request.getDataScadenzaFrom()));
+            }
+            if (request.getDataScadenzaTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("dataScadenza"), request.getDataScadenzaTo().plus(1, ChronoUnit.DAYS)));
+            }
+
             if (request.getNote() != null) {
                 predicates.add(cb.like(cb.upper(root.get("note")), "%" + request.getNote().toUpperCase() + "%"));
             }
             if (request.getDictionaryIdNotConcluso() != null && request.getDictionaryIdNotConcluso()) {
                 predicates.add(cb.notEqual(root.get("dictionary").get("id"), 22L));
+            }
+
+            if (request.getDictionaryIdNotApprovato() != null && request.getDictionaryIdNotApprovato()) {
+                predicates.add(cb.notEqual(root.get("dictionary").get("id"), 18));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -318,6 +356,7 @@ public class PayoutBusiness {
         private Long affiliateId;
         private List<Long> transazioniCpl;
         private List<Long> transazioniCpc;
+        private List<Long> transazioniCps;
     }
 
     @Data
@@ -336,10 +375,15 @@ public class PayoutBusiness {
         private LocalDate dateTo;
         private Long dictionaryId;
         private Boolean dictionaryIdNotConcluso;
+        private Boolean dictionaryIdNotApprovato;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate data;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dataScadenza;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate dataScadenzaFrom;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate dataScadenzaTo;
     }
 
     @Data

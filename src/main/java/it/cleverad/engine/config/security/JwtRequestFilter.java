@@ -49,8 +49,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
 
         if (!uri.contains("encoded") && !uri.contains("target") && !uri.contains("cleverad/file")
-                && !uri.contains("cleverad/cpc/refferal") && !uri.contains("cleverad/cpm/refferal"))
+                && !uri.contains("cleverad/cpc/refferal") && !uri.contains("cleverad/cpm/refferal")) {
             log.info("{}>{}>{}", username, request.getMethod(), uri);
+        }
 
         //Once we get the token validate it.
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

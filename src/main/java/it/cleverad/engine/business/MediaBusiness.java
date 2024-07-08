@@ -76,6 +76,7 @@ public class MediaBusiness {
     // CREATE
     public MediaDTO create(BaseCreateRequest request) {
 
+        log.info("Creating MediaDTO  from " + request);
         String bannerCode = request.getBannerCode();
         request.setVisibile(true);
         String url = request.getUrl();
@@ -134,16 +135,17 @@ public class MediaBusiness {
 
     // UPDATE
     public MediaDTO update(Long id, Filter filter) {
+        log.info("Updating media" + filter);
+
         Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Media", id));
         mapper.map(filter, media);
 
         String bannerCode = media.getBannerCode();
-
         String url = media.getUrl();
         if (StringUtils.isNotBlank(url)) bannerCode = bannerCode.replace("{{url}}", url);
-
         String target = media.getTarget();
         if (StringUtils.isNotBlank(target)) bannerCode = bannerCode.replace("{{target}}", target);
+
 //        List<Target> targets = (List<Target>) mappedEntity.getTargets();
 //        targets.stream().filter(target -> StringUtils.isNotBlank(target.getTarget())).forEach(target -> {
 //            bannerCode.replace("{{target}}", target.getTarget());
@@ -437,10 +439,10 @@ public class MediaBusiness {
      * ============================================================================================================
      **/
 
-
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @ToString
     public static class BaseCreateRequest {
         private String name;
         private Long typeId;

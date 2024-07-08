@@ -62,9 +62,19 @@ public class CampaignController {
         return business.getCampaignsAffiliate(affiliateId);
     }
 
+    @GetMapping("/{affiliateId}/deactivate")
+    public CampaignDTO deactivate(@PathVariable Long affiliateId) {
+        return business.deactivate(affiliateId);
+    }
+
+    @GetMapping("/{affiliateId}/reactivate")
+    public CampaignDTO reactivate(@PathVariable Long affiliateId) {
+        return business.reactivate(affiliateId);
+    }
+
     @GetMapping("/affiliate")
     public Page<CampaignBaseDTO> getCampaigns(CampaignBusiness.Filter request, @PageableDefault(value = Integer.MAX_VALUE) Pageable pageable) {
-        return business.getCampaignsActive(request, pageable);
+        return business.getCampaignsStatusActive(request, pageable);
     }
 
     @GetMapping("/affiliate/not")

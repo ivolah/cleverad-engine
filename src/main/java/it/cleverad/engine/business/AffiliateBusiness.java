@@ -28,7 +28,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.Column;
 import javax.persistence.criteria.Predicate;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -173,7 +172,7 @@ public class AffiliateBusiness {
 
     public String getGlobalPixel(Long id) {
         Affiliate affiliate = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Affiliate", id));
-        return  affiliate.getGlobalPixel();
+        return affiliate.getGlobalPixel();
     }
 
     public String getGlobalPixelValue(Long id) {
@@ -199,12 +198,15 @@ public class AffiliateBusiness {
         if (request.termId != null)
             map.setDictionaryTermType(dictionaryRepository.findById(request.termId).orElseThrow(() -> new ElementCleveradException("TERM", request.termId)));
         else
-            map.setDictionaryTermType(dictionaryRepository.findById(102L).orElseThrow(() -> new ElementCleveradException("TERM", 102L)));
+            map.setDictionaryTermType(dictionaryRepository.findById(101L).orElseThrow(() -> new ElementCleveradException("TERM", 101L)));
 
-        if (request.vatId != null)
+        if (request.vatId == null) {
+            if (request.country.equals("IT"))
+                map.setDictionaryVatType(dictionaryRepository.findById(104L).orElseThrow(() -> new ElementCleveradException("VAT", 104L)));
+            else
+                map.setDictionaryVatType(dictionaryRepository.findById(105L).orElseThrow(() -> new ElementCleveradException("VAT", 105L)));
+        } else
             map.setDictionaryVatType(dictionaryRepository.findById(request.vatId).orElseThrow(() -> new ElementCleveradException("VAT", request.vatId)));
-        else
-            map.setDictionaryVatType(dictionaryRepository.findById(104L).orElseThrow(() -> new ElementCleveradException("VAT", 104L)));
 
         if (request.companytypeId != null && request.companytypeId != 0)
             map.setDictionaryCompanyType(dictionaryRepository.findById(request.companytypeId).orElseThrow(() -> new ElementCleveradException("Company Type", request.companytypeId)));

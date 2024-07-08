@@ -4,6 +4,7 @@ import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.Commission;
 import it.cleverad.engine.persistence.model.service.QueryTransaction;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
+import it.cleverad.engine.persistence.model.tracking.Cpc;
 import it.cleverad.engine.persistence.model.tracking.Cpl;
 import it.cleverad.engine.persistence.repository.service.CommissionRepository;
 import it.cleverad.engine.persistence.repository.service.RevenueFactorRepository;
@@ -30,6 +31,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -105,11 +107,28 @@ public class RigeneraCPLBusiness {
                 log.trace("RIGENERO GIORNO {}-{}-{}", anno, mese, gg);
                 cplBusiness.getAllDay(anno, mese, gg, affiliateId, camapignId).stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
 
+                    log.trace("ID {}", cplDTO.getId());
+
                     // leggo sempre i cpc precedenti per trovare il click riferito alla lead
                     cpcBusiness.findByIp24HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal()).stream().filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal())).forEach(cpcDTO -> {
                         cplDTO.setRefferal(cpcDTO.getRefferal());
                         cplDTO.setCpcId(cpcDTO.getId());
                     });
+
+                    // giro senza controllare IP address
+                    if (cplDTO.getCpcId() == null) {
+                        List<Cpc> listaSenzaIp = cpcBusiness.findByIp1HoursBeforeNoIp(cplDTO.getDate(), cplDTO.getRefferal()).stream().filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal())).collect(Collectors.toList());
+                        if (listaSenzaIp.size() > 0) {
+                            //check id cpc non usato in transazioni cpl come cpcid
+                            long numerositatitudine = transactionCPLBusiness.countByCpcId(listaSenzaIp.get(0).getId());
+                            log.info("NO IP CPC {} Ref ORIG {} --> Ref CPC {} - CPCID USATO {}", listaSenzaIp.get(0).getId(), cplDTO.getRefferal(), listaSenzaIp.get(0).getRefferal(), numerositatitudine);
+                            if (numerositatitudine == 0) {
+                                cplDTO.setRefferal(listaSenzaIp.get(0).getRefferal());
+                                cplDTO.setCpcId(listaSenzaIp.get(0).getId());
+                            }
+                        }
+                    }
+
                     log.trace("Refferal :: {} con ID CPC {}", cplDTO.getRefferal(), cplDTO.getCpcId());
                     cplBusiness.setCpcId(cplDTO.getId(), cplDTO.getCpcId());
 
@@ -263,9 +282,9 @@ public class RigeneraCPLBusiness {
                                         String info = cplDTO.getInfo();
                                         String data = cplDTO.getData();
                                         String url = "";
-                                        log.info("RCPLB POST BACK ::: " + followT + " :: " + globalPixel + " :: " + info + " :: " + data);
+                                        log.trace("RCPLB POST BACK ::: " + followT + " :: " + globalPixel + " :: " + info + " :: " + data);
                                         if (StringUtils.isNotBlank(globalPixel)) {
-                                            url = globalPixel ;
+                                            url = globalPixel;
                                         } else if (StringUtils.isNotBlank(followT)) {
                                             url = followT;
                                         }
@@ -275,8 +294,6 @@ public class RigeneraCPLBusiness {
                                             // aggiungo order_id / transaction_id
                                             keyValueMap.put("orderid", data);
                                             keyValueMap.put("order_id", data);
-                                            keyValueMap.put("transaction_id", data);
-                                            keyValueMap.put("transactionid", data);
                                             url = referralService.replacePlaceholders(url, keyValueMap);
                                             log.trace("RCPLB URL :: " + url);
                                             try {
@@ -284,7 +301,7 @@ public class RigeneraCPLBusiness {
                                                 HttpURLConnection con = (HttpURLConnection) urlGet.openConnection();
                                                 con.setRequestMethod("GET");
                                                 con.getInputStream();
-                                                log.info("RCPLB Chiamo PB  :: " + con.getResponseCode() + " :: " + url);
+                                                log.info("RCPLB Chiamo PB  :: " + con.getResponseCode() + " :: " + url + " :: GP:" + globalPixel + " :: INFO :" + info + " :: DATA:" + data);
                                             } catch (Exception e) {
                                                 log.error("RCPLB Eccezione chianata Post Back", e);
                                             }

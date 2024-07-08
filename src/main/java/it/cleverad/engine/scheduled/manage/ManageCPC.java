@@ -68,7 +68,7 @@ public class ManageCPC {
      * ============================================================================================================
      **/
 
-    @Scheduled(cron = "5 */5 * * * ?")
+    @Scheduled(cron = "2 */22 * * * ?")
     @Async
     public void gestiusciTransazioni() {
 

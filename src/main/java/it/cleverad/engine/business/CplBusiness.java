@@ -132,7 +132,7 @@ public class CplBusiness {
         repository.save(media);
     }
 
-    public Page<CplDTO> getUnreadOneHourBefore() {
+    public Page<CplDTO> getUnreadOneHourBefore( ) {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setRead(false);

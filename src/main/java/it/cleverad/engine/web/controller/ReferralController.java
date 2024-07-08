@@ -2,6 +2,7 @@ package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.ReferralBusiness;
 import it.cleverad.engine.config.model.Refferal;
+import it.cleverad.engine.service.ReferralService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +30,14 @@ public class ReferralController {
     public Refferal generate(@RequestBody ReferralBusiness.FilterGenerate request) {
         return business.generate(request);
     }
+
+    @PatchMapping(path = "/descrivi")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ReferralService.ReferralDTO descrivi(@RequestBody ReferralBusiness.Filter request) {
+        return business.descrivi(request);
+    }
+
+
     /**
      * ============================================================================================================
      **/

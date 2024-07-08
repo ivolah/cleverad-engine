@@ -220,6 +220,19 @@ public class TransactionController {
      * ============================================================================================================
      **/
 
+    /**
+     * This function is responsible for searching transactions based on their status.
+     * It retrieves a paginated list of transactions that match the provided filter criteria.
+     *
+     * @param request An instance of {@link TransactionStatusBusiness.QueryFilter} containing the search criteria.
+     *                This includes parameters such as transaction status, affiliate ID, campaign ID, etc.
+     * @param pageable An instance of {@link Pageable} that specifies the pagination details.
+     *                 It includes parameters such as page number, page size, sorting options, etc.
+     *
+     * @return A {@link Page} of {@link QueryTransaction} objects that match the search criteria.
+     *         Each {@link QueryTransaction} object represents a transaction and contains relevant information.
+     *         The page contains the requested transactions and pagination metadata.
+     */
     @GetMapping("/status")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Page<QueryTransaction> searchStatus(TransactionStatusBusiness.QueryFilter request, Pageable pageable) {

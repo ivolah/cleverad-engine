@@ -47,6 +47,7 @@ public class CampaignDTO {
     private List<AffiliateChannelCommissionCampaignDTO> affiliateChannelCommissionCampaigns;
     private List<Long> categoryList;
     private Boolean checkPhoneNumber;
+    private Boolean suspended;
 
     public static CampaignDTO from(Campaign campaign) {
 
@@ -157,11 +158,13 @@ public class CampaignDTO {
                 campaign.getPlanner() != null ? campaign.getPlanner().getName() : null,
                 campaign.getPlanner() != null ? campaign.getPlanner().getEmail() : null,
                 medias, affiliateDTOList, commissions, categoryDTOS, revenues, accc, categoryList,
-                campaign.getCheckPhoneNumber());
+                campaign.getCheckPhoneNumber(),
+                campaign.getSuspended());
     }
- public static CampaignDTO fromList(Campaign campaign) {
 
-           return new CampaignDTO(campaign.getId(), campaign.getName(), campaign.getShortDescription(),
+    public static CampaignDTO fromList(Campaign campaign) {
+
+        return new CampaignDTO(campaign.getId(), campaign.getName(), campaign.getShortDescription(),
                 campaign.getLongDescription(), campaign.getNote(), campaign.getStatus(),
                 campaign.getCreationDate(), campaign.getLastModificationDate(),
                 campaign.getStartDate(), campaign.getEndDate(), campaign.getIdFile(),
@@ -177,7 +180,9 @@ public class CampaignDTO {
                 campaign.getPlanner() != null ? campaign.getPlanner().getName() : null,
                 campaign.getPlanner() != null ? campaign.getPlanner().getEmail() : null,
                 null, null, null, null, null, null, null,
-                campaign.getCheckPhoneNumber());
+                campaign.getCheckPhoneNumber(),
+                campaign.getSuspended()
+        );
     }
 
 }

@@ -4,6 +4,7 @@ import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.Commission;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
+import it.cleverad.engine.persistence.model.tracking.Cpc;
 import it.cleverad.engine.persistence.model.tracking.Cpl;
 import it.cleverad.engine.persistence.repository.service.CommissionRepository;
 import it.cleverad.engine.persistence.repository.service.RevenueFactorRepository;
@@ -12,6 +13,7 @@ import it.cleverad.engine.persistence.repository.tracking.CplRepository;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.*;
 import it.cleverad.engine.web.dto.tracking.CpcDTO;
+import it.cleverad.engine.web.dto.tracking.CplDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -89,6 +91,21 @@ public class ManageCPL {
                     cplDTO.setRefferal(cpcDTO.getRefferal());
                     cplDTO.setCpcId(cpcDTO.getId());
                 });
+
+                // giro senza controllare IP address
+                if (cplDTO.getCpcId() == null) {
+                    List<Cpc> listaSenzaIp = cpcBusiness.findByIp1HoursBeforeNoIp(cplDTO.getDate(), cplDTO.getRefferal()).stream().filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal())).collect(Collectors.toList());
+                    if (listaSenzaIp.size() > 0) {
+                        //check id cpc non usato in transazioni cpl come cpcid
+                        long numerositatitudine = transactionCPLBusiness.countByCpcId(listaSenzaIp.get(0).getId());
+                        log.info("NO IP CPC {} Ref ORIG {} --> Ref CPC {} - CPCID USATO {}", listaSenzaIp.get(0).getId(), cplDTO.getRefferal(), listaSenzaIp.get(0).getRefferal(), numerositatitudine);
+                        if (numerositatitudine == 0) {
+                            cplDTO.setRefferal(listaSenzaIp.get(0).getRefferal());
+                            cplDTO.setCpcId(listaSenzaIp.get(0).getId());
+                        }
+                    }
+                }
+
                 Long idCpc = cplDTO.getCpcId();
                 log.trace("Refferal :: {} con ID CPC {}", cplDTO.getRefferal(), idCpc);
                 cplBusiness.setCpcId(cplDTO.getId(), idCpc);
@@ -264,9 +281,9 @@ public class ManageCPL {
                                 String info = cplDTO.getInfo();
                                 String data = cplDTO.getData();
                                 String url = "";
-                                log.info("POST BACK ::: " + followT + " :: " + globalPixel + " :: " + info + " :: " + data);
+                                log.trace("POST BACK ::: " + followT + " :: " + globalPixel + " :: " + info + " :: " + data);
                                 if (StringUtils.isNotBlank(globalPixel)) {
-                                    url = globalPixel ;
+                                    url = globalPixel;
                                 } else if (StringUtils.isNotBlank(followT)) {
                                     url = followT;
                                 }
@@ -276,16 +293,14 @@ public class ManageCPL {
                                     // aggiungo order_id / transaction_id
                                     keyValueMap.put("orderid", data);
                                     keyValueMap.put("order_id", data);
-                                    keyValueMap.put("transaction_id", data);
-                                    keyValueMap.put("transactionid", data);
                                     url = referralService.replacePlaceholders(url, keyValueMap);
-                                    log.info("URL :: " + url);
+                                    log.trace("URL :: " + url);
                                     try {
                                         URL urlGet = new URL(url);
                                         HttpURLConnection con = (HttpURLConnection) urlGet.openConnection();
                                         con.setRequestMethod("GET");
                                         con.getInputStream();
-                                        log.info("Chiamo PB  :: " + con.getResponseCode() + " :: " + url);
+                                        log.info("Post Back (" + con.getResponseCode() + ") : " + url + " :::: GP (" + globalPixel + ") :: INFO (" + info + ") :: DATA (" + data +"");
                                     } catch (Exception e) {
                                         log.error("Eccezione chianata Post Back", e);
                                         throw new RuntimeException(e);

@@ -84,7 +84,6 @@ public class PayoutController {
         return business.getTypes();
     }
 
-
     @PatchMapping(path = "/{id}/confermo")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public PayoutDTO updateConfermato(@PathVariable Long id) {

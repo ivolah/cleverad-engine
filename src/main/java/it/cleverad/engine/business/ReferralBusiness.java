@@ -35,6 +35,11 @@ public class ReferralBusiness {
         return r;
     }
 
+    // DESCRIVI
+    public ReferralService.ReferralDTO descrivi(Filter filter) {
+        return  referralService.descrivi(filter.getReferral());
+    }
+
     /**
      * ============================================================================================================
      **/

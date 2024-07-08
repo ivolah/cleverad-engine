@@ -1,8 +1,14 @@
 package it.cleverad.engine.service;
 
+import it.cleverad.engine.business.*;
 import it.cleverad.engine.config.model.Refferal;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -12,20 +18,33 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 @Service
 @Slf4j
 public class ReferralService {
 
+    @Autowired
+    private TargetBusiness targetBusiness;
+    @Autowired
+    private AffiliateBusiness affiliateBusiness;
+    @Autowired
+    private MediaBusiness mediaBusiness;
+    @Autowired
+    private CampaignBusiness campaignBusiness;
+    @Autowired
+    private ChannelBusiness channelBusiness;
+
+
     public Map<String, String> estrazioneInfo(String input) {
         Map<String, String> keyValueMap = new HashMap<>();
         if (StringUtils.isNotEmpty(input)) {
-            // pattern "xxx: value"
             Pattern pattern = Pattern.compile("(\\w+)\\s*:\\s*([^,]+)");
             Matcher matcher = pattern.matcher(input);
             while (matcher.find()) {
                 String key = matcher.group(1).trim();
                 String value = matcher.group(2).trim();
-                keyValueMap.put(key, value);
+                keyValueMap.put(key.toLowerCase(), value);
+                log.trace("key: " + key + " value: " + value);
             }
         }
         return keyValueMap;
@@ -36,7 +55,7 @@ public class ReferralService {
             String key = entry.getKey();
             String value = entry.getValue();
             input = input.replaceAll("\\{" + key + "\\}", value).replaceAll("\\{" + key.toUpperCase() + "\\}", value).replaceAll("\\[" + key + "\\]", value).replaceAll("\\[" + key.toUpperCase() + "\\]", value);
-            log.trace(">" + key + "< : >" + value + "< = " + input);
+            log.trace("REPLACE PLACEHOLDERS >" + key + "< : >" + value + "< = " + input);
         }
         return input;
     }
@@ -94,9 +113,47 @@ public class ReferralService {
         return null;
     }
 
-    public String decodifica(String refferalString) {
-        byte[] decoder = Base64.getDecoder().decode(refferalString);
-        return new String(decoder);
+    public ReferralDTO descrivi(String refs) {
+
+        Refferal refferal = decodificaReferral(refs);
+
+        String affiliateName = "";
+        if (refferal.getAffiliateId() != null) {
+            affiliateName = affiliateBusiness.findById(refferal.getAffiliateId()).getName();
+        }
+        String mediaName = "";
+        if (refferal.getMediaId() != null) {
+            mediaName = mediaBusiness.findById(refferal.getMediaId()).getName();
+        }
+        String campaignName = "";
+        if (refferal.getCampaignId() != null) {
+            campaignName = campaignBusiness.findById(refferal.getCampaignId()).getName();
+        }
+        String channelName = "";
+        if (refferal.getChannelId() != null) {
+            channelName = channelBusiness.findById(refferal.getChannelId()).getName();
+        }
+        String targetName = "";
+        if (refferal.getTargetId() != null && refferal.getTargetId() != 0L) {
+            targetName = targetBusiness.findById(refferal.getTargetId()).getTarget();
+        }
+
+        ReferralDTO referralDTO = new ReferralDTO();
+        referralDTO.setAffiliateId(refferal.getAffiliateId());
+        referralDTO.setAffiliateName(affiliateName);
+        referralDTO.setMediaId(refferal.getMediaId());
+        referralDTO.setMediaName(mediaName);
+        referralDTO.setCampaignId(refferal.getCampaignId());
+        referralDTO.setCampaignName(campaignName);
+        referralDTO.setChannelId(refferal.getChannelId());
+        referralDTO.setChannelName(channelName);
+        referralDTO.setRefferal(refs);
+        referralDTO.setTargetId(refferal.getTargetId());
+        referralDTO.setTargetName(targetName);
+        if (refferal.getMediaId() != null)
+            referralDTO.setDestinationUrl(mediaBusiness.findById(refferal.getMediaId()).getTarget());
+
+        return referralDTO;
     }
 
     public String creaEncoding(String campaignId, String mediaID, String affilaiteID, String channelID, String targetId) {
@@ -120,6 +177,30 @@ public class ReferralService {
             reString = reString.substring(0, reString.length() - 1);
         }
         return reString;
+    }
+
+    private String decodifica(String refferalString) {
+        byte[] decoder = Base64.getDecoder().decode(refferalString);
+        return new String(decoder);
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @ToString
+    public class ReferralDTO {
+        private String refferal;
+        private Long mediaId;
+        private String mediaName;
+        private Long campaignId;
+        private String campaignName;
+        private Long affiliateId;
+        private String affiliateName;
+        private Long channelId;
+        private String channelName;
+        private Long targetId;
+        private String targetName;
+        private String destinationUrl;
     }
 
 }

@@ -183,9 +183,26 @@ public class CpcBusiness {
         request.setIp(ip);
         request.setDatetimeFrom(dateTime.minusHours(24));
         request.setDatetimeTo(dateTime);
-        request.setRefferal(referral);
+        request.setRefferalCheckRight(referral);
         Page<Cpc> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(CpcDTO::from);
+    }
+
+    public List<Cpc> findByIp1HoursBeforeNoIp(LocalDateTime dateTime, String referral) {
+        Filter request = new Filter();
+        request.setDatetimeFrom(dateTime.minusHours(1));
+        request.setDatetimeTo(dateTime);
+        request.setRefferalCheckRight(referral);
+        List<Cpc> lis = repository.findAll(getSpecification(request), Sort.by(Sort.Order.desc("id")));
+        return lis;
+    }
+
+    public long countByIp2HoursBeforeNoIp(LocalDateTime dateTime, String referral) {
+        Filter request = new Filter();
+        request.setDatetimeFrom(dateTime.minusHours(2));
+        request.setDatetimeTo(dateTime);
+        request.setRefferalCheckRight(referral);
+        return repository.count(getSpecification(request));
     }
 
     public Page<CpcDTO> findByIpTwoHoursBefore(String ip, LocalDateTime dateTime) {
@@ -239,9 +256,14 @@ public class CpcBusiness {
             if (request.getId() != null) {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
+
             if (request.getRefferal() != null) {
                 predicates.add(cb.like(root.get("refferal"), "%" + request.getRefferal() + "%"));
             }
+            if (request.getRefferalCheckRight() != null) {
+                predicates.add(cb.like(root.get("refferal"), request.getRefferalCheckRight() + "%"));
+            }
+
             if (request.getRead() != null) {
                 predicates.add(cb.equal(root.get("read"), request.getRead()));
             }
@@ -333,6 +355,9 @@ public class CpcBusiness {
         private Long targetId;
 
         private Boolean blacklisted;
+
+        private String refferalCheckRight;
+
     }
 
 }

@@ -75,4 +75,7 @@ public interface TransactionCPLRepository extends JpaRepository<TransactionCPL, 
             "limit 10;")
     List<TopCampagne> listaTop10CampagneGiorno(@Param("days") Integer days, @Param("affiliateid") Long affiliateId, @Param("advertiserId") Long advertiserId);
 
+
+    long countByCpcId( @Param("cpc_id") Long cpcId);
+
 }

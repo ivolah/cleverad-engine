@@ -87,11 +87,10 @@ public class CampaignBusiness {
         map.setAdvertiser(advertiserRepository.findById(request.getCompanyId()).orElseThrow(() -> new ElementCleveradException("Advertiser", request.getCompanyId())));
         map.setDealer(dealerRepository.findById(request.getDealerId()).orElseThrow(() -> new ElementCleveradException("Dealer", request.dealerId)));
         map.setPlanner(plannerRepository.findById(request.getPlannerId()).orElseThrow(() -> new ElementCleveradException("Planner", request.plannerId)));
-
         map.setValuta("EUR");
+        map.setSuspended(false);
 
         CampaignDTO dto = CampaignDTO.from(repository.save(map));
-
         CampaignDTO finalDto = dto;
 
         //Category
@@ -148,7 +147,6 @@ public class CampaignBusiness {
 
         // INVIO NOTIFICA CANALE TELEGRAM
         //telegramService.sendNotification("Nuova CAMPAGNA  " + campaign.getName() + "!!!! \n Accedi alla piattaforma e richiedi di partecipare!");
-
 
         dto = CampaignDTO.from(repository.save(campaign));
 
@@ -244,6 +242,9 @@ public class CampaignBusiness {
 
         Campaign campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
         mapper.map(filter, campaign);
+        campaign.setValuta(filter.getValuta());
+        campaign.setSuspended(filter.getSuspended());
+        campaign.setCheckPhoneNumber(filter.getCheckPhoneNumber());
 
         // SET
         if (filter.getCookieId() != null)
@@ -275,6 +276,20 @@ public class CampaignBusiness {
         return CampaignDTO.from(repository.save(campaign));
     }
 
+    public CampaignDTO deactivate(Long id) {
+        Campaign campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
+        campaign.setSuspended(true);
+        campaign.setLastModificationDate(LocalDateTime.now());
+        return CampaignDTO.from(repository.save(campaign));
+    }
+
+    public CampaignDTO reactivate(Long id) {
+        Campaign campaign = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Campaign", id));
+        campaign.setSuspended(false);
+        campaign.setLastModificationDate(LocalDateTime.now());
+        return CampaignDTO.from(repository.save(campaign));
+    }
+
     // TROVA LE CAMPAGNE DELL AFFILIATE
     public Page<CampaignDTO> getCampaignsAffiliate(Long affiliateId) {
         Affiliate cc = affiliateRepository.findById(affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", affiliateId));
@@ -297,7 +312,7 @@ public class CampaignBusiness {
         return page.map(CampaignDTO::from);
     }
 
-    public Page<CampaignBaseDTO> getCampaignsActive(Filter req, Pageable pageable) {
+    public Page<CampaignBaseDTO> getCampaignsStatusActive(Filter req, Pageable pageable) {
 
         Long affiliateId = jwtUserDetailsService.getAffiliateId();
         List<Long> listaId = new ArrayList<>();
@@ -479,6 +494,9 @@ public class CampaignBusiness {
             if (request.getStatus() != null) {
                 predicates.add(cb.equal(root.get("status"), request.getStatus()));
             }
+            if (request.getSuspended() != null) {
+                predicates.add(cb.equal(root.get("suspended"), request.getSuspended()));
+            }
             if (request.getCreationDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("creationDate"), LocalDateTime.ofInstant(request.getCreationDateFrom(), ZoneOffset.UTC)));
             }
@@ -531,6 +549,7 @@ public class CampaignBusiness {
                 predicates.add(cb.equal(root.get("advertiser").get("id"), request.getAdvertiserId()));
             }
 
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
@@ -562,6 +581,7 @@ public class CampaignBusiness {
         private LocalDateTime startDate;
         @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSz")
         private LocalDateTime endDate;
+        private Boolean suspended;
     }
 
     @Data
@@ -608,6 +628,7 @@ public class CampaignBusiness {
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate disableDueDateTo;
         private Long advertiserId;
+        private Boolean suspended;
     }
 
 }

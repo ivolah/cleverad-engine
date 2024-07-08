@@ -45,9 +45,9 @@ public class Campaign {
     private LocalDateTime creationDate = LocalDateTime.now();
     @Column(name = "last_modification_date")
     private LocalDateTime lastModificationDate = LocalDateTime.now();
-
     @Column(name = "check_phone_number")
     private Boolean checkPhoneNumber = false;
+    private Boolean suspended = false;
 
     // ONE TO MANY
 
@@ -80,11 +80,9 @@ public class Campaign {
     @ManyToOne
     @JoinColumn(name = "cookie_id")
     private Cookie cookie;
-
     @ManyToOne
     @JoinColumn(name = "planner_id")
     private Planner planner;
-
     @ManyToOne
     @JoinColumn(name = "dealer_id")
     private Dealer dealer;
