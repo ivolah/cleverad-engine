@@ -700,7 +700,7 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
             @Param("inDictionaryId") List<Long> inDictionaryId,
             @Param("notInDictionaryId") List<Long> notInDictionaryId,
             @Param("inStausId") List<Long> inStausId,
-            @Param("notInStausId") List<Long> notInStausId
+            @Param("notInStausId") List<Long> notInStausId, @Param("orders") List<String> orders
     );
 
     //=========================================================================================================================

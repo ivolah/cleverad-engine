@@ -12,12 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,7 +52,7 @@ public class TransactionStatusBusiness {
                         request.getDictionaryId(), request.getAffiliateId(), request.getChannelId(), request.getCampaignId(),
                         request.getMediaId(), request.getCommissionId(), request.getRevenueId(), request.getPayoutPresent(),
                         request.getPayoutId(), request.getAdvertiserId(), request.getValueNotZero(), request.getInDictionaryId(),
-                        request.getNotInDictionaryId(), request.getInStausId(), request.getNotInStausId())
+                        request.getNotInDictionaryId(), request.getInStausId(), request.getNotInStausId(), null)
                 .stream().findFirst().orElse(null);
         return tq;
     }
@@ -75,10 +78,18 @@ public class TransactionStatusBusiness {
             request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
         }
 
+      List<String> orders = new ArrayList<>();
+        if (request.getDataList() != null && request.getDataList().length() > 3) {
+            log.info("Dentro :: ", request.getDataList());
+            Arrays.stream(request.getDataList().split(",")).distinct().forEach(s -> {
+                orders.add(s);
+            });
+        }
+
         List<QueryTransaction> listaTransazioni = new ArrayList<>();
         if (request != null) {
             if (request.getTipo() == null) {
-                listaTransazioni = queryRepository.listaTransazioni(request.getCreationDateFrom(), request.getCreationDateTo() != null ? request.getCreationDateTo().atTime(23, 59, 59, 99999) : null, request.getStatusId(), request.getDictionaryId(), request.getAffiliateId(), request.getChannelId(), request.getCampaignId(), request.getMediaId(), request.getCommissionId(), request.getRevenueId(), request.getPayoutPresent(), request.getPayoutId(), request.getAdvertiserId(), request.getValueNotZero(), request.getInDictionaryId(), request.getNotInDictionaryId(), request.getInStausId(), request.getNotInStausId());
+                listaTransazioni = queryRepository.listaTransazioni(request.getCreationDateFrom(), request.getCreationDateTo() != null ? request.getCreationDateTo().atTime(23, 59, 59, 99999) : null, request.getStatusId(), request.getDictionaryId(), request.getAffiliateId(), request.getChannelId(), request.getCampaignId(), request.getMediaId(), request.getCommissionId(), request.getRevenueId(), request.getPayoutPresent(), request.getPayoutId(), request.getAdvertiserId(), request.getValueNotZero(), request.getInDictionaryId(), request.getNotInDictionaryId(), request.getInStausId(), request.getNotInStausId(), orders);
             } else if (request.getTipo().equals("CPC")) {
                 listaTransazioni = queryRepository.listaTransazioniCPC(request.getCreationDateFrom(), request.getCreationDateTo() != null ? request.getCreationDateTo().atTime(23, 59, 59, 99999) : null, request.getStatusId(), request.getDictionaryId(), request.getAffiliateId(), request.getChannelId(), request.getCampaignId(), request.getMediaId(), request.getCommissionId(), request.getRevenueId(), request.getPayoutPresent(), request.getPayoutId(), request.getAdvertiserId(), request.getValueNotZero(), request.getInDictionaryId(), request.getNotInDictionaryId(), request.getInStausId(), request.getNotInStausId());
             } else if (request.getTipo().equals("CPL")) {
@@ -90,7 +101,7 @@ public class TransactionStatusBusiness {
             }
         } else {
             listaTransazioni = queryRepository.listaTransazioni(
-                    request.getCreationDateFrom(), request.getCreationDateTo() != null ? request.getCreationDateTo().atTime(23, 59, 59, 99999) : null, request.getStatusId(), request.getDictionaryId(), request.getAffiliateId(), request.getChannelId(), request.getCampaignId(), request.getMediaId(), request.getCommissionId(), request.getRevenueId(), request.getPayoutPresent(), request.getPayoutId(), request.getAdvertiserId(), request.getValueNotZero(), request.getInDictionaryId(), request.getNotInDictionaryId(), request.getInStausId(), request.getNotInStausId());
+                    request.getCreationDateFrom(), request.getCreationDateTo() != null ? request.getCreationDateTo().atTime(23, 59, 59, 99999) : null, request.getStatusId(), request.getDictionaryId(), request.getAffiliateId(), request.getChannelId(), request.getCampaignId(), request.getMediaId(), request.getCommissionId(), request.getRevenueId(), request.getPayoutPresent(), request.getPayoutId(), request.getAdvertiserId(), request.getValueNotZero(), request.getInDictionaryId(), request.getNotInDictionaryId(), request.getInStausId(), request.getNotInStausId(), orders);
         }
 
         final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), listaTransazioni.size());
