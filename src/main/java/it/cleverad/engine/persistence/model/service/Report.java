@@ -679,7 +679,7 @@ import javax.persistence.*;
                 "       COALESCE(SUM(transazioni.leadnumberrigettato), 0)                                                                     as leadNumberRigettato, " +
                 "       COALESCE(round(SUM(transazioni.clicknumber) / NULLIF(SUM(transazioni.impressionnumber), 0) * 100, 2), 0)              as CTR, " +
                 "       COALESCE(round(CAST((SUM(transazioni.leadnumber) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 2), 0) as LR, " +
-                "       COALESCE(round(CAST((SUM(transazioni.leadnumber) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 2), 0) as LR, " +
+                "       COALESCE(round(CAST((SUM(transazioni.leadnumberrigettato) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 2), 0) as LRR, " +
                 "       COALESCE(round(CAST(SUM(transazioni.value) AS numeric), 2), 0)                                                        as commission, " +
                 "       COALESCE(round(CAST(SUM(transazioni.valuerigettato) AS numeric), 2), 0)                                               as commissionRigettato, " +
                 "       COALESCE(round(CAST(SUM(transazioni.revenue) AS numeric), 2), 0)                                                      as revenue, " +
@@ -1043,7 +1043,7 @@ import javax.persistence.*;
                 "       COALESCE(SUM(transazioni.leadnumberrigettato), 0)                                                                     as leadNumberRigettato, " +
                 "       COALESCE(round(SUM(transazioni.clicknumber) / NULLIF(SUM(transazioni.impressionnumber), 0) * 100, 2), 0)              as CTR, " +
                 "       COALESCE(round(CAST((SUM(transazioni.leadnumber) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 2), 0) as LR, " +
-                "       COALESCE(round(CAST((SUM(transazioni.leadnumber) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 2), 0) as LR, " +
+                "       COALESCE(round(CAST((SUM(transazioni.leadnumberrigettato) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 2), 0) as LRR, " +
                 "       COALESCE(round(CAST(SUM(transazioni.value) AS numeric), 2), 0)                                                        as commission, " +
                 "       COALESCE(round(CAST(SUM(transazioni.valuerigettato) AS numeric), 2), 0)                                               as commissionRigettato, " +
                 "       COALESCE(round(CAST(SUM(transazioni.revenue) AS numeric), 2), 0)                                                      as revenue, " +
@@ -1403,7 +1403,7 @@ import javax.persistence.*;
                 "       COALESCE(SUM(transazioni.leadnumberrigettato), 0)                                                                     as leadNumberRigettato, " +
                 "       COALESCE(round(SUM(transazioni.clicknumber) / NULLIF(SUM(transazioni.impressionnumber), 0) * 100, 2), 0)              as CTR, " +
                 "       COALESCE(round(CAST((SUM(transazioni.leadnumber) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 2), 0) as LR, " +
-                "       COALESCE(round(CAST((SUM(transazioni.leadnumber) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 2), 0) as LR, " +
+                "       COALESCE(round(CAST((SUM(transazioni.leadnumberrigettato) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 2), 0) as LRR, " +
                 "       COALESCE(round(CAST(SUM(transazioni.value) AS numeric), 2), 0)                                                        as commission, " +
                 "       COALESCE(round(CAST(SUM(transazioni.valuerigettato) AS numeric), 2), 0)                                               as commissionRigettato, " +
                 "       COALESCE(round(CAST(SUM(transazioni.revenue) AS numeric), 2), 0)                                                      as revenue, " +
@@ -1767,7 +1767,7 @@ import javax.persistence.*;
                 "       COALESCE(SUM(transazioni.leadnumberrigettato), 0)                                                                     as leadNumberRigettato, " +
                 "       COALESCE(round(SUM(transazioni.clicknumber) / NULLIF(SUM(transazioni.impressionnumber), 0) * 100, 2), 0)              as CTR, " +
                 "       COALESCE(round(CAST((SUM(transazioni.leadnumber) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 2), 0) as LR, " +
-                "       COALESCE(round(CAST((SUM(transazioni.leadnumber) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 2), 0) as LR, " +
+                "       COALESCE(round(CAST((SUM(transazioni.leadnumberrigettato) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 2), 0) as LRR, " +
                 "       COALESCE(round(CAST(SUM(transazioni.value) AS numeric), 2), 0)                                                        as commission, " +
                 "       COALESCE(round(CAST(SUM(transazioni.valuerigettato) AS numeric), 2), 0)                                               as commissionRigettato, " +
                 "       COALESCE(round(CAST(SUM(transazioni.revenue) AS numeric), 2), 0)                                                      as revenue, " +

@@ -333,7 +333,7 @@ public class ReportBusiness {
         Long dictId = null;
         if (request.getDictionaryIds().size() > 0) {
             dictId = request.getDictionaryIds().get(0);
-        }
+}
         if (request.campaignActive != null && request.campaignActive && request.getDateTimeFrom() != null) {
             List<Long> cids = campaignBusiness.getCampaignsinDateRange(request.getDateTimeFrom(), request.getDateTimeTo()).stream().mapToLong(value -> value.getId()).boxed().collect(Collectors.toList());
             request.setCampaignIds(cids);
@@ -351,7 +351,7 @@ public class ReportBusiness {
         }
         if (report.getClickNumber() != null && report.getClickNumber() > 0) {
             double lr = (report.getLeadNumber().doubleValue() / report.getClickNumber().doubleValue()) * 100;
-            report.setCtr("" + DoubleRounder.round(lr, 2));
+            report.setLr("" + DoubleRounder.round(lr, 2));
         }
         report.setCommission(lista.stream().mapToDouble(reportDaily -> reportDaily.getCommission()).sum());
         report.setCommissionRigettato(lista.stream().mapToDouble(reportDaily -> reportDaily.getCommissionRigettato()).sum());
@@ -413,7 +413,7 @@ public class ReportBusiness {
         }
         if (report.getClickNumber() != null && report.getClickNumber() > 0) {
             double lr = (report.getLeadNumber().doubleValue() / report.getClickNumber().doubleValue()) * 100;
-            report.setCtr("" + DoubleRounder.round(lr, 2));
+            report.setLr("" + DoubleRounder.round(lr, 2));
         }
         report.setCommission(lista.stream().mapToDouble(reportDaily -> reportDaily.getCommission()).sum());
         report.setCommissionRigettato(lista.stream().mapToDouble(reportDaily -> reportDaily.getCommissionRigettato()).sum());

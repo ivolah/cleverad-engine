@@ -236,7 +236,7 @@ public class RigeneraCPLBusiness {
                                     commVal = acccFirst.getCommissionValue();
                                     commissionId = acccFirst.getCommissionId();
                                 } else
-                                    log.warn("No Commission CPL C :: {} e A :0: {}, setto default ({})", refferal.getCampaignId(), refferal.getAffiliateId(), cplDTO.getRefferal());
+                                    log.warn("Rignera - No Commission CPL (campagna {} e affilitato {}), setto default ({})", refferal.getCampaignId(), refferal.getAffiliateId(), cplDTO.getRefferal());
                             }
                             transaction.setCommissionId(commissionId);
 

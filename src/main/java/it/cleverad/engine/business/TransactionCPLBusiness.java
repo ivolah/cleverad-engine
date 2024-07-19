@@ -74,55 +74,76 @@ public class TransactionCPLBusiness {
      **/
 
     public TransactionCPLDTO createCpl(BaseCreateRequest request) {
-        TransactionCPL newCplTransaction = mapper.map(request, TransactionCPL.class);
-        newCplTransaction.setPayoutPresent(false);
-        newCplTransaction.setApproved(true);
-        newCplTransaction.setPhoneVerified(false);
-        newCplTransaction.setInitialValue(DoubleRounder.round(request.getValue(), 2));
+        Long numero = request.getLeadNumber();
+        TransactionCPL cpl = null;
+        log.info("Numero : " + numero);
 
-        if (request.getManualDate() != null) {
-            newCplTransaction.setDateTime(request.getManualDate().atStartOfDay());
-            newCplTransaction.setLeadNumber(1L);
-            request.setDictionaryId(68L);
-            request.setStatusId(73L);
-            newCplTransaction.setData(request.getData().trim().replace("[REPLACE]", ""));
+        if (numero == null) {
+            numero = 1L;
+        }
+        if (numero == 0) {
+            numero = 1L;
         }
 
-        // trovo revenue
-        RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(request.getCampaignId(), 11L);
-        if (rf != null) {
-            newCplTransaction.setRevenueId(rf.getId());
+        for (int i = 0; i < numero; i++) {
+
+            TransactionCPL newCplTransaction = mapper.map(request, TransactionCPL.class);
+            newCplTransaction.setPayoutPresent(false);
+            newCplTransaction.setApproved(true);
+            newCplTransaction.setPhoneVerified(false);
+            newCplTransaction.setInitialValue(DoubleRounder.round(request.getValue(), 2));
+
+            if (request.getManualDate() != null) {
+                newCplTransaction.setDateTime(request.getManualDate().atStartOfDay());
+                newCplTransaction.setLeadNumber(1L);
+                request.setDictionaryId(68L);
+                request.setStatusId(73L);
+                newCplTransaction.setData(request.getData().trim().replace("[REPLACE]", ""));
+            }
+
+            // trovo revenue
+            RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(request.getCampaignId(), 11L);
+            if (rf != null) {
+                newCplTransaction.setRevenueId(rf.getId());
+            } else {
+                newCplTransaction.setRevenueId(2L);
+            }
+            newCplTransaction.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
+
+            if (request.commissionId != null)
+                newCplTransaction.setCommission(commissionRepository.findById(request.commissionId).orElseThrow(() -> new ElementCleveradException("Commission", request.commissionId)));
+            if (request.channelId != null)
+                newCplTransaction.setChannel(channelRepository.findById(request.channelId).orElseThrow(() -> new ElementCleveradException("Channel", request.channelId)));
+            if (request.dictionaryId != null)
+                newCplTransaction.setDictionary(dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", request.dictionaryId)));
+            if (request.statusId != null)
+                newCplTransaction.setDictionaryStatus(dictionaryRepository.findById(request.statusId).orElseThrow(() -> new ElementCleveradException("Status", request.statusId)));
+            if (request.mediaId != null)
+                newCplTransaction.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
+
+            Affiliate aa = null;
+            if (request.affiliateId != null) {
+                aa = affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId));
+            }
+            newCplTransaction.setAffiliate(aa);
+
+            Wallet ww = null;
+            if (request.walletId != null) {
+                ww = walletRepository.findById(request.walletId).orElseThrow(() -> new ElementCleveradException("Wallet", request.walletId));
+            } else if (aa != null) {
+                ww = aa.getWallets().stream().findFirst().get();
+            }
+            newCplTransaction.setWallet(ww);
+
+            cpl = cplRepository.saveAndFlush(newCplTransaction);
+            log.info(i + " >> ID :: " + cpl.getId());
+        }
+
+        if (cpl != null) {
+            return TransactionCPLDTO.from(cpl);
         } else {
-            newCplTransaction.setRevenueId(2L);
+            throw new NullPointerException("ECCEZIONE CPL manuale nullo");
         }
-        newCplTransaction.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
-
-        if (request.commissionId != null)
-            newCplTransaction.setCommission(commissionRepository.findById(request.commissionId).orElseThrow(() -> new ElementCleveradException("Commission", request.commissionId)));
-        if (request.channelId != null)
-            newCplTransaction.setChannel(channelRepository.findById(request.channelId).orElseThrow(() -> new ElementCleveradException("Channel", request.channelId)));
-        if (request.dictionaryId != null)
-            newCplTransaction.setDictionary(dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", request.dictionaryId)));
-        if (request.statusId != null)
-            newCplTransaction.setDictionaryStatus(dictionaryRepository.findById(request.statusId).orElseThrow(() -> new ElementCleveradException("Status", request.statusId)));
-        if (request.mediaId != null)
-            newCplTransaction.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
-
-        Affiliate aa = null;
-        if (request.affiliateId != null) {
-            aa = affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId));
-        }
-        newCplTransaction.setAffiliate(aa);
-
-        Wallet ww = null;
-        if (request.walletId != null) {
-            ww = walletRepository.findById(request.walletId).orElseThrow(() -> new ElementCleveradException("Wallet", request.walletId));
-        } else if (aa != null) {
-            ww = aa.getWallets().stream().findFirst().get();
-        }
-        newCplTransaction.setWallet(ww);
-
-        return TransactionCPLDTO.from(cplRepository.save(newCplTransaction));
     }
 
     /**
@@ -257,7 +278,7 @@ public class TransactionCPLBusiness {
     }
 
     public Page<TransactionCPLDTO> searchByCampaign(Long id, Pageable pageableRequest) {
-        TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
+        Filter request = new Filter();
         request.setCampaignId(id);
         if (!jwtUserDetailsService.getRole().equals("Admin")) {
             request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
@@ -267,7 +288,7 @@ public class TransactionCPLBusiness {
     }
 
     public List<TransactionCPL> searchByCampaignMese(Long campaignId) {
-        TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
+        Filter request = new Filter();
         request.setCampaignId(campaignId);
         LocalDate now = LocalDate.now();
         request.setDateTimeFrom(now.withDayOfMonth(1).atStartOfDay());
@@ -276,7 +297,7 @@ public class TransactionCPLBusiness {
     }
 
     public List<TransactionCPL> searchForCampaignBudget(Long campaignId, LocalDate from, LocalDate to) {
-        TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
+        Filter request = new Filter();
         request.setCampaignId(campaignId);
         request.setDateTimeFrom(from.atStartOfDay());
         request.setDateTimeTo(LocalDateTime.of((to), LocalTime.MAX));
@@ -288,7 +309,7 @@ public class TransactionCPLBusiness {
     }
 
     public List<TransactionCPL> searchForCampaignAffiliateBudget(Long campaignId, Long affiliateId, LocalDate from, LocalDate to) {
-        TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
+        Filter request = new Filter();
         request.setCampaignId(campaignId);
         request.setAffiliateId(affiliateId);
         request.setDateTimeFrom(from.atStartOfDay());
@@ -302,7 +323,7 @@ public class TransactionCPLBusiness {
 
     //    -- ---- ---- ---- ---- RIGENERA WALLET
     public List<TransactionCPL> searchPayout(Long affiliateId, Boolean payoutPresent) {
-        TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
+        Filter request = new Filter();
         request.setAffiliateId(affiliateId);
         request.setPayoutPresent(payoutPresent);
         request.setValueNotZero(true);
@@ -311,7 +332,7 @@ public class TransactionCPLBusiness {
 
     //    -- ---- ---- ---- ---- RIGENERA AFFILIATE BUDGET
     public List<TransactionCPL> searchLastModified() {
-        TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
+        Filter request = new Filter();
         request.setValueNotZero(true);
         ArrayList<Long> not = new ArrayList<>();
         not.add(74L); // RIGETTATO
@@ -321,7 +342,7 @@ public class TransactionCPLBusiness {
     }
 
     public List<TransactionCPL> searchForAffiliateBudget(Long affiliateId, Long campaignId) {
-        TransactionCPLBusiness.Filter request = new TransactionCPLBusiness.Filter();
+        Filter request = new Filter();
         request.setValueNotZero(true);
         ArrayList<Long> not = new ArrayList<>();
         not.add(74L); // RIGETTATO

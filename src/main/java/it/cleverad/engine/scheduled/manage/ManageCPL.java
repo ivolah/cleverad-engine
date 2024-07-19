@@ -204,10 +204,7 @@ public class ManageCPL {
                     Long commissionId = 0L;
                     AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
                     if (checkAction) {
-
-
                         // TODO SE ACTION ID IDENTICI??? COSA FACCIAMO
-
                         Commission cm = commissionRepository.findFirstByActionAndStatus(cplDTO.getActionId(), true);
                         if (cm != null) {
                             commissionId = cm.getId();
@@ -228,7 +225,7 @@ public class ManageCPL {
                             commVal = acccFirst.getCommissionValue();
                             commissionId = acccFirst.getCommissionId();
                         } else
-                            log.warn("No Commission CPL C: {} e A: {}, setto default ({})", refferal.getCampaignId(), refferal.getAffiliateId(), cplDTO.getRefferal());
+                            log.warn("No Commission CPL (campagna {} e affilitato {}), setto default ({})", refferal.getCampaignId(), refferal.getAffiliateId(), cplDTO.getRefferal());
                     }
                     transaction.setCommissionId(commissionId);
 

@@ -324,6 +324,8 @@ public class CampaignBusiness {
         Page<Campaign> page = null;
         Filter request = new Filter();
         request.setStatus(true);
+        if (StringUtils.isNotBlank(req.getName()))
+            request.setName(req.getName());
 
         if (StringUtils.isBlank(req.getBbtipo()) && req.getCategoryId() == null) {
             request.setIdListIn(listaId.stream().distinct().collect(Collectors.toList()));
