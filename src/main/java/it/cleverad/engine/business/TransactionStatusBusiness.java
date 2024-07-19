@@ -104,6 +104,7 @@ public class TransactionStatusBusiness {
                     request.getCreationDateFrom(), request.getCreationDateTo() != null ? request.getCreationDateTo().atTime(23, 59, 59, 99999) : null, request.getStatusId(), request.getDictionaryId(), request.getAffiliateId(), request.getChannelId(), request.getCampaignId(), request.getMediaId(), request.getCommissionId(), request.getRevenueId(), request.getPayoutPresent(), request.getPayoutId(), request.getAdvertiserId(), request.getValueNotZero(), request.getInDictionaryId(), request.getNotInDictionaryId(), request.getInStausId(), request.getNotInStausId(), orders);
         }
 
+
         final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), listaTransazioni.size());
         return new PageImpl<>(listaTransazioni.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, listaTransazioni.size());
     }
