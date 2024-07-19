@@ -396,6 +396,7 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
             "  AND ((:notInDictionaryId) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
             "  AND ((:inStausId) IS NULL OR (t.status_id in (:inStausId))) " +
             "  AND ((:notInStausId) IS NULL OR (t.status_id not in (:notInStausId))) " +
+            "  AND ((:orders) IS NULL OR (t.data in (:orders))) " +
             " " +
             "UNION " +
             "SELECT DISTINCT row_number() OVER ()                                                    AS rn, " +
@@ -468,6 +469,8 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
             "  AND ((:notInDictionaryId) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
             "  AND ((:inStausId) IS NULL OR (t.status_id in (:inStausId))) " +
             "  AND ((:notInStausId) IS NULL OR (t.status_id not in (:notInStausId))) " +
+            " AND ((:orders) IS NULL OR (t.data in (:orders))) " +
+
             " " +
             "UNION " +
             "SELECT DISTINCT row_number() OVER ()                                                          AS rn, " +
@@ -944,6 +947,7 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
                     "  AND ((:inDictionaryId) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
                     "  AND ((:notInDictionaryId) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
                     "  AND ((:inStausId) IS NULL OR (t.status_id in (:inStausId))) " +
+                    " AND ((:orders) IS NULL OR (t.data in (:orders))) " +
                     "  AND ((:notInStausId) IS NULL OR (t.status_id not in (:notInStausId))) " +
                     " " +
                     "UNION " +
@@ -1016,6 +1020,7 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
                     "  AND ((:inDictionaryId) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
                     "  AND ((:notInDictionaryId) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
                     "  AND ((:inStausId) IS NULL OR (t.status_id in (:inStausId))) " +
+                    " AND ((:orders) IS NULL OR (t.data in (:orders))) " +
                     "  AND ((:notInStausId) IS NULL OR (t.status_id not in (:notInStausId))) ;"
     )
     List<QueryTransaction> listaTransazioniCPL(
@@ -1036,7 +1041,7 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
             @Param("inDictionaryId") List<Long> inDictionaryId,
             @Param("notInDictionaryId") List<Long> notInDictionaryId,
             @Param("inStausId") List<Long> inStausId,
-            @Param("notInStausId") List<Long> notInStausId
+            @Param("notInStausId") List<Long> notInStausId, @Param("orders") List<String> orders
     );
 
     //=========================================================================================================================
@@ -1111,6 +1116,7 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
                     "  AND ((:inDictionaryId) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
                     "  AND ((:notInDictionaryId) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
                     "  AND ((:inStausId) IS NULL OR (t.status_id in (:inStausId))) " +
+                    " AND ((:orders) IS NULL OR (t.data in (:orders))) " +
                     "  AND ((:notInStausId) IS NULL OR (t.status_id not in (:notInStausId))); ;"
     )
     List<QueryTransaction> listaTransazioniCPM(
@@ -1131,7 +1137,7 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
             @Param("inDictionaryId") List<Long> inDictionaryId,
             @Param("notInDictionaryId") List<Long> notInDictionaryId,
             @Param("inStausId") List<Long> inStausId,
-            @Param("notInStausId") List<Long> notInStausId
+            @Param("notInStausId") List<Long> notInStausId, @Param("orders") List<String> orders
     );
 
 
@@ -1210,6 +1216,7 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
                     "  AND ((:notInDictionaryId) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
                     "  AND ((:inStausId) IS NULL OR (t.status_id in (:inStausId))) " +
                     "  AND ((:notInStausId) IS NULL OR (t.status_id not in (:notInStausId))) " +
+                    " AND ((:orders) IS NULL OR (t.data in (:orders))) " +
                     " " +
                     "UNION " +
                     "SELECT DISTINCT row_number() OVER ()                                                    AS rn, " +
@@ -1281,6 +1288,7 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
                     "  AND ((:inDictionaryId) IS NULL OR (t.dictionary_id in (:inDictionaryId))) " +
                     "  AND ((:notInDictionaryId) IS NULL OR (t.dictionary_id not in (:notInDictionaryId))) " +
                     "  AND ((:inStausId) IS NULL OR (t.status_id in (:inStausId))) " +
+                    " AND ((:orders) IS NULL OR (t.data in (:orders))) " +
                     "  AND ((:notInStausId) IS NULL OR (t.status_id not in (:notInStausId))) ;"
     )
     List<QueryTransaction> listaTransazioniCPS(
@@ -1301,7 +1309,7 @@ public interface QueryRepository extends JpaRepository<Report, Long>, JpaSpecifi
             @Param("inDictionaryId") List<Long> inDictionaryId,
             @Param("notInDictionaryId") List<Long> notInDictionaryId,
             @Param("inStausId") List<Long> inStausId,
-            @Param("notInStausId") List<Long> notInStausId
+            @Param("notInStausId") List<Long> notInStausId, @Param("orders") List<String> orders
     );
 
     //=========================================================================================================================
