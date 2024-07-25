@@ -219,6 +219,7 @@ public class ManageCPL {
                         req.setAffiliateId(refferal.getAffiliateId());
                         req.setChannelId(refferal.getChannelId());
                         req.setCampaignId(refferal.getCampaignId());
+                        req.setBlocked(false);
                         req.setCommissionDicId(11L);
                         AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
                         if (acccFirst != null) {

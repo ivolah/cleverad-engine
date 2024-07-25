@@ -420,6 +420,11 @@ public class CampaignBudgetBusiness {
         private LocalDate invoiceDueDate;
         private Integer volume;
         private LocalDate volumeDate;
+        private Integer capFatturabile;
+        private Double fatturato;
+        private String note;
+        private Long fatturaId;
+        private Boolean status;
     }
 
 }

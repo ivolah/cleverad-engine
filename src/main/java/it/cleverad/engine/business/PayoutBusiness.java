@@ -14,10 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.decimal4j.util.DoubleRounder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
@@ -208,11 +205,20 @@ public class PayoutBusiness {
     // SEARCH PAGINATED
     public Page<PayoutDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
-//        if (request.getDictionaryId() == null) {
-//            request.setDictionaryIdNotConcluso(true);
-//        }
         Page<Payout> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(PayoutDTO::fromNoTransazioni);
+        List<PayoutDTO> listaPayout = page.map(PayoutDTO::fromNoTransazioni).toList();
+        log.info("list size" + listaPayout.size());
+
+        PayoutDTO dto = new PayoutDTO();
+        dto.setImponibile(listaPayout.stream().mapToDouble(PayoutDTO::getImponibile).sum());
+        dto.setTotale(listaPayout.stream().mapToDouble(PayoutDTO::getTotale).sum());
+        dto.setIva(listaPayout.stream().mapToDouble(PayoutDTO::getIva).sum());
+        log.info("DTO " + dto);
+
+        List<PayoutDTO> modifiableList = new ArrayList<>(listaPayout);
+        modifiableList.add(dto);
+
+        return new PageImpl<>(modifiableList, pageableRequest, page.getTotalElements());
     }
 
     public Page<PayoutDTO> findByIdAffilaite(Long id, Pageable pageableRequest) {

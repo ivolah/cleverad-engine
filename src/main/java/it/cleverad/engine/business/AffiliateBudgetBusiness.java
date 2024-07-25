@@ -6,6 +6,7 @@ import it.cleverad.engine.persistence.repository.service.AffiliateBudgetReposito
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.web.dto.AffiliateBudgetDTO;
+import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -15,10 +16,7 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
@@ -31,8 +29,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -127,15 +127,10 @@ public class AffiliateBudgetBusiness {
     public Page<AffiliateBudgetDTO> getByIdCampaign(Long id) {
         Filter request = new Filter();
         request.setCampaignId(id);
-        Page<AffiliateBudget> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
-        return page.map(AffiliateBudgetDTO::from);
-    }
-    public Page<AffiliateBudgetDTO> getByActiveIdCampaign(Long id) {
-        Filter request = new Filter();
-        request.setCampaignId(id);
-        request.setStatus(true);
-        Page<AffiliateBudget> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
-        return page.map(AffiliateBudgetDTO::from);
+        List<AffiliateBudgetDTO> ll = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE)).map(AffiliateBudgetDTO::from).toList();
+        List<AffiliateBudgetDTO> modifiableList = new ArrayList<>(ll);
+        modifiableList = modifiableList.stream().sorted(Comparator.comparing(AffiliateBudgetDTO::getAffiliateName)).collect(Collectors.toList());
+        return new PageImpl<>(modifiableList);
     }
 
     public Page<AffiliateBudgetDTO> getByIdCampaignAndIdAffiliate(Long idCampaign, Long idAffilaite) {

@@ -148,7 +148,7 @@ public class CommissionBusiness {
     public Page<CommissionDTO> getByIdCampaign(Long id) {
         Filter request = new Filter();
         request.setCampaignId(id);
-        Page<Commission> page = repository.findAll(getSpecification(request), PageRequest.of(0, 100, Sort.by(Sort.Order.desc("id"))));
+        Page<Commission> page = repository.findAll(getSpecification(request), PageRequest.of(0, 100, Sort.by(Sort.Order.desc("value"))));
         return page.map(CommissionDTO::from);
     }
 
@@ -156,7 +156,7 @@ public class CommissionBusiness {
         Filter request = new Filter();
         request.setCampaignId(id);
         request.setStatus(true);
-        Page<Commission> page = repository.findAll(getSpecification(request), PageRequest.of(0, 100, Sort.by(Sort.Order.desc("id"))));
+        Page<Commission> page = repository.findAll(getSpecification(request), PageRequest.of(0, 100, Sort.by(Sort.Order.desc("value"))));
         return page.map(CommissionDTO::from);
     }
 
