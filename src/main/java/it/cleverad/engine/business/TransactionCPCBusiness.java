@@ -152,6 +152,13 @@ public class TransactionCPCBusiness {
         return TransactionCPCDTO.from(cpcRepository.save(cpc));
     }
 
+    public TransactionCPCDTO settaScaduto( Long id) {
+        TransactionCPC cpc = cpcRepository.findById(id).get();
+        cpc.setValue(0D);
+        cpc.setDictionaryStatus(dictionaryRepository.findById(127L).get());
+        return TransactionCPCDTO.from(cpcRepository.save(cpc));
+    }
+
     //  quando campbio stato devo ricalcolare i budget affilitato e campagna
     //  nuovi tre stati  : pending, approvato e rifutato
     public void updateStatus(Long id, Long dictionaryId, Boolean approved, Long statusId) {

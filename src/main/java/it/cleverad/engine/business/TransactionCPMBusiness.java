@@ -190,6 +190,13 @@ public class TransactionCPMBusiness {
         }
     }
 
+    public TransactionCPMDTO settaScaduto(Long id) {
+        TransactionCPM cpc = cpmRepository.findById(id).get();
+        cpc.setValue(0D);
+        cpc.setDictionaryStatus(dictionaryRepository.findById(127L).get());
+        return TransactionCPMDTO.from(cpmRepository.save(cpc));
+    }
+
     // SEARCH PAGINATED
     public Page<TransactionCPMDTO> searchCpm(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));

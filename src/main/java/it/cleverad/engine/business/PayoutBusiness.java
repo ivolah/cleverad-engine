@@ -52,6 +52,14 @@ public class PayoutBusiness {
     private MailService mailService;
     @Autowired
     private TransactionStatusBusiness transactionStatusBusiness;
+    @Autowired
+    private TransactionCPCBusiness transactionCPCBusiness;
+    @Autowired
+    private TransactionCPLBusiness transactionCPLBusiness;
+    @Autowired
+    private TransactionCPSBusiness transactionCPSBusiness;
+    @Autowired
+    private TransactionCPMBusiness transactionCPMBusiness;
 
     /**
      * ============================================================================================================
@@ -88,10 +96,10 @@ public class PayoutBusiness {
             affiliatesList.add(transaction.getAffiliate().getId());
         });
 
-//        request.getTransazioniCps().stream().forEach(id -> {
-//            TransactionCPS transaction = cpsRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction CPS", id));
+        request.getTransazioniCps().stream().forEach(id -> {
+            TransactionCPS transaction = cpsRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction CPS", id));
 //            affiliatesList.add(transaction.getAffiliate().getId());
-//        });
+        });
 
         // faccio distinct e creo un pqyout vuoto per ognuno
         HashMap<Long, Long> affiliatoPayout = new HashMap<>();
@@ -207,13 +215,11 @@ public class PayoutBusiness {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Page<Payout> page = repository.findAll(getSpecification(request), pageable);
         List<PayoutDTO> listaPayout = page.map(PayoutDTO::fromNoTransazioni).toList();
-        log.info("list size" + listaPayout.size());
 
         PayoutDTO dto = new PayoutDTO();
         dto.setImponibile(listaPayout.stream().mapToDouble(PayoutDTO::getImponibile).sum());
         dto.setTotale(listaPayout.stream().mapToDouble(PayoutDTO::getTotale).sum());
         dto.setIva(listaPayout.stream().mapToDouble(PayoutDTO::getIva).sum());
-        log.info("DTO " + dto);
 
         List<PayoutDTO> modifiableList = new ArrayList<>(listaPayout);
         modifiableList.add(dto);
@@ -225,20 +231,18 @@ public class PayoutBusiness {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setDictionaryIdNotApprovato(true);
+        request.setDictionaryIdNotScaduto(true);
         if (id != null) request.setAffiliateId(id);
         Page<Payout> page = repository.findAll(getSpecification(request), pageable);
         return page.map(PayoutDTO::fromNoTransazioni);
     }
 
+
+
     // UPDATE
     public PayoutDTO update(Long id, Filter filter) {
         Payout payout = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Payout", id));
         payout.setDataScadenza(filter.getDataScadenza());
-        //        Long dataDaSommare = Long.valueOf(payout.getAffiliate().getDictionaryTermType().getDescription());
-        //        payout.setDataScadenza(payout.getData().plusDays(dataDaSommare));
-        //        Double ivaDaMoltiplicare = Double.valueOf(payout.getAffiliate().getDictionaryVatType().getDescription());
-        //        payout.setIva(payout.getImponibile() * ivaDaMoltiplicare);
-        //        payout.setTotale(payout.getImponibile() + payout.getIva());
         return PayoutDTO.from(repository.save(payout));
     }
 
@@ -257,45 +261,35 @@ public class PayoutBusiness {
         return PayoutDTO.from(repository.save(payout));
     }
 
-    public PayoutDTO removeCpc(Long payoutId, Long transactionId) {
-
-        TransactionCPC cpc = cpcRepository.findById(transactionId).orElseThrow(() -> new ElementCleveradException("Transaction CPC", transactionId));
-        Double value = cpc.getValue();
-        cpc.setPayout(null);
-        cpc.setPayoutReference(null);
-        cpcRepository.save(cpc);
-
-        Payout payout = repository.findById(payoutId).orElseThrow(() -> new ElementCleveradException("Payout", payoutId));
-        Set<TransactionCPC> transactionCPCS = payout.getTransactionCPCS();
-        transactionCPCS.remove(cpc);
-        payout.setTransactionCPCS(transactionCPCS);
-        Double totale = payout.getTotale();
-        payout.setTotale(totale - value);
-        repository.save(payout);
-
-        return PayoutDTO.from(payout);
-    }
-
-    public PayoutDTO removeCpl(Long payoutId, Long transactionId) {
-        TransactionCPL cpl = cplRepository.findById(transactionId).orElseThrow(() -> new ElementCleveradException("Transaction CPL", transactionId));
-        Double value = cpl.getValue();
-        cpl.setPayout(null);
-        cpl.setPayoutReference(null);
-        cplRepository.save(cpl);
-
-        Payout payout = repository.findById(payoutId).orElseThrow(() -> new ElementCleveradException("Payout", payoutId));
-        Set<TransactionCPL> transactionCPCl = payout.getTransactionCPLS();
-        transactionCPCl.remove(cpl);
-        payout.setTransactionCPLS(transactionCPCl);
-        Double totale = payout.getTotale();
-        payout.setTotale(totale - value);
-        repository.save(payout);
-        return PayoutDTO.from(payout);
-    }
-
     //  GET TIPI
     public Page<DictionaryDTO> getTypes() {
         return dictionaryBusiness.getTypePayout();
+    }
+
+    /**
+     * ============================================================================================================
+     **/
+
+    public List<PayoutDTO> getPayoutToDisable() {
+        Filter request = new Filter();
+        request.setStato(true);
+        request.setDateTo(LocalDate.now().minusMonths(6));
+        request.setDictionaryIdNotConcluso(true);
+        return repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE)).map(PayoutDTO::fromNoTransazioni).toList();
+    }
+
+    public PayoutDTO settaScaduti(Long id) {
+        Payout payout = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Payout", id));
+        payout.setDictionary(dictionaryRepository.findById(126L).get());
+
+        // rigetto tutte le transazioni del payout
+        payout.getTransactionCPCS().stream().forEach(transaction -> transactionCPCBusiness.settaScaduto(transaction.getId()));
+        payout.getTransactionCPLS().stream().forEach(transaction -> transactionCPLBusiness.settaScaduto(transaction.getId()));
+        payout.getTransactionCPMS().stream().forEach(transaction -> transactionCPMBusiness.settaScaduto(transaction.getId()));
+        payout.getTransactionCPSS().stream().forEach(transaction -> transactionCPSBusiness.settaScaduto(transaction.getId()));
+
+
+        return PayoutDTO.from(repository.save(payout));
     }
 
     /**
@@ -341,6 +335,10 @@ public class PayoutBusiness {
                 predicates.add(cb.notEqual(root.get("dictionary").get("id"), 18));
             }
 
+            if (request.getDictionaryIdNotScaduto() != null && request.getDictionaryIdNotScaduto()) {
+                predicates.add(cb.notEqual(root.get("dictionary").get("id"), 126));
+            }
+
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
             return completePredicate;
         };
@@ -382,6 +380,7 @@ public class PayoutBusiness {
         private Long dictionaryId;
         private Boolean dictionaryIdNotConcluso;
         private Boolean dictionaryIdNotApprovato;
+        private Boolean dictionaryIdNotScaduto;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate data;
         @DateTimeFormat(pattern = "yyyy-MM-dd")

@@ -44,6 +44,8 @@ public class CampaignBudgetBusiness {
     @Autowired
     private CampaignBudgetService campaignBudgetService;
     @Autowired
+    private CampaignCostBusiness campaignCostBusiness;
+    @Autowired
     private Mapper mapper;
 
     private static double calculateMedian(Page<CampaignBudget> page, String fieldName) {
@@ -88,6 +90,8 @@ public class CampaignBudgetBusiness {
         map.setBudgetIniziale(DoubleRounder.round(request.getPayout() * request.capIniziale, 2));
         map.setStatoPagato(false);
         map.setStatoFatturato(false);
+        Double costi = campaignCostBusiness.searchByCampaignID(campaign.getId(), Pageable.unpaged()).toList().stream().mapToDouble(campaignCostDTO -> campaignCostDTO.getCosto()).sum();
+        map.setCosti(costi);
         if (request.getScarto() == null) map.setScarto(0D);
         return CampaignBudgetDTO.from(repository.save(map));
     }
@@ -154,80 +158,6 @@ public class CampaignBudgetBusiness {
         return newPage.map(CampaignBudgetDTO::from);
     }
 
-    private CampaignBudget calculateTotalsForDoubleFields(Page<CampaignBudget> page) {
-        CampaignBudget campaignBudget = new CampaignBudget();
-        campaignBudget.setCapIniziale(getIntegerFieldValue(page, "capIniziale"));
-        campaignBudget.setCapErogato(getIntegerFieldValue(page, "capErogato"));
-
-        // versione originale
-//        if (campaignBudget.getCapErogato() != 0D) {
-//            campaignBudget.setCapPc(DoubleRounder.round((campaignBudget.getCapErogato() * 100) / campaignBudget.getCapIniziale(), 2));
-//        } else campaignBudget.setCapPc(0D);
-
-        campaignBudget.setPayout(calculateMedian(page, "payout"));
-        campaignBudget.setBudgetIniziale(getFieldValue(page, "budgetIniziale"));
-        campaignBudget.setBudgetErogato(getFieldValue(page, "budgetErogato"));
-
-        // hack per manenere stesso campo ma calcolare % budget
-        if (campaignBudget.getBudgetErogato() != 0D) {
-            campaignBudget.setCapPc(DoubleRounder.round((campaignBudget.getBudgetErogato() * 100) / campaignBudget.getBudgetIniziale(), 2));
-        } else campaignBudget.setCapPc(0D);
-
-        campaignBudget.setCommissioniErogate(getFieldValue(page, "commissioniErogate"));
-        campaignBudget.setRevenue(getFieldValue(page, "revenue"));
-        if (campaignBudget.getBudgetErogato() != 0D) {
-            campaignBudget.setRevenuePC(DoubleRounder.round((campaignBudget.getRevenue() / campaignBudget.getBudgetErogato()) * 100, 2));
-        } else campaignBudget.setRevenuePC(0D);
-
-        campaignBudget.setScarto(getFieldValue(page, "scarto"));
-        campaignBudget.setBudgetErogatops(getFieldValue(page, "budgetErogatops"));
-        campaignBudget.setCommissioniErogateps(getFieldValue(page, "commissioniErogateps"));
-        campaignBudget.setRevenuePS(getFieldValue(page, "revenuePS"));
-        if (campaignBudget.getBudgetErogatops() != 0D) {
-            campaignBudget.setRevenuePCPS(DoubleRounder.round((campaignBudget.getRevenuePS() / campaignBudget.getBudgetErogatops()) * 100, 2));
-        } else campaignBudget.setRevenuePCPS(0D);
-        campaignBudget.setRevenueDay(DoubleRounder.round(campaignBudget.getRevenue() / LocalDate.now().getDayOfMonth(), 2));
-        campaignBudget.setFatturato(getFieldValue(page, "fatturato"));
-        campaignBudget.setStatus(null);
-        campaignBudget.setPrenotato(null);
-
-        return campaignBudget;
-    }
-
-    // Helper method to get field value by field name using Reflection
-    private double getFieldValue(Page<CampaignBudget> page, String fieldName) {
-        return page.getContent().stream().mapToDouble(entity -> {
-            Field field = null;
-            try {
-                field = CampaignBudget.class.getDeclaredField(fieldName);
-                field.setAccessible(true);
-                Object value = field.get(entity);
-                if (value instanceof Double) {
-                    return (Double) value;
-                }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-            return 0.0;
-        }).sum();
-    }
-
-    private Integer getIntegerFieldValue(Page<CampaignBudget> page, String fieldName) {
-        return page.getContent().stream().mapToInt(entity -> {
-            Field field = null;
-            try {
-                field = CampaignBudget.class.getDeclaredField(fieldName);
-                field.setAccessible(true);
-                Object value = field.get(entity);
-                if (value instanceof Integer) {
-                    return (Integer) value;
-                }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-            return 0;
-        }).sum();
-    }
 
     public Page<CampaignBudgetDTO> searchByCampaignID(Long campaignId, Pageable pageableRequest) {
         Sort sort = Sort.by(Sort.Order.desc("campaignStatus"), Sort.Order.asc("advertiserName"), Sort.Order.asc("plannerName"), Sort.Order.asc("campaignName"));
@@ -312,6 +242,80 @@ public class CampaignBudgetBusiness {
      * ============================================================================================================
      **/
 
+    private CampaignBudget calculateTotalsForDoubleFields(Page<CampaignBudget> page) {
+        CampaignBudget campaignBudget = new CampaignBudget();
+        campaignBudget.setCapIniziale(getIntegerFieldValue(page, "capIniziale"));
+        campaignBudget.setCapErogato(getIntegerFieldValue(page, "capErogato"));
+        campaignBudget.setPayout(calculateMedian(page, "payout"));
+        campaignBudget.setBudgetIniziale(getFieldValue(page, "budgetIniziale"));
+        campaignBudget.setBudgetErogato(getFieldValue(page, "budgetErogato"));
+
+        // hack per manenere stesso campo ma calcolare % budget
+        if (campaignBudget.getBudgetErogato() != 0D) {
+            campaignBudget.setCapPc(DoubleRounder.round((campaignBudget.getBudgetErogato() * 100) / campaignBudget.getBudgetIniziale(), 2));
+        } else campaignBudget.setCapPc(0D);
+
+        campaignBudget.setCommissioniErogate(getFieldValue(page, "commissioniErogate"));
+        campaignBudget.setRevenue(getFieldValue(page, "revenue"));
+        if (campaignBudget.getBudgetErogato() != 0D) {
+            campaignBudget.setRevenuePC(DoubleRounder.round((campaignBudget.getRevenue() / campaignBudget.getBudgetErogato()) * 100, 2));
+        } else campaignBudget.setRevenuePC(0D);
+
+        campaignBudget.setScarto(getFieldValue(page, "scarto"));
+        campaignBudget.setBudgetErogatops(getFieldValue(page, "budgetErogatops"));
+        campaignBudget.setCommissioniErogateps(getFieldValue(page, "commissioniErogateps"));
+        campaignBudget.setRevenuePS(getFieldValue(page, "revenuePS"));
+        if (campaignBudget.getBudgetErogatops() != 0D) {
+            campaignBudget.setRevenuePCPS(DoubleRounder.round((campaignBudget.getRevenuePS() / campaignBudget.getBudgetErogatops()) * 100, 2));
+        } else campaignBudget.setRevenuePCPS(0D);
+        campaignBudget.setRevenueDay(DoubleRounder.round(campaignBudget.getRevenue() / LocalDate.now().getDayOfMonth(), 2));
+        campaignBudget.setFatturato(getFieldValue(page, "fatturato"));
+        campaignBudget.setStatus(null);
+        campaignBudget.setPrenotato(null);
+
+        return campaignBudget;
+    }
+
+    // Helper method to get field value by field name using Reflection
+    private double getFieldValue(Page<CampaignBudget> page, String fieldName) {
+        return page.getContent().stream().mapToDouble(entity -> {
+            Field field = null;
+            try {
+                field = CampaignBudget.class.getDeclaredField(fieldName);
+                field.setAccessible(true);
+                Object value = field.get(entity);
+                if (value instanceof Double) {
+                    return (Double) value;
+                }
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+            return 0.0;
+        }).sum();
+    }
+
+    private Integer getIntegerFieldValue(Page<CampaignBudget> page, String fieldName) {
+        return page.getContent().stream().mapToInt(entity -> {
+            Field field = null;
+            try {
+                field = CampaignBudget.class.getDeclaredField(fieldName);
+                field.setAccessible(true);
+                Object value = field.get(entity);
+                if (value instanceof Integer) {
+                    return (Integer) value;
+                }
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+            return 0;
+        }).sum();
+    }
+
+
+    /**
+     * ============================================================================================================
+     **/
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
@@ -350,6 +354,7 @@ public class CampaignBudgetBusiness {
         private Integer volume;
         private LocalDate volumeDate;
         private Integer volumeDelta;
+        private Double costi;
     }
 
     @Data
@@ -399,6 +404,7 @@ public class CampaignBudgetBusiness {
         private Boolean status;
         private Boolean statoFatturato;
         private Boolean statoPagato;
+        private Double costi;
     }
 
     @Data

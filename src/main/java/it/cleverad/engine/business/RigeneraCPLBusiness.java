@@ -231,6 +231,7 @@ public class RigeneraCPLBusiness {
                                 req.setChannelId(refferal.getChannelId());
                                 req.setCampaignId(refferal.getCampaignId());
                                 req.setCommissionDicId(11L);
+                                req.setBlocked(false);
                                 AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
                                 if (acccFirst != null) {
                                     commVal = acccFirst.getCommissionValue();

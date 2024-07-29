@@ -113,6 +113,8 @@ public class ManageCPS {
                     transaction.setDateTime(cpsDTO.getDate());
                     transaction.setApproved(true);
                     transaction.setPayoutPresent(false);
+                    // setto id CPC
+                    transaction.setCpcId(idCpc);
 
                     if (StringUtils.isNotBlank(cpsDTO.getAgent())) transaction.setAgent(cpsDTO.getAgent());
                     else transaction.setAgent("");
@@ -125,9 +127,11 @@ public class ManageCPS {
                     try {
                         CampaignDTO campaignDTO = campaignBusiness.findByIdAdmin(refferal.getCampaignId());
                         LocalDate endDate = campaignDTO.getEndDate();
+                        Boolean scaduta = false;
                         if (endDate.isBefore(LocalDate.now())) {
                             // setto a campagna scaduta
                             transaction.setDictionaryId(49L);
+                            scaduta =true;
                         } else {
                             //setto pending
                             transaction.setDictionaryId(42L);
@@ -142,65 +146,73 @@ public class ManageCPS {
                             transaction.setWalletId(walletID);
                         }
 
-                        // GIRO STANDARD
-                        RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 51L);
-                        if (rf != null) {
-                            transaction.setRevenueId(rf.getId());
+
+                        if (scaduta) {
+                            log.debug("Campagna {} : {} scaduta", campaignDTO.getId(), campaignDTO.getName());
+                            transaction.setRevenueId(1L);
+                            transaction.setCommissionId(0L);
+                            transaction.setStatusId(74L); // rigettato
+                            transaction.setValue(0D);
                         } else {
-                            log.warn("Non trovato revenue factor di tipo 51 per campagna {} , setto default", refferal.getCampaignId());
-                            transaction.setRevenueId(2L);
+
+                            // GIRO STANDARD
+                            RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 51L);
+                            if (rf != null) {
+                                transaction.setRevenueId(rf.getId());
+                            } else {
+                                log.warn("Non trovato revenue factor di tipo 51 per campagna {} , setto default", refferal.getCampaignId());
+                                transaction.setRevenueId(2L);
+                            }
+
+                            // gesione commisione
+                            Double sellValue = 0D;
+                            Long commissionId = 0L;
+                            AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
+                            req.setAffiliateId(refferal.getAffiliateId());
+                            req.setChannelId(refferal.getChannelId());
+                            req.setCampaignId(refferal.getCampaignId());
+                            req.setCommissionDicId(51L);
+                            req.setBlocked(false);
+                            AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
+                            if (acccFirst != null) {
+                                // trovo in info di cps il ORDER VALUE
+                                String info = cpsDTO.getData();
+                                Map<String, String> infos = referralService.estrazioneInfo(info);
+                                String orderValue = infos.get("orderValue");
+                                log.info("OrderValue: " + orderValue);
+                                if (StringUtils.isNotBlank(orderValue)) {
+                                    Double valore = Double.valueOf(orderValue);
+                                    Double percentuale = acccFirst.getSale();
+                                    log.info("Valore {} - Percenutale {}", valore, percentuale);
+                                    sellValue = (percentuale / 100.0) * valore;
+                                    log.info("SELL VALUE :: {}", DoubleRounder.round(sellValue, 2));
+                                }
+                                commissionId = acccFirst.getCommissionId();
+                            } else
+                                log.warn("No Commission CPS C: {} e A: {}, setto default ({})", refferal.getCampaignId(), refferal.getAffiliateId(), cpsDTO.getRefferal());
+
+                            transaction.setCommissionId(commissionId);
+                            transaction.setValue(DoubleRounder.round(sellValue * 1, 2));
+
+                            // decremento budget Affiliato
+                            AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
+                            if (bb != null && bb.getBudget() != null && (bb.getBudget() - sellValue) < 0)
+                                transaction.setDictionaryId(47L);
+
+                            // Stato Budget Campagna
+                            CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(refferal.getCampaignId(), transaction.getDateTime().toLocalDate()).stream().findFirst().orElse(null);
+                            if (campBudget != null && campBudget.getBudgetErogato() != null) {
+                                Double budgetCampagna = campBudget.getBudgetErogato() - sellValue;
+                                // setto stato transazione a ovebudget editore se totale < 0
+                                if (budgetCampagna < 0) {
+                                    transaction.setDictionaryId(48L);
+                                }
+                            }
+                            //setto pending
+                            transaction.setStatusId(72L);
                         }
 
-                        // gesione commisione
-                        Double sellValue = 0D;
-                        Long commissionId = 0L;
-                        AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
-                        req.setAffiliateId(refferal.getAffiliateId());
-                        req.setChannelId(refferal.getChannelId());
-                        req.setCampaignId(refferal.getCampaignId());
-                        req.setCommissionDicId(51L);
-                        AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
-                        if (acccFirst != null) {
-                            // trovo in info di cps il ORDER VALUE
-                            String info = cpsDTO.getData();
-                            Map<String, String> infos = referralService.estrazioneInfo(info);
-                            String orderValue = infos.get("orderValue");
-                            log.info("OrderValue: " + orderValue);
-                            if (StringUtils.isNotBlank(orderValue)) {
-                                Double valore = Double.valueOf(orderValue);
-                                Double percentuale = acccFirst.getSale();
-                                log.info("Valore {} - Percenutale {}", valore, percentuale);
-                                sellValue = (percentuale / 100.0) * valore;
-                                log.info("SELL VALUE :: {}", DoubleRounder.round(sellValue, 2));
-                            }
-                            commissionId = acccFirst.getCommissionId();
-                        } else
-                            log.warn("No Commission CPS C: {} e A: {}, setto default ({})", refferal.getCampaignId(), refferal.getAffiliateId(), cpsDTO.getRefferal());
-
-                        transaction.setCommissionId(commissionId);
-                        transaction.setValue(DoubleRounder.round(sellValue * 1, 2));
-
-                        // decremento budget Affiliato
-                        AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
-                        if (bb != null && bb.getBudget() != null && (bb.getBudget() - sellValue) < 0)
-                            transaction.setDictionaryId(47L);
-
-                        // Stato Budget Campagna
-                        CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(refferal.getCampaignId(), transaction.getDateTime().toLocalDate()).stream().findFirst().orElse(null);
-                        if (campBudget != null && campBudget.getBudgetErogato() != null) {
-                            Double budgetCampagna = campBudget.getBudgetErogato() - sellValue;
-                            // setto stato transazione a ovebudget editore se totale < 0
-                            if (budgetCampagna < 0) {
-                                transaction.setDictionaryId(48L);
-                            }
-                        }
-                        //setto pending
-                        transaction.setStatusId(72L);
-
-                        // setto id CPC
-                        transaction.setCpcId(idCpc);
-
-                        // creo la transazione
+                                   // creo la transazione
                         TransactionCPSDTO cps = transactionCPSBusiness.createCps(transaction);
                         log.info(">>> CREATO TRANSAZIONE :::: CPS :::: {} ", cps.getId());
 

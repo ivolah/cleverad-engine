@@ -127,4 +127,6 @@ public class CampaignBudget {
     @OneToMany(mappedBy = "campaignBudget")
     private Set<FileCampaignBudgetOrder> fileCampaignBudgetOrders;
 
+    private Double costi;
+
 }

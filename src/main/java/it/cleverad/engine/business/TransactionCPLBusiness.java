@@ -76,7 +76,6 @@ public class TransactionCPLBusiness {
     public TransactionCPLDTO createCpl(BaseCreateRequest request) {
         Long numero = request.getLeadNumber();
         TransactionCPL cpl = null;
-        log.info("Numero : " + numero);
 
         if (numero == null) {
             numero = 1L;
@@ -136,7 +135,7 @@ public class TransactionCPLBusiness {
             newCplTransaction.setWallet(ww);
 
             cpl = cplRepository.saveAndFlush(newCplTransaction);
-            log.info(i + " >> ID :: " + cpl.getId());
+            log.trace(i + " >> ID :: " + cpl.getId());
         }
 
         if (cpl != null) {
@@ -255,6 +254,13 @@ public class TransactionCPLBusiness {
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
         }
+    }
+
+    public TransactionCPLDTO settaScaduto(Long id) {
+        TransactionCPL cpc = cplRepository.findById(id).get();
+        cpc.setValue(0D);
+        cpc.setDictionaryStatus(dictionaryRepository.findById(127L).get());
+        return TransactionCPLDTO.from(cplRepository.save(cpc));
     }
 
     /**

@@ -25,7 +25,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -168,6 +167,8 @@ public class ManageCPC {
                         TransactionCPCBusiness.BaseCreateRequest transaction = new TransactionCPCBusiness.BaseCreateRequest();
                         transaction.setCampaignId(campaignId);
                         transaction.setPayoutPresent(false);
+                        transaction.setClickNumber(Long.valueOf(numer));
+                        transaction.setAgent("");
 
                         Long affiliateId = refferal.getAffiliateId();
                         if (!Objects.isNull(affiliateId)) transaction.setAffiliateId(affiliateId);
@@ -179,9 +180,11 @@ public class ManageCPC {
                         transaction.setDateTime(LocalDateTime.now().withMinute(0).withSecond(0).withNano(0).minusMinutes(1));
                         transaction.setApproved(true);
 
+                        Boolean scaduta = false;
                         if (campaign.getEndDate().isBefore(LocalDate.now())) {
                             // setto a campagna scaduta
                             transaction.setDictionaryId(49L);
+                            scaduta = true;
                         } else {
                             transaction.setDictionaryId(42L);
                         }
@@ -193,65 +196,75 @@ public class ManageCPC {
                             transaction.setWalletId(walletID);
                         }
 
-                        // trovo revenue
-                        RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(campaignId, 10L);
-                        if (rf != null && rf.getId() != null) {
-                            transaction.setRevenueId(rf.getId());
-                        } else {
-                            log.trace("Non trovato revenue factor di tipo 10 per campagna {}, setto default", campaignId);
-                            transaction.setRevenueId(1L);
-                        }
-
                         // gesione commisione
                         Double commVal = 0D;
 
-                        AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
-                        req.setAffiliateId(affiliateId);
-                        req.setChannelId(channelId);
-                        req.setCampaignId(campaignId);
-                        req.setCommissionDicId(10L);
-
-                        AffiliateChannelCommissionCampaignDTO accc = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
-                        if (accc != null) {
-                            commVal = accc.getCommissionValue();
-                            transaction.setCommissionId(accc.getCommissionId());
-                        } else {
-                            log.trace("Non trovato Commission di tipo 10 per campagna {}, setto default", campaignId);
+                        if (scaduta) {
+                            log.debug("Campagna {} : {} scaduta", campaign.getId(), campaign.getName());
+                            transaction.setRevenueId(1L);
                             transaction.setCommissionId(0L);
-                        }
+                            transaction.setStatusId(74L); // rigettato
+                            transaction.setValue(0D);
+                        } else {
 
-                        // calcolo valore
-                        Double totale = commVal * numer;
-                        transaction.setValue(totale);
-                        transaction.setClickNumber(Long.valueOf(numer));
-
-                        // incemento valore scheduled
-
-                        // decremento budget Affiliato
-                        AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(campaignId, affiliateId).stream().findFirst().orElse(null);
-                        // setto stato transazione a ovebudget editore se totale < 0
-                        if (bb != null && bb.getBudget() != null && ((bb.getBudget() - totale) < 0)) {
-                            transaction.setDictionaryId(47L);
-                        }
-
-                        // Stato Budget Campagna
-                        CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(refferal.getCampaignId(), transaction.getDateTime().toLocalDate()).stream().findFirst().orElse(null);
-                        if (campBudget != null && campBudget.getBudgetErogato() != null) {
-                            Double budgetCampagna = campBudget.getBudgetErogato() - totale;
-                            // setto stato transazione a ovebudget editore se totale < 0
-                            if (budgetCampagna < 0) {
-                                transaction.setDictionaryId(48L);
+                            // trovo revenue
+                            RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(campaignId, 10L);
+                            if (rf != null && rf.getId() != null) {
+                                transaction.setRevenueId(rf.getId());
+                            } else {
+                                log.trace("Non trovato revenue factor di tipo 10 per campagna {}, setto default", campaignId);
+                                transaction.setRevenueId(1L);
                             }
+
+                            //trovo commissione
+                            AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
+                            req.setAffiliateId(affiliateId);
+                            req.setChannelId(channelId);
+                            req.setCampaignId(campaignId);
+                            req.setCommissionDicId(10L);
+                            req.setBlocked(false);
+
+                            AffiliateChannelCommissionCampaignDTO accc = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
+                            if (accc != null) {
+                                commVal = accc.getCommissionValue();
+                                transaction.setCommissionId(accc.getCommissionId());
+                            } else {
+                                log.trace("Non trovato Commission di tipo 10 per campagna {}, setto default", campaignId);
+                                transaction.setCommissionId(0L);
+                            }
+
+                            // calcolo valore
+                            Double totale = commVal * numer;
+                            transaction.setValue(totale);
+
+                            // incemento valore scheduled
+
+                            // decremento budget Affiliato
+                            AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(campaignId, affiliateId).stream().findFirst().orElse(null);
+                            // setto stato transazione a ovebudget editore se totale < 0
+                            if (bb != null && bb.getBudget() != null && ((bb.getBudget() - totale) < 0)) {
+                                transaction.setDictionaryId(47L);
+                            }
+
+                            // Stato Budget Campagna
+                            CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(refferal.getCampaignId(), transaction.getDateTime().toLocalDate()).stream().findFirst().orElse(null);
+                            if (campBudget != null && campBudget.getBudgetErogato() != null) {
+                                Double budgetCampagna = campBudget.getBudgetErogato() - totale;
+                                // setto stato transazione a ovebudget editore se totale < 0
+                                if (budgetCampagna < 0) {
+                                    transaction.setDictionaryId(48L);
+                                }
+                            }
+
+                            // commissione scaduta
+                            if (accc != null && accc.getCommissionDueDate() != null && (accc.getCommissionDueDate().isBefore(LocalDate.now()))) {
+                                transaction.setDictionaryId(49L);
+                            }
+
+                            transaction.setStatusId(72L);//setto pending
                         }
 
-                        // commissione scaduta
-                        if (accc != null && accc.getCommissionDueDate() != null && (accc.getCommissionDueDate().isBefore(LocalDate.now()))) {
-                            transaction.setDictionaryId(49L);
-                        }
 
-                        transaction.setAgent("");
-                        //setto pending
-                        transaction.setStatusId(72L);
 
                         // creo la transazione
                         TransactionCPCDTO tcpc = transactionCPCBusiness.createCpc(transaction);

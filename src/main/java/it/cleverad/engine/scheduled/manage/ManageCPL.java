@@ -13,7 +13,6 @@ import it.cleverad.engine.persistence.repository.tracking.CplRepository;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.*;
 import it.cleverad.engine.web.dto.tracking.CpcDTO;
-import it.cleverad.engine.web.dto.tracking.CplDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -143,6 +142,7 @@ public class ManageCPL {
                     transaction.setDateTime(cplDTO.getDate());
                     transaction.setApproved(true);
                     transaction.setPayoutPresent(false);
+                    transaction.setLeadNumber(1L);
 
                     if (StringUtils.isNotBlank(cplDTO.getAgent())) transaction.setAgent(cplDTO.getAgent());
                     else transaction.setAgent("");
@@ -153,10 +153,12 @@ public class ManageCPL {
 
                     // controlla data scadneza camapgna
                     CampaignDTO campaignDTO = campaignBusiness.findByIdAdmin(refferal.getCampaignId());
+                    Boolean scaduta = false;
                     LocalDate endDate = campaignDTO.getEndDate();
                     if (endDate.isBefore(LocalDate.now())) {
                         // setto a campagna scaduta
                         transaction.setDictionaryId(49L);
+                        scaduta = true;
                     } else {
                         //setto pending
                         transaction.setDictionaryId(42L);
@@ -170,89 +172,98 @@ public class ManageCPL {
                         transaction.setWalletId(walletID);
                     }
 
-                    // check Action ID
-                    boolean checkAction = false;
-                    if (StringUtils.isNotBlank(cplDTO.getActionId()) && (cplDTO.getActionId().equals("0"))) {
-                        log.info(">>>>>>>>>> TROVATO ACTION : {}", cplDTO.getActionId());
-                        checkAction = true;
+                    if (scaduta) {
+                        log.debug("Campagna {} : {} scaduta", campaignDTO.getId(), campaignDTO.getName());
+                        transaction.setRevenueId(1L);
+                        transaction.setCommissionId(0L);
+                        transaction.setStatusId(74L); // rigettato
+                        transaction.setValue(0D);
+                    } else {
 
-                    }
+                        // check Action ID
+                        boolean checkAction = false;
+                        if (StringUtils.isNotBlank(cplDTO.getActionId()) && (cplDTO.getActionId().equals("0"))) {
+                            log.info(">>>>>>>>>> TROVATO ACTION : {}", cplDTO.getActionId());
+                            checkAction = true;
 
-                    // trovo revenue
-                    if (checkAction) {
-                        RevenueFactor rf = revenueFactorRepository.findFirstByActionAndStatus(cplDTO.getActionId(), true);
-                        if (rf != null) {
-                            transaction.setRevenueId(rf.getId());
-                            log.warn("Revenue >{}< trovata da action ID >{}<", rf.getId(), cplDTO.getActionId());
-                        } else {
-                            checkAction = false;
                         }
-                    }
-                    if (!checkAction) {
-                        // GIRO STANDARD
-                        RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 11L);
-                        if (rf != null) {
-                            transaction.setRevenueId(rf.getId());
-                        } else {
-                            log.warn("Non trovato revenue factor di tipo 11 per campagna {} , setto default", refferal.getCampaignId());
-                            transaction.setRevenueId(2L);
+
+                        // trovo revenue
+                        if (checkAction) {
+                            RevenueFactor rf = revenueFactorRepository.findFirstByActionAndStatus(cplDTO.getActionId(), true);
+                            if (rf != null) {
+                                transaction.setRevenueId(rf.getId());
+                                log.warn("Revenue >{}< trovata da action ID >{}<", rf.getId(), cplDTO.getActionId());
+                            } else {
+                                checkAction = false;
+                            }
                         }
-                    }
-
-                    // gesione commisione
-                    Double commVal = 0D;
-                    Long commissionId = 0L;
-                    AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
-                    if (checkAction) {
-                        // TODO SE ACTION ID IDENTICI??? COSA FACCIAMO
-                        Commission cm = commissionRepository.findFirstByActionAndStatus(cplDTO.getActionId(), true);
-                        if (cm != null) {
-                            commissionId = cm.getId();
-                            commVal = cm.getValue();
-                            log.warn("Commissione >{}< trovata da action ID >{}<", cm.getId(), cplDTO.getActionId());
-                        } else {
-                            checkAction = false;
+                        if (!checkAction) {
+                            // GIRO STANDARD
+                            RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 11L);
+                            if (rf != null) {
+                                transaction.setRevenueId(rf.getId());
+                            } else {
+                                log.warn("Non trovato revenue factor di tipo 11 per campagna {} , setto default", refferal.getCampaignId());
+                                transaction.setRevenueId(2L);
+                            }
                         }
-                    }
-                    if (!checkAction) {
-                        // non è settato l'actionId allora faccio il solito giro
-                        req.setAffiliateId(refferal.getAffiliateId());
-                        req.setChannelId(refferal.getChannelId());
-                        req.setCampaignId(refferal.getCampaignId());
-                        req.setBlocked(false);
-                        req.setCommissionDicId(11L);
-                        AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
-                        if (acccFirst != null) {
-                            commVal = acccFirst.getCommissionValue();
-                            commissionId = acccFirst.getCommissionId();
-                        } else
-                            log.warn("No Commission CPL (campagna {} e affilitato {}), setto default ({})", refferal.getCampaignId(), refferal.getAffiliateId(), cplDTO.getRefferal());
-                    }
-                    transaction.setCommissionId(commissionId);
 
-                    Double totale = commVal * 1;
-                    transaction.setValue(DoubleRounder.round(totale, 2));
-                    transaction.setLeadNumber(1L);
-
-                    // incemento valore schedled
-
-                    // decremento budget Affiliato
-                    AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
-                    if (bb != null && bb.getBudget() != null && (bb.getBudget() - totale) < 0)
-                        transaction.setDictionaryId(47L);
-
-                    // Stato Budget Campagna
-                    CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(refferal.getCampaignId(), transaction.getDateTime().toLocalDate()).stream().findFirst().orElse(null);
-                    if (campBudget != null && campBudget.getBudgetErogato() != null) {
-                        Double budgetCampagna = campBudget.getBudgetErogato() - totale;
-                        // setto stato transazione a ovebudget editore se totale < 0
-                        if (budgetCampagna < 0) {
-                            transaction.setDictionaryId(48L);
+                        // gesione commisione
+                        Double commVal = 0D;
+                        Long commissionId = 0L;
+                        AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
+                        if (checkAction) {
+                            // TODO SE ACTION ID IDENTICI??? COSA FACCIAMO
+                            Commission cm = commissionRepository.findFirstByActionAndStatus(cplDTO.getActionId(), true);
+                            if (cm != null) {
+                                commissionId = cm.getId();
+                                commVal = cm.getValue();
+                                log.warn("Commissione >{}< trovata da action ID >{}<", cm.getId(), cplDTO.getActionId());
+                            } else {
+                                checkAction = false;
+                            }
                         }
+                        if (!checkAction) {
+                            // non è settato l'actionId allora faccio il solito giro
+                            req.setAffiliateId(refferal.getAffiliateId());
+                            req.setChannelId(refferal.getChannelId());
+                            req.setCampaignId(refferal.getCampaignId());
+                            req.setBlocked(false);
+                            req.setCommissionDicId(11L);
+                            AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
+                            if (acccFirst != null) {
+                                commVal = acccFirst.getCommissionValue();
+                                commissionId = acccFirst.getCommissionId();
+                            } else
+                                log.warn("No Commission CPL (campagna {} e affilitato {}), setto default ({})", refferal.getCampaignId(), refferal.getAffiliateId(), cplDTO.getRefferal());
+                        }
+                        transaction.setCommissionId(commissionId);
+
+                        Double totale = commVal * 1;
+                        transaction.setValue(DoubleRounder.round(totale, 2));
+
+                        // incemento valore schedled
+
+                        // decremento budget Affiliato
+                        AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
+                        if (bb != null && bb.getBudget() != null && (bb.getBudget() - totale) < 0)
+                            transaction.setDictionaryId(47L);
+
+                        // Stato Budget Campagna
+                        CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(refferal.getCampaignId(), transaction.getDateTime().toLocalDate()).stream().findFirst().orElse(null);
+                        if (campBudget != null && campBudget.getBudgetErogato() != null) {
+                            Double budgetCampagna = campBudget.getBudgetErogato() - totale;
+                            // setto stato transazione a ovebudget editore se totale < 0
+                            if (budgetCampagna < 0) {
+                                transaction.setDictionaryId(48L);
+                            }
+                        }
+
+                        //setto pending
+                        transaction.setStatusId(72L);
                     }
 
-                    //setto pending
-                    transaction.setStatusId(72L);
                     // setto id CPC
                     transaction.setCpcId(idCpc);
                     // setto id CPL
@@ -298,7 +309,7 @@ public class ManageCPL {
                                         HttpURLConnection con = (HttpURLConnection) urlGet.openConnection();
                                         con.setRequestMethod("GET");
                                         con.getInputStream();
-                                        log.info("Post Back (" + con.getResponseCode() + ") : " + url + " :::: GP (" + globalPixel + ") :: INFO (" + info + ") :: DATA (" + data +"");
+                                        log.info("Post Back (" + con.getResponseCode() + ") : " + url + " :::: GP (" + globalPixel + ") :: INFO (" + info + ") :: DATA (" + data + "");
                                     } catch (Exception e) {
                                         log.error("Eccezione chianata Post Back", e);
                                         throw new RuntimeException(e);

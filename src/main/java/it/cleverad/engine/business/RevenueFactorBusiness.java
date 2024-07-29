@@ -40,16 +40,12 @@ public class RevenueFactorBusiness {
 
     @Autowired
     private RevenueFactorRepository repository;
-
     @Autowired
     private Mapper mapper;
-
     @Autowired
     private DictionaryBusiness dictionaryBusiness;
-
     @Autowired
     private CampaignRepository campaignRepository;
-
     @Autowired
     private DictionaryRepository dictionaryRepository;
 
@@ -97,11 +93,9 @@ public class RevenueFactorBusiness {
     public RevenueFactorDTO update(Long id, Filter filter) {
         RevenueFactor revenueFactor = repository.findById(id).orElseThrow(() -> new ElementCleveradException("RevenueFactor", id));
         mapper.map(filter, revenueFactor);
-
         revenueFactor.setCampaign(campaignRepository.findById(filter.campaignId).orElseThrow());
         revenueFactor.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow());
         revenueFactor.setLastModificationDate(LocalDateTime.now());
-
         return RevenueFactorDTO.from(repository.save(revenueFactor));
     }
 
@@ -120,19 +114,11 @@ public class RevenueFactorBusiness {
         return page.map(RevenueFactorDTO::from);
     }
 
-    public RevenueFactor getbyIdCampaign(Long id) {
-        Filter request = new Filter();
-        request.setCampaignId(id);
-        RevenueFactor revenueFactor = repository.findAll(getSpecification(request)).stream().findFirst().get();
-        return revenueFactor;
-    }
-
     public RevenueFactor getbyIdCampaignAndDictionrayId(Long campId, Long dictId) {
         Filter request = new Filter();
         request.setCampaignId(campId);
-        //request.setStatus(true);
+        request.setStatus(true);
         request.setDictionaryId(dictId);
-//        date valdidità
         RevenueFactor revenueFactor = repository.findAll(getSpecification(request)).stream().findFirst().orElse(null);
         return revenueFactor;
     }
@@ -164,42 +150,36 @@ public class RevenueFactorBusiness {
             if (request.getStatus() != null) {
                 predicates.add(cb.equal(root.get("status"), request.getStatus()));
             }
-
             if (request.getCampaignId() != null) {
                 predicates.add(cb.equal(root.get("campaign").get("id"), request.getCampaignId()));
             }
             if (request.getDictionaryId() != null) {
                 predicates.add(cb.equal(root.get("dictionary").get("id"), request.getDictionaryId()));
             }
-
             if (request.getCreationDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("creationDate"), LocalDateTime.ofInstant(request.getCreationDateFrom(), ZoneOffset.UTC)));
             }
             if (request.getCreationDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("creationDate"), LocalDateTime.ofInstant(request.getCreationDateTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
             }
-
             if (request.getLastModificationDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("lastModificationDate"), LocalDateTime.ofInstant(request.getLastModificationDateFrom(), ZoneOffset.UTC)));
             }
             if (request.getLastModificationDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("lastModificationDate"), LocalDateTime.ofInstant(request.getLastModificationDateTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
             }
-
             if (request.getStartDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), request.getStartDateFrom()));
             }
             if (request.getStartDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), (request.getStartDateTo().plus(1, ChronoUnit.DAYS))));
             }
-
             if (request.getDueDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("dueDate"), (request.getDueDateFrom())));
             }
             if (request.getDueDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), (request.getDueDateTo().plus(1, ChronoUnit.DAYS))));
             }
-
             if (request.getDisableDueDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), request.getDisableDueDateTo()));
             }
@@ -209,7 +189,6 @@ public class RevenueFactorBusiness {
             return completePredicate;
         };
     }
-
 
     /**
      * ============================================================================================================
@@ -239,7 +218,6 @@ public class RevenueFactorBusiness {
         private LocalDate startDate;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate dueDate;
-
         private Long id;
         private Double revenue;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -251,18 +229,14 @@ public class RevenueFactorBusiness {
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate startDateTo;
         private Boolean status;
-
         private Long campaignId;
         private Long dictionaryId;
-
         private Instant creationDateFrom;
         private Instant creationDateTo;
         private Instant lastModificationDateFrom;
         private Instant lastModificationDateTo;
-
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate disableDueDateTo;
-
         private String action;
         private Double sale;
     }

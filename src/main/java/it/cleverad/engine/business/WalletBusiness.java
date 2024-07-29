@@ -90,23 +90,6 @@ public class WalletBusiness {
         return WalletDTO.from(repository.save(wallet));
     }
 
-//    public WalletDTO incement(Long id, Double value) {
-//        Wallet wallet = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Wallet", id));
-//        wallet.setResidual(wallet.getResidual() + value);
-//        wallet.setTotal(wallet.getTotal() + value);
-//        return WalletDTO.from(repository.save(wallet));
-//    }
-
-//    public WalletDTO decrement(Long id, Double value) {
-//        Wallet wallet = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Wallet", id));
-//        if (wallet.getResidual() != 0D) wallet.setResidual(wallet.getResidual() - value);
-//        if (wallet.getTotal() != 0D) wallet.setTotal(wallet.getTotal() - value);
-//        WalletDTO dto = WalletDTO.from(repository.saveAndFlush(wallet));
-//        log.trace("Decrement by :: {} - {} --> {}", id, value, dto.getTotal());
-//        return dto;
-//    }
-
-
     /**
      * ============================================================================================================
      **/

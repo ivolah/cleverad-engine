@@ -71,8 +71,6 @@ public class AffiliateChannelCommissionCampaignBusiness {
         req.setChannelId(request.getChannelId());
         List<Long> ids = this.search(req).stream().mapToLong(AffiliateChannelCommissionCampaignDTO::getId).boxed().collect(Collectors.toList());
 
-        log.info("ids: " + ids.size());
-
         Boolean blocco = false;
         if (request.getChannelId() == 0) {
             log.info(request.toString());

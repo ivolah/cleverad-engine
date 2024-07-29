@@ -3,10 +3,12 @@ package it.cleverad.engine.business;
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.Affiliate;
+import it.cleverad.engine.persistence.model.service.TransactionCPL;
 import it.cleverad.engine.persistence.model.service.TransactionCPS;
 import it.cleverad.engine.persistence.model.service.Wallet;
 import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.web.dto.DictionaryDTO;
+import it.cleverad.engine.web.dto.TransactionCPLDTO;
 import it.cleverad.engine.web.dto.TransactionCPSDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -172,6 +174,13 @@ public class TransactionCPSBusiness {
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);
         }
+    }
+
+    public TransactionCPSDTO settaScaduto(Long id) {
+        TransactionCPS cpc = cpsRepository.findById(id).get();
+        cpc.setValue(0D);
+        cpc.setDictionaryStatus(dictionaryRepository.findById(127L).get());
+        return TransactionCPSDTO.from(cpsRepository.save(cpc));
     }
 
     // SEARCH PAGINATED

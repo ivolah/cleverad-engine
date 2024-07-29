@@ -1,13 +1,8 @@
 package it.cleverad.engine.scheduled;//package it.cleverad.engine.scheduled;
 
-import it.cleverad.engine.business.AffiliateBudgetBusiness;
-import it.cleverad.engine.business.CampaignBusiness;
-import it.cleverad.engine.business.CommissionBusiness;
-import it.cleverad.engine.business.RevenueFactorBusiness;
-import it.cleverad.engine.web.dto.AffiliateBudgetDTO;
-import it.cleverad.engine.web.dto.CampaignDTO;
-import it.cleverad.engine.web.dto.CommissionDTO;
-import it.cleverad.engine.web.dto.RevenueFactorDTO;
+import it.cleverad.engine.business.*;
+import it.cleverad.engine.persistence.model.service.Payout;
+import it.cleverad.engine.web.dto.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -29,9 +24,12 @@ public class DisableStausDailyScheduledActivities {
     @Autowired
     private CommissionBusiness commissionBusiness;
     @Autowired
+    private PayoutBusiness payoutBusiness;
+    @Autowired
     private RevenueFactorBusiness revenueFactorBusiness;
 
-    @Scheduled(cron = "10 59 23 * * ?")
+   @Scheduled(cron = "10 59 23 * * ?")
+   // @Scheduled(cron = "10 55 17 * * ?")
     public void aggiornaStato() {
         log.info("AGGIORNAMENTO QUOTIDIANO STATO");
 
@@ -61,6 +59,13 @@ public class DisableStausDailyScheduledActivities {
         listaCampagne.stream().forEach(campaignDTO -> {
             campaignBusiness.disable(campaignDTO.getId());
             log.info("Disable Campaign ({}) : {} ", LocalDate.now().plusDays(1), campaignDTO.getId());
+        });
+
+        // Payout da settare a scaduti
+        List<PayoutDTO> listaPayout = payoutBusiness.getPayoutToDisable();
+        listaPayout.stream().forEach(dto -> {
+            payoutBusiness.settaScaduti(dto.getId());
+            log.info("Disable Payout ({}) : {} ", LocalDate.now().plusDays(1), dto.getId());
         });
 
     }
