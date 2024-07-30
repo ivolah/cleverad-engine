@@ -90,7 +90,7 @@ public class CampaignBudgetBusiness {
         map.setBudgetIniziale(DoubleRounder.round(request.getPayout() * request.capIniziale, 2));
         map.setStatoPagato(false);
         map.setStatoFatturato(false);
-        Double costi = campaignCostBusiness.searchByCampaignID(campaign.getId(), Pageable.unpaged()).toList().stream().mapToDouble(campaignCostDTO -> campaignCostDTO.getCosto()).sum();
+        Double costi = campaignCostBusiness.searchByCampaignIdUnpaged(campaign.getId()).toList().stream().mapToDouble(campaignCostDTO -> campaignCostDTO.getCosto()).sum();
         map.setCosti(costi);
         if (request.getScarto() == null) map.setScarto(0D);
         return CampaignBudgetDTO.from(repository.save(map));
@@ -157,7 +157,6 @@ public class CampaignBudgetBusiness {
 
         return newPage.map(CampaignBudgetDTO::from);
     }
-
 
     public Page<CampaignBudgetDTO> searchByCampaignID(Long campaignId, Pageable pageableRequest) {
         Sort sort = Sort.by(Sort.Order.desc("campaignStatus"), Sort.Order.asc("advertiserName"), Sort.Order.asc("plannerName"), Sort.Order.asc("campaignName"));

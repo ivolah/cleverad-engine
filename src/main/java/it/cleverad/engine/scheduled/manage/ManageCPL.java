@@ -97,7 +97,7 @@ public class ManageCPL {
                     if (listaSenzaIp.size() > 0) {
                         //check id cpc non usato in transazioni cpl come cpcid
                         long numerositatitudine = transactionCPLBusiness.countByCpcId(listaSenzaIp.get(0).getId());
-                        log.info("NO IP CPC {} Ref ORIG {} --> Ref CPC {} - CPCID USATO {}", listaSenzaIp.get(0).getId(), cplDTO.getRefferal(), listaSenzaIp.get(0).getRefferal(), numerositatitudine);
+                        log.trace("NO IP CPC {} Ref ORIG {} --> Ref CPC {} - CPCID USATO {}", listaSenzaIp.get(0).getId(), cplDTO.getRefferal(), listaSenzaIp.get(0).getRefferal(), numerositatitudine);
                         if (numerositatitudine == 0) {
                             cplDTO.setRefferal(listaSenzaIp.get(0).getRefferal());
                             cplDTO.setCpcId(listaSenzaIp.get(0).getId());
@@ -164,6 +164,12 @@ public class ManageCPL {
                         transaction.setDictionaryId(42L);
                     }
 
+                    if(campaignDTO.getStatus() == false){
+                        // setto a campagna scaduta
+                        transaction.setDictionaryId(49L);
+                        scaduta = true;
+                    }
+
                     // associo a wallet
                     Long affiliateID = refferal.getAffiliateId();
                     Long walletID;
@@ -178,6 +184,7 @@ public class ManageCPL {
                         transaction.setCommissionId(0L);
                         transaction.setStatusId(74L); // rigettato
                         transaction.setValue(0D);
+                        transaction.setDictionaryId(49L);
                     } else {
 
                         // check Action ID

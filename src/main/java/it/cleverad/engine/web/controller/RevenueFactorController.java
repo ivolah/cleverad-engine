@@ -43,7 +43,7 @@ public class RevenueFactorController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public RevenueFactorDTO getByUuid(@PathVariable Long id) {
-        return business.findById(id);
+        return business.findById(id, false);
     }
 
     @DeleteMapping("/{id}")

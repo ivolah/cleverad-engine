@@ -65,10 +65,16 @@ public class RevenueFactorBusiness {
     }
 
     // GET BY ID
-    public RevenueFactorDTO findById(Long id) {
-        RevenueFactor entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException("RevenueFactor", id));
+    public RevenueFactorDTO findById(Long id, Boolean interno) {
+        RevenueFactor entity = null;
+        if (interno) {
+            entity = repository.findById(id).orElse(null);
+        } else {
+            entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException("RevenueFactor", id));
+        }
         return RevenueFactorDTO.from(entity);
     }
+
 
     // DELETE BY ID
     public void delete(Long id) {

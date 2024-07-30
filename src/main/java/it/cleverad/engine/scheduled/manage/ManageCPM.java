@@ -159,6 +159,12 @@ public class ManageCPM {
                                 transaction.setDictionaryId(49L);
                             }
 
+                            if(campaignDTO.getStatus() == false){
+                                // setto a campagna scaduta
+                                transaction.setDictionaryId(49L);
+                                scaduta = true;
+                            }
+
                             // associo a wallet
                             Long affiliateID = refferal.getAffiliateId();
 
@@ -173,11 +179,12 @@ public class ManageCPM {
                             }
 
                             if (scaduta) {
-                                log.debug("Campagna {} : {} scaduta", campaignDTO.getId(), campaignDTO.getName());
+                                log.trace("Campagna {} : {} scaduta", campaignDTO.getId(), campaignDTO.getName());
                                 transaction.setRevenueId(1L);
                                 transaction.setCommissionId(0L);
                                 transaction.setStatusId(74L); // rigettato
                                 transaction.setValue(0D);
+                                transaction.setDictionaryId(49L);
                             } else {
                                 // trovo revenue
                                 RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 50L);

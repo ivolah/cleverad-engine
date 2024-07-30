@@ -189,6 +189,12 @@ public class ManageCPC {
                             transaction.setDictionaryId(42L);
                         }
 
+                        if(campaign.getStatus() == false){
+                            // setto a campagna scaduta
+                            transaction.setDictionaryId(49L);
+                            scaduta = true;
+                        }
+
                         // associo a wallet
                         Long walletID = null;
                         if (affiliateId != null) {
@@ -205,6 +211,7 @@ public class ManageCPC {
                             transaction.setCommissionId(0L);
                             transaction.setStatusId(74L); // rigettato
                             transaction.setValue(0D);
+                            transaction.setDictionaryId(49L);
                         } else {
 
                             // trovo revenue

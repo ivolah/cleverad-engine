@@ -121,7 +121,7 @@ public class RigeneraCPLBusiness {
                         if (listaSenzaIp.size() > 0) {
                             //check id cpc non usato in transazioni cpl come cpcid
                             long numerositatitudine = transactionCPLBusiness.countByCpcId(listaSenzaIp.get(0).getId());
-                            log.info("NO IP CPC {} Ref ORIG {} --> Ref CPC {} - CPCID USATO {}", listaSenzaIp.get(0).getId(), cplDTO.getRefferal(), listaSenzaIp.get(0).getRefferal(), numerositatitudine);
+                            log.trace("NO IP CPC {} Ref ORIG {} --> Ref CPC {} - CPCID USATO {}", listaSenzaIp.get(0).getId(), cplDTO.getRefferal(), listaSenzaIp.get(0).getRefferal(), numerositatitudine);
                             if (numerositatitudine == 0) {
                                 cplDTO.setRefferal(listaSenzaIp.get(0).getRefferal());
                                 cplDTO.setCpcId(listaSenzaIp.get(0).getId());

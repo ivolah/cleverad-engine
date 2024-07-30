@@ -113,6 +113,13 @@ public class CampaignCostBusiness {
         return page.map(CampaignCostDTO::from);
     }
 
+    public Page<CampaignCostDTO> searchByCampaignIdUnpaged(Long campaignId) {
+        Filter request = new Filter();
+        request.setCampaignId(campaignId);
+        Page<CampaignCost> page = repository.findAll(getSpecification(request), Pageable.unpaged());
+        return page.map(CampaignCostDTO::from);
+    }
+
     /**
      * ============================================================================================================
      **/

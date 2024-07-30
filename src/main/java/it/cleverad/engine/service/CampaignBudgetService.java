@@ -56,7 +56,8 @@ public class CampaignBudgetService {
             log.trace("NUMERO TRANS CPL {} :: {} ({})", dto.getCampaignId(), cpls.size(), dto.getCapIniziale());
             for (TransactionCPL cpl : cpls) {
                 capErogato += 1;
-                budgetErogato += revenueFactorBusiness.findById(cpl.getRevenueId()).getRevenue();
+                if (revenueFactorBusiness.findById(cpl.getRevenueId(), false) != null)
+                    budgetErogato += revenueFactorBusiness.findById(cpl.getRevenueId(), false).getRevenue();
                 commissioniErogate += cpl.getCommission().getValue();
             }
             log.trace("CPL budgetErogato :: {}", budgetErogato);
@@ -67,8 +68,9 @@ public class CampaignBudgetService {
             List<TransactionCPC> cpcs = transactionCPCBusiness.searchForCampaignBudget(dto.getCampaignId(), dto.getStartDate(), dto.getEndDate());
             log.trace("NUMERO TRANS CPC {} :: {} ({})", dto.getCampaignId(), cpcs.size(), dto.getCapIniziale());
             for (TransactionCPC cpc : cpcs) {
-                  capErogato += cpc.getClickNumber().intValue();
-                budgetErogato += revenueFactorBusiness.findById(cpc.getRevenueId()).getRevenue() * cpc.getClickNumber().intValue();
+                capErogato += cpc.getClickNumber().intValue();
+                if (revenueFactorBusiness.findById(cpc.getRevenueId(), false) != null)
+                    budgetErogato += revenueFactorBusiness.findById(cpc.getRevenueId(), false).getRevenue() * cpc.getClickNumber().intValue();
                 commissioniErogate += (cpc.getCommission().getValue() * cpc.getClickNumber().intValue());
                 log.trace("{} :: comm value  {} :: {} * {} == {}", capErogato, cpc.getValue(), cpc.getCommission().getValue(), cpc.getClickNumber().intValue(), (cpc.getCommission().getValue() * cpc.getClickNumber().intValue()));
             }
@@ -106,32 +108,27 @@ public class CampaignBudgetService {
 
             // Cap Percentuale
             Double ce = 0D;
-            if (capErogato != 0D)
-                ce = br.round((double) (capErogato * 100) / dto.getCapIniziale());
+            if (capErogato != 0D) ce = br.round((double) (capErogato * 100) / dto.getCapIniziale());
             request.setCapPc(ce);
 
             // Revenue Percentuale
             Double rpc = 0D;
-            if (budgetErogato != 0D)
-                rpc = br.round((revenue / budgetErogato) * 100);
+            if (budgetErogato != 0D) rpc = br.round((revenue / budgetErogato) * 100);
             request.setRevenuePC(rpc);
 
             // Budget Erogato Post Scarto
             Double beps = 0D;
-            if (budgetErogato != 0D)
-                beps = br.round(budgetErogato - (budgetErogato / 100 * scarto));
+            if (budgetErogato != 0D) beps = br.round(budgetErogato - (budgetErogato / 100 * scarto));
             request.setBudgetErogatops(beps);
 
             // Commisioni Erogate Post Scarto
             Double ceps = 0D;
-            if (commissioniErogate != 0D)
-                ceps = br.round(commissioniErogate - (commissioniErogate / 100 * scarto));
+            if (commissioniErogate != 0D) ceps = br.round(commissioniErogate - (commissioniErogate / 100 * scarto));
             request.setCommissioniErogateps(ceps);
 
             // Revenu Post Scarto
             Double rps = 0D;
-            if (scarto != 0D)
-                rps = br.round(revenue - (revenue / 100 * scarto));
+            if (scarto != 0D) rps = br.round(revenue - (revenue / 100 * scarto));
             request.setRevenuePS(rps);
 
             // Revenue Percentuale Post Scarto

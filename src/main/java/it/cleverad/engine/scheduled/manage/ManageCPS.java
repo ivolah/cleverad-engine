@@ -137,6 +137,12 @@ public class ManageCPS {
                             transaction.setDictionaryId(42L);
                         }
 
+                        if(campaignDTO.getStatus() == false){
+                            // setto a campagna scaduta
+                            transaction.setDictionaryId(49L);
+                            scaduta = true;
+                        }
+
                         // associo a wallet
                         Long affiliateID = refferal.getAffiliateId();
 
@@ -146,13 +152,13 @@ public class ManageCPS {
                             transaction.setWalletId(walletID);
                         }
 
-
                         if (scaduta) {
                             log.debug("Campagna {} : {} scaduta", campaignDTO.getId(), campaignDTO.getName());
                             transaction.setRevenueId(1L);
                             transaction.setCommissionId(0L);
                             transaction.setStatusId(74L); // rigettato
                             transaction.setValue(0D);
+                            transaction.setDictionaryId(49L);
                         } else {
 
                             // GIRO STANDARD

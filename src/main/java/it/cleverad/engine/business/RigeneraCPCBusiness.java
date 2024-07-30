@@ -97,13 +97,12 @@ public class RigeneraCPCBusiness {
         List<ClickMultipli> listaDaDisabilitare = new ArrayList<>();
         Integer numeroGiorniBetween = dataDaGestireEnd.getDayOfYear() - dataDaGestireStart.getDayOfYear();
         for (int i = 0; i < numeroGiorniBetween; i++) {
-            List<ClickMultipli> ll = cpcBusiness.getListaClickMultipliDaDisabilitare(dataDaGestireStart.plusDays(i), dataDaGestireStart.plusDays(i + 1), affiliateId, campaignId);
-            listaDaDisabilitare.addAll(ll);
-            log.info("Data :: {} :: {}  disabilitati", dataDaGestireStart.plusDays(i).format(DateTimeFormatter.ISO_LOCAL_DATE), ll.size());
+            listaDaDisabilitare.addAll(cpcBusiness.getListaClickMultipliDaDisabilitare(dataDaGestireStart.plusDays(i),
+                    dataDaGestireStart.plusDays(i + 1),
+                    affiliateId,
+                    campaignId));
+            log.info("Data :: {} :: {}  disabilitati", dataDaGestireStart.plusDays(i).format(DateTimeFormatter.ISO_LOCAL_DATE), listaDaDisabilitare.size());
         }
-        //
-        //        List<ClickMultipli> listaDaDisabilitare = cpcBusiness.getListaClickMultipliDaDisabilitare(dataDaGestireStart, dataDaGestireEnd);
-        //        log.info("DA DISABILIATRE :: {}", listaDaDisabilitare.size());
 
         // giro settaggio click multipli
         listaDaDisabilitare.forEach(clickMultipli -> {
