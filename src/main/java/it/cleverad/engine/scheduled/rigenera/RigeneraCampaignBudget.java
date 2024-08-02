@@ -18,7 +18,7 @@ public class RigeneraCampaignBudget {
      */
     @Scheduled(cron = "7 7 0/1 * * ?")
     public void ciclaCampaignBudget() {
-        campaignBudgetService.gestisciCampaignBudget(null);
+        campaignBudgetService.gestisciCampaignBudget(null, true);
     }//ciclaCampaignBudget
 
 }

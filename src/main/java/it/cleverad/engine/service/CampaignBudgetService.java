@@ -31,8 +31,10 @@ public class CampaignBudgetService {
     private FileCampaignBudgetBusiness fileCampaignBudgetBusiness;
     @Autowired
     private Mapper mapper;
+    @Autowired
+    private CampaignCostBusiness campaignCostBusiness;
 
-    public void gestisciCampaignBudget(Long id) {
+    public void gestisciCampaignBudget(Long id, Boolean interno) {
         DoubleRounder br = new DoubleRounder(2);
 
         List<CampaignBudgetDTO> budgets = new ArrayList<>();
@@ -56,8 +58,8 @@ public class CampaignBudgetService {
             log.trace("NUMERO TRANS CPL {} :: {} ({})", dto.getCampaignId(), cpls.size(), dto.getCapIniziale());
             for (TransactionCPL cpl : cpls) {
                 capErogato += 1;
-                if (revenueFactorBusiness.findById(cpl.getRevenueId(), false) != null)
-                    budgetErogato += revenueFactorBusiness.findById(cpl.getRevenueId(), false).getRevenue();
+                if (revenueFactorBusiness.findById(cpl.getRevenueId(), interno) != null)
+                    budgetErogato += revenueFactorBusiness.findById(cpl.getRevenueId(), interno).getRevenue();
                 commissioniErogate += cpl.getCommission().getValue();
             }
             log.trace("CPL budgetErogato :: {}", budgetErogato);
@@ -141,6 +143,12 @@ public class CampaignBudgetService {
             request.setId(null);
             request.setStatus(true);
             request.setRevenue(br.round(revenue));
+
+            request.setStatoPagato(dto.getStatoPagato());
+            request.setStatoFatturato(dto.getStatoFatturato());
+            request.setInvoiceDueDate(dto.getInvoiceDueDate());
+            Double costi = campaignCostBusiness.searchByCampaignIdUnpaged(dto.getId()).toList().stream().mapToDouble(campaignCostDTO -> campaignCostDTO.getCosto()).sum();
+            request.setCosti(costi);
 
             CampaignBudgetDTO cb = campaignBudgetBusiness.create(request);
             log.trace("CREATO :: {}", cb.getId());

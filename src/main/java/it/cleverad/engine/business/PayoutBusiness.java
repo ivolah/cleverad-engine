@@ -24,6 +24,7 @@ import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -96,10 +97,10 @@ public class PayoutBusiness {
             affiliatesList.add(transaction.getAffiliate().getId());
         });
 
-        request.getTransazioniCps().stream().forEach(id -> {
-            TransactionCPS transaction = cpsRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction CPS", id));
+//        request.getTransazioniCps().stream().forEach(id -> {
+//            TransactionCPS transaction = cpsRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction CPS", id));
 //            affiliatesList.add(transaction.getAffiliate().getId());
-        });
+//        });
 
         // faccio distinct e creo un pqyout vuoto per ognuno
         HashMap<Long, Long> affiliatoPayout = new HashMap<>();
@@ -119,14 +120,15 @@ public class PayoutBusiness {
             Dictionary dictionary = dictionaryRepository.findById(18L).orElseThrow(() -> new ElementCleveradException("Dictionary", 18L));
             map.setDictionary(dictionary);
             Long dataDaSommare = Long.valueOf(affiliate.getDictionaryTermType().getDescription());
-            map.setDataScadenza(LocalDate.now().plusDays(dataDaSommare));
+            LocalDate ultimoDelMese = LocalDate.now().plusDays(dataDaSommare).with(TemporalAdjusters.lastDayOfMonth());;
+            map.setDataScadenza(ultimoDelMese);
             map = repository.save(map);
             affiliatoPayout.put(idAffiliate, map.getId());
         });
 
         Set<Payout> listaPayout = new HashSet<>();
 
-        // per ogni singola transazione
+        // per ogni singola transazione CPC
         request.getTransazioniCpc().forEach(id -> {
             TransactionCPC transaction = cpcRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction CPC", id));
             Long payoutId = affiliatoPayout.get(transaction.getAffiliate().getId());
@@ -147,7 +149,7 @@ public class PayoutBusiness {
             cpcRepository.save(transaction);
         });
 
-        // per ogni singola transazione
+        // per ogni singola transazione CPL
         request.getTransazioniCpl().stream().forEach(id -> {
             TransactionCPL transaction = cplRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction CPL", id));
             Long payoutId = affiliatoPayout.get(transaction.getAffiliate().getId());
@@ -287,7 +289,6 @@ public class PayoutBusiness {
         payout.getTransactionCPLS().stream().forEach(transaction -> transactionCPLBusiness.settaScaduto(transaction.getId()));
         payout.getTransactionCPMS().stream().forEach(transaction -> transactionCPMBusiness.settaScaduto(transaction.getId()));
         payout.getTransactionCPSS().stream().forEach(transaction -> transactionCPSBusiness.settaScaduto(transaction.getId()));
-
 
         return PayoutDTO.from(repository.save(payout));
     }

@@ -106,7 +106,7 @@ public class CampaignBudgetBusiness {
     }
 
     public void recalculate(Long id) {
-        campaignBudgetService.gestisciCampaignBudget(id);
+        campaignBudgetService.gestisciCampaignBudget(id, false);
     }
 
     // ENABLE E DISABLE
@@ -354,6 +354,12 @@ public class CampaignBudgetBusiness {
         private LocalDate volumeDate;
         private Integer volumeDelta;
         private Double costi;
+
+        private Boolean statoFatturato;
+        private Boolean statoPagato;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate invoiceDueDate;
+
     }
 
     @Data

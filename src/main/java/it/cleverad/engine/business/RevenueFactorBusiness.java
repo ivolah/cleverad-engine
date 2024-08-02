@@ -72,7 +72,11 @@ public class RevenueFactorBusiness {
         } else {
             entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException("RevenueFactor", id));
         }
-        return RevenueFactorDTO.from(entity);
+        if (entity == null) {
+            return null;
+        } else {
+            return RevenueFactorDTO.from(entity);
+        }
     }
 
 

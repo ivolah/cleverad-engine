@@ -28,8 +28,7 @@ public class DisableStausDailyScheduledActivities {
     @Autowired
     private RevenueFactorBusiness revenueFactorBusiness;
 
-   @Scheduled(cron = "10 59 23 * * ?")
-   // @Scheduled(cron = "10 55 17 * * ?")
+   @Scheduled(cron = "5 0 0 * * ?")
     public void aggiornaStato() {
         log.info("AGGIORNAMENTO QUOTIDIANO STATO");
 
