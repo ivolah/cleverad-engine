@@ -19,7 +19,7 @@ public class RigeneraCPL {
     public void rigeneraCPLdiIeri() {
         LocalDate localDate = LocalDate.now();
         LocalDate yesterday = localDate.minusDays(1);
-        rigenera.rigenera(yesterday.getYear(), yesterday.getMonthValue(), yesterday.getDayOfMonth(), null, null);
+        rigenera.rigenera(yesterday.getYear(), yesterday.getMonthValue(), yesterday.getDayOfMonth(), null, null, false);
     }//rigeneraCPLdiIeri
 
 }

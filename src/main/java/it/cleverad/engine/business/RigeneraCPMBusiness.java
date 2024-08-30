@@ -42,8 +42,8 @@ public class RigeneraCPMBusiness {
     public void rigenera(Integer anno, Integer mese, Integer giorno) {
         // ==========================================================================================================================================
         // ==========================================================================================================================================
-        // RIPASSO TUTTE LE Cpm PENDING
-        this.gestisci(anno, mese, giorno, 72L, false);
+        // RIPASSO TUTTE LE Cpm
+        this.gestisci(anno, mese, giorno, 73L, false);
         // RIPASSO TUTTE LE Cpm BLACKLISTED
         this.gestisci(anno, mese, giorno, 74L, true);
         // ==========================================================================================================================================
@@ -60,11 +60,10 @@ public class RigeneraCPMBusiness {
         log.info(anno + "-" + mese + "-" + giorno + " >> " + dataDaGestireStart + " || " + dataDaGestireEnd);
 
         //RIGENERO
-        List<CpmDTO> day = CpmBusiness.getAllByDay(dataDaGestireStart, dataDaGestireEnd, blacklisted).getContent();
+        List<CpmDTO> day = CpmBusiness.getAllByDay(dataDaGestireStart, dataDaGestireEnd, blacklisted, true).getContent();
         log.info(">>> RIGENERO :: " + day.size() + " >>> con status ::" + statusID);
 
         List<String> refs = day.stream().filter(dto -> dto.getRefferal() != null).map(CpmDTO::getRefferal).distinct().collect(Collectors.toList());
-        log.info("Refs {}", refs.size());
         refs.stream().parallel().forEach(refferal -> {
 
             CpmBusiness.Filter rq = new CpmBusiness.Filter();
@@ -93,24 +92,12 @@ public class RigeneraCPMBusiness {
                 if (d.getChannelId() != null)
                     channelID = d.getChannelId();
             }
-            log.info("REF :: {} {} :: {}", refferal, campaignId, totImp);
+            log.info("{} - {} :: {}", campaignId, totImp, refferal);
 
             if (campaignId != null && affiliateId != null) {
                 TransactionCPMBusiness.BaseCreateRequest transaction = new TransactionCPMBusiness.BaseCreateRequest();
 
-                Campaign campaign = campaignRepository.findById(campaignId).orElse(null);
-                if (campaign.getEndDate().isBefore(dataDaGestireStart)) {
-                    // setto a campagna scaduta
-                    transaction.setDictionaryId(49L);
-                } else {
-                    transaction.setDictionaryId(39L);
-                }
-                if (blacklisted) transaction.setDictionaryId(70L);
-
-                // associo a wallet
-                WalletDTO wDTO = walletBusiness.findByIdAffilaite(affiliateId).stream().findFirst().orElse(null);
-                if (wDTO != null)
-                    transaction.setWalletId(wDTO.getId());
+                transaction.setStatusId(statusID);
 
                 transaction.setRevenueId(1L);
                 transaction.setCommissionId(0L);
@@ -124,7 +111,22 @@ public class RigeneraCPMBusiness {
                 transaction.setPayoutPresent(false);
                 transaction.setDateTime(dataDaGestireStart.atTime(12, 0, 0));
                 transaction.setAgent("");
-                transaction.setStatusId(statusID);
+
+                Campaign campaign = campaignRepository.findById(campaignId).orElse(null);
+                if (campaign.getEndDate().isBefore(dataDaGestireStart)) {
+                    log.info("Campaign scaduto: " + campaign.getName() + " " + campaign.getId());
+                    // setto a campagna scaduta
+                    transaction.setDictionaryId(49L);
+                    transaction.setStatusId(74L); // rigettato
+                } else {
+                    transaction.setDictionaryId(39L);
+                }
+                if (blacklisted) transaction.setDictionaryId(70L);
+
+                // associo a wallet
+                WalletDTO wDTO = walletBusiness.findByIdAffilaite(affiliateId).stream().findFirst().orElse(null);
+                if (wDTO != null)
+                    transaction.setWalletId(wDTO.getId());
 
                 // creo la transazione
                 TransactionCPMDTO tCpm = transactionCpmBusiness.createCpm(transaction);

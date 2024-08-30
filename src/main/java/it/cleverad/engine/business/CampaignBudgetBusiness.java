@@ -144,7 +144,7 @@ public class CampaignBudgetBusiness {
     // SEARCH PAGINATED
     public Page<CampaignBudgetDTO> search(Filter request, Pageable pageableRequest) {
 
-        Sort sort = Sort.by(Sort.Order.desc("campaignStatus"), Sort.Order.asc("advertiserName"), Sort.Order.asc("plannerName"), Sort.Order.asc("campaignName"));
+        Sort sort = Sort.by(Sort.Order.asc("campaignName"), Sort.Order.desc("campaignStatus"), Sort.Order.asc("advertiserName"), Sort.Order.asc("plannerName"));
 
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), sort);
         request.setStatus(true);

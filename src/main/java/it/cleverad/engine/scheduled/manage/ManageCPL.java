@@ -164,7 +164,7 @@ public class ManageCPL {
                         transaction.setDictionaryId(42L);
                     }
 
-                    if(campaignDTO.getStatus() == false){
+                    if (campaignDTO.getStatus() == false) {
                         // setto a campagna scaduta
                         transaction.setDictionaryId(49L);
                         scaduta = true;
@@ -329,6 +329,11 @@ public class ManageCPL {
                     }
 
                 }// creo solo se ho affiliate
+                else if (refferal != null && refferal.getSuccess() == false) {
+                    log.warn("Errore decodifica refferal :: {}", cplDTO.getRefferal());
+                    cplBusiness.setRead(cplDTO.getId());
+                }
+
             });
         } catch (Exception e) {
             log.error("MANAGE CPL EXCEPTION --  {}", e.getMessage(), e);
@@ -341,7 +346,6 @@ public class ManageCPL {
 
     public void gestisciBlacklisted() {
         try {
-
             cplBusiness.getUnreadBlacklisted().stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
 
                 if (cplDTO.getRefferal().length() < 6) {
@@ -433,6 +437,11 @@ public class ManageCPL {
                         log.error("BLACKLIS ECCEZIONE CPL :> ", ecc);
                     }
                 }// creo solo se ho affiliate
+                else if (refferal != null && refferal.getSuccess() == false) {
+                    log.warn("Errore decodifica refferal :: {}", cplDTO.getRefferal());
+                    cplBusiness.setRead(cplDTO.getId());
+                }
+
             });
         } catch (Exception e) {
             log.error("Eccezione Scheduler CPL --  {}", e.getMessage(), e);

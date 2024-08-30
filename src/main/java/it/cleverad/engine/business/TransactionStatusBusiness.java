@@ -66,12 +66,12 @@ public class TransactionStatusBusiness {
         dictIds.add(42L);
         dictIds.add(68L);
 
-        if (jwtUserDetailsService.isAffiliate()) {
+        if (jwtUserDetailsService.isAffiliate() != null && jwtUserDetailsService.isAffiliate()) {
             request.setValueNotZero(true);
             request.setInStausId(statusIds);// nascodne delle transazioni
             request.setInDictionaryId(dictIds);// nascodne delle transazioni
             request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
-        } else if (jwtUserDetailsService.isAdvertiser()) {
+        } else if (jwtUserDetailsService.isAdvertiser() != null && jwtUserDetailsService.isAdvertiser()) {
             request.setValueNotZero(true);
             request.setInStausId(statusIds);// nascodne delle transazioni
             request.setInDictionaryId(dictIds);// nascodne delle transazioni

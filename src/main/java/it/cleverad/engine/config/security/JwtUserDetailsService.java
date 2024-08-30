@@ -71,28 +71,25 @@ public class JwtUserDetailsService implements UserDetailsService {
         }
     }
 
-    public Long getAffilaite() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userBusiness.findByUsername(username).getAffiliateId();
-    }
-
     public Boolean isAdmin() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (username != null)
-            return username.equals("anonymousUser") || userBusiness.findByUsername(username).getRoleId() == 3;
-        else return false;
+        if (SecurityContextHolder.getContext() != null && SecurityContextHolder.getContext().getAuthentication() != null) {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            return username != null && (username.equals("anonymousUser") || userBusiness.findByUsername(username).getRoleId() == 3);
+        } else return false;
     }
 
     public Boolean isAdvertiser() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (username != null) return userBusiness.findByUsername(username).getRoleId() == 555;
-        else return false;
+        if (SecurityContextHolder.getContext() != null && SecurityContextHolder.getContext().getAuthentication() != null) {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            return username != null && userBusiness.findByUsername(username).getRoleId() == 555;
+        } else return false;
     }
 
     public Boolean isAffiliate() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (username != null) return userBusiness.findByUsername(username).getRoleId() == 4;
-        else return false;
+        if (SecurityContextHolder.getContext() != null && SecurityContextHolder.getContext().getAuthentication() != null) {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            return username != null && userBusiness.findByUsername(username).getRoleId() == 4;
+        } else return false;
     }
 
 }

@@ -15,5 +15,6 @@ public class Refferal {
     private Long affiliateId;
     private Long channelId;
     private Long targetId;
+    private Boolean success;
 
 }

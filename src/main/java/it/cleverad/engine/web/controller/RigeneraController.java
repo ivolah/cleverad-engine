@@ -34,7 +34,7 @@ public class RigeneraController {
     @PostMapping("/cpl")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void manageCPL(@ModelAttribute RigeneraCPLBusiness.FilterUpdate request) {
-        rigeneraCPLBusiness.rigenera(request.getYear(), request.getMonth(), request.getDay(), request.getAffiliateId(), request.getCampaignId());
+        rigeneraCPLBusiness.rigenera(request.getYear(), request.getMonth(), request.getDay(), request.getAffiliateId(), request.getCampaignId(), request.getPostback());
     }
 
     @PostMapping("/cpc")

@@ -8,6 +8,7 @@ import it.cleverad.engine.persistence.model.tracking.Cpc;
 import it.cleverad.engine.persistence.model.tracking.Cpl;
 import it.cleverad.engine.persistence.repository.service.CommissionRepository;
 import it.cleverad.engine.persistence.repository.service.RevenueFactorRepository;
+import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.persistence.repository.tracking.CplRepository;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.*;
@@ -39,19 +40,25 @@ import java.util.stream.Collectors;
 public class RigeneraCPLBusiness {
 
     @Autowired
+    CampaignBudgetBusiness campaignBudgetBusiness;
+    @Autowired
+    private CommissionRepository commissionRepository;
+    @Autowired
     private CplBusiness cplBusiness;
     @Autowired
-    private TransactionStatusBusiness transactionStatusBusiness;
-    @Autowired
-    private WalletBusiness walletBusiness;
+    private WalletRepository walletRepository;
     @Autowired
     private AffiliateBudgetBusiness affiliateBudgetBusiness;
     @Autowired
     private CampaignBusiness campaignBusiness;
     @Autowired
+    private AffiliateBusiness affiliateBusiness;
+    @Autowired
+    private CampaignAffiliateBusiness campaignAffiliateBusiness;
+    @Autowired
     private RevenueFactorBusiness revenueFactorBusiness;
     @Autowired
-    private RevenueFactorRepository revenueFactorRepositorye;
+    private RevenueFactorRepository revenueFactorRepository;
     @Autowired
     private AffiliateChannelCommissionCampaignBusiness affiliateChannelCommissionCampaignBusiness;
     @Autowired
@@ -61,17 +68,15 @@ public class RigeneraCPLBusiness {
     @Autowired
     private CplRepository cplRepository;
     @Autowired
-    private CommissionRepository commissionRepository;
-    @Autowired
     private TransactionCPLBusiness transactionCPLBusiness;
     @Autowired
-    private CampaignBudgetBusiness campaignBudgetBusiness;
+    private TransactionStatusBusiness transactionStatusBusiness;
     @Autowired
-    private CampaignAffiliateBusiness campaignAffiliateBusiness;
+    private WalletBusiness walletBusiness;
     @Autowired
-    private AffiliateBusiness affiliateBusiness;
+    private RevenueFactorRepository revenueFactorRepositorye;
 
-    public void rigenera(Integer anno, Integer mese, Integer giorno, Long affiliateId, Long camapignId) {
+    public void rigenera(Integer anno, Integer mese, Integer giorno, Long affiliateId, Long camapignId, Boolean postback) {
         try {
 
             int start = (giorno == null) ? 1 : giorno;
@@ -98,16 +103,16 @@ public class RigeneraCPLBusiness {
             Page<QueryTransaction> ls = transactionStatusBusiness.searchPrefiltratoN(request, Pageable.ofSize(Integer.MAX_VALUE));
             log.info(">>> TOT :: " + ls.getTotalElements());
             for (QueryTransaction tcpl : ls) {
-                log.trace("CANCELLO PER RIGENERA CP :: {} : {} :: {}", tcpl.getid(), tcpl.getValue(), tcpl.getDateTime());
+                log.info("CANCELLO PER RIGENERA CPL :: {} : {} :: {}", tcpl.getid(), tcpl.getValue(), tcpl.getDateTime());
                 transactionCPLBusiness.delete(tcpl.getid());
                 Thread.sleep(50L);
             }
 
             for (int gg = start; gg <= end; gg++) {
-                log.trace("RIGENERO GIORNO {}-{}-{}", anno, mese, gg);
+                log.info("RIGENERO GIORNO {}-{}-{}", anno, mese, gg);
                 cplBusiness.getAllDay(anno, mese, gg, affiliateId, camapignId).stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
 
-                    log.trace("ID {}", cplDTO.getId());
+                    log.info("ID {}", cplDTO.getId());
 
                     // leggo sempre i cpc precedenti per trovare il click riferito alla lead
                     cpcBusiness.findByIp24HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal()).stream().filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal())).forEach(cpcDTO -> {
@@ -129,7 +134,7 @@ public class RigeneraCPLBusiness {
                         }
                     }
 
-                    log.trace("Refferal :: {} con ID CPC {}", cplDTO.getRefferal(), cplDTO.getCpcId());
+                    log.info("Refferal :: {}  con ID CPC {}", cplDTO.getRefferal(), cplDTO.getCpcId());
                     cplBusiness.setCpcId(cplDTO.getId(), cplDTO.getCpcId());
 
                     // prendo reffereal e lo leggo
@@ -167,9 +172,11 @@ public class RigeneraCPLBusiness {
                         try {
                             CampaignDTO campaignDTO = campaignBusiness.findByIdAdmin(refferal.getCampaignId());
                             LocalDate endDate = campaignDTO.getEndDate();
+                            Boolean scaduta = false;
                             if (endDate.isBefore(cplDTO.getDate().toLocalDate())) {
                                 // setto a campagna scaduta
                                 transaction.setDictionaryId(49L);
+                                scaduta = true;
                             } else {
                                 //setto pending
                                 transaction.setDictionaryId(42L);
@@ -183,84 +190,97 @@ public class RigeneraCPLBusiness {
                                 transaction.setWalletId(walletID);
                             }
 
-                            // check Action ID
-                            boolean checkAction = false;
-                            if (StringUtils.isNotBlank(cplDTO.getActionId())) {
-                                log.info(">>>>>>>>>> TROVATO ACTION : {}", cplDTO.getActionId());
-                                checkAction = true;
-                            }
-
-                            // trovo revenue
-                            if (checkAction) {
-                                RevenueFactor rf = revenueFactorRepositorye.findFirstByActionAndStatus(cplDTO.getActionId(), true);
-                                if (rf != null) {
-                                    transaction.setRevenueId(rf.getId());
-                                    log.warn("Revenue >{}< trovata da action ID >{}<", rf.getId(), cplDTO.getActionId());
-                                } else {
-                                    checkAction = false;
-                                }
-                            }
-                            if (!checkAction) {
-                                // GIRO STANDARD
-                                RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 11L);
-                                if (rf != null) {
-                                    transaction.setRevenueId(rf.getId());
-                                } else {
-                                    log.warn("Non trovato revenue factor di tipo 11 per campagna {} , setto default", refferal.getCampaignId());
-                                    transaction.setRevenueId(2L);
-                                }
-                            }
-
-                            // gesione commisione
-                            Double commVal = 0D;
-                            Long commissionId = 0L;
-                            AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
-                            if (checkAction) {
-                                Commission cm = commissionRepository.findFirstByActionAndStatus(cplDTO.getActionId(), true);
-                                if (cm != null) {
-                                    commissionId = cm.getId();
-                                    commVal = cm.getValue();
-                                    log.warn("Commissione >{}< trovata da action ID >{}<", cm.getId(), cplDTO.getActionId());
-                                } else {
-                                    checkAction = false;
-                                }
-                            }
-                            if (!checkAction) {
-                                // non è settato l'actionId allora faccio il solito giro
-                                req.setAffiliateId(refferal.getAffiliateId());
-                                req.setChannelId(refferal.getChannelId());
-                                req.setCampaignId(refferal.getCampaignId());
-                                req.setCommissionDicId(11L);
-                                req.setBlocked(false);
-                                AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
-                                if (acccFirst != null) {
-                                    commVal = acccFirst.getCommissionValue();
-                                    commissionId = acccFirst.getCommissionId();
-                                } else
-                                    log.warn("Rignera - No Commission CPL (campagna {} e affilitato {}), setto default ({})", refferal.getCampaignId(), refferal.getAffiliateId(), cplDTO.getRefferal());
-                            }
-                            transaction.setCommissionId(commissionId);
-
-                            Double totale = DoubleRounder.round(commVal * 1, 2);
-                            transaction.setValue(totale);
-                            transaction.setLeadNumber(1L);
-
-                            // decremento budget Affiliato
-                            AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
-                            if (bb != null && bb.getBudget() != null && ((bb.getBudget() - totale) < 0)) {
-                                transaction.setDictionaryId(47L);
-                            }
-
-                            // setto stato transazione a ovebudget editore se totale < 0
-                            CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(camapignId, cplDTO.getDate().toLocalDate()).stream().findFirst().orElse(null);
-                            if (campBudget != null && campBudget.getBudgetErogato() != null && (campBudget.getBudgetErogato() - totale < 0)) {
-                                transaction.setDictionaryId(48L);
-                            }
-
-                            if (cccpl.getBlacklisted() != null && cccpl.getBlacklisted()) {
-                                transaction.setStatusId(74L);
+                            if (scaduta) {
+                                log.debug("Campagna {} : {} scaduta", campaignDTO.getId(), campaignDTO.getName());
+                                transaction.setRevenueId(1L);
+                                transaction.setCommissionId(0L);
+                                transaction.setStatusId(74L); // rigettato
+                                transaction.setValue(0D);
+                                transaction.setDictionaryId(49L);
+                                transaction.setLeadNumber(1L);
                             } else {
-                                transaction.setStatusId(72L);
+
+                                // check Action ID
+                                boolean checkAction = false;
+                                if (StringUtils.isNotBlank(cplDTO.getActionId())) {
+                                    log.info(">>>>>>>>>> TROVATO ACTION : {}", cplDTO.getActionId());
+                                    checkAction = true;
+                                }
+
+                                // trovo revenue
+                                if (checkAction) {
+                                    RevenueFactor rf = revenueFactorRepositorye.findFirstByActionAndStatus(cplDTO.getActionId(), true);
+                                    if (rf != null) {
+                                        transaction.setRevenueId(rf.getId());
+                                        log.warn("Revenue >{}< trovata da action ID >{}<", rf.getId(), cplDTO.getActionId());
+                                    } else {
+                                        checkAction = false;
+                                    }
+                                }
+                                if (!checkAction) {
+                                    // GIRO STANDARD
+                                    RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 11L);
+                                    if (rf != null) {
+                                        transaction.setRevenueId(rf.getId());
+                                    } else {
+                                        log.warn("Non trovato revenue factor di tipo 11 per campagna {} , setto default", refferal.getCampaignId());
+                                        transaction.setRevenueId(2L);
+                                    }
+                                }
+
+                                // gesione commisione
+                                Double commVal = 0D;
+                                Long commissionId = 0L;
+                                AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
+                                if (checkAction) {
+                                    Commission cm = commissionRepository.findFirstByActionAndStatus(cplDTO.getActionId(), true);
+                                    if (cm != null) {
+                                        commissionId = cm.getId();
+                                        commVal = cm.getValue();
+                                        log.warn("Commissione >{}< trovata da action ID >{}<", cm.getId(), cplDTO.getActionId());
+                                    } else {
+                                        checkAction = false;
+                                    }
+                                }
+                                if (!checkAction) {
+                                    // non è settato l'actionId allora faccio il solito giro
+                                    req.setAffiliateId(refferal.getAffiliateId());
+                                    req.setChannelId(refferal.getChannelId());
+                                    req.setCampaignId(refferal.getCampaignId());
+                                    req.setCommissionDicId(11L);
+                                    req.setBlocked(false);
+                                    AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
+                                    if (acccFirst != null) {
+                                        commVal = acccFirst.getCommissionValue();
+                                        commissionId = acccFirst.getCommissionId();
+                                    } else
+                                        log.warn("Rignera - No Commission CPL (campagna {} e affilitato {}), setto default ({})", refferal.getCampaignId(), refferal.getAffiliateId(), cplDTO.getRefferal());
+                                }
+                                transaction.setCommissionId(commissionId);
+
+                                Double totale = DoubleRounder.round(commVal * 1, 2);
+                                transaction.setValue(totale);
+                                transaction.setLeadNumber(1L);
+
+                                // decremento budget Affiliato
+                                AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
+                                if (bb != null && bb.getBudget() != null && ((bb.getBudget() - totale) < 0)) {
+                                    transaction.setDictionaryId(47L);
+                                }
+
+                                // setto stato transazione a ovebudget editore se totale < 0
+                                CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(camapignId, cplDTO.getDate().toLocalDate()).stream().findFirst().orElse(null);
+                                if (campBudget != null && campBudget.getBudgetErogato() != null && (campBudget.getBudgetErogato() - totale < 0)) {
+                                    transaction.setDictionaryId(48L);
+                                }
+
+                                if (cccpl.getBlacklisted() != null && cccpl.getBlacklisted()) {
+                                    transaction.setStatusId(74L);
+                                    log.info("QUI=?");
+                                } else {
+                                    transaction.setStatusId(72L);
+                                }
+
                             }
 
                             // creo la transazione
@@ -271,48 +291,51 @@ public class RigeneraCPLBusiness {
                             cplBusiness.setRead(cplDTO.getId());
 
                             // verifico il Postback ed eventualemnte faccio chiamata solo se campagna attiva
-                            if (transaction.getDictionaryId() != 49L) {
-                                //not manuale
-                                if (transaction.getManualDate() == null) {
-                                    List<CampaignAffiliateDTO> campaignAffiliateDTOS = campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(refferal.getAffiliateId(), refferal.getCampaignId()).toList();
-                                    campaignAffiliateDTOS.forEach(campaignAffiliateDTO -> {
-                                        // cerco global
-                                        String globalPixel = affiliateBusiness.getGlobalPixel(affiliateID);
-                                        // cerco folow through
-                                        String followT = campaignAffiliateDTO.getFollowThrough();
-                                        String info = cplDTO.getInfo();
-                                        String data = cplDTO.getData();
-                                        String url = "";
-                                        log.trace("RCPLB POST BACK ::: " + followT + " :: " + globalPixel + " :: " + info + " :: " + data);
-                                        if (StringUtils.isNotBlank(globalPixel)) {
-                                            url = globalPixel;
-                                        } else if (StringUtils.isNotBlank(followT)) {
-                                            url = followT;
-                                        }
-                                        if (StringUtils.isNotBlank(url)) {
-                                            // trovo tutte le chiavi
-                                            Map<String, String> keyValueMap = referralService.estrazioneInfo(info);
-                                            // aggiungo order_id / transaction_id
-                                            keyValueMap.put("orderid", data);
-                                            keyValueMap.put("order_id", data);
-                                            url = referralService.replacePlaceholders(url, keyValueMap);
-                                            log.trace("RCPLB URL :: " + url);
-                                            try {
-                                                URL urlGet = new URL(url);
-                                                HttpURLConnection con = (HttpURLConnection) urlGet.openConnection();
-                                                con.setRequestMethod("GET");
-                                                con.getInputStream();
-                                                log.info("RCPLB Chiamo PB  :: " + con.getResponseCode() + " :: " + url + " :: GP:" + globalPixel + " :: INFO :" + info + " :: DATA:" + data);
-                                            } catch (Exception e) {
-                                                log.error("RCPLB Eccezione chianata Post Back", e);
+                            if (postback) {
+                                if (transaction.getDictionaryId() != 49L) {
+                                    //not manuale
+                                    if (transaction.getManualDate() == null) {
+                                        List<CampaignAffiliateDTO> campaignAffiliateDTOS = campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(refferal.getAffiliateId(), refferal.getCampaignId()).toList();
+                                        campaignAffiliateDTOS.forEach(campaignAffiliateDTO -> {
+                                            // cerco global
+                                            String globalPixel = affiliateBusiness.getGlobalPixel(affiliateID);
+                                            // cerco folow through
+                                            String followT = campaignAffiliateDTO.getFollowThrough();
+                                            String info = cplDTO.getInfo();
+                                            String data = cplDTO.getData();
+                                            String url = "";
+                                            log.trace("RCPLB POST BACK ::: " + followT + " :: " + globalPixel + " :: " + info + " :: " + data);
+                                            if (StringUtils.isNotBlank(globalPixel)) {
+                                                url = globalPixel;
+                                            } else if (StringUtils.isNotBlank(followT)) {
+                                                url = followT;
                                             }
-                                        }
-                                    });
+                                            if (StringUtils.isNotBlank(url)) {
+                                                // trovo tutte le chiavi
+                                                Map<String, String> keyValueMap = referralService.estrazioneInfo(info);
+                                                // aggiungo order_id / transaction_id
+                                                keyValueMap.put("orderid", data);
+                                                keyValueMap.put("order_id", data);
+                                                url = referralService.replacePlaceholders(url, keyValueMap);
+                                                log.trace("RCPLB URL :: " + url);
+                                                try {
+                                                    URL urlGet = new URL(url);
+                                                    HttpURLConnection con = (HttpURLConnection) urlGet.openConnection();
+                                                    con.setRequestMethod("GET");
+                                                    con.getInputStream();
+                                                    log.info("RCPLB Chiamo PB  :: " + con.getResponseCode() + " :: " + url + " :: GP:" + globalPixel + " :: INFO :" + info + " :: DATA:" + data);
+                                                } catch (Exception e) {
+                                                    log.error("RCPLB Eccezione chianata Post Back", e);
+                                                }
+                                            }
+                                        });
+                                    }
+                                } else {
+                                    log.warn("Campagna scaduta non faccio postback :: {}", cpl.getId());
                                 }
                             } else {
-                                log.warn("Campagna scaduta non faccio postback :: {}", cpl.getId());
+                                log.info("================================ no postback");
                             }
-
                         } catch (Exception ecc) {
                             log.error("ECCEZIONE CPL :> ", ecc);
                         }
@@ -335,6 +358,7 @@ public class RigeneraCPLBusiness {
         private Integer day;
         private Long affiliateId;
         private Long campaignId;
+        private Boolean postback;
     }
 
 }

@@ -108,6 +108,8 @@ public class ReferralService {
                     refferal.setTargetId(0L);
                 }
             }
+
+            refferal.setSuccess(continua);
             return refferal;
         }
         return null;

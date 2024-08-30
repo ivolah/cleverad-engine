@@ -271,8 +271,6 @@ public class ManageCPC {
                             transaction.setStatusId(72L);//setto pending
                         }
 
-
-
                         // creo la transazione
                         TransactionCPCDTO tcpc = transactionCPCBusiness.createCpc(transaction);
                         log.trace(">>> CREATO TRANSAZIONE :::: CPC :::: {} -- {} -- {}", tcpc.getId(), ref, refferal);
