@@ -144,7 +144,7 @@ public class AffiliateBudgetBusiness {
 
     public List<AffiliateBudgetDTO> getBudgetToDisable() {
         Filter request = new Filter();
-        request.setDisableDueDateTo(LocalDate.now().plusDays(1));
+        request.setDisableDueDateTo(LocalDate.now().minusDays(1));
         request.setStatus(true);
         Page<AffiliateBudget> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(AffiliateBudgetDTO::from).toList();

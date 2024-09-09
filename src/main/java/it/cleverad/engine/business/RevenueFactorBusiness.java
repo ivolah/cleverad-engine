@@ -61,6 +61,9 @@ public class RevenueFactorBusiness {
         map.setCreationDate(LocalDateTime.now());
         map.setLastModificationDate(LocalDateTime.now());
         map.setStatus(true);
+        if(map.getDictionary().getId().equals(50L)) {
+            map.setRevenue(map.getRevenue()/1000);
+        }
         return RevenueFactorDTO.from(repository.save(map));
     }
 
@@ -78,7 +81,6 @@ public class RevenueFactorBusiness {
             return RevenueFactorDTO.from(entity);
         }
     }
-
 
     // DELETE BY ID
     public void delete(Long id) {
@@ -140,7 +142,7 @@ public class RevenueFactorBusiness {
 
     public List<RevenueFactorDTO> getRevenueToDisable() {
         Filter request = new Filter();
-        request.setDisableDueDateTo(LocalDate.now().plusDays(1));
+        request.setDisableDueDateTo(LocalDate.now().minusDays(1));
         request.setStatus(true);
         Page<RevenueFactor> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(RevenueFactorDTO::from).toList();

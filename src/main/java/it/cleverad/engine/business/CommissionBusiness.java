@@ -73,6 +73,9 @@ public class CommissionBusiness {
         map.setLastModificationDate(LocalDateTime.now());
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
         map.setDictionary(dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
+        if(map.getDictionary().getId().equals(50L)) {
+            map.setValue(map.getValue()/1000);
+        }
         return CommissionDTO.from(repository.save(map));
     }
 
@@ -162,7 +165,7 @@ public class CommissionBusiness {
 
     public List<CommissionDTO> getCommissionToDisable() {
         Filter request = new Filter();
-        request.setDisableDueDateTo(LocalDate.now().plusDays(1));
+        request.setDisableDueDateTo(LocalDate.now().minusDays(1));
         request.setStatus(true);
         Page<Commission> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(CommissionDTO::from).toList();

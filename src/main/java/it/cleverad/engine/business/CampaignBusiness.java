@@ -396,7 +396,7 @@ public class CampaignBusiness {
     public List<CampaignDTO> getCampaignsToDisable() {
         Filter request = new Filter();
         request.setStatus(true);
-        request.setDisableDueDateTo(LocalDate.now().plusDays(1));
+        request.setDisableDueDateTo(LocalDate.now().minusDays(1));
         Page<Campaign> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(CampaignDTO::fromList).toList();
     }

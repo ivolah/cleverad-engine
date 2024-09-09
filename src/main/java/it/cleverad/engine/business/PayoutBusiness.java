@@ -239,12 +239,11 @@ public class PayoutBusiness {
         return page.map(PayoutDTO::fromNoTransazioni);
     }
 
-
-
     // UPDATE
     public PayoutDTO update(Long id, Filter filter) {
         Payout payout = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Payout", id));
         payout.setDataScadenza(filter.getDataScadenza());
+        payout.setLastModificationDate(LocalDateTime.now());
         return PayoutDTO.from(repository.save(payout));
     }
 
@@ -259,6 +258,7 @@ public class PayoutBusiness {
             mailRequest.setNote(payout.getNote());
             mailService.inviaMailPayout(mailRequest);
         }
+        payout.setLastModificationDate(LocalDateTime.now());
         payout.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", dictionaryId)));
         return PayoutDTO.from(repository.save(payout));
     }
@@ -277,6 +277,7 @@ public class PayoutBusiness {
         request.setStato(true);
         request.setDateTo(LocalDate.now().minusMonths(6));
         request.setDictionaryIdNotConcluso(true);
+        request.setDictionaryIdNotScaduto(true);
         return repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE)).map(PayoutDTO::fromNoTransazioni).toList();
     }
 

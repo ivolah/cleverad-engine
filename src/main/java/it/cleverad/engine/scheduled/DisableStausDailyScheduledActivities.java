@@ -36,35 +36,35 @@ public class DisableStausDailyScheduledActivities {
         List<AffiliateBudgetDTO> listaBudget = affiliateBudgetBusiness.getBudgetToDisable();
         listaBudget.stream().forEach(budgetDTO -> {
             affiliateBudgetBusiness.disable(budgetDTO.getId());
-            log.info("Disable Budget ({}) : {} ", LocalDate.now().plusDays(1), budgetDTO.getId());
+            log.info("Disable Budget ({}) : {} ", LocalDate.now(), budgetDTO.getId());
         });
 
         // aggiorao sato commission
         List<CommissionDTO> listaCommission = commissionBusiness.getCommissionToDisable();
         listaCommission.stream().forEach(comm -> {
             commissionBusiness.disable(comm.getId());
-            log.info("Disable Commission ({}) : {} ", LocalDate.now().plusDays(1), comm.getId());
+            log.info("Disable Commission ({}) : {} ", LocalDate.now(), comm.getId());
         });
 
         // aggiorno stato revenue
         List<RevenueFactorDTO> listaRevenu = revenueFactorBusiness.getRevenueToDisable();
         listaRevenu.stream().forEach(rr -> {
             revenueFactorBusiness.disable(rr.getId());
-            log.info("Disable Revenue ({}) : {} ", LocalDate.now().plusDays(1), rr.getId());
+            log.info("Disable Revenue ({}) : {} ", LocalDate.now(), rr.getId());
         });
 
         // aggiorno Stato Campagne
         List<CampaignDTO> listaCampagne = campaignBusiness.getCampaignsToDisable();
         listaCampagne.stream().forEach(campaignDTO -> {
             campaignBusiness.disable(campaignDTO.getId());
-            log.info("Disable Campaign ({}) : {} ", LocalDate.now().plusDays(1), campaignDTO.getId());
+            log.info("Disable Campaign ({}) : {} ", LocalDate.now(), campaignDTO.getId());
         });
 
         // Payout da settare a scaduti
         List<PayoutDTO> listaPayout = payoutBusiness.getPayoutToDisable();
         listaPayout.stream().forEach(dto -> {
             payoutBusiness.settaScaduti(dto.getId());
-            log.info("Disable Payout ({}) : {} ", LocalDate.now().plusDays(1), dto.getId());
+            log.info("Disable Payout ({}) : {} ", LocalDate.now(), dto.getId());
         });
 
     }
