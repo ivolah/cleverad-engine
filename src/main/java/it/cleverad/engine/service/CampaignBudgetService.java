@@ -150,6 +150,8 @@ public class CampaignBudgetService {
             Double costi = campaignCostBusiness.searchByCampaignIdUnpaged(dto.getId()).toList().stream().mapToDouble(campaignCostDTO -> campaignCostDTO.getCosto()).sum();
             request.setCosti(costi);
 
+            request.setFatturato(dto.getFatturato());
+
             CampaignBudgetDTO cb = campaignBudgetBusiness.create(request);
             log.trace("CREATO :: {}", cb.getId());
 
