@@ -112,7 +112,7 @@ public class RigeneraCPLBusiness {
                 log.info("RIGENERO GIORNO {}-{}-{}", anno, mese, gg);
                 cplBusiness.getAllDay(anno, mese, gg, affiliateId, camapignId).stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
 
-                    log.info("ID {}", cplDTO.getId());
+                    log.trace("ID {}", cplDTO.getId());
 
                     // leggo sempre i cpc precedenti per trovare il click riferito alla lead
                     cpcBusiness.findByIp24HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal()).stream().filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal())).forEach(cpcDTO -> {
@@ -134,7 +134,7 @@ public class RigeneraCPLBusiness {
                         }
                     }
 
-                    log.info("Refferal :: {}  con ID CPC {}", cplDTO.getRefferal(), cplDTO.getCpcId());
+                    log.trace("Refferal :: {}  con ID CPC {}", cplDTO.getRefferal(), cplDTO.getCpcId());
                     cplBusiness.setCpcId(cplDTO.getId(), cplDTO.getCpcId());
 
                     // prendo reffereal e lo leggo

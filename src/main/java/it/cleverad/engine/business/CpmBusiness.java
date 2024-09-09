@@ -212,12 +212,13 @@ public class CpmBusiness {
         return page.map(CpmDTO::from);
     }
 
-    public Page<CpmDTO> getAllByDay(LocalDate dataFrom, LocalDate datato, Boolean blacklisted, Boolean read) {
+    public Page<CpmDTO> getAllByDay(LocalDate dataFrom, LocalDate datato, Boolean blacklisted, Boolean read, Long campaignId) {
         CpmBusiness.Filter request = new CpmBusiness.Filter();
         request.setDateFrom(dataFrom);
         request.setDateTo(datato);
         request.setBlacklisted(blacklisted);
         request.setRead(read);
+        request.setCampaignid(campaignId);
         Page<Cpm> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(CpmDTO::from);
     }

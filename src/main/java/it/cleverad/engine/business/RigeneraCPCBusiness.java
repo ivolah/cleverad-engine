@@ -237,8 +237,8 @@ public class RigeneraCPCBusiness {
                                 totaleClick += 1;
                                 mediaId = tcpc.getMediaId();
                             }
-                            if (totaleClick > 0)
-                                log.info("TRI {}-{}-{} :: {}", campaignId, affiliateId, channelID, totaleClick);
+//                            if (totaleClick > 0)
+//                                log.info("TRI {}-{}-{} :: {}", campaignId, affiliateId, channelID, totaleClick);
 
                             if (totaleClick > 0) {
                                 TransactionCPCBusiness.BaseCreateRequest transaction = new TransactionCPCBusiness.BaseCreateRequest();

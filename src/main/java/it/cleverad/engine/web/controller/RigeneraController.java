@@ -46,7 +46,7 @@ public class RigeneraController {
     @PostMapping("/cpm")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void manageCPM(@ModelAttribute RigeneraCPMBusiness.FilterUpdate request) {
-        rigeneraCPMBusiness.rigenera(request.getYear(), request.getMonth(), request.getDay());
+        rigeneraCPMBusiness.rigenera(request.getYear(), request.getMonth(), request.getDay(), request.getCampaignId(), request.getAffiliateId());
     }
 
 
