@@ -31,12 +31,12 @@ import javax.persistence.*;
                 "                      tco.name                                                                 AS commissionname,  " +
                 "                      tco.value                                                                AS commissionvalue,  " +
                 "                      CAST(0 as numeric)                                                       AS commissionvaluerigettato,  " +
-                "                      round(CAST(t.value AS numeric), 2)                                       AS value,  " +
+                "                      round(CAST(t.value AS numeric), 4)                                       AS value,  " +
                 "                      CAST(0 as numeric)                                                       AS valuerigettato,  " +
                 "                      CAST(t.revenue_id as bigint)                                             AS revenueid,  " +
                 "                      trf.revenue                                                              AS revenuevalue,  " +
                 "                      CAST(0 as numeric)                                                       AS revenuevaluerigettato,  " +
-                "                      round(CAST(trf.revenue AS numeric) * CAST(t.click_number AS numeric), 2) AS revenue,  " +
+                "                      round(CAST(trf.revenue AS numeric) * CAST(t.click_number AS numeric), 4) AS revenue,  " +
                 "                      CAST(0 as numeric)                                                       AS revenuerigettato,  " +
                 "                      t.click_number                                                           AS clicknumber,  " +
                 "                      CAST(0 as bigint)                                                        AS clicknumberrigettato,  " +
@@ -94,12 +94,12 @@ import javax.persistence.*;
                 "                      0                                                                        AS commissionvalue,  " +
                 "                      tco.value                                                                AS commissionvaluerigettato,  " +
                 "                      0                                                                        AS value,  " +
-                "                      round(CAST(t.value AS numeric), 2)                                       AS valuerigettato,  " +
+                "                      round(CAST(t.value AS numeric), 4)                                       AS valuerigettato,  " +
                 "                      t.revenue_id                                                             AS revenueid,  " +
                 "                      0                                                                        AS revenuevalue,  " +
                 "                      trf.revenue                                                              AS revenuevaluerigettato,  " +
                 "                      0                                                                        AS revenue,  " +
-                "                      round(CAST(trf.revenue AS numeric) * CAST(t.click_number AS numeric), 2) AS revenuerigettato,  " +
+                "                      round(CAST(trf.revenue AS numeric) * CAST(t.click_number AS numeric), 4) AS revenuerigettato,  " +
                 "                      0                                                                        AS clicknumber,  " +
                 "                      t.click_number                                                           AS clicknumberrigettato,  " +
                 "                      0                                                                        AS impressionnumber,  " +
@@ -155,12 +155,12 @@ import javax.persistence.*;
                 "                      tco.name                                                                AS commissionname,  " +
                 "                      tco.value                                                               AS commissionvalue,  " +
                 "                      0                                                                       AS commissionvaluerigettato,  " +
-                "                      round(CAST(t.value AS numeric), 2)                                      AS value,  " +
+                "                      round(CAST(t.value AS numeric), 4)                                      AS value,  " +
                 "                      0                                                                       AS valuerigettato,  " +
                 "                      t.revenue_id                                                            AS revenueid,  " +
                 "                      trf.revenue                                                             AS revenuevalue,  " +
                 "                      0                                                                       AS revenuevaluerigettato,  " +
-                "                      round(CAST(trf.revenue AS numeric) * CAST(t.lead_number AS numeric), 2) AS revenue,  " +
+                "                      round(CAST(trf.revenue AS numeric) * CAST(t.lead_number AS numeric), 4) AS revenue,  " +
                 "                      0                                                                       AS revenuerigettato,  " +
                 "                      0                                                                       AS clicknumber,  " +
                 "                      0                                                                       AS clicknumberrigettato,  " +
@@ -218,12 +218,12 @@ import javax.persistence.*;
                 "                      0                                                                       AS commissionvalue,  " +
                 "                      tco.value                                                               AS commissionvaluerigettato,  " +
                 "                      0                                                                       AS value,  " +
-                "                      round(CAST(t.value AS numeric), 2)                                      AS valuerigettato,  " +
+                "                      round(CAST(t.value AS numeric), 4)                                      AS valuerigettato,  " +
                 "                      t.revenue_id                                                            AS revenueid,  " +
                 "                      0                                                                       AS revenuevalue,  " +
                 "                      trf.revenue                                                             AS revenuevaluerigettato,  " +
                 "                      0                                                                       AS revenue,  " +
-                "                      round(CAST(trf.revenue AS numeric) * CAST(t.lead_number AS numeric), 2) AS revenuerigettato,  " +
+                "                      round(CAST(trf.revenue AS numeric) * CAST(t.lead_number AS numeric), 4) AS revenuerigettato,  " +
                 "                      0                                                                       AS clicknumber,  " +
                 "                      0                                                                       AS clicknumberrigettato,  " +
                 "                      0                                                                       AS impressionnumber,  " +
@@ -279,12 +279,12 @@ import javax.persistence.*;
                 "                      tco.name                                                                      AS commissionname,  " +
                 "                      tco.value                                                                     AS commissionvalue,  " +
                 "                      0                                                                             AS commissionvaluerigettato,  " +
-                "                      round(CAST(t.value AS numeric), 2)                                            AS value,  " +
+                "                      round(CAST(t.value AS numeric), 4)                                            AS value,  " +
                 "                      0                                                                             AS valuerigettato,  " +
                 "                      t.revenue_id                                                                  AS revenueid,  " +
                 "                      trf.revenue                                                                   AS revenuevalue,  " +
                 "                      0                                                                             AS revenuevaluerigettato,  " +
-                "                      round(CAST(trf.revenue AS numeric) * CAST(t.impression_number AS numeric), 2) AS revenue,  " +
+                "                      round(CAST(trf.revenue AS numeric) * CAST(t.impression_number AS numeric), 4) AS revenue,  " +
                 "                      0                                                                             AS revenuerigettato,  " +
                 "                      0                                                                             AS clicknumber,  " +
                 "                      0                                                                             AS clicknumberrigettato,  " +
@@ -323,18 +323,18 @@ import javax.persistence.*;
                 "       COALESCE(SUM(trans.clicknumberrigettato), 0)                                                              as clickNumberRigettato,  " +
                 "       COALESCE(SUM(trans.leadnumber), 0)                                                                        as leadNumber,  " +
                 "       COALESCE(SUM(trans.leadnumberrigettato), 0)                                                               as leadNumberRigettato,  " +
-                "       COALESCE(round(SUM(trans.clicknumber) / NULLIF(SUM(trans.impressionnumber), 0) * 100, 2), 0)                         as CTR,  " +
-                "       COALESCE(round(CAST((SUM(trans.leadnumber) / NULLIF(SUM(trans.clicknumber), 0) * 100) AS numeric), 2), 0) as LR,  " +
-                "       COALESCE(round(CAST(SUM(trans.value) AS numeric), 2), 0)                                                  as commission,  " +
-                "       COALESCE(round(CAST(SUM(trans.valuerigettato) AS numeric), 2), 0)                                         as commissionRigettato,  " +
-                "       COALESCE(round(CAST(SUM(trans.revenue) AS numeric), 2), 0)                                                as revenue,  " +
-                "       COALESCE(round(CAST(SUM(trans.revenuerigettato) AS numeric), 2), 0)                                       as revenueRigettato,  " +
-                "       COALESCE(round(CAST((SUM(trans.revenue) - SUM(trans.value)) AS numeric), 2), 0)                           as margine,  " +
+                "       COALESCE(round(SUM(trans.clicknumber) / NULLIF(SUM(trans.impressionnumber), 0) * 100, 4), 0)                         as CTR,  " +
+                "       COALESCE(round(CAST((SUM(trans.leadnumber) / NULLIF(SUM(trans.clicknumber), 0) * 100) AS numeric), 4), 0) as LR,  " +
+                "       COALESCE(round(CAST(SUM(trans.value) AS numeric), 4), 0)                                                  as commission,  " +
+                "       COALESCE(round(CAST(SUM(trans.valuerigettato) AS numeric), 4), 0)                                         as commissionRigettato,  " +
+                "       COALESCE(round(CAST(SUM(trans.revenue) AS numeric), 4), 0)                                                as revenue,  " +
+                "       COALESCE(round(CAST(SUM(trans.revenuerigettato) AS numeric), 4), 0)                                       as revenueRigettato,  " +
+                "       COALESCE(round(CAST((SUM(trans.revenue) - SUM(trans.value)) AS numeric), 4), 0)                           as margine,  " +
                 "       COALESCE(round(CAST((SUM(trans.revenue) - SUM(trans.value)) AS numeric) / CAST(SUM(NULLIF(trans.revenue, 0)) AS numeric) *  " +
-                "                      100, 2), 0)                                                                                as marginePC,  " +
-                "       COALESCE(round(CAST(SUM(trans.value) / NULLIF(SUM(trans.impressionnumber), 0) * 1000 AS numeric), 2), 0)             as ecpm,  " +
-                "       COALESCE(round(CAST(SUM(trans.value) / NULLIF(SUM(trans.clicknumber), 0) AS numeric), 2), 0)              as ecpc,  " +
-                "       COALESCE(round(CAST(SUM(trans.value) / NULLIF(SUM(trans.leadnumber), 0) AS numeric), 2), 0)               as ecpl  " +
+                "                      100, 4), 0)                                                                                as marginePC,  " +
+                "       COALESCE(round(CAST(SUM(trans.value) / NULLIF(SUM(trans.impressionnumber), 0) * 1000 AS numeric), 4), 0)             as ecpm,  " +
+                "       COALESCE(round(CAST(SUM(trans.value) / NULLIF(SUM(trans.clicknumber), 0) AS numeric), 4), 0)              as ecpc,  " +
+                "       COALESCE(round(CAST(SUM(trans.value) / NULLIF(SUM(trans.leadnumber), 0) AS numeric), 4), 0)               as ecpl  " +
                 "from trans  " +
                 "group by trans.datetime  " +
                 "order by giorno;",
@@ -384,12 +384,12 @@ import javax.persistence.*;
                 "                            tco.name                                                                 AS commissionname, " +
                 "                            tco.value                                                                AS commissionvalue, " +
                 "                            CAST(0 as numeric)                                                       AS commissionvaluerigettato, " +
-                "                            round(CAST(t.value AS numeric), 2)                                       AS value, " +
+                "                            round(CAST(t.value AS numeric), 4)                                       AS value, " +
                 "                            CAST(0 as numeric)                                                       AS valuerigettato, " +
                 "                            CAST(t.revenue_id as bigint)                                             AS revenueid, " +
                 "                            trf.revenue                                                              AS revenuevalue, " +
                 "                            CAST(0 as numeric)                                                       AS revenuevaluerigettato, " +
-                "                            round(CAST(trf.revenue AS numeric) * CAST(t.click_number AS numeric), 2) AS revenue, " +
+                "                            round(CAST(trf.revenue AS numeric) * CAST(t.click_number AS numeric), 4) AS revenue, " +
                 "                            CAST(0 as numeric)                                                       AS revenuerigettato, " +
                 "                            t.click_number                                                           AS clicknumber, " +
                 "                            CAST(0 as bigint)                                                        AS clicknumberrigettato, " +
@@ -447,12 +447,12 @@ import javax.persistence.*;
                 "                            0                                                                        AS commissionvalue, " +
                 "                            tco.value                                                                AS commissionvaluerigettato, " +
                 "                            0                                                                        AS value, " +
-                "                            round(CAST(t.value AS numeric), 2)                                       AS valuerigettato, " +
+                "                            round(CAST(t.value AS numeric), 4)                                       AS valuerigettato, " +
                 "                            t.revenue_id                                                             AS revenueid, " +
                 "                            0                                                                        AS revenuevalue, " +
                 "                            trf.revenue                                                              AS revenuevaluerigettato, " +
                 "                            0                                                                        AS revenue, " +
-                "                            round(CAST(trf.revenue AS numeric) * CAST(t.click_number AS numeric), 2) AS revenuerigettato, " +
+                "                            round(CAST(trf.revenue AS numeric) * CAST(t.click_number AS numeric), 4) AS revenuerigettato, " +
                 "                            0                                                                        AS clicknumber, " +
                 "                            t.click_number                                                           AS clicknumberrigettato, " +
                 "                            0                                                                        AS impressionnumber, " +
@@ -508,12 +508,12 @@ import javax.persistence.*;
                 "                            tco.name                                                                AS commissionname, " +
                 "                            tco.value                                                               AS commissionvalue, " +
                 "                            0                                                                       AS commissionvaluerigettato, " +
-                "                            round(CAST(t.value AS numeric), 2)                                      AS value, " +
+                "                            round(CAST(t.value AS numeric), 4)                                      AS value, " +
                 "                            0                                                                       AS valuerigettato, " +
                 "                            t.revenue_id                                                            AS revenueid, " +
                 "                            trf.revenue                                                             AS revenuevalue, " +
                 "                            0                                                                       AS revenuevaluerigettato, " +
-                "                            round(CAST(trf.revenue AS numeric) * CAST(t.lead_number AS numeric), 2) AS revenue, " +
+                "                            round(CAST(trf.revenue AS numeric) * CAST(t.lead_number AS numeric), 4) AS revenue, " +
                 "                            0                                                                       AS revenuerigettato, " +
                 "                            0                                                                       AS clicknumber, " +
                 "                            0                                                                       AS clicknumberrigettato, " +
@@ -571,12 +571,12 @@ import javax.persistence.*;
                 "                            0                                                                       AS commissionvalue, " +
                 "                            tco.value                                                               AS commissionvaluerigettato, " +
                 "                            0                                                                       AS value, " +
-                "                            round(CAST(t.value AS numeric), 2)                                      AS valuerigettato, " +
+                "                            round(CAST(t.value AS numeric), 4)                                      AS valuerigettato, " +
                 "                            t.revenue_id                                                            AS revenueid, " +
                 "                            0                                                                       AS revenuevalue, " +
                 "                            trf.revenue                                                             AS revenuevaluerigettato, " +
                 "                            0                                                                       AS revenue, " +
-                "                            round(CAST(trf.revenue AS numeric) * CAST(t.lead_number AS numeric), 2) AS revenuerigettato, " +
+                "                            round(CAST(trf.revenue AS numeric) * CAST(t.lead_number AS numeric), 4) AS revenuerigettato, " +
                 "                            0                                                                       AS clicknumber, " +
                 "                            0                                                                       AS clicknumberrigettato, " +
                 "                            0                                                                       AS impressionnumber, " +
@@ -632,12 +632,12 @@ import javax.persistence.*;
                 "                            tco.name                                                                      AS commissionname, " +
                 "                            tco.value                                                                     AS commissionvalue, " +
                 "                            0                                                                             AS commissionvaluerigettato, " +
-                "                            round(CAST(t.value AS numeric), 2)                                            AS value, " +
+                "                            round(CAST(t.value AS numeric), 4)                                            AS value, " +
                 "                            0                                                                             AS valuerigettato, " +
                 "                            t.revenue_id                                                                  AS revenueid, " +
                 "                            trf.revenue                                                                   AS revenuevalue, " +
                 "                            0                                                                             AS revenuevaluerigettato, " +
-                "                            round(CAST(trf.revenue AS numeric) * CAST(t.impression_number AS numeric), 2) AS revenue, " +
+                "                            round(CAST(trf.revenue AS numeric) * CAST(t.impression_number AS numeric), 4) AS revenue, " +
                 "                            0                                                                             AS revenuerigettato, " +
                 "                            0                                                                             AS clicknumber, " +
                 "                            0                                                                             AS clicknumberrigettato, " +
@@ -677,19 +677,19 @@ import javax.persistence.*;
                 "       COALESCE(SUM(transazioni.clicknumberrigettato), 0)                                                                    as clickNumberRigettato, " +
                 "       COALESCE(SUM(transazioni.leadnumber), 0)                                                                              as leadNumber, " +
                 "       COALESCE(SUM(transazioni.leadnumberrigettato), 0)                                                                     as leadNumberRigettato, " +
-                "       COALESCE(round(SUM(transazioni.clicknumber) / NULLIF(SUM(transazioni.impressionnumber), 0) * 100, 2), 0)              as CTR, " +
-                "       COALESCE(round(CAST((SUM(transazioni.leadnumber) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 2), 0) as LR, " +
-                "       COALESCE(round(CAST((SUM(transazioni.leadnumberrigettato) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 2), 0) as LRR, " +
-                "       COALESCE(round(CAST(SUM(transazioni.value) AS numeric), 2), 0)                                                        as commission, " +
-                "       COALESCE(round(CAST(SUM(transazioni.valuerigettato) AS numeric), 2), 0)                                               as commissionRigettato, " +
-                "       COALESCE(round(CAST(SUM(transazioni.revenue) AS numeric), 2), 0)                                                      as revenue, " +
-                "       COALESCE(round(CAST(SUM(transazioni.revenuerigettato) AS numeric), 2), 0)                                             as revenueRigettato, " +
-                "       COALESCE(round(CAST((SUM(transazioni.revenue) - SUM(transazioni.value)) AS numeric), 2), 0)                           as margine, " +
+                "       COALESCE(round(SUM(transazioni.clicknumber) / NULLIF(SUM(transazioni.impressionnumber), 0) * 100, 4), 0)              as CTR, " +
+                "       COALESCE(round(CAST((SUM(transazioni.leadnumber) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 4), 0) as LR, " +
+                "       COALESCE(round(CAST((SUM(transazioni.leadnumberrigettato) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 4), 0) as LRR, " +
+                "       COALESCE(round(CAST(SUM(transazioni.value) AS numeric), 4), 0)                                                        as commission, " +
+                "       COALESCE(round(CAST(SUM(transazioni.valuerigettato) AS numeric), 4), 0)                                               as commissionRigettato, " +
+                "       COALESCE(round(CAST(SUM(transazioni.revenue) AS numeric), 4), 0)                                                      as revenue, " +
+                "       COALESCE(round(CAST(SUM(transazioni.revenuerigettato) AS numeric), 4), 0)                                             as revenueRigettato, " +
+                "       COALESCE(round(CAST((SUM(transazioni.revenue) - SUM(transazioni.value)) AS numeric), 4), 0)                           as margine, " +
                 "       COALESCE(round(CAST((SUM(transazioni.revenue) - SUM(transazioni.value)) AS numeric) / CAST(SUM(NULLIF(transazioni.revenue, 0)) AS numeric) * " +
-                "                      100, 2), 0)                                                                                            as marginePC, " +
-                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.impressionnumber), 0) * 1000 AS numeric), 2), 0)  as ecpm, " +
-                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.clicknumber), 0) AS numeric), 2), 0)              as ecpc, " +
-                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.leadnumber), 0) AS numeric), 2), 0)               as ecpl, " +
+                "                      100, 4), 0)                                                                                            as marginePC, " +
+                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.impressionnumber), 0) * 1000 AS numeric), 4), 0)  as ecpm, " +
+                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.clicknumber), 0) AS numeric), 4), 0)              as ecpc, " +
+                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.leadnumber), 0) AS numeric), 4), 0)               as ecpl, " +
                 "       0                                                                                      as initialBudget, " +
                 "       0                                                                 as budget, " +
                 "       0                                                                                                           as budgetGivenPC, " +
@@ -748,12 +748,12 @@ import javax.persistence.*;
                 "                            tco.name                                                                 AS commissionname, " +
                 "                            tco.value                                                                AS commissionvalue, " +
                 "                            CAST(0 as numeric)                                                       AS commissionvaluerigettato, " +
-                "                            round(CAST(t.value AS numeric), 2)                                       AS value, " +
+                "                            round(CAST(t.value AS numeric), 4)                                       AS value, " +
                 "                            CAST(0 as numeric)                                                       AS valuerigettato, " +
                 "                            CAST(t.revenue_id as bigint)                                             AS revenueid, " +
                 "                            trf.revenue                                                              AS revenuevalue, " +
                 "                            CAST(0 as numeric)                                                       AS revenuevaluerigettato, " +
-                "                            round(CAST(trf.revenue AS numeric) * CAST(t.click_number AS numeric), 2) AS revenue, " +
+                "                            round(CAST(trf.revenue AS numeric) * CAST(t.click_number AS numeric), 4) AS revenue, " +
                 "                            CAST(0 as numeric)                                                       AS revenuerigettato, " +
                 "                            t.click_number                                                           AS clicknumber, " +
                 "                            CAST(0 as bigint)                                                        AS clicknumberrigettato, " +
@@ -811,12 +811,12 @@ import javax.persistence.*;
                 "                            0                                                                        AS commissionvalue, " +
                 "                            tco.value                                                                AS commissionvaluerigettato, " +
                 "                            0                                                                        AS value, " +
-                "                            round(CAST(t.value AS numeric), 2)                                       AS valuerigettato, " +
+                "                            round(CAST(t.value AS numeric), 4)                                       AS valuerigettato, " +
                 "                            t.revenue_id                                                             AS revenueid, " +
                 "                            0                                                                        AS revenuevalue, " +
                 "                            trf.revenue                                                              AS revenuevaluerigettato, " +
                 "                            0                                                                        AS revenue, " +
-                "                            round(CAST(trf.revenue AS numeric) * CAST(t.click_number AS numeric), 2) AS revenuerigettato, " +
+                "                            round(CAST(trf.revenue AS numeric) * CAST(t.click_number AS numeric), 4) AS revenuerigettato, " +
                 "                            0                                                                        AS clicknumber, " +
                 "                            t.click_number                                                           AS clicknumberrigettato, " +
                 "                            0                                                                        AS impressionnumber, " +
@@ -872,12 +872,12 @@ import javax.persistence.*;
                 "                            tco.name                                                                AS commissionname, " +
                 "                            tco.value                                                               AS commissionvalue, " +
                 "                            0                                                                       AS commissionvaluerigettato, " +
-                "                            round(CAST(t.value AS numeric), 2)                                      AS value, " +
+                "                            round(CAST(t.value AS numeric), 4)                                      AS value, " +
                 "                            0                                                                       AS valuerigettato, " +
                 "                            t.revenue_id                                                            AS revenueid, " +
                 "                            trf.revenue                                                             AS revenuevalue, " +
                 "                            0                                                                       AS revenuevaluerigettato, " +
-                "                            round(CAST(trf.revenue AS numeric) * CAST(t.lead_number AS numeric), 2) AS revenue, " +
+                "                            round(CAST(trf.revenue AS numeric) * CAST(t.lead_number AS numeric), 4) AS revenue, " +
                 "                            0                                                                       AS revenuerigettato, " +
                 "                            0                                                                       AS clicknumber, " +
                 "                            0                                                                       AS clicknumberrigettato, " +
@@ -935,12 +935,12 @@ import javax.persistence.*;
                 "                            0                                                                       AS commissionvalue, " +
                 "                            tco.value                                                               AS commissionvaluerigettato, " +
                 "                            0                                                                       AS value, " +
-                "                            round(CAST(t.value AS numeric), 2)                                      AS valuerigettato, " +
+                "                            round(CAST(t.value AS numeric), 4)                                      AS valuerigettato, " +
                 "                            t.revenue_id                                                            AS revenueid, " +
                 "                            0                                                                       AS revenuevalue, " +
                 "                            trf.revenue                                                             AS revenuevaluerigettato, " +
                 "                            0                                                                       AS revenue, " +
-                "                            round(CAST(trf.revenue AS numeric) * CAST(t.lead_number AS numeric), 2) AS revenuerigettato, " +
+                "                            round(CAST(trf.revenue AS numeric) * CAST(t.lead_number AS numeric), 4) AS revenuerigettato, " +
                 "                            0                                                                       AS clicknumber, " +
                 "                            0                                                                       AS clicknumberrigettato, " +
                 "                            0                                                                       AS impressionnumber, " +
@@ -996,12 +996,12 @@ import javax.persistence.*;
                 "                            tco.name                                                                      AS commissionname, " +
                 "                            tco.value                                                                     AS commissionvalue, " +
                 "                            0                                                                             AS commissionvaluerigettato, " +
-                "                            round(CAST(t.value AS numeric), 2)                                            AS value, " +
+                "                            round(CAST(t.value AS numeric), 4)                                            AS value, " +
                 "                            0                                                                             AS valuerigettato, " +
                 "                            t.revenue_id                                                                  AS revenueid, " +
                 "                            trf.revenue                                                                   AS revenuevalue, " +
                 "                            0                                                                             AS revenuevaluerigettato, " +
-                "                            round(CAST(trf.revenue AS numeric) * CAST(t.impression_number AS numeric), 2) AS revenue, " +
+                "                            round(CAST(trf.revenue AS numeric) * CAST(t.impression_number AS numeric), 4) AS revenue, " +
                 "                            0                                                                             AS revenuerigettato, " +
                 "                            0                                                                             AS clicknumber, " +
                 "                            0                                                                             AS clicknumberrigettato, " +
@@ -1041,19 +1041,19 @@ import javax.persistence.*;
                 "       COALESCE(SUM(transazioni.clicknumberrigettato), 0)                                                                    as clickNumberRigettato, " +
                 "       COALESCE(SUM(transazioni.leadnumber), 0)                                                                              as leadNumber, " +
                 "       COALESCE(SUM(transazioni.leadnumberrigettato), 0)                                                                     as leadNumberRigettato, " +
-                "       COALESCE(round(SUM(transazioni.clicknumber) / NULLIF(SUM(transazioni.impressionnumber), 0) * 100, 2), 0)              as CTR, " +
-                "       COALESCE(round(CAST((SUM(transazioni.leadnumber) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 2), 0) as LR, " +
-                "       COALESCE(round(CAST((SUM(transazioni.leadnumberrigettato) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 2), 0) as LRR, " +
-                "       COALESCE(round(CAST(SUM(transazioni.value) AS numeric), 2), 0)                                                        as commission, " +
-                "       COALESCE(round(CAST(SUM(transazioni.valuerigettato) AS numeric), 2), 0)                                               as commissionRigettato, " +
-                "       COALESCE(round(CAST(SUM(transazioni.revenue) AS numeric), 2), 0)                                                      as revenue, " +
-                "       COALESCE(round(CAST(SUM(transazioni.revenuerigettato) AS numeric), 2), 0)                                             as revenueRigettato, " +
-                "       COALESCE(round(CAST((SUM(transazioni.revenue) - SUM(transazioni.value)) AS numeric), 2), 0)                           as margine, " +
+                "       COALESCE(round(SUM(transazioni.clicknumber) / NULLIF(SUM(transazioni.impressionnumber), 0) * 100, 4), 0)              as CTR, " +
+                "       COALESCE(round(CAST((SUM(transazioni.leadnumber) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 4), 0) as LR, " +
+                "       COALESCE(round(CAST((SUM(transazioni.leadnumberrigettato) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 4), 0) as LRR, " +
+                "       COALESCE(round(CAST(SUM(transazioni.value) AS numeric), 4), 0)                                                        as commission, " +
+                "       COALESCE(round(CAST(SUM(transazioni.valuerigettato) AS numeric), 4), 0)                                               as commissionRigettato, " +
+                "       COALESCE(round(CAST(SUM(transazioni.revenue) AS numeric), 4), 0)                                                      as revenue, " +
+                "       COALESCE(round(CAST(SUM(transazioni.revenuerigettato) AS numeric), 4), 0)                                             as revenueRigettato, " +
+                "       COALESCE(round(CAST((SUM(transazioni.revenue) - SUM(transazioni.value)) AS numeric), 4), 0)                           as margine, " +
                 "       COALESCE(round(CAST((SUM(transazioni.revenue) - SUM(transazioni.value)) AS numeric) / CAST(SUM(NULLIF(transazioni.revenue, 0)) AS numeric) * " +
-                "                      100, 2), 0)                                                                                            as marginePC, " +
-                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.impressionnumber), 0) * 1000 AS numeric), 2), 0)  as ecpm, " +
-                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.clicknumber), 0) AS numeric), 2), 0)              as ecpc, " +
-                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.leadnumber), 0) AS numeric), 2), 0)               as ecpl " +
+                "                      100, 4), 0)                                                                                            as marginePC, " +
+                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.impressionnumber), 0) * 1000 AS numeric), 4), 0)  as ecpm, " +
+                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.clicknumber), 0) AS numeric), 4), 0)              as ecpc, " +
+                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.leadnumber), 0) AS numeric), 4), 0)               as ecpl " +
                 " " +
                 "FROM transazioni " +
                 "GROUP BY transazioni.affiliateid, transazioni.affiliatename " +
@@ -1106,12 +1106,12 @@ import javax.persistence.*;
                 "                            tco.name                                                                 AS commissionname, " +
                 "                            tco.value                                                                AS commissionvalue, " +
                 "                            CAST(0 as numeric)                                                       AS commissionvaluerigettato, " +
-                "                            round(CAST(t.value AS numeric), 2)                                       AS value, " +
+                "                            round(CAST(t.value AS numeric), 4)                                       AS value, " +
                 "                            CAST(0 as numeric)                                                       AS valuerigettato, " +
                 "                            CAST(t.revenue_id as bigint)                                             AS revenueid, " +
                 "                            trf.revenue                                                              AS revenuevalue, " +
                 "                            CAST(0 as numeric)                                                       AS revenuevaluerigettato, " +
-                "                            round(CAST(trf.revenue AS numeric) * CAST(t.click_number AS numeric), 2) AS revenue, " +
+                "                            round(CAST(trf.revenue AS numeric) * CAST(t.click_number AS numeric), 4) AS revenue, " +
                 "                            CAST(0 as numeric)                                                       AS revenuerigettato, " +
                 "                            t.click_number                                                           AS clicknumber, " +
                 "                            CAST(0 as bigint)                                                        AS clicknumberrigettato, " +
@@ -1169,12 +1169,12 @@ import javax.persistence.*;
                 "                            0                                                                        AS commissionvalue, " +
                 "                            tco.value                                                                AS commissionvaluerigettato, " +
                 "                            0                                                                        AS value, " +
-                "                            round(CAST(t.value AS numeric), 2)                                       AS valuerigettato, " +
+                "                            round(CAST(t.value AS numeric), 4)                                       AS valuerigettato, " +
                 "                            t.revenue_id                                                             AS revenueid, " +
                 "                            0                                                                        AS revenuevalue, " +
                 "                            trf.revenue                                                              AS revenuevaluerigettato, " +
                 "                            0                                                                        AS revenue, " +
-                "                            round(CAST(trf.revenue AS numeric) * CAST(t.click_number AS numeric), 2) AS revenuerigettato, " +
+                "                            round(CAST(trf.revenue AS numeric) * CAST(t.click_number AS numeric), 4) AS revenuerigettato, " +
                 "                            0                                                                        AS clicknumber, " +
                 "                            t.click_number                                                           AS clicknumberrigettato, " +
                 "                            0                                                                        AS impressionnumber, " +
@@ -1230,12 +1230,12 @@ import javax.persistence.*;
                 "                            tco.name                                                                AS commissionname, " +
                 "                            tco.value                                                               AS commissionvalue, " +
                 "                            0                                                                       AS commissionvaluerigettato, " +
-                "                            round(CAST(t.value AS numeric), 2)                                      AS value, " +
+                "                            round(CAST(t.value AS numeric), 4)                                      AS value, " +
                 "                            0                                                                       AS valuerigettato, " +
                 "                            t.revenue_id                                                            AS revenueid, " +
                 "                            trf.revenue                                                             AS revenuevalue, " +
                 "                            0                                                                       AS revenuevaluerigettato, " +
-                "                            round(CAST(trf.revenue AS numeric) * CAST(t.lead_number AS numeric), 2) AS revenue, " +
+                "                            round(CAST(trf.revenue AS numeric) * CAST(t.lead_number AS numeric), 4) AS revenue, " +
                 "                            0                                                                       AS revenuerigettato, " +
                 "                            0                                                                       AS clicknumber, " +
                 "                            0                                                                       AS clicknumberrigettato, " +
@@ -1293,12 +1293,12 @@ import javax.persistence.*;
                 "                            0                                                                       AS commissionvalue, " +
                 "                            tco.value                                                               AS commissionvaluerigettato, " +
                 "                            0                                                                       AS value, " +
-                "                            round(CAST(t.value AS numeric), 2)                                      AS valuerigettato, " +
+                "                            round(CAST(t.value AS numeric), 4)                                      AS valuerigettato, " +
                 "                            t.revenue_id                                                            AS revenueid, " +
                 "                            0                                                                       AS revenuevalue, " +
                 "                            trf.revenue                                                             AS revenuevaluerigettato, " +
                 "                            0                                                                       AS revenue, " +
-                "                            round(CAST(trf.revenue AS numeric) * CAST(t.lead_number AS numeric), 2) AS revenuerigettato, " +
+                "                            round(CAST(trf.revenue AS numeric) * CAST(t.lead_number AS numeric), 4) AS revenuerigettato, " +
                 "                            0                                                                       AS clicknumber, " +
                 "                            0                                                                       AS clicknumberrigettato, " +
                 "                            0                                                                       AS impressionnumber, " +
@@ -1354,12 +1354,12 @@ import javax.persistence.*;
                 "                            tco.name                                                                      AS commissionname, " +
                 "                            tco.value                                                                     AS commissionvalue, " +
                 "                            0                                                                             AS commissionvaluerigettato, " +
-                "                            round(CAST(t.value AS numeric), 2)                                            AS value, " +
+                "                            round(CAST(t.value AS numeric), 4)                                            AS value, " +
                 "                            0                                                                             AS valuerigettato, " +
                 "                            t.revenue_id                                                                  AS revenueid, " +
                 "                            trf.revenue                                                                   AS revenuevalue, " +
                 "                            0                                                                             AS revenuevaluerigettato, " +
-                "                            round(CAST(trf.revenue AS numeric) * CAST(t.impression_number AS numeric), 2) AS revenue, " +
+                "                            round(CAST(trf.revenue AS numeric) * CAST(t.impression_number AS numeric), 4) AS revenue, " +
                 "                            0                                                                             AS revenuerigettato, " +
                 "                            0                                                                             AS clicknumber, " +
                 "                            0                                                                             AS clicknumberrigettato, " +
@@ -1401,19 +1401,19 @@ import javax.persistence.*;
                 "       COALESCE(SUM(transazioni.clicknumberrigettato), 0)                                                                    as clickNumberRigettato, " +
                 "       COALESCE(SUM(transazioni.leadnumber), 0)                                                                              as leadNumber, " +
                 "       COALESCE(SUM(transazioni.leadnumberrigettato), 0)                                                                     as leadNumberRigettato, " +
-                "       COALESCE(round(SUM(transazioni.clicknumber) / NULLIF(SUM(transazioni.impressionnumber), 0) * 100, 2), 0)              as CTR, " +
-                "       COALESCE(round(CAST((SUM(transazioni.leadnumber) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 2), 0) as LR, " +
-                "       COALESCE(round(CAST((SUM(transazioni.leadnumberrigettato) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 2), 0) as LRR, " +
-                "       COALESCE(round(CAST(SUM(transazioni.value) AS numeric), 2), 0)                                                        as commission, " +
-                "       COALESCE(round(CAST(SUM(transazioni.valuerigettato) AS numeric), 2), 0)                                               as commissionRigettato, " +
-                "       COALESCE(round(CAST(SUM(transazioni.revenue) AS numeric), 2), 0)                                                      as revenue, " +
-                "       COALESCE(round(CAST(SUM(transazioni.revenuerigettato) AS numeric), 2), 0)                                             as revenueRigettato, " +
-                "       COALESCE(round(CAST((SUM(transazioni.revenue) - SUM(transazioni.value)) AS numeric), 2), 0)                           as margine, " +
+                "       COALESCE(round(SUM(transazioni.clicknumber) / NULLIF(SUM(transazioni.impressionnumber), 0) * 100, 4), 0)              as CTR, " +
+                "       COALESCE(round(CAST((SUM(transazioni.leadnumber) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 4), 0) as LR, " +
+                "       COALESCE(round(CAST((SUM(transazioni.leadnumberrigettato) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 4), 0) as LRR, " +
+                "       COALESCE(round(CAST(SUM(transazioni.value) AS numeric), 4), 0)                                                        as commission, " +
+                "       COALESCE(round(CAST(SUM(transazioni.valuerigettato) AS numeric), 4), 0)                                               as commissionRigettato, " +
+                "       COALESCE(round(CAST(SUM(transazioni.revenue) AS numeric), 4), 0)                                                      as revenue, " +
+                "       COALESCE(round(CAST(SUM(transazioni.revenuerigettato) AS numeric), 4), 0)                                             as revenueRigettato, " +
+                "       COALESCE(round(CAST((SUM(transazioni.revenue) - SUM(transazioni.value)) AS numeric), 4), 0)                           as margine, " +
                 "       COALESCE(round(CAST((SUM(transazioni.revenue) - SUM(transazioni.value)) AS numeric) / CAST(SUM(NULLIF(transazioni.revenue, 0)) AS numeric) * " +
-                "                      100, 2), 0)                                                                                            as marginePC, " +
-                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.impressionnumber), 0) * 1000 AS numeric), 2), 0)  as ecpm, " +
-                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.clicknumber), 0) AS numeric), 2), 0)              as ecpc, " +
-                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.leadnumber), 0) AS numeric), 2), 0)               as ecpl " +
+                "                      100, 4), 0)                                                                                            as marginePC, " +
+                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.impressionnumber), 0) * 1000 AS numeric), 4), 0)  as ecpm, " +
+                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.clicknumber), 0) AS numeric), 4), 0)              as ecpc, " +
+                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.leadnumber), 0) AS numeric), 4), 0)               as ecpl " +
                 " " +
                 "FROM transazioni " +
                 "GROUP BY transazioni.affiliateid, transazioni.affiliatename, transazioni.channelname, transazioni.channelid " +
@@ -1468,12 +1468,12 @@ import javax.persistence.*;
                 "                            tco.name                                                                 AS commissionname, " +
                 "                            tco.value                                                                AS commissionvalue, " +
                 "                            CAST(0 as numeric)                                                       AS commissionvaluerigettato, " +
-                "                            round(CAST(t.value AS numeric), 2)                                       AS value, " +
+                "                            round(CAST(t.value AS numeric), 4)                                       AS value, " +
                 "                            CAST(0 as numeric)                                                       AS valuerigettato, " +
                 "                            CAST(t.revenue_id as bigint)                                             AS revenueid, " +
                 "                            trf.revenue                                                              AS revenuevalue, " +
                 "                            CAST(0 as numeric)                                                       AS revenuevaluerigettato, " +
-                "                            round(CAST(trf.revenue AS numeric) * CAST(t.click_number AS numeric), 2) AS revenue, " +
+                "                            round(CAST(trf.revenue AS numeric) * CAST(t.click_number AS numeric), 4) AS revenue, " +
                 "                            CAST(0 as numeric)                                                       AS revenuerigettato, " +
                 "                            t.click_number                                                           AS clicknumber, " +
                 "                            CAST(0 as bigint)                                                        AS clicknumberrigettato, " +
@@ -1531,12 +1531,12 @@ import javax.persistence.*;
                 "                            0                                                                        AS commissionvalue, " +
                 "                            tco.value                                                                AS commissionvaluerigettato, " +
                 "                            0                                                                        AS value, " +
-                "                            round(CAST(t.value AS numeric), 2)                                       AS valuerigettato, " +
+                "                            round(CAST(t.value AS numeric), 4)                                       AS valuerigettato, " +
                 "                            t.revenue_id                                                             AS revenueid, " +
                 "                            0                                                                        AS revenuevalue, " +
                 "                            trf.revenue                                                              AS revenuevaluerigettato, " +
                 "                            0                                                                        AS revenue, " +
-                "                            round(CAST(trf.revenue AS numeric) * CAST(t.click_number AS numeric), 2) AS revenuerigettato, " +
+                "                            round(CAST(trf.revenue AS numeric) * CAST(t.click_number AS numeric), 4) AS revenuerigettato, " +
                 "                            0                                                                        AS clicknumber, " +
                 "                            t.click_number                                                           AS clicknumberrigettato, " +
                 "                            0                                                                        AS impressionnumber, " +
@@ -1592,12 +1592,12 @@ import javax.persistence.*;
                 "                            tco.name                                                                AS commissionname, " +
                 "                            tco.value                                                               AS commissionvalue, " +
                 "                            0                                                                       AS commissionvaluerigettato, " +
-                "                            round(CAST(t.value AS numeric), 2)                                      AS value, " +
+                "                            round(CAST(t.value AS numeric), 4)                                      AS value, " +
                 "                            0                                                                       AS valuerigettato, " +
                 "                            t.revenue_id                                                            AS revenueid, " +
                 "                            trf.revenue                                                             AS revenuevalue, " +
                 "                            0                                                                       AS revenuevaluerigettato, " +
-                "                            round(CAST(trf.revenue AS numeric) * CAST(t.lead_number AS numeric), 2) AS revenue, " +
+                "                            round(CAST(trf.revenue AS numeric) * CAST(t.lead_number AS numeric), 4) AS revenue, " +
                 "                            0                                                                       AS revenuerigettato, " +
                 "                            0                                                                       AS clicknumber, " +
                 "                            0                                                                       AS clicknumberrigettato, " +
@@ -1655,12 +1655,12 @@ import javax.persistence.*;
                 "                            0                                                                       AS commissionvalue, " +
                 "                            tco.value                                                               AS commissionvaluerigettato, " +
                 "                            0                                                                       AS value, " +
-                "                            round(CAST(t.value AS numeric), 2)                                      AS valuerigettato, " +
+                "                            round(CAST(t.value AS numeric), 4)                                      AS valuerigettato, " +
                 "                            t.revenue_id                                                            AS revenueid, " +
                 "                            0                                                                       AS revenuevalue, " +
                 "                            trf.revenue                                                             AS revenuevaluerigettato, " +
                 "                            0                                                                       AS revenue, " +
-                "                            round(CAST(trf.revenue AS numeric) * CAST(t.lead_number AS numeric), 2) AS revenuerigettato, " +
+                "                            round(CAST(trf.revenue AS numeric) * CAST(t.lead_number AS numeric), 4) AS revenuerigettato, " +
                 "                            0                                                                       AS clicknumber, " +
                 "                            0                                                                       AS clicknumberrigettato, " +
                 "                            0                                                                       AS impressionnumber, " +
@@ -1716,12 +1716,12 @@ import javax.persistence.*;
                 "                            tco.name                                                                      AS commissionname, " +
                 "                            tco.value                                                                     AS commissionvalue, " +
                 "                            0                                                                             AS commissionvaluerigettato, " +
-                "                            round(CAST(t.value AS numeric), 2)                                            AS value, " +
+                "                            round(CAST(t.value AS numeric), 4)                                            AS value, " +
                 "                            0                                                                             AS valuerigettato, " +
                 "                            t.revenue_id                                                                  AS revenueid, " +
                 "                            trf.revenue                                                                   AS revenuevalue, " +
                 "                            0                                                                             AS revenuevaluerigettato, " +
-                "                            round(CAST(trf.revenue AS numeric) * CAST(t.impression_number AS numeric), 2) AS revenue, " +
+                "                            round(CAST(trf.revenue AS numeric) * CAST(t.impression_number AS numeric), 4) AS revenue, " +
                 "                            0                                                                             AS revenuerigettato, " +
                 "                            0                                                                             AS clicknumber, " +
                 "                            0                                                                             AS clicknumberrigettato, " +
@@ -1765,19 +1765,19 @@ import javax.persistence.*;
                 "       COALESCE(SUM(transazioni.clicknumberrigettato), 0)                                                                    as clickNumberRigettato, " +
                 "       COALESCE(SUM(transazioni.leadnumber), 0)                                                                              as leadNumber, " +
                 "       COALESCE(SUM(transazioni.leadnumberrigettato), 0)                                                                     as leadNumberRigettato, " +
-                "       COALESCE(round(SUM(transazioni.clicknumber) / NULLIF(SUM(transazioni.impressionnumber), 0) * 100, 2), 0)              as CTR, " +
-                "       COALESCE(round(CAST((SUM(transazioni.leadnumber) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 2), 0) as LR, " +
-                "       COALESCE(round(CAST((SUM(transazioni.leadnumberrigettato) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 2), 0) as LRR, " +
-                "       COALESCE(round(CAST(SUM(transazioni.value) AS numeric), 2), 0)                                                        as commission, " +
-                "       COALESCE(round(CAST(SUM(transazioni.valuerigettato) AS numeric), 2), 0)                                               as commissionRigettato, " +
-                "       COALESCE(round(CAST(SUM(transazioni.revenue) AS numeric), 2), 0)                                                      as revenue, " +
-                "       COALESCE(round(CAST(SUM(transazioni.revenuerigettato) AS numeric), 2), 0)                                             as revenueRigettato, " +
-                "       COALESCE(round(CAST((SUM(transazioni.revenue) - SUM(transazioni.value)) AS numeric), 2), 0)                           as margine, " +
+                "       COALESCE(round(SUM(transazioni.clicknumber) / NULLIF(SUM(transazioni.impressionnumber), 0) * 100, 4), 0)              as CTR, " +
+                "       COALESCE(round(CAST((SUM(transazioni.leadnumber) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 4), 0) as LR, " +
+                "       COALESCE(round(CAST((SUM(transazioni.leadnumberrigettato) / NULLIF(SUM(transazioni.clicknumber), 0) * 100) AS numeric), 4), 0) as LRR, " +
+                "       COALESCE(round(CAST(SUM(transazioni.value) AS numeric), 4), 0)                                                        as commission, " +
+                "       COALESCE(round(CAST(SUM(transazioni.valuerigettato) AS numeric), 4), 0)                                               as commissionRigettato, " +
+                "       COALESCE(round(CAST(SUM(transazioni.revenue) AS numeric), 4), 0)                                                      as revenue, " +
+                "       COALESCE(round(CAST(SUM(transazioni.revenuerigettato) AS numeric), 4), 0)                                             as revenueRigettato, " +
+                "       COALESCE(round(CAST((SUM(transazioni.revenue) - SUM(transazioni.value)) AS numeric), 4), 0)                           as margine, " +
                 "       COALESCE(round(CAST((SUM(transazioni.revenue) - SUM(transazioni.value)) AS numeric) / CAST(SUM(NULLIF(transazioni.revenue, 0)) AS numeric) * " +
-                "                      100, 2), 0)                                                                                            as marginePC, " +
-                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.impressionnumber), 0) * 1000 AS numeric), 2), 0)  as ecpm, " +
-                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.clicknumber), 0) AS numeric), 2), 0)              as ecpc, " +
-                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.leadnumber), 0) AS numeric), 2), 0)               as ecpl " +
+                "                      100, 4), 0)                                                                                            as marginePC, " +
+                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.impressionnumber), 0) * 1000 AS numeric), 4), 0)  as ecpm, " +
+                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.clicknumber), 0) AS numeric), 4), 0)              as ecpc, " +
+                "       COALESCE(round(CAST(SUM(transazioni.value) / NULLIF(SUM(transazioni.leadnumber), 0) AS numeric), 4), 0)               as ecpl " +
                 " " +
                 "FROM transazioni " +
                 "GROUP BY transazioni.affiliateid, transazioni.affiliatename, transazioni.channelname, transazioni.channelid, transazioni.campaignName, transazioni.campaignId " +
