@@ -86,7 +86,7 @@ public class ManageCPL {
 
                 // leggo sempre i cpc precedenti per trovare il click riferito alla lead
                 cpcBusiness.findByIp24HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal()).stream().filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal())).forEach(cpcDTO -> {
-                    log.trace("R ORIG {} --> R CPC {}", cplDTO.getRefferal(), cpcDTO.getRefferal());
+                    log.info("CPC : {} : ORIG {} --> CPC {}", cpcDTO.getId(), cplDTO.getRefferal(), cpcDTO.getRefferal());
                     cplDTO.setRefferal(cpcDTO.getRefferal());
                     cplDTO.setCpcId(cpcDTO.getId());
                 });
@@ -97,7 +97,7 @@ public class ManageCPL {
                     if (listaSenzaIp.size() > 0) {
                         //check id cpc non usato in transazioni cpl come cpcid
                         long numerositatitudine = transactionCPLBusiness.countByCpcId(listaSenzaIp.get(0).getId());
-                        log.trace("NO IP CPC {} Ref ORIG {} --> Ref CPC {} - CPCID USATO {}", listaSenzaIp.get(0).getId(), cplDTO.getRefferal(), listaSenzaIp.get(0).getRefferal(), numerositatitudine);
+                        log.info("NO-IP CPC {} : ORIG {} --> CPC {} - used: {}", listaSenzaIp.get(0).getId(), cplDTO.getRefferal(), listaSenzaIp.get(0).getRefferal(), numerositatitudine);
                         if (numerositatitudine == 0) {
                             cplDTO.setRefferal(listaSenzaIp.get(0).getRefferal());
                             cplDTO.setCpcId(listaSenzaIp.get(0).getId());
@@ -111,27 +111,27 @@ public class ManageCPL {
                 // prendo reffereal e lo leggo
                 Refferal refferal = referralService.decodificaReferral(cplDTO.getRefferal());
 
+                log.info(">>>> T-CPL :: {} :: ", cplDTO, refferal);
+
+                //aggiorno dati CPL
+                Cpl cccpl = cplRepository.findById(cplDTO.getId()).orElseThrow(() -> new ElementCleveradException("Cpl", cplDTO.getId()));
+                cccpl.setMediaId(refferal.getMediaId());
+                cccpl.setCampaignId(refferal.getCampaignId());
+                cccpl.setAffiliateId(refferal.getAffiliateId());
+                cccpl.setChannelId(refferal.getChannelId());
+                cccpl.setTargetId(refferal.getTargetId());
+                if (cccpl.getData().equals("[REPLACE]")) {
+                    cccpl.setData("");
+                    cplDTO.setData("");
+                }
+                if (StringUtils.isBlank(cccpl.getInfo()) && idCpc != null) {
+                    CpcDTO cpc = cpcBusiness.findById(idCpc);
+                    cccpl.setInfo(cpc.getInfo());
+                    cplDTO.setInfo(cpc.getInfo());
+                }
+                cplRepository.save(cccpl);
+
                 if (refferal != null && refferal.getAffiliateId() != null) {
-                    log.trace(">>>> T-CPL :: {} :: ", cplDTO, refferal);
-
-                    //aggiorno dati CPL
-                    Cpl cccpl = cplRepository.findById(cplDTO.getId()).orElseThrow(() -> new ElementCleveradException("Cpl", cplDTO.getId()));
-                    cccpl.setMediaId(refferal.getMediaId());
-                    cccpl.setCampaignId(refferal.getCampaignId());
-                    cccpl.setAffiliateId(refferal.getAffiliateId());
-                    cccpl.setChannelId(refferal.getChannelId());
-                    cccpl.setTargetId(refferal.getTargetId());
-                    if (cccpl.getData().equals("[REPLACE]")) {
-                        cccpl.setData("");
-                        cplDTO.setData("");
-                    }
-                    if (StringUtils.isBlank(cccpl.getInfo()) && idCpc != null) {
-                        CpcDTO cpc = cpcBusiness.findById(idCpc);
-                        cccpl.setInfo(cpc.getInfo());
-                        cplDTO.setInfo(cpc.getInfo());
-                    }
-                    cplRepository.save(cccpl);
-
                     // setta transazione
                     TransactionCPLBusiness.BaseCreateRequest transaction = new TransactionCPLBusiness.BaseCreateRequest();
                     transaction.setRefferal(cplDTO.getRefferal());
@@ -280,9 +280,6 @@ public class ManageCPL {
                     TransactionCPLDTO cpl = transactionCPLBusiness.createCpl(transaction);
                     log.info(">>> CREATO TRANSAZIONE :::: CPL :::: {} ", cpl.getId());
 
-                    // setto a gestito
-                    cplBusiness.setRead(cplDTO.getId());
-
                     // verifico il Postback ed eventualemnte faccio chiamata
                     // solo se campagna attiva
                     if (transaction.getDictionaryId() != 49L) {
@@ -333,6 +330,9 @@ public class ManageCPL {
                     log.warn("Errore decodifica refferal :: {}", cplDTO.getRefferal());
                     cplBusiness.setRead(cplDTO.getId());
                 }
+
+                // setto a gestito
+                cplBusiness.setRead(cplDTO.getId());
 
             });
         } catch (Exception e) {

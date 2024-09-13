@@ -86,10 +86,13 @@ public class CampaignBudgetBusiness {
         map.setPlanner(campaign.getPlanner());
         map.setDictionary(dictionaryRepository.findById(request.tipologiaId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.tipologiaId)));
         map.setCanali(dictionaryRepository.findById(request.canaleId).orElseThrow(() -> new ElementCleveradException("Dictionary-canale", request.canaleId)));
-        map.setStatus(true);
+        if (request.getStatus() == null) map.setStatus(true);
+        else map.setStatus(request.getStatus());
         map.setBudgetIniziale(DoubleRounder.round(request.getPayout() * request.capIniziale, 2));
-        map.setStatoPagato(false);
-        map.setStatoFatturato(false);
+        if (request.getStatoPagato() == null) map.setStatoPagato(false);
+        else map.setStatoPagato(request.getStatoPagato());
+        if (request.getStatoFatturato() == null) map.setStatoFatturato(false);
+        else map.setStatoFatturato(request.getStatoFatturato());
         Double costi = campaignCostBusiness.searchByCampaignIdUnpaged(campaign.getId()).toList().stream().mapToDouble(campaignCostDTO -> campaignCostDTO.getCosto()).sum();
         map.setCosti(costi);
         if (request.getScarto() == null) map.setScarto(0D);
@@ -153,7 +156,7 @@ public class CampaignBudgetBusiness {
         CampaignBudget calcolato = calculateTotalsForDoubleFields(page);
         List<CampaignBudget> newListWithAdditionalElement = new ArrayList<>(page.getContent());
         newListWithAdditionalElement.add(calcolato);
-        Page<CampaignBudget> newPage = new PageImpl<>(newListWithAdditionalElement, pageable, page.getTotalElements() + 1);
+        Page<CampaignBudget> newPage = new PageImpl<>(newListWithAdditionalElement, pageable, page.getTotalElements());
 
         return newPage.map(CampaignBudgetDTO::from);
     }
@@ -354,7 +357,6 @@ public class CampaignBudgetBusiness {
         private LocalDate volumeDate;
         private Integer volumeDelta;
         private Double costi;
-
         private Boolean statoFatturato;
         private Boolean statoPagato;
         @DateTimeFormat(pattern = "yyyy-MM-dd")

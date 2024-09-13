@@ -112,7 +112,7 @@ public class RigeneraCPLBusiness {
                 log.info("RIGENERO GIORNO {}-{}-{}", anno, mese, gg);
                 cplBusiness.getAllDay(anno, mese, gg, affiliateId, camapignId).stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
 
-                    log.trace("ID {}", cplDTO.getId());
+                    log.info("ID {}", cplDTO.getId());
 
                     // leggo sempre i cpc precedenti per trovare il click riferito alla lead
                     cpcBusiness.findByIp24HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal()).stream().filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal())).forEach(cpcDTO -> {
@@ -126,7 +126,7 @@ public class RigeneraCPLBusiness {
                         if (listaSenzaIp.size() > 0) {
                             //check id cpc non usato in transazioni cpl come cpcid
                             long numerositatitudine = transactionCPLBusiness.countByCpcId(listaSenzaIp.get(0).getId());
-                            log.trace("NO IP CPC {} Ref ORIG {} --> Ref CPC {} - CPCID USATO {}", listaSenzaIp.get(0).getId(), cplDTO.getRefferal(), listaSenzaIp.get(0).getRefferal(), numerositatitudine);
+                            log.info("NO-IP CPC {} : ORIG {} --> CPC {} - used: {}", listaSenzaIp.get(0).getId(), cplDTO.getRefferal(), listaSenzaIp.get(0).getRefferal(), numerositatitudine);
                             if (numerositatitudine == 0) {
                                 cplDTO.setRefferal(listaSenzaIp.get(0).getRefferal());
                                 cplDTO.setCpcId(listaSenzaIp.get(0).getId());
@@ -139,16 +139,17 @@ public class RigeneraCPLBusiness {
 
                     // prendo reffereal e lo leggo
                     Refferal refferal = referralService.decodificaReferral(cplDTO.getRefferal());
-                    if (refferal != null && refferal.getAffiliateId() != null) {
-                        //aggiorno dati CPL
-                        Cpl cccpl = cplRepository.findById(cplDTO.getId()).orElseThrow(() -> new ElementCleveradException("Cpl", cplDTO.getId()));
-                        cccpl.setMediaId(refferal.getMediaId());
-                        cccpl.setCampaignId(refferal.getCampaignId());
-                        cccpl.setAffiliateId(refferal.getAffiliateId());
-                        cccpl.setChannelId(refferal.getChannelId());
-                        cccpl.setTargetId(refferal.getTargetId());
-                        cplRepository.save(cccpl);
+                    log.info(">>>>RR T-CPL :: {} :: ", cplDTO, refferal);
+                    //aggiorno dati CPL
+                    Cpl cccpl = cplRepository.findById(cplDTO.getId()).orElseThrow(() -> new ElementCleveradException("Cpl", cplDTO.getId()));
+                    cccpl.setMediaId(refferal.getMediaId());
+                    cccpl.setCampaignId(refferal.getCampaignId());
+                    cccpl.setAffiliateId(refferal.getAffiliateId());
+                    cccpl.setChannelId(refferal.getChannelId());
+                    cccpl.setTargetId(refferal.getTargetId());
+                    cplRepository.save(cccpl);
 
+                    if (refferal != null && refferal.getAffiliateId() != null) {
                         // setta transazione
                         TransactionCPLBusiness.BaseCreateRequest transaction = new TransactionCPLBusiness.BaseCreateRequest();
                         transaction.setRefferal(cplDTO.getRefferal());
@@ -287,9 +288,6 @@ public class RigeneraCPLBusiness {
                             TransactionCPLDTO cpl = transactionCPLBusiness.createCpl(transaction);
                             log.info(">>>RIGENERATO LEAD :::: {} ", cpl.getId());
 
-                            // setto a gestito
-                            cplBusiness.setRead(cplDTO.getId());
-
                             // verifico il Postback ed eventualemnte faccio chiamata solo se campagna attiva
                             if (postback) {
                                 if (transaction.getDictionaryId() != 49L) {
@@ -340,6 +338,9 @@ public class RigeneraCPLBusiness {
                             log.error("ECCEZIONE CPL :> ", ecc);
                         }
                     }// creo solo se ho affiliate
+
+                    // setto a gestito
+                    cplBusiness.setRead(cplDTO.getId());
                 });
             }// ciclo se prendo in considerazione tutto il mese
 

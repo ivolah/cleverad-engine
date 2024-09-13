@@ -60,16 +60,19 @@ public class TrackingBusiness {
 
     // GET BY ID
     public TargetDTO getTarget(BaseCreateRequest request) {
+
+        log.trace("REQ: " + request.getRefferalId());
+        log.trace("REQ: " + request.getIp());
         TargetDTO targetDTO = new TargetDTO();
         Refferal refferal = referralService.decodificaReferral(request.getRefferalId());
-        //log.info("REQ: " + refferal);
+        log.trace("REQ: " + refferal);
 
         if (refferal != null && refferal.getMediaId() != null) {
 
             MediaDTO mediaDTO = null;
             if (mediaBusiness.findById(refferal.getMediaId()) != null) {
                 mediaDTO = mediaBusiness.findById(refferal.getMediaId());
-                //log.info(">>>>>>>> " + mediaDTO.getTarget() + " ------ " + refferal.getMediaId());
+                log.trace(">>>>>>>> " + mediaDTO.getTarget() + " ------ " + refferal.getMediaId());
                 targetDTO.setTarget(mediaDTO.getTarget());
             }
 
@@ -85,7 +88,7 @@ public class TrackingBusiness {
             }
         }
 
-        //log.info("TT " + targetDTO.getTarget());
+        log.trace("TT " + targetDTO.getTarget());
 
         if (refferal != null && refferal.getCampaignId() != null) {
 
