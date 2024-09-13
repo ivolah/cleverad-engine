@@ -57,6 +57,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests().antMatchers(
                         "/authenticate",
                         "/target",
+                        "/botdata",
                         "/file/encoded",
                         "/file/*/download",
                         "/register",
