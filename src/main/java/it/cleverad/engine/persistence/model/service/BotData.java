@@ -21,10 +21,13 @@ public class BotData {
     private String cap;
     private String telefono;
     private String ip;
-    private LocalDateTime ts;
-    @Column(name = "project_name")
-    private String projectName;
-    @Column(name = "project_referral")
-    private String projectReferral;
-
+    private LocalDateTime ts = LocalDateTime.now();
+    @Column(name = "campaign_name")
+    private String campaignName;
+    @Column(name = "campaign_referral")
+    private String campaignReferral;
+    private String referral;
+    private String email;
+    private Boolean privacy1;
+    private Boolean privacy2;
 }

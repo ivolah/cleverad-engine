@@ -17,7 +17,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,8 +73,12 @@ public class BotDataBusiness {
             existingData.setTelefono(updatedData.getTelefono());
             existingData.setIp(updatedData.getIp());
             existingData.setTs(updatedData.getTs());
-            existingData.setProjectName(updatedData.getProjectName());
-            existingData.setProjectReferral(updatedData.getProjectRefferal());
+            existingData.setCampaignName(updatedData.getCampaignName());
+            existingData.setCampaignReferral(updatedData.getCampaignReferral());
+            existingData.setReferral(updatedData.getReferral());
+            existingData.setEmail(updatedData.getEmail());
+            existingData.setPrivacy1(updatedData.getPrivacy1());
+            existingData.setPrivacy2(updatedData.getPrivacy2());
             return repository.save(existingData);
         }).orElseThrow(() -> new RuntimeException("BotData with ID " + id + " not found"))));
     }
@@ -102,11 +105,11 @@ public class BotDataBusiness {
             if (request.getId() != null) {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
-            if (request.getProjectName() != null) {
-                predicates.add(cb.like(cb.upper(root.get("projectName")), "%" + request.getProjectName().toUpperCase() + "%"));
+            if (request.getCampaignName() != null) {
+                predicates.add(cb.like(cb.upper(root.get("campaignName")), "%" + request.getCampaignName().toUpperCase() + "%"));
             }
-            if (request.getProjectRefferal() != null) {
-                predicates.add(cb.like(root.get("projectReferral"), "%" + request.getProjectRefferal() + "%"));
+            if (request.getCampaignReferral() != null) {
+                predicates.add(cb.like(root.get("campaignReferral"), "%" + request.getCampaignReferral() + "%"));
             }
             if (request.getIp() != null) {
                 predicates.add(cb.equal(root.get("ip"), request.getIp()));
@@ -135,10 +138,12 @@ public class BotDataBusiness {
         private String cap;
         private String telefono;
         private String ip;
-        @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSz")
-        private LocalDateTime ts = LocalDateTime.now();
-        private String projectName;
-        private String projectRefferal;
+        private String campaignName;
+        private String campaignReferral;
+        private String referral;
+        private String email;
+        private Boolean privacy1;
+        private Boolean privacy2;
     }
 
     @Data
@@ -152,8 +157,12 @@ public class BotDataBusiness {
         private LocalDateTime ts;
         private Instant tsFrom;
         private Instant tsTo;
-        private String projectName;
-        private String projectRefferal;
+        private String campaignName;
+        private String campaignReferral;
+        private String referral;
+        private String email;
+        private Boolean privacy1;
+        private Boolean privacy2;
     }
 
 }
