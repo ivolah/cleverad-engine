@@ -8,6 +8,7 @@ import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
 import it.cleverad.engine.service.CampaignBudgetService;
 import it.cleverad.engine.web.dto.CampaignBudgetDTO;
+import it.cleverad.engine.web.dto.CampaignCostDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.Column;
 import javax.persistence.criteria.Predicate;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
@@ -68,7 +70,6 @@ public class CampaignBudgetBusiness {
         for (double value : pp) {
             sum += value;
         }
-        // log.info("SS {} + {} - {}", sum, pp.length, overallPercentage);
 
         return DoubleRounder.round(sum / pp.length, 2);
     }
@@ -93,8 +94,8 @@ public class CampaignBudgetBusiness {
         else map.setStatoPagato(request.getStatoPagato());
         if (request.getStatoFatturato() == null) map.setStatoFatturato(false);
         else map.setStatoFatturato(request.getStatoFatturato());
-        Double costi = campaignCostBusiness.searchByCampaignIdUnpaged(campaign.getId()).toList().stream().mapToDouble(campaignCostDTO -> campaignCostDTO.getCosto()).sum();
-        map.setCosti(costi);
+        Double costiProduzione = campaignCostBusiness.searchByCampaignIdUnpaged(campaign.getId()).toList().stream().mapToDouble(CampaignCostDTO::getCosto).sum();
+        map.setCostiProduzione(costiProduzione);
         if (request.getScarto() == null) map.setScarto(0D);
         return CampaignBudgetDTO.from(repository.save(map));
     }
@@ -356,11 +357,17 @@ public class CampaignBudgetBusiness {
         private Integer volume;
         private LocalDate volumeDate;
         private Integer volumeDelta;
-        private Double costi;
         private Boolean statoFatturato;
         private Boolean statoPagato;
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate invoiceDueDate;
+        private Double payoutGenerati;
+        private Double costiProduzione;
+        private Double costiAltri;
+        private Double costiTotale;
+        private Double margineContribuzione;
+        private Double margineContribuzionePc;
+
 
     }
 
@@ -411,7 +418,14 @@ public class CampaignBudgetBusiness {
         private Boolean status;
         private Boolean statoFatturato;
         private Boolean statoPagato;
-        private Double costi;
+
+        private Double payoutGenerati;
+        private Double costiProduzione;
+        private Double costiAltri;
+        private Double costiTotale;
+        private Double margineContribuzione;
+        private Double margineContribuzionePc;
+
     }
 
     @Data
@@ -438,6 +452,13 @@ public class CampaignBudgetBusiness {
         private String note;
         private Long fatturaId;
         private Boolean status;
+        private Double payoutGenerati;
+        private Double costiProduzione;
+        private Double costiAltri;
+        private Double costiTotale;
+        private Double margineContribuzione;
+        private Double margineContribuzionePc;
+
     }
 
 }

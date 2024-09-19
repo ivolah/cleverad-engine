@@ -288,12 +288,13 @@ public class AffiliateBusiness {
         mailService.invio(mailRequest);
 
         // invio mail Affiliate
-        //mailRequest.setTemplateId(6L);
-        //mailRequest.setAffiliateId(dto.getId());
-        //mailRequest.setEmail(request.primaryMail);
-        ////mailRequest.setUserId();
-        //mailService.invio(mailRequest);
-
+        /*
+        mailRequest.setTemplateId(6L);
+        mailRequest.setAffiliateId(dto.getId());
+        mailRequest.setEmail(request.primaryMail);
+        //mailRequest.setUserId();
+        mailService.invio(mailRequest);
+        */
         return dto;
     }
 

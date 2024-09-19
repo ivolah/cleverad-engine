@@ -65,6 +65,13 @@ public class CampaignBudgetDTO {
     private List<FileCampaignBudgetInvoiceDTO> fileCampaignBudgetInvoices;
     private List<FileCampaignBudgetOrderDTO> fileCampaignBudgetOrders;
 
+    private Double payoutGenerati;
+    private Double costiProduzione;
+    private Double costiAltri;
+    private Double costiTotale;
+    private Double margineContribuzione;
+    private Double margineContribuzionePc;
+
     public static CampaignBudgetDTO from(CampaignBudget campaignBudget) {
 
         List<FileCampaignBudgetInvoiceDTO> invoices = null;
@@ -119,7 +126,14 @@ public class CampaignBudgetDTO {
                 campaignBudget.getNote(), campaignBudget.getCapFatturabile(), campaignBudget.getFatturato(), campaignBudget.getStatus(),
                 campaignBudget.getStatoFatturato(), campaignBudget.getStatoPagato(), campaignBudget.getInvoiceDueDate(),
                 campaignBudget.getVolume(), campaignBudget.getVolumeDate(), campaignBudget.getVolumeDelta(),
-                invoices, orders);
+                invoices, orders,
+                campaignBudget.getPayoutGenerati(),
+                campaignBudget.getCostiProduzione(),
+                campaignBudget.getCostiAltri(),
+                campaignBudget.getCostiTotale(),
+                campaignBudget.getMargineContribuzione(),
+                campaignBudget.getMargineContribuzione()
+        );
     }
 
 }

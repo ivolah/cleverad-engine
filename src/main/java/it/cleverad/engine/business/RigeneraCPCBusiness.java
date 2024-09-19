@@ -3,8 +3,8 @@ package it.cleverad.engine.business;
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.ClickMultipli;
+import it.cleverad.engine.persistence.model.service.QueryTransaction;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
-import it.cleverad.engine.persistence.model.service.TransactionCPC;
 import it.cleverad.engine.persistence.model.tracking.Cpc;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.persistence.repository.tracking.CpcRepository;
@@ -64,57 +64,48 @@ public class RigeneraCPCBusiness {
     private ReferralService referralService;
     @Autowired
     private CampaignRepository campaignRepository;
+    @Autowired
+    private TransactionStatusBusiness transactionStatusBusiness;
 
     private long TIME_THRESHOLD = 60000;
     private Map<String, Instant> ipTimestampMap = new HashMap<>();
 
-    private boolean isSuspiciousRequest(String ipAddress) {
-        Instant currentTime = Instant.now();
-        return ipTimestampMap.compute(ipAddress, (key, lastTimestamp) -> {
-            if (lastTimestamp != null && currentTime.toEpochMilli() - lastTimestamp.toEpochMilli() < TIME_THRESHOLD) {
-                return lastTimestamp; // Suspicious request
-            }
-            return currentTime;
-        }) != currentTime;
-    }
-
     public void rigenera(Integer anno, Integer mese, Integer giorno, Long affiliateId, Long campaignId) {
+        try {
 
-        int start = (giorno == null) ? 1 : giorno;
-        int end = (giorno == null) ? LocalDate.of(anno, mese, 1).lengthOfMonth() : giorno;
+            int start = (giorno == null) ? 1 : giorno;
+            int end = (giorno == null) ? LocalDate.of(anno, mese, 1).lengthOfMonth() : giorno;
+            LocalDate dataDaGestireStart = LocalDate.of(anno, mese, start);
+            LocalDate dataDaGestireEnd = LocalDate.of(anno, mese, end);
+            log.info(anno + "-" + mese + "-" + giorno + " >> " + dataDaGestireStart + " || " + dataDaGestireEnd + " per A " + affiliateId + " per C " + campaignId);
 
-        LocalDate dataDaGestireStart = LocalDate.of(anno, mese, start);
-        LocalDate dataDaGestireEnd = LocalDate.of(anno, mese, end);
+            // ==========================================================================================================================================
+            // ==========================================================================================================================================
+            // SETTAGGIO CLICK MULTIPLI
+            // ==========================================================================================================================================
+            // ==========================================================================================================================================
 
-        log.info(anno + "-" + mese + "-" + giorno + " >> " + dataDaGestireStart + " || " + dataDaGestireEnd + " per A " + affiliateId + " per C " + campaignId);
+            // NEL CASO NON SIA GIA' VERIFICO I CLICK MULTIPLI
+            List<ClickMultipli> listaDaDisabilitare = new ArrayList<>();
+            Integer numeroGiorniBetween = dataDaGestireEnd.getDayOfYear() - dataDaGestireStart.getDayOfYear();
+            for (int i = 0; i < numeroGiorniBetween; i++) {
+                listaDaDisabilitare.addAll(cpcBusiness.getListaClickMultipliDaDisabilitare(dataDaGestireStart.plusDays(i), dataDaGestireStart.plusDays(i + 1), affiliateId, campaignId));
+                if (listaDaDisabilitare.size() > 0)
+                    log.info("Data :: {} :: {}  disabilitati", dataDaGestireStart.plusDays(i).format(DateTimeFormatter.ISO_LOCAL_DATE), listaDaDisabilitare.size());
+            }
 
-        // ==========================================================================================================================================
-        // ==========================================================================================================================================
-        // SETTAGGIO CLICK MULTIPLI
-        // ==========================================================================================================================================
-        // ==========================================================================================================================================
+            // giro settaggio click multipli
+            listaDaDisabilitare.forEach(clickMultipli -> {
+                log.trace("Disabilito {} :: {}", clickMultipli.getId(), clickMultipli.getTotale());
+                Cpc cccp = repository.findById(clickMultipli.getId()).orElseThrow(() -> new ElementCleveradException("Cpc", clickMultipli.getId()));
+                cccp.setRead(true);
+                cccp.setBlacklisted(true);
+                cccp.setMultiple(true);
+                repository.save(cccp);
+            });
 
-        // NEL CASO NON SIA GIA' VERIFICO I CLICK MULTIPLI
-        List<ClickMultipli> listaDaDisabilitare = new ArrayList<>();
-        Integer numeroGiorniBetween = dataDaGestireEnd.getDayOfYear() - dataDaGestireStart.getDayOfYear();
-        for (int i = 0; i < numeroGiorniBetween; i++) {
-            listaDaDisabilitare.addAll(cpcBusiness.getListaClickMultipliDaDisabilitare(dataDaGestireStart.plusDays(i), dataDaGestireStart.plusDays(i + 1), affiliateId, campaignId));
-            if (listaDaDisabilitare.size() > 0)
-            log.info("Data :: {} :: {}  disabilitati", dataDaGestireStart.plusDays(i).format(DateTimeFormatter.ISO_LOCAL_DATE), listaDaDisabilitare.size());
-        }
-
-        // giro settaggio click multipli
-        listaDaDisabilitare.forEach(clickMultipli -> {
-            log.trace("Disabilito {} :: {}", clickMultipli.getId(), clickMultipli.getTotale());
-            Cpc cccp = repository.findById(clickMultipli.getId()).orElseThrow(() -> new ElementCleveradException("Cpc", clickMultipli.getId()));
-            cccp.setRead(true);
-            cccp.setBlacklisted(true);
-            cccp.setMultiple(true);
-            repository.save(cccp);
-        });
-
-        // cerco IP vicini tra quelli non già blacklisted
-        //       Page<CpcDTO> listaIpDaVerificare = cpcBusiness.getListaNotBlacklisted(dataDaGestireStart, dataDaGestireEnd);
+            // cerco IP vicini tra quelli non già blacklisted
+            //       Page<CpcDTO> listaIpDaVerificare = cpcBusiness.getListaNotBlacklisted(dataDaGestireStart, dataDaGestireEnd);
 //        List<String> ips = listaIpDaVerificare.stream().map(cpcDTO -> cpcDTO.getIp()).distinct().collect(Collectors.toList();
 //        ips.stream().filter(this::isSuspiciousRequest).forEach(ipAddress -> {
 //            // Additional logic for handling suspicious requests
@@ -128,86 +119,80 @@ public class RigeneraCPCBusiness {
 //
 //        });
 
+            // ==========================================================================================================================================
+            // CANCELLO LE TRANSAZIONI PENDING NON MANUALI
 
-        // ==========================================================================================================================================
-        // ==========================================================================================================================================
-        // CANCELLO LE TRANSAZIONI NON BLACKLISTED
+            TransactionStatusBusiness.QueryFilter request = new TransactionStatusBusiness.QueryFilter();
+            request.setCreationDateFrom(dataDaGestireStart);
+            request.setCreationDateTo(dataDaGestireEnd);
+            request.setTipo("CPC");
+            if (affiliateId != null) request.setAffiliateId(affiliateId);
+            if (campaignId != null) request.setCampaignId(campaignId);
+            List<Long> not = new ArrayList<>();
+            not.add(68L); // MANUALE
+            request.setNotInDictionaryId(not);
+            not = new ArrayList<>();
+            not.add(74L); // RIGETTATO
+            request.setNotInStausId(not);
+            Page<QueryTransaction> ls = transactionStatusBusiness.searchPrefiltratoN(request, Pageable.ofSize(Integer.MAX_VALUE));
+            log.info(">>> TOT :: " + ls.getTotalElements());
+            for (QueryTransaction tcpl : ls) {
+                log.info("CANCELLO PER RIGENERA CPC :: {} : {} :: {}", tcpl.getid(), tcpl.getValue(), tcpl.getDateTime());
+                transactionCPCBusiness.delete(tcpl.getid());
+                Thread.sleep(50L);
+            }
 
-        // GESTISCO LE TRANSAZIONI --->>> RIGETTATE E NOT MANUALILISTED
-        List<TransactionCPC> transazioni74 = transactionCPCBusiness.searchStatusIdAndDateNotManual(74L, dataDaGestireStart, dataDaGestireEnd, affiliateId, campaignId);
-        log.info("RIGETTATE --> 74 >> " + transazioni74.size());
-        transazioni74.forEach(ttt -> transactionCPCBusiness.delete(ttt.getId()));
+            // RIPASSO TUTTE LE CPC PENDING
+            this.gestisci(anno, mese, giorno, affiliateId, campaignId, 72L, false, dataDaGestireStart, dataDaGestireEnd);
 
-        // GESTISCO LE TRANSAZIONI --->>> APPROVATE E NOT MANUALILISTED
-        List<TransactionCPC> transazioni73 = transactionCPCBusiness.searchStatusIdAndDateNotManual(73L, dataDaGestireStart, dataDaGestireEnd, affiliateId, campaignId);
-        log.info("APPROVATE --> 73 >> " + transazioni73.size());
-        transazioni73.forEach(ttt -> transactionCPCBusiness.delete(ttt.getId()));
-
-        // GESTISCO LE TRANSAZIONI --->>> PENDING E NOT MANUALILISTED
-        List<TransactionCPC> transazioni72 = transactionCPCBusiness.searchStatusIdAndDateNotManual(72L, dataDaGestireStart, dataDaGestireEnd, affiliateId, campaignId);
-        log.info("PENDING --> 72 >> " + transazioni72.size());
-        transazioni72.forEach(ttt -> transactionCPCBusiness.delete(ttt.getId()));
-
-        // RIPASSO TUTTE LE CPC PENDING
-        this.gestisci(anno, mese, giorno, affiliateId, campaignId, 72L, false);
-
-        // ==========================================================================================================================================
-        // ==========================================================================================================================================
-        // GESTISCO BLACKLISTED A PARTE
-
-        // GESTISCO LE TRANSAZIONI --->>> BLACKLSTED
-        List<TransactionCPC> black = transactionCPCBusiness.searchStatusIdAndDicIdAndDate(74L, 70L, dataDaGestireStart, dataDaGestireEnd, affiliateId, campaignId);
-        log.info("BLACKLISTED >> " + black.size());
-        black.forEach(transactionStatusDTO -> transactionCPCBusiness.delete(transactionStatusDTO.getId()));
-        // RIPASSO TUTTE LE CPC BLACKLISTED
-        this.gestisci(anno, mese, giorno, affiliateId, campaignId, 74L, true);
-
+            // ==========================================================================================================================================
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public void gestisci(Integer anno, Integer mese, Integer giorno, Long affId, Long campId, Long statusID, Boolean blacklisted) {
+    public void gestisci(Integer anno, Integer mese, Integer giorno, Long affId, Long campId, Long statusID, Boolean blacklisted, LocalDate dataDaGestireStart, LocalDate dataDaGestireEnd) {
         try {
 
             int start = (giorno == null) ? 1 : giorno;
             int end = (giorno == null) ? LocalDate.of(anno, mese, 1).lengthOfMonth() : giorno;
 
-            LocalDate dataDaGestireStart = LocalDate.of(anno, mese, start);
-            LocalDate dataDaGestireEnd = LocalDate.of(anno, mese, end);
-
-            //RIGENERO
-            Page<CpcDTO> day = cpcBusiness.getAllByDay(dataDaGestireStart, dataDaGestireEnd, blacklisted, affId, campId);
-            log.trace(">>> RIGENERO :: " + day.getTotalElements() + " >>> con status ::" + statusID);
-
             // trovo tutti i refferal
             List<Triple> triples = new ArrayList<>();
-            day.stream().filter(dto -> dto.getRefferal() != null).forEach(cpcDTO -> {
-                // gestisco i refferal troppo corti
-                if (cpcDTO.getRefferal().length() < 5) {
-                    // cerco da cpc
-                    List<CpcDTO> ips = cpcBusiness.findByIp24HoursBefore(cpcDTO.getIp(), cpcDTO.getDate(), cpcDTO.getRefferal()).stream().collect(Collectors.toList());
-                    // prendo ultimo ipp
-                    for (CpcDTO ccc : ips)
-                        if (StringUtils.isNotBlank(ccc.getRefferal())) cpcDTO.setRefferal(ccc.getRefferal());
-                }
+            cpcBusiness.getAllByDay(dataDaGestireStart, dataDaGestireEnd, blacklisted, affId, campId)
+                    .stream()
+                    .filter(dto -> dto.getRefferal() != null)
+                    .forEach(cpcDTO -> {
 
-                //gestisco i casi dove i dati non sono tutti valorizzati
-                Cpc cccp = repository.findById(cpcDTO.getId()).get();
-                if (cpcDTO.getRefferal().equals("{{refferalId}}")) {
-                    cccp.setRefferal("");
-                } else {
-                    Refferal refferal = referralService.decodificaReferral(cpcDTO.getRefferal());
-                    if (refferal != null) {
-                        if (refferal.getMediaId() != null) cccp.setMediaId(refferal.getMediaId());
-                        if (refferal.getCampaignId() != null) cccp.setCampaignId(refferal.getCampaignId());
-                        if (refferal.getAffiliateId() != null) cccp.setAffiliateId(refferal.getAffiliateId());
-                        if (refferal.getChannelId() != null) cccp.setChannelId(refferal.getChannelId());
-                        if (refferal.getTargetId() != null) cccp.setTargetId(refferal.getTargetId());
-                    }
-                    repository.save(cccp);
-                }
+                        // gestisco i refferal troppo corti
+                        if (cpcDTO.getRefferal().length() < 5) {
+                            // cerco da cpc
+                            List<CpcDTO> ips = cpcBusiness.findByIp24HoursBefore(cpcDTO.getIp(), cpcDTO.getDate(), cpcDTO.getRefferal()).stream().collect(Collectors.toList());
+                            // prendo ultimo ipp
+                            for (CpcDTO ccc : ips)
+                                if (StringUtils.isNotBlank(ccc.getRefferal())) cpcDTO.setRefferal(ccc.getRefferal());
+                        }
 
-                Triple<Long, Long, Long> triple = new ImmutableTriple<>(cpcDTO.getCampaignId(), cpcDTO.getAffiliateId(), cpcDTO.getChannelId());
-                triples.add(triple);
-            });
+                        //gestisco i casi dove i dati non sono tutti valorizzati
+                        Cpc cccp = repository.findById(cpcDTO.getId()).get();
+                        if (cpcDTO.getRefferal().equals("{{refferalId}}")) {
+                            cccp.setRefferal("");
+                        } else {
+                            Refferal refferal = referralService.decodificaReferral(cpcDTO.getRefferal());
+                            if (refferal != null) {
+                                if (refferal.getMediaId() != null) cccp.setMediaId(refferal.getMediaId());
+                                if (refferal.getCampaignId() != null) cccp.setCampaignId(refferal.getCampaignId());
+                                if (refferal.getAffiliateId() != null) cccp.setAffiliateId(refferal.getAffiliateId());
+                                if (refferal.getChannelId() != null) cccp.setChannelId(refferal.getChannelId());
+                                if (refferal.getTargetId() != null) cccp.setTargetId(refferal.getTargetId());
+                            }
+                            repository.save(cccp);
+                        }
+
+                        // creo tripletta
+                        Triple<Long, Long, Long> triple = new ImmutableTriple<>(cpcDTO.getCampaignId(), cpcDTO.getAffiliateId(), cpcDTO.getChannelId());
+                        triples.add(triple);
+                    });
 
             triples.stream().distinct().collect(Collectors.toList()).forEach(triple -> {
 
@@ -237,8 +222,6 @@ public class RigeneraCPCBusiness {
                                 totaleClick += 1;
                                 mediaId = tcpc.getMediaId();
                             }
-//                            if (totaleClick > 0)
-//                                log.info("TRI {}-{}-{} :: {}", campaignId, affiliateId, channelID, totaleClick);
 
                             if (totaleClick > 0) {
                                 TransactionCPCBusiness.BaseCreateRequest transaction = new TransactionCPCBusiness.BaseCreateRequest();
@@ -253,12 +236,6 @@ public class RigeneraCPCBusiness {
                                     } else {
                                         transaction.setDictionaryId(42L);
                                     }
-
-//                                    if (campaign.getStatus() == false) {
-//                                        // setto a campagna scaduta
-//                                        transaction.setDictionaryId(49L);
-//                                        scaduta = true;
-//                                    }
 
                                     // associo a wallet
                                     Long walletID = null;
@@ -361,6 +338,16 @@ public class RigeneraCPCBusiness {
         }
     }
 
+    private boolean isSuspiciousRequest(String ipAddress) {
+        Instant currentTime = Instant.now();
+        return ipTimestampMap.compute(ipAddress, (key, lastTimestamp) -> {
+            if (lastTimestamp != null && currentTime.toEpochMilli() - lastTimestamp.toEpochMilli() < TIME_THRESHOLD) {
+                return lastTimestamp; // Suspicious request
+            }
+            return currentTime;
+        }) != currentTime;
+    }
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
@@ -372,6 +359,5 @@ public class RigeneraCPCBusiness {
         private Long affiliateId;
         private Long campaignId;
     }
-
 
 }

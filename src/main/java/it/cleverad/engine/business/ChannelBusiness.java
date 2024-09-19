@@ -149,11 +149,7 @@ public class ChannelBusiness {
     public void deleteByIdAffiliate(Long idAffilaite) {
         if (jwtUserDetailsService.isAdmin()) {
             Page<Channel> page = repository.findByAffiliateId(idAffilaite, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id"))));
-            page.stream().forEach(channel -> {
-                //cancello canale
-                //log.info("Cancello canale {}", channel.getId());
-                this.delete(channel.getId());
-            });
+            page.stream().forEach(channel -> this.delete(channel.getId()));
         }
     }
 
@@ -223,8 +219,7 @@ public class ChannelBusiness {
             channel.setChannelCategories(collect);
         }
 
-        ChannelDTO dto = ChannelDTO.from(repository.save(channel));
-        return dto;
+        return ChannelDTO.from(repository.save(channel));
     }
 
     public Page<ChannelDTO> getbyIdAffiliateChannelCommissionTemplate(Long id, Pageable pageableRequest) {
@@ -249,9 +244,7 @@ public class ChannelBusiness {
 
     public List<Long> getbyIdAffiliateAllActive(Long affiliateId) {
         Page<Channel> page = repository.findByAffiliateIdAndStatus(affiliateId, true, PageRequest.of(0, Integer.MAX_VALUE));
-        return page.map(ChannelDTO::from).stream().map(channelDTO -> {
-            return channelDTO.getId();
-        }).collect(Collectors.toList());
+        return page.map(ChannelDTO::from).stream().map(ChannelDTO::getId).collect(Collectors.toList());
     }
 
     public Page<ChannelDTO> getbyIdUser(Long id, Pageable pageableRequest) {
@@ -259,9 +252,7 @@ public class ChannelBusiness {
         rr.setAffiliateId(userBusiness.findById(id).getAffiliateId());
         Page<AffiliateChannelCommissionCampaignDTO> search = accc.search(rr, pageableRequest);
 
-        List<Channel> channelList = search.stream().map(dtos -> {
-            return repository.findById(dtos.getChannelId()).get();
-        }).collect(Collectors.toList());
+        List<Channel> channelList = search.stream().map(dtos -> repository.findById(dtos.getChannelId()).get()).collect(Collectors.toList());
 
         Page<Channel> page = new PageImpl<>(channelList.stream().distinct().collect(Collectors.toList()));
         return page.map(ChannelDTO::from);
@@ -269,7 +260,7 @@ public class ChannelBusiness {
 
     public List<Long> getBrandBuddies(Long affiliateId) {
         Page<Channel> page = repository.findByAffiliateIdAndStatus(affiliateId, true, PageRequest.of(0, Integer.MAX_VALUE));
-        return page.map(ChannelDTO::from).stream().map(channelDTO -> channelDTO.getId()).collect(Collectors.toList());
+        return page.map(ChannelDTO::from).stream().map(ChannelDTO::getId).collect(Collectors.toList());
     }
 
     public Page<ChannelDTO> getbyIdCampaignPrefiltrato(Long campaignId, Pageable pageableRequest) {

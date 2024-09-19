@@ -8,19 +8,20 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 @Service
 @Slf4j
 public class FileStoreService {
 
     public String storeFile(Long id, String tipo, String fileName, byte[] bytes) throws IOException {
-        String filePath = "/media/cleverad/" + id + "/" + tipo + "/" + fileName;
+        String filePath = Paths.get("/media/cleverad", String.valueOf(id), tipo, fileName).toString();
         FileUtils.writeByteArrayToFile(new File(filePath), bytes);
         return filePath;
     }
 
     public String storeFileNew(Long id, String tipo, String fileName, byte[] bytes) throws IOException {
-        String filePath = "/media/cleverad/" + tipo + "/" + id + "/" + fileName;
+        String filePath = Paths.get("/media/cleverad", tipo, String.valueOf(id), fileName).toString();
         FileUtils.writeByteArrayToFile(new File(filePath), bytes);
         return filePath;
     }

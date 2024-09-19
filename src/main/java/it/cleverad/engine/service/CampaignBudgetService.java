@@ -5,6 +5,7 @@ import it.cleverad.engine.business.*;
 import it.cleverad.engine.persistence.model.service.TransactionCPC;
 import it.cleverad.engine.persistence.model.service.TransactionCPL;
 import it.cleverad.engine.web.dto.CampaignBudgetDTO;
+import it.cleverad.engine.web.dto.CampaignCostDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.decimal4j.util.DoubleRounder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,8 +148,23 @@ public class CampaignBudgetService {
             request.setStatoPagato(dto.getStatoPagato());
             request.setStatoFatturato(dto.getStatoFatturato());
             request.setInvoiceDueDate(dto.getInvoiceDueDate());
-            Double costi = campaignCostBusiness.searchByCampaignIdUnpaged(dto.getId()).toList().stream().mapToDouble(campaignCostDTO -> campaignCostDTO.getCosto()).sum();
-            request.setCosti(costi);
+
+            Double costiProduzione = campaignCostBusiness.searchByCampaignIdUnpaged(dto.getId()).toList().stream().mapToDouble(CampaignCostDTO::getCosto).sum();
+            request.setCostiProduzione(costiProduzione);
+
+            request.setCostiAltri(dto.getCostiAltri());
+            Double totaleCosti = costiProduzione + dto.getCostiAltri();
+            request.setCostiTotale(totaleCosti);
+
+            // trovare le transazioni di quel peridodo che hanno un payout associato e sommarne il valore
+            Double payoutGenerati = null;
+            request.setPayoutGenerati(payoutGenerati);
+
+            Double margine = dto.getFatturato() - totaleCosti;
+            request.setMargineContribuzione(margine);
+
+            Double marginePC = margine / dto.getFatturato();
+            request.setMargineContribuzionePc(marginePC);
 
             CampaignBudgetDTO cb = campaignBudgetBusiness.create(request);
             log.trace("CREATO :: {}", cb.getId());
@@ -160,7 +176,6 @@ public class CampaignBudgetService {
 
             // cancello
             campaignBudgetBusiness.delete(dto.getId());
-            log.trace("ELIMINO {}", dto.getId());
         }
         log.trace("END");
     }

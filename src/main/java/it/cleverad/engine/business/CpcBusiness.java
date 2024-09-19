@@ -193,8 +193,7 @@ public class CpcBusiness {
         request.setDatetimeFrom(dateTime.minusHours(1));
         request.setDatetimeTo(dateTime);
         request.setRefferalCheckRight(referral);
-        List<Cpc> lis = repository.findAll(getSpecification(request), Sort.by(Sort.Order.desc("id")));
-        return lis;
+        return repository.findAll(getSpecification(request), Sort.by(Sort.Order.desc("id")));
     }
 
     public long countByIp2HoursBeforeNoIp(LocalDateTime dateTime, String referral) {
@@ -229,8 +228,8 @@ public class CpcBusiness {
         request.setDateFrom(dataFrom);
         request.setDateTo(datato);
         request.setBlacklisted(blacklisted);
-        request.setAffiliateid(affiliateId);
-        request.setCampaignid(campaignId);
+        if (affiliateId != null) request.setAffiliateid(affiliateId);
+        if (campaignId != null) request.setCampaignid(campaignId);
         Page<Cpc> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
         return page.map(CpcDTO::from);
     }

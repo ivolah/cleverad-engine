@@ -1,4 +1,4 @@
-package it.cleverad.engine.web.controller.incoming;
+package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.BotDataBusiness;
 import it.cleverad.engine.web.dto.BotDataDTO;

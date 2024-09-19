@@ -59,8 +59,11 @@ public class TransactionStatusBusiness {
 
     public Page<QueryTransaction> searchPrefiltratoN(TransactionStatusBusiness.QueryFilter request, Pageable pageableRequest) {
 
+        // inclusi solo se Affiliate o Advertiser
         List<Long> statusIds = new ArrayList<>();
         statusIds.add(72L);
+
+        // inclusi solo se Affiliate o Advertiser
         List<Long> dictIds = new ArrayList<>();
         dictIds.add(39L);
         dictIds.add(42L);

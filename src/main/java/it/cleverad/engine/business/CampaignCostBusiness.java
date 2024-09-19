@@ -90,7 +90,7 @@ public class CampaignCostBusiness {
         request.setCampaignId(id);
         Page<CampaignCost> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
         try {
-            page.stream().forEach(CampaignCost -> repository.deleteById(CampaignCost.getId()));
+            page.stream().forEach(cc -> repository.deleteById(cc.getId()));
         } catch (javax.validation.ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {

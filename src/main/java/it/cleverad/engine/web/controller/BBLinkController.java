@@ -39,12 +39,6 @@ public class BBLinkController {
         return business.search(request, pageable);
     }
 
-//    @PatchMapping(path = "/{id}")
-//    @ResponseStatus(HttpStatus.ACCEPTED)
-//    public BBLinkDTO update(@PathVariable Long id, @RequestBody BBLinkBusiness.Filter request) {
-//        return business.update(id, request);
-//    }
-
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public BBLinkDTO findById(@PathVariable Long id) {

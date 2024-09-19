@@ -81,10 +81,8 @@ public class RigeneraCPLBusiness {
 
             int start = (giorno == null) ? 1 : giorno;
             int end = (giorno == null) ? LocalDate.of(anno, mese, 1).lengthOfMonth() : giorno;
-
             LocalDate dataDaGestireStart = LocalDate.of(anno, mese, start);
             LocalDate dataDaGestireEnd = LocalDate.of(anno, mese, end);
-
             log.info(anno + "-" + mese + "-" + giorno + " >> " + dataDaGestireStart + " || " + dataDaGestireEnd + " per " + affiliateId + " e " + camapignId);
 
             // cancello le transazioni

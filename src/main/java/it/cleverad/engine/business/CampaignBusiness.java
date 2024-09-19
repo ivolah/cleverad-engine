@@ -295,10 +295,7 @@ public class CampaignBusiness {
         Affiliate cc = affiliateRepository.findById(affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", affiliateId));
         List<Campaign> campaigns = new ArrayList<>();
         if (cc.getCampaignAffiliates() != null) {
-            campaigns = cc.getCampaignAffiliates().stream().map(campaignAffiliate -> {
-                Campaign ccc = campaignAffiliate.getCampaign();
-                return ccc;
-            }).collect(Collectors.toList());
+            campaigns = cc.getCampaignAffiliates().stream().map(CampaignAffiliate::getCampaign).collect(Collectors.toList());
         }
         Page<Campaign> page = new PageImpl<>(campaigns.stream().distinct().collect(Collectors.toList()));
         return page.map(CampaignDTO::fromList);
@@ -307,7 +304,7 @@ public class CampaignBusiness {
     // TROVA LE CAMPAGNE DELL ADVERTISER
     public Page<CampaignDTO> getCampaignsAdvertiser(Long advertiserId) {
         Advertiser advertiser = advertiserRepository.findById(advertiserId).orElseThrow(() -> new ElementCleveradException("Advertiser", advertiserId));
-        List<Campaign> campaigns = advertiser.getCampaigns().stream().collect(Collectors.toList());
+        List<Campaign> campaigns = new ArrayList<>(advertiser.getCampaigns());
         Page<Campaign> page = new PageImpl<>(campaigns.stream().distinct().collect(Collectors.toList()));
         return page.map(CampaignDTO::from);
     }
@@ -426,7 +423,7 @@ public class CampaignBusiness {
 //        Page<Media> medias = mediaRepository.findAll(mediaBusiness.getSpecification(ff), Pageable.ofSize(Integer.MAX_VALUE));
 //        List<Long> listaId = medias.map(media -> MediaDTO.from(media)).stream().map(MediaDTO::getCampaignId).distinct().collect(Collectors.toList());
 
-        if (listaId.size() > 0) {
+        if (!listaId.isEmpty()) {
 
             Long affiliateId = jwtUserDetailsService.getAffiliateId();
 

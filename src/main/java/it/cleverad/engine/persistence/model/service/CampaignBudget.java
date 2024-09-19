@@ -127,6 +127,17 @@ public class CampaignBudget {
     @OneToMany(mappedBy = "campaignBudget")
     private Set<FileCampaignBudgetOrder> fileCampaignBudgetOrders;
 
-    private Double costi;
+    @Column(name = "payout_generati")
+    private Double payoutGenerati;
+    @Column(name = "costi_produzione")
+    private Double costiProduzione;
+    @Column(name = "costi_altri")
+    private Double costiAltri;
+    @Column(name = "costi_totale")
+    private Double costiTotale;
+    @Column(name = "margine_contribuzione")
+    private Double margineContribuzione;
+    @Column(name = "margine_contribuzione_pc")
+    private Double margineContribuzionePc;
 
 }

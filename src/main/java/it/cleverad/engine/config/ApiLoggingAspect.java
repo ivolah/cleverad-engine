@@ -65,15 +65,6 @@ public class ApiLoggingAspect {
 
     }
 
-    // After successful controller method execution
-    @AfterReturning(pointcut = "controllerMethods()", returning = "result")
-    public void logResponse(JoinPoint joinPoint, Object result) {
-        String methodName = joinPoint.getSignature().getName();
-        String className = joinPoint.getSignature().getDeclaringTypeName();
-//        logger.info("Completed Method: {} in Class: {} with Response: {}",
-//                methodName, className, Optional.ofNullable(result).orElse("null"));
-    }
-
     // After an exception is thrown in the controller
     @AfterThrowing(pointcut = "controllerMethods()", throwing = "exception")
     public void logException(JoinPoint joinPoint, Exception exception) {

@@ -1,6 +1,8 @@
 package it.cleverad.engine.scheduled.consolida;
 
 import it.cleverad.engine.business.TransactionCPCBusiness;
+import it.cleverad.engine.business.TransactionStatusBusiness;
+import it.cleverad.engine.persistence.model.service.QueryTransaction;
 import it.cleverad.engine.web.dto.TransactionCPCDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
@@ -9,6 +11,7 @@ import org.decimal4j.util.DoubleRounder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -26,6 +29,9 @@ public class ConsolidaCPC {
     @Autowired
     private TransactionCPCBusiness transactionCPCBusiness;
 
+    @Autowired
+    private TransactionStatusBusiness transactionStatusBusiness;
+
     @Async
     @Scheduled(cron = "23 58 * * * ?")
     public void ciclaCPC() {
@@ -36,37 +42,41 @@ public class ConsolidaCPC {
 
     public void consolidaCPC(LocalDateTime oraSpaccata, Boolean blacklisted) {
 
-        TransactionCPCBusiness.Filter request = new TransactionCPCBusiness.Filter();
-        request.setDateTimeFrom(oraSpaccata.toLocalDate().atStartOfDay());
-        request.setDateTimeTo(oraSpaccata);
-        if(Boolean.TRUE.equals(blacklisted)) {
-            // setto rifiutato
-            request.setStatusId(74L);
-            // setto blacklisted
-            request.setDictionaryId(70L);
-        }
-        else {
-            request.setStatusId(72L);
-        }
-
-        Page<TransactionCPCDTO> cpcs = transactionCPCBusiness.searchCpc(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
+        TransactionStatusBusiness.QueryFilter request = new TransactionStatusBusiness.QueryFilter();
+        request.setDateTimeFrom(oraSpaccata.toLocalDate());
+        request.setDateTimeTo(oraSpaccata.toLocalDate());
+        request.setTipo("CPC");
+        List<Long> not = new ArrayList<>();
+        not.add(68L); // MANUALE
+        request.setNotInDictionaryId(not);
+        not = new ArrayList<>();
+        not.add(74L); // RIGETTATO
+        request.setNotInStausId(not);
+        Page<QueryTransaction> ls = transactionStatusBusiness.searchPrefiltratoN(request, Pageable.ofSize(Integer.MAX_VALUE));
+        log.info(">>> TOT :: " + ls.getTotalElements());
 
         ArrayList<Triple> triples = new ArrayList<>();
-        for (TransactionCPCDTO tcpm : cpcs) {
-            Triple<Long, Long, Long> triple = new ImmutableTriple<>(tcpm.getCampaignId(), tcpm.getAffiliateId(), tcpm.getChannelId());
+        for (QueryTransaction queryTransaction : ls) {
+            Triple<Long, Long, Long> triple
+                    = new ImmutableTriple<>(
+                    queryTransaction.getCampaignId(),
+                    Long.parseLong(queryTransaction.getAffiliateid()),
+                    queryTransaction.getChannelid()
+            );
             triples.add(triple);
         }
+
         List<Triple> listWithoutDuplicates = triples.stream().distinct().collect(Collectors.toList());
 
         for (Triple ttt : listWithoutDuplicates) {
-            request = new TransactionCPCBusiness.Filter();
+            TransactionCPCBusiness.Filter rrr = new TransactionCPCBusiness.Filter();
             oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
-            request.setDateTimeFrom(oraSpaccata.toLocalDate().atStartOfDay());
-            request.setDateTimeTo(oraSpaccata);
-            request.setCampaignId((Long) ttt.getLeft());
-            request.setAffiliateId((Long) ttt.getMiddle());
-            request.setChannelId((Long) ttt.getRight());
-            cpcs = transactionCPCBusiness.searchCpc(request, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
+            rrr.setDateTimeFrom(oraSpaccata.toLocalDate().atStartOfDay());
+            rrr.setDateTimeTo(oraSpaccata);
+            rrr.setCampaignId((Long) ttt.getLeft());
+            rrr.setAffiliateId((Long) ttt.getMiddle());
+            rrr.setChannelId((Long) ttt.getRight());
+            Page<TransactionCPCDTO> cpcs = transactionCPCBusiness.searchCpc(rrr, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
 
             Long totaleClick = 0L;
             Double value = 0D;

@@ -87,9 +87,7 @@ public class CampaignAffiliateBusiness {
         request.setFollowNull(false);
         Page<CampaignAffiliate> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
         try {
-            page.stream().forEach(campaignAffiliate -> {
-                repository.deleteById(campaignAffiliate.getId());
-            });
+            page.stream().forEach(campaignAffiliate -> repository.deleteById(campaignAffiliate.getId()));
         } catch (javax.validation.ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {

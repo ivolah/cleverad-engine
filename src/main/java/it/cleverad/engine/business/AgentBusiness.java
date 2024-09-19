@@ -51,8 +51,7 @@ public class AgentBusiness {
 
     // GET BY ID
     public AgentDTO findById(Long id) {
-        Agent Agent = repository.findById(id).orElseThrow(() -> new ElementCleveradException(" Agent", id));
-        return AgentDTO.from(Agent);
+        return AgentDTO.from(repository.findById(id).orElseThrow(() -> new ElementCleveradException(" Agent", id)));
     }
 
     // DELETE BY ID

@@ -5,7 +5,6 @@ import it.cleverad.engine.persistence.model.service.Advertiser;
 import it.cleverad.engine.persistence.repository.service.AdvertiserRepository;
 import it.cleverad.engine.persistence.repository.service.DictionaryRepository;
 import it.cleverad.engine.web.dto.AdvertiserDTO;
-import it.cleverad.engine.web.dto.UserDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -92,12 +91,13 @@ public class AdvertiserBusiness {
         userBusiness.create(opertatoreOmbra);
 
         // invio mail ad opertatore Advertiser
-//        MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
-//        mailRequest = new MailService.BaseCreateRequest();
-//        mailRequest.setAffiliateId(dto.getId());
-//        mailRequest.setUserId(userDto.getId());
-//        else mailRequest.setTemplateId(XXXXXL);
-//        mailService.invio(mailRequest);
+/*       MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
+        mailRequest = new MailService.BaseCreateRequest();
+        mailRequest.setAffiliateId(dto.getId());
+        mailRequest.setUserId(userDto.getId());
+        else mailRequest.setTemplateId(XXXXXL);
+        mailService.invio(mailRequest);
+ */
 
         return dto;
     }
