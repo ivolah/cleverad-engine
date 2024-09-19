@@ -1,13 +1,11 @@
 package it.cleverad.engine.web.dto;
 
 import it.cleverad.engine.persistence.model.service.Operation;
-import it.cleverad.engine.persistence.model.service.Planner;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import javax.persistence.Column;
 import java.time.LocalDateTime;
 
 @Data

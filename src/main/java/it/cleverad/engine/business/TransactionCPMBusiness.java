@@ -103,10 +103,10 @@ public class TransactionCPMBusiness {
         Wallet ww = null;
         if (request.walletId != null) {
             ww = walletRepository.findById(request.walletId).orElseThrow(() -> new ElementCleveradException("Wallet", request.walletId));
-        } else if (aa != null) {
-            if (aa.getWallets().size() > 0)
-                ww = aa.getWallets().stream().findFirst().get();
+        } else if (aa != null && !aa.getWallets().isEmpty()) {
+            ww = aa.getWallets().stream().findFirst().get();
         }
+
         map.setWallet(ww);
         if (request.mediaId != null)
             map.setMedia(mediaRepository.findById(request.mediaId).orElseThrow(() -> new ElementCleveradException("Media", request.mediaId)));
@@ -207,6 +207,7 @@ public class TransactionCPMBusiness {
     public Page<TransactionCPMDTO> searchByAffiliateCpm(Filter request, Long id, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         if (jwtUserDetailsService.getRole().equals("Admin")) {
+            //nothing
         } else {
             //    request.setApproved(true);
             request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
@@ -261,7 +262,7 @@ public class TransactionCPMBusiness {
 
     private Specification<TransactionCPM> getSpecificationCPM(Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {
@@ -359,9 +360,9 @@ public class TransactionCPMBusiness {
     @AllArgsConstructor
     @ToString
     public static class Filter {
-        public List<Long> notInId;
-        public List<Long> statusIdIn;
-        public List<Long> dictionaryIdIn;
+        private List<Long> notInId;
+        private List<Long> statusIdIn;
+        private List<Long> dictionaryIdIn;
         private Long id;
         private Long affiliateId;
         private Long campaignId;

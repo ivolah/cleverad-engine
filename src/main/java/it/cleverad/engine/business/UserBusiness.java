@@ -177,9 +177,7 @@ public class UserBusiness {
     public void deleteByIdAffiliate(Long affiliateId) {
         try {
             Page<UserDTO> page = this.searchByAffiliateID(affiliateId, PageRequest.of(0, Integer.MAX_VALUE));
-            page.stream().forEach(userDTO -> {
-                repository.deleteById(userDTO.getId());
-            });
+            page.stream().forEach(userDTO -> repository.deleteById(userDTO.getId()));
         } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
@@ -190,9 +188,7 @@ public class UserBusiness {
     public void deleteByIdAdvertiser(Long advertiserId) {
         try {
             Page<UserDTO> page = this.searchByAdvertiserId(advertiserId, PageRequest.of(0, Integer.MAX_VALUE));
-            page.stream().forEach(userDTO -> {
-                repository.deleteById(userDTO.getId());
-            });
+            page.stream().forEach(userDTO -> repository.deleteById(userDTO.getId()));
         } catch (ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
@@ -203,9 +199,7 @@ public class UserBusiness {
     // SEARCH PAGINATED
     public Page<UserDTO> search(Filter request, Pageable pageableRequest) {
         Page<User> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id"))));
-        return page.map(user -> {
-            return UserDTO.from(user);
-        });
+        return page.map(UserDTO::from);
     }
 
     // SEARCH By AFFILIATE ID
@@ -258,14 +252,13 @@ public class UserBusiness {
 
                 if (userDTO != null) {
                     MailService.BaseCreateRequest mailRequest = new MailService.BaseCreateRequest();
-                    if(tipoAffilaite) {
+                    if (tipoAffilaite) {
                         AffiliateDTO affiliate = affiliateBusiness.findById(userDTO.getAffiliateId());
                         // invio mail USER Affilaite
                         if (affiliate.getBrandbuddies()) mailRequest.setTemplateId(23L);
                         else mailRequest.setTemplateId(3L);
                         mailRequest.setAffiliateId(userDTO.getAffiliateId());
-                    }
-                    else {
+                    } else {
                         // invio mail USER ADVERTISER
                         mailRequest.setAdvertiserId(userDTO.getAdvertiserId());
                         mailRequest.setTemplateId(3L);
@@ -330,7 +323,7 @@ public class UserBusiness {
      **/
     private Specification<User> getSpecification(Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {

@@ -3,7 +3,6 @@ package it.cleverad.engine.business;
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.Advertiser;
-import it.cleverad.engine.persistence.model.service.Coupon;
 import it.cleverad.engine.persistence.model.service.FileCoupon;
 import it.cleverad.engine.persistence.repository.service.AdvertiserRepository;
 import it.cleverad.engine.persistence.repository.service.CouponRepository;
@@ -72,8 +71,6 @@ public class FileCouponBusiness {
             if (jwtUserDetailsService.isAdvertiser())
                 request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
             Advertiser advertiser = advertiserRepository.findById(request.advertiserId).orElseThrow(() -> new ElementCleveradException("Advertiser", request.advertiserId));
-
-            Coupon coupon = couponRepository.findById(request.couponId).orElseThrow(() -> new ElementCleveradException("couponId", request.couponId));
 
             String filename = StringUtils.cleanPath(file.getOriginalFilename());
             String path = fileStoreService.storeFileNew(advertiser.getId(), "coupon", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), file.getBytes());
@@ -160,7 +157,7 @@ public class FileCouponBusiness {
      **/
     private Specification<FileCoupon> getSpecification(FileCouponBusiness.Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {

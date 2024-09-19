@@ -37,7 +37,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         //        HttpServletRequest cachedBodyRequest = new CachedBodyHttpServletRequest((HttpServletRequest) requeste);
 
         final String requestTokenHeader = cachedBodyRequest.getHeader("Authorization");
-        String uri = cachedBodyRequest.getRequestURI();
         String username = null;
         String jwtToken = null;
 

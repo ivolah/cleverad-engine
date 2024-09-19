@@ -101,18 +101,6 @@ public class FileAffiliateBusiness {
         return page.map(FileAffiliateDTO::from);
     }
 
-    // UPDATE
-//    public FileAffiliateDTO update(Long id, FileAffiliateBusiness.Filter filter) {
-//        FileAffiliate fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File", id));
-//        FileAffiliateDTO from = FileAffiliateDTO.from(fil);
-//        mapper.map(filter, from);
-//        FileAffiliate mappedEntity = mapper.map(fil, FileAffiliate.class);
-//        mapper.map(from, mappedEntity);
-//        mappedEntity.setDictionary(dictionaryRepository.findById(filter.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.dictionaryId)));
-//        mappedEntity.setAffiliate(affiliateRepository.findById(filter.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", filter.affiliateId)));
-//        return FileAffiliateDTO.from(repository.save(mappedEntity));
-//    }
-
     //  GET TIPI
     public Page<DictionaryDTO> getTypes() {
         return dictionaryBusiness.getTypeDocument();
@@ -137,7 +125,7 @@ public class FileAffiliateBusiness {
      **/
     private Specification<FileAffiliate> getSpecification(FileAffiliateBusiness.Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {

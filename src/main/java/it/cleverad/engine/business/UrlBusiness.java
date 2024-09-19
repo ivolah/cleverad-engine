@@ -1,7 +1,6 @@
 package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
-import it.cleverad.engine.persistence.model.service.QueryTransaction;
 import it.cleverad.engine.persistence.model.service.Url;
 import it.cleverad.engine.persistence.repository.service.UrlRepository;
 import it.cleverad.engine.web.exception.ElementCleveradException;
@@ -12,7 +11,10 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +23,6 @@ import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -50,8 +51,7 @@ public class UrlBusiness {
 
     // GET BY ID
     public Url findById(Long id) {
-        Url entity = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Url", id));
-        return entity;
+        return repository.findById(id).orElseThrow(() -> new ElementCleveradException("Url", id));
     }
 
     // DELETE BY ID
@@ -84,7 +84,7 @@ public class UrlBusiness {
 
     private Specification<Url> getSpecification(Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {

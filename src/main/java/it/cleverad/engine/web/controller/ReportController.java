@@ -1,7 +1,7 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.ReportBusiness;
-import it.cleverad.engine.persistence.model.service.*;
+import it.cleverad.engine.persistence.model.service.QueryTopElenco;
 import it.cleverad.engine.web.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

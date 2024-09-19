@@ -131,8 +131,7 @@ public class RevenueFactorBusiness {
         request.setCampaignId(campId);
         request.setStatus(true);
         request.setDictionaryId(dictId);
-        RevenueFactor revenueFactor = repository.findAll(getSpecification(request)).stream().findFirst().orElse(null);
-        return revenueFactor;
+        return repository.findAll(getSpecification(request)).stream().findFirst().orElse(null);
     }
 
     //  GET TIPI
@@ -153,7 +152,7 @@ public class RevenueFactorBusiness {
      **/
     private Specification<RevenueFactor> getSpecification(Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {

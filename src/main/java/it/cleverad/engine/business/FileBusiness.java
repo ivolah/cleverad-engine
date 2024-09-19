@@ -38,6 +38,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -61,7 +62,7 @@ public class FileBusiness {
 
     // CREATE
     public Long storeFile(MultipartFile file) throws IOException {
-        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
         String path = fileStoreService.storeFile(1L, "misc", UUID.randomUUID() + "." + FilenameUtils.getExtension(fileName), file.getBytes());
         File fileDB = new File(fileName, file.getContentType(), path);
         return repository.save(fileDB).getId();
@@ -93,19 +94,6 @@ public class FileBusiness {
         Page<File> page = repository.findAll(getSpecification(request), pageable);
         return page.map(FileDTO::from);
     }
-
-    // UPDATE
-//    public FileDTO update(Long id, FileBusiness.Filter filter) {
-//        File fil = repository.findById(id).orElseThrow(() -> new ElementCleveradException("File", id));
-//        FileDTO from = FileDTO.from(fil);
-//
-//        mapper.map(filter, from);
-//
-//        File mappedEntity = mapper.map(fil, File.class);
-//        mapper.map(from, mappedEntity);
-//
-//        return FileDTO.from(repository.save(mappedEntity));
-//    }
 
     public List<FileDTO> listaFileCodificati() {
         Filter request = new Filter();
@@ -152,7 +140,7 @@ public class FileBusiness {
      **/
     private Specification<File> getSpecification(FileBusiness.Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {

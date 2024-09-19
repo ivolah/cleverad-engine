@@ -94,7 +94,7 @@ public class ManageCPL {
                 // giro senza controllare IP address
                 if (cplDTO.getCpcId() == null) {
                     List<Cpc> listaSenzaIp = cpcBusiness.findByIp1HoursBeforeNoIp(cplDTO.getDate(), cplDTO.getRefferal()).stream().filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal())).collect(Collectors.toList());
-                    if (listaSenzaIp.size() > 0) {
+                    if (!listaSenzaIp.isEmpty()) {
                         //check id cpc non usato in transazioni cpl come cpcid
                         long numerositatitudine = transactionCPLBusiness.countByCpcId(listaSenzaIp.get(0).getId());
                         log.info("NO-IP CPC {} : ORIG {} --> CPC {} - used: {}", listaSenzaIp.get(0).getId(), cplDTO.getRefferal(), listaSenzaIp.get(0).getRefferal(), numerositatitudine);
@@ -164,7 +164,7 @@ public class ManageCPL {
                         transaction.setDictionaryId(42L);
                     }
 
-                    if (campaignDTO.getStatus() == false) {
+                    if (campaignDTO.getStatus()) {
                         // setto a campagna scaduta
                         transaction.setDictionaryId(49L);
                         scaduta = true;
@@ -326,7 +326,7 @@ public class ManageCPL {
                     }
 
                 }// creo solo se ho affiliate
-                else if (refferal != null && refferal.getSuccess() == false) {
+                else if (refferal != null && !refferal.getSuccess()) {
                     log.warn("Errore decodifica refferal :: {}", cplDTO.getRefferal());
                     cplBusiness.setRead(cplDTO.getId());
                 }
@@ -437,7 +437,7 @@ public class ManageCPL {
                         log.error("BLACKLIS ECCEZIONE CPL :> ", ecc);
                     }
                 }// creo solo se ho affiliate
-                else if (refferal != null && refferal.getSuccess() == false) {
+                else if (refferal != null && !refferal.getSuccess()) {
                     log.warn("Errore decodifica refferal :: {}", cplDTO.getRefferal());
                     cplBusiness.setRead(cplDTO.getId());
                 }

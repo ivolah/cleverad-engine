@@ -3,12 +3,10 @@ package it.cleverad.engine.business;
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.Affiliate;
-import it.cleverad.engine.persistence.model.service.TransactionCPL;
 import it.cleverad.engine.persistence.model.service.TransactionCPS;
 import it.cleverad.engine.persistence.model.service.Wallet;
 import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.web.dto.DictionaryDTO;
-import it.cleverad.engine.web.dto.TransactionCPLDTO;
 import it.cleverad.engine.web.dto.TransactionCPSDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
@@ -72,7 +70,6 @@ public class TransactionCPSBusiness {
 
     public TransactionCPSDTO createCps(BaseCreateRequest request) {
         TransactionCPS map = mapper.map(request, TransactionCPS.class);
-        //   request.setDictionaryId(42L);
 
         map.setCampaign(campaignRepository.findById(request.campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", request.campaignId)));
 
@@ -211,7 +208,7 @@ public class TransactionCPSBusiness {
 
     private Specification<TransactionCPS> getSpecificationCPS(Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {
@@ -337,9 +334,9 @@ public class TransactionCPSBusiness {
     @AllArgsConstructor
     @ToString
     public static class Filter {
-        public List<Long> notInId;
-        public List<Long> statusIdIn;
-        public List<Long> dictionaryIdIn;
+        private List<Long> notInId;
+        private List<Long> statusIdIn;
+        private List<Long> dictionaryIdIn;
         private Long id;
         private Long affiliateId;
         private Long campaignId;

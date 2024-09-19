@@ -132,11 +132,11 @@ public class ReportBusiness {
         }
         List<ReportCampagneDTO> lista = reportRepository.searchReportCampaign(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(23, 59, 59, 99999), request.getStatusId(), null, request.getAffiliateid(), null, request.getCampaignId(), request.getAdvertiserId(), dictId, request.getStatusIds(), request.getCampaignIds());
         ReportCampagneDTO ultimaThule = new ReportCampagneDTO();
-        ultimaThule.setClickNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getClickNumber()).sum());
-        ultimaThule.setClickNumberRigettato(lista.stream().mapToLong(reportDaily -> reportDaily.getClickNumberRigettato()).sum());
-        ultimaThule.setLeadNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getLeadNumber()).sum());
-        ultimaThule.setLeadNumberRigettato(lista.stream().mapToLong(reportDaily -> reportDaily.getLeadNumberRigettato()).sum());
-        ultimaThule.setImpressionNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getImpressionNumber()).sum());
+        ultimaThule.setClickNumber(lista.stream().mapToLong(ReportCampagneDTO::getClickNumber).sum());
+        ultimaThule.setClickNumberRigettato(lista.stream().mapToLong(ReportCampagneDTO::getClickNumberRigettato).sum());
+        ultimaThule.setLeadNumber(lista.stream().mapToLong(ReportCampagneDTO::getLeadNumber).sum());
+        ultimaThule.setLeadNumberRigettato(lista.stream().mapToLong(ReportCampagneDTO::getLeadNumberRigettato).sum());
+        ultimaThule.setImpressionNumber(lista.stream().mapToLong(ReportCampagneDTO::getImpressionNumber).sum());
         if (ultimaThule.getImpressionNumber() != null && ultimaThule.getImpressionNumber() > 0) {
             double ctr = (ultimaThule.getClickNumber().doubleValue() / ultimaThule.getImpressionNumber().doubleValue()) * 100;
             ultimaThule.setCtr("" + ctr + "");
@@ -145,21 +145,21 @@ public class ReportBusiness {
             double lr = (ultimaThule.getLeadNumber().doubleValue() / ultimaThule.getClickNumber().doubleValue()) * 100;
             ultimaThule.setLr("" + lr);
         }
-        ultimaThule.setCommission(lista.stream().mapToDouble(reportDaily -> reportDaily.getCommission()).sum());
-        ultimaThule.setCommissionRigettato(lista.stream().mapToDouble(reportDaily -> reportDaily.getCommissionRigettato()).sum());
-        ultimaThule.setRevenue(lista.stream().mapToDouble(reportDaily -> reportDaily.getRevenue()).sum());
-        ultimaThule.setRevenueRigettato(lista.stream().mapToDouble(reportDaily -> reportDaily.getRevenueRigettato()).sum());
+        ultimaThule.setCommission(lista.stream().mapToDouble(ReportCampagneDTO::getCommission).sum());
+        ultimaThule.setCommissionRigettato(lista.stream().mapToDouble(ReportCampagneDTO::getCommissionRigettato).sum());
+        ultimaThule.setRevenue(lista.stream().mapToDouble(ReportCampagneDTO::getRevenue).sum());
+        ultimaThule.setRevenueRigettato(lista.stream().mapToDouble(ReportCampagneDTO::getRevenueRigettato).sum());
         ultimaThule.setMargine(ultimaThule.getRevenue() - ultimaThule.getCommission());
         if (ultimaThule.getRevenue() != null && ultimaThule.getRevenue() > 0) {
-            Double marginePC = ((ultimaThule.getRevenue().doubleValue() - ultimaThule.getCommission().doubleValue()) / ultimaThule.getRevenue().doubleValue() * 100);
+            Double marginePC = ((ultimaThule.getRevenue() - ultimaThule.getCommission()) / ultimaThule.getRevenue() * 100);
             ultimaThule.setMarginePC(DoubleRounder.round(marginePC, 2));
         } else ultimaThule.setMarginePC(0d);
         if (ultimaThule.getImpressionNumber() != null && ultimaThule.getImpressionNumber() > 0) {
-            Double ecpm = ultimaThule.getCommission().doubleValue() / ultimaThule.getImpressionNumber().doubleValue() * 1000;
+            Double ecpm = ultimaThule.getCommission() / ultimaThule.getImpressionNumber().doubleValue() * 1000;
             ultimaThule.setEcpm(DoubleRounder.round(ecpm, 2) + "");
         }
         if (ultimaThule.getClickNumber() != null && ultimaThule.getClickNumber() > 0) {
-            Double ecpc = ultimaThule.getCommission().doubleValue() / ultimaThule.getClickNumber().doubleValue();
+            Double ecpc = ultimaThule.getCommission() / ultimaThule.getClickNumber().doubleValue();
             ultimaThule.setEcpc(DoubleRounder.round(ecpc, 2) + "");
         }
         if (ultimaThule.getLeadNumber() != null && ultimaThule.getLeadNumber() > 0) {
@@ -169,8 +169,7 @@ public class ReportBusiness {
         //ultima riga calcolata
         lista.add(ultimaThule);
         final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), lista.size());
-        Page<ReportCampagneDTO> pp = new PageImpl<>(lista.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, lista.size());
-        return pp;
+        return new PageImpl<>(lista.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, lista.size());
     }
 
     /**
@@ -202,11 +201,11 @@ public class ReportBusiness {
         List<ReportDailyDTO> lista = reportRepository.searchReportDaily(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(23, 59, 59, 99999), request.getStatusId(), null, request.getAffiliateid(), null, request.getCampaignId(), request.getAdvertiserId(), dictId, request.getStatusIds(), request.getCampaignIds());
         ReportDailyDTO report = new ReportDailyDTO();
         report.setGiorno("Total : ");
-        report.setClickNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getClickNumber()).sum());
-        report.setClickNumberRigettato(lista.stream().mapToLong(reportDaily -> reportDaily.getClickNumberRigettato()).sum());
-        report.setLeadNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getLeadNumber()).sum());
-        report.setLeadNumberRigettato(lista.stream().mapToLong(reportDaily -> reportDaily.getLeadNumberRigettato()).sum());
-        report.setImpressionNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getImpressionNumber()).sum());
+        report.setClickNumber(lista.stream().mapToLong(ReportDailyDTO::getClickNumber).sum());
+        report.setClickNumberRigettato(lista.stream().mapToLong(ReportDailyDTO::getClickNumberRigettato).sum());
+        report.setLeadNumber(lista.stream().mapToLong(ReportDailyDTO::getLeadNumber).sum());
+        report.setLeadNumberRigettato(lista.stream().mapToLong(ReportDailyDTO::getLeadNumberRigettato).sum());
+        report.setImpressionNumber(lista.stream().mapToLong(ReportDailyDTO::getImpressionNumber).sum());
         if (report.getImpressionNumber() != null && report.getImpressionNumber() > 0) {
             double ctr = (report.getClickNumber().doubleValue() / report.getImpressionNumber().doubleValue()) * 100;
             report.setCtr("" + DoubleRounder.round(ctr, 2));
@@ -215,25 +214,25 @@ public class ReportBusiness {
             double lr = (report.getLeadNumber().doubleValue() / report.getClickNumber().doubleValue()) * 100;
             report.setLr("" + DoubleRounder.round(lr, 2));
         }
-        report.setCommission(lista.stream().mapToDouble(reportDaily -> reportDaily.getCommission()).sum());
-        report.setCommissionRigettato(lista.stream().mapToDouble(reportDaily -> reportDaily.getCommissionRigettato()).sum());
-        report.setRevenue(lista.stream().mapToDouble(reportDaily -> reportDaily.getRevenue()).sum());
-        report.setRevenueRigettato(lista.stream().mapToDouble(reportDaily -> reportDaily.getRevenueRigettato()).sum());
+        report.setCommission(lista.stream().mapToDouble(ReportDailyDTO::getCommission).sum());
+        report.setCommissionRigettato(lista.stream().mapToDouble(ReportDailyDTO::getCommissionRigettato).sum());
+        report.setRevenue(lista.stream().mapToDouble(ReportDailyDTO::getRevenue).sum());
+        report.setRevenueRigettato(lista.stream().mapToDouble(ReportDailyDTO::getRevenueRigettato).sum());
         report.setMargine(report.getRevenue() - report.getCommission());
         if (report.getRevenue() != null && report.getRevenue() > 0) {
-            Double marginePC = ((report.getRevenue().doubleValue() - report.getCommission().doubleValue()) / report.getRevenue().doubleValue() * 100);
+            Double marginePC = ((report.getRevenue() - report.getCommission()) / report.getRevenue() * 100);
             report.setMarginePC(DoubleRounder.round(marginePC, 2));
         } else report.setMarginePC(0d);
         if (report.getImpressionNumber() != null && report.getImpressionNumber() > 0) {
-            Double ecpm = report.getCommission().doubleValue() / report.getImpressionNumber().doubleValue() * 1000;
+            Double ecpm = report.getCommission() / report.getImpressionNumber().doubleValue() * 1000;
             report.setEcpm(DoubleRounder.round(ecpm, 2) + "");
         }
         if (report.getClickNumber() != null && report.getClickNumber() > 0) {
-            Double ecpc = report.getCommission().doubleValue() / report.getClickNumber().doubleValue();
+            Double ecpc = report.getCommission() / report.getClickNumber().doubleValue();
             report.setEcpc(DoubleRounder.round(ecpc, 2) + "");
         }
         if (report.getLeadNumber() != null && report.getLeadNumber() > 0) {
-            Double ecpl = report.getCommission().doubleValue() / report.getLeadNumber().doubleValue();
+            Double ecpl = report.getCommission() / report.getLeadNumber().doubleValue();
             report.setEcpl(DoubleRounder.round(ecpl, 2) + "");
         }
         //ultima riga calcolata
@@ -271,11 +270,11 @@ public class ReportBusiness {
         }
         List<ReportAffiliatesDTO> lista = reportRepository.searchReportAffiliate(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(23, 59, 59, 99999), request.getStatusId(), null, request.getAffiliateid(), null, request.getCampaignId(), request.getAdvertiserId(), dictId, request.getStatusIds(), request.getCampaignIds());
         ReportAffiliatesDTO report = new ReportAffiliatesDTO();
-        report.setClickNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getClickNumber()).sum());
-        report.setClickNumberRigettato(lista.stream().mapToLong(reportDaily -> reportDaily.getClickNumberRigettato()).sum());
-        report.setLeadNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getLeadNumber()).sum());
-        report.setLeadNumberRigettato(lista.stream().mapToLong(reportDaily -> reportDaily.getLeadNumberRigettato()).sum());
-        report.setImpressionNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getImpressionNumber()).sum());
+        report.setClickNumber(lista.stream().mapToLong(ReportAffiliatesDTO::getClickNumber).sum());
+        report.setClickNumberRigettato(lista.stream().mapToLong(ReportAffiliatesDTO::getClickNumberRigettato).sum());
+        report.setLeadNumber(lista.stream().mapToLong(ReportAffiliatesDTO::getLeadNumber).sum());
+        report.setLeadNumberRigettato(lista.stream().mapToLong(ReportAffiliatesDTO::getLeadNumberRigettato).sum());
+        report.setImpressionNumber(lista.stream().mapToLong(ReportAffiliatesDTO::getImpressionNumber).sum());
         if (report.getImpressionNumber() != null && report.getImpressionNumber() > 0) {
             double ctr = (report.getClickNumber().doubleValue() / report.getImpressionNumber().doubleValue()) * 100;
             report.setCtr("" + DoubleRounder.round(ctr, 2));
@@ -284,32 +283,31 @@ public class ReportBusiness {
             double lr = (report.getLeadNumber().doubleValue() / report.getClickNumber().doubleValue()) * 100;
             report.setLr("" + DoubleRounder.round(lr, 2));
         }
-        report.setCommission(lista.stream().mapToDouble(reportDaily -> reportDaily.getCommission()).sum());
-        report.setCommissionRigettato(lista.stream().mapToDouble(reportDaily -> reportDaily.getCommissionRigettato()).sum());
-        report.setRevenue(lista.stream().mapToDouble(reportDaily -> reportDaily.getRevenue()).sum());
-        report.setRevenueRigettato(lista.stream().mapToDouble(reportDaily -> reportDaily.getRevenueRigettato()).sum());
+        report.setCommission(lista.stream().mapToDouble(ReportAffiliatesDTO::getCommission).sum());
+        report.setCommissionRigettato(lista.stream().mapToDouble(ReportAffiliatesDTO::getCommissionRigettato).sum());
+        report.setRevenue(lista.stream().mapToDouble(ReportAffiliatesDTO::getRevenue).sum());
+        report.setRevenueRigettato(lista.stream().mapToDouble(ReportAffiliatesDTO::getRevenueRigettato).sum());
         report.setMargine(report.getRevenue() - report.getCommission());
         if (report.getRevenue() != null && report.getRevenue() > 0) {
-            Double marginePC = ((report.getRevenue().doubleValue() - report.getCommission().doubleValue()) / report.getRevenue().doubleValue() * 100);
+            Double marginePC = ((report.getRevenue() - report.getCommission()) / report.getRevenue() * 100);
             report.setMarginePC(DoubleRounder.round(marginePC, 2));
         } else report.setMarginePC(0d);
         if (report.getImpressionNumber() != null && report.getImpressionNumber() > 0) {
-            Double ecpm = report.getCommission().doubleValue() / report.getImpressionNumber().doubleValue() * 1000;
+            Double ecpm = report.getCommission() / report.getImpressionNumber().doubleValue() * 1000;
             report.setEcpm(DoubleRounder.round(ecpm, 2) + "");
         }
         if (report.getClickNumber() != null && report.getClickNumber() > 0) {
-            Double ecpc = report.getCommission().doubleValue() / report.getClickNumber().doubleValue();
+            Double ecpc = report.getCommission() / report.getClickNumber().doubleValue();
             report.setEcpc(DoubleRounder.round(ecpc, 2) + "");
         }
         if (report.getLeadNumber() != null && report.getLeadNumber() > 0) {
-            Double ecpl = report.getCommission().doubleValue() / report.getLeadNumber().doubleValue();
+            Double ecpl = report.getCommission() / report.getLeadNumber().doubleValue();
             report.setEcpl(DoubleRounder.round(ecpl, 2) + "");
         }
         //ultima riga calcolata
         lista.add(report);
         final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), lista.size());
-        Page<ReportAffiliatesDTO> pp = new PageImpl<>(lista.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, lista.size());
-        return pp;
+        return new PageImpl<>(lista.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, lista.size());
     }
 
     /**
@@ -340,11 +338,11 @@ public class ReportBusiness {
         }
         List<ReportAffiliatesChannelDTO> lista = reportRepository.searchReportAffiliateChannel(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(23, 59, 59, 99999), request.getStatusId(), null, request.getAffiliateid(), null, request.getCampaignId(), request.getAdvertiserId(), dictId, request.getStatusIds(), request.getCampaignIds());
         ReportAffiliatesChannelDTO report = new ReportAffiliatesChannelDTO();
-        report.setClickNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getClickNumber()).sum());
-        report.setClickNumberRigettato(lista.stream().mapToLong(reportDaily -> reportDaily.getClickNumberRigettato()).sum());
-        report.setLeadNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getLeadNumber()).sum());
-        report.setLeadNumberRigettato(lista.stream().mapToLong(reportDaily -> reportDaily.getLeadNumberRigettato()).sum());
-        report.setImpressionNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getImpressionNumber()).sum());
+        report.setClickNumber(lista.stream().mapToLong(ReportAffiliatesChannelDTO::getClickNumber).sum());
+        report.setClickNumberRigettato(lista.stream().mapToLong(ReportAffiliatesChannelDTO::getClickNumberRigettato).sum());
+        report.setLeadNumber(lista.stream().mapToLong(ReportAffiliatesChannelDTO::getLeadNumber).sum());
+        report.setLeadNumberRigettato(lista.stream().mapToLong(ReportAffiliatesChannelDTO::getLeadNumberRigettato).sum());
+        report.setImpressionNumber(lista.stream().mapToLong(ReportAffiliatesChannelDTO::getImpressionNumber).sum());
         if (report.getImpressionNumber() != null && report.getImpressionNumber() > 0) {
             double ctr = (report.getClickNumber().doubleValue() / report.getImpressionNumber().doubleValue()) * 100;
             report.setCtr("" + DoubleRounder.round(ctr, 2));
@@ -353,32 +351,31 @@ public class ReportBusiness {
             double lr = (report.getLeadNumber().doubleValue() / report.getClickNumber().doubleValue()) * 100;
             report.setLr("" + DoubleRounder.round(lr, 2));
         }
-        report.setCommission(lista.stream().mapToDouble(reportDaily -> reportDaily.getCommission()).sum());
-        report.setCommissionRigettato(lista.stream().mapToDouble(reportDaily -> reportDaily.getCommissionRigettato()).sum());
-        report.setRevenue(lista.stream().mapToDouble(reportDaily -> reportDaily.getRevenue()).sum());
-        report.setRevenueRigettato(lista.stream().mapToDouble(reportDaily -> reportDaily.getRevenueRigettato()).sum());
+        report.setCommission(lista.stream().mapToDouble(ReportAffiliatesChannelDTO::getCommission).sum());
+        report.setCommissionRigettato(lista.stream().mapToDouble(ReportAffiliatesChannelDTO::getCommissionRigettato).sum());
+        report.setRevenue(lista.stream().mapToDouble(ReportAffiliatesChannelDTO::getRevenue).sum());
+        report.setRevenueRigettato(lista.stream().mapToDouble(ReportAffiliatesChannelDTO::getRevenueRigettato).sum());
         report.setMargine(report.getRevenue() - report.getCommission());
         if (report.getRevenue() != null && report.getRevenue() > 0) {
-            Double marginePC = ((report.getRevenue().doubleValue() - report.getCommission().doubleValue()) / report.getRevenue().doubleValue() * 100);
+            Double marginePC = ((report.getRevenue() - report.getCommission().doubleValue()) / report.getRevenue().doubleValue() * 100);
             report.setMarginePC(DoubleRounder.round(marginePC, 2));
         } else report.setMarginePC(0d);
         if (report.getImpressionNumber() != null && report.getImpressionNumber() > 0) {
-            Double ecpm = report.getCommission().doubleValue() / report.getImpressionNumber().doubleValue() * 1000;
+            Double ecpm = report.getCommission() / report.getImpressionNumber().doubleValue() * 1000;
             report.setEcpm(DoubleRounder.round(ecpm, 2) + "");
         }
         if (report.getClickNumber() != null && report.getClickNumber() > 0) {
-            Double ecpc = report.getCommission().doubleValue() / report.getClickNumber().doubleValue();
+            Double ecpc = report.getCommission() / report.getClickNumber().doubleValue();
             report.setEcpc(DoubleRounder.round(ecpc, 2) + "");
         }
         if (report.getLeadNumber() != null && report.getLeadNumber() > 0) {
-            Double ecpl = report.getCommission().doubleValue() / report.getLeadNumber().doubleValue();
+            Double ecpl = report.getCommission() / report.getLeadNumber().doubleValue();
             report.setEcpl(DoubleRounder.round(ecpl, 2) + "");
         }
         //ultima riga calcolata
         lista.add(report);
         final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), lista.size());
-        Page<ReportAffiliatesChannelDTO> pp = new PageImpl<>(lista.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, lista.size());
-        return pp;
+        return new PageImpl<>(lista.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, lista.size());
     }
 
 
@@ -393,7 +390,7 @@ public class ReportBusiness {
             request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
         }
         Long dictId = null;
-        if (request.getDictionaryIds().size() > 0) {
+        if (!request.getDictionaryIds().isEmpty()) {
             dictId = request.getDictionaryIds().get(0);
         }
         if (request.campaignActive != null && request.campaignActive && request.getDateTimeFrom() != null) {
@@ -402,11 +399,11 @@ public class ReportBusiness {
         }
         List<ReportAffiliatesChannelCampaignDTO> lista = reportRepository.searchReportAffiliateChannelCampaign(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(23, 59, 59, 99999), request.getStatusId(), null, request.getAffiliateid(), null, request.getCampaignId(), request.getAdvertiserId(), dictId, request.getStatusIds(), request.getCampaignIds());
         ReportAffiliatesChannelCampaignDTO report = new ReportAffiliatesChannelCampaignDTO();
-        report.setClickNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getClickNumber()).sum());
-        report.setClickNumberRigettato(lista.stream().mapToLong(reportDaily -> reportDaily.getClickNumberRigettato()).sum());
-        report.setLeadNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getLeadNumber()).sum());
-        report.setLeadNumberRigettato(lista.stream().mapToLong(reportDaily -> reportDaily.getLeadNumberRigettato()).sum());
-        report.setImpressionNumber(lista.stream().mapToLong(reportDaily -> reportDaily.getImpressionNumber()).sum());
+        report.setClickNumber(lista.stream().mapToLong(ReportAffiliatesChannelCampaignDTO::getClickNumber).sum());
+        report.setClickNumberRigettato(lista.stream().mapToLong(ReportAffiliatesChannelCampaignDTO::getClickNumberRigettato).sum());
+        report.setLeadNumber(lista.stream().mapToLong(ReportAffiliatesChannelCampaignDTO::getLeadNumber).sum());
+        report.setLeadNumberRigettato(lista.stream().mapToLong(ReportAffiliatesChannelCampaignDTO::getLeadNumberRigettato).sum());
+        report.setImpressionNumber(lista.stream().mapToLong(ReportAffiliatesChannelCampaignDTO::getImpressionNumber).sum());
         if (report.getImpressionNumber() != null && report.getImpressionNumber() > 0) {
             double ctr = (report.getClickNumber().doubleValue() / report.getImpressionNumber().doubleValue()) * 100;
             report.setCtr("" + DoubleRounder.round(ctr, 2));
@@ -415,32 +412,31 @@ public class ReportBusiness {
             double lr = (report.getLeadNumber().doubleValue() / report.getClickNumber().doubleValue()) * 100;
             report.setLr("" + DoubleRounder.round(lr, 2));
         }
-        report.setCommission(lista.stream().mapToDouble(reportDaily -> reportDaily.getCommission()).sum());
-        report.setCommissionRigettato(lista.stream().mapToDouble(reportDaily -> reportDaily.getCommissionRigettato()).sum());
-        report.setRevenue(lista.stream().mapToDouble(reportDaily -> reportDaily.getRevenue()).sum());
-        report.setRevenueRigettato(lista.stream().mapToDouble(reportDaily -> reportDaily.getRevenueRigettato()).sum());
+        report.setCommission(lista.stream().mapToDouble(ReportAffiliatesChannelCampaignDTO::getCommission).sum());
+        report.setCommissionRigettato(lista.stream().mapToDouble(ReportAffiliatesChannelCampaignDTO::getCommissionRigettato).sum());
+        report.setRevenue(lista.stream().mapToDouble(ReportAffiliatesChannelCampaignDTO::getRevenue).sum());
+        report.setRevenueRigettato(lista.stream().mapToDouble(ReportAffiliatesChannelCampaignDTO::getRevenueRigettato).sum());
         report.setMargine(report.getRevenue() - report.getCommission());
         if (report.getRevenue() != null && report.getRevenue() > 0) {
-            Double marginePC = ((report.getRevenue().doubleValue() - report.getCommission().doubleValue()) / report.getRevenue().doubleValue() * 100);
+            Double marginePC = ((report.getRevenue() - report.getCommission()) / report.getRevenue() * 100);
             report.setMarginePC(DoubleRounder.round(marginePC, 2));
         } else report.setMarginePC(0d);
         if (report.getImpressionNumber() != null && report.getImpressionNumber() > 0) {
-            Double ecpm = report.getCommission().doubleValue() / report.getImpressionNumber().doubleValue() * 1000;
+            Double ecpm = report.getCommission() / report.getImpressionNumber().doubleValue() * 1000;
             report.setEcpm(DoubleRounder.round(ecpm, 2) + "");
         }
         if (report.getClickNumber() != null && report.getClickNumber() > 0) {
-            Double ecpc = report.getCommission().doubleValue() / report.getClickNumber().doubleValue();
+            Double ecpc = report.getCommission() / report.getClickNumber().doubleValue();
             report.setEcpc(DoubleRounder.round(ecpc, 2) + "");
         }
         if (report.getLeadNumber() != null && report.getLeadNumber() > 0) {
-            Double ecpl = report.getCommission().doubleValue() / report.getLeadNumber().doubleValue();
+            Double ecpl = report.getCommission() / report.getLeadNumber().doubleValue();
             report.setEcpl(DoubleRounder.round(ecpl, 2) + "");
         }
         //ultima riga calcolata
         lista.add(report);
         final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), lista.size());
-        Page<ReportAffiliatesChannelCampaignDTO> pp = new PageImpl<>(lista.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, lista.size());
-        return pp;
+        return new PageImpl<>(lista.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, lista.size());
     }
 
     /**

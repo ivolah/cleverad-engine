@@ -44,7 +44,7 @@ public class StatCPLBusiness {
         JSONArray data = new JSONArray();
         JSONArray xSeries = new JSONArray();
         for (int i = request.getDays(); i >= 0; i--) {
-            Long nu = repository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).stream().mapToLong(value -> value.gettotale()).sum();
+            Long nu = repository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).stream().mapToLong(TopCampagne::gettotale).sum();
             if (nu == null)
                 nu = 0L;
             data.put(nu);
@@ -69,7 +69,7 @@ public class StatCPLBusiness {
         }
         JSONArray jsonArray = new JSONArray();
         for (int i = request.getDays(); i >= 0; i--) {
-            Long nu = repository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).stream().mapToLong(value -> value.gettotale()).sum();
+            Long nu = repository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).stream().mapToLong(TopCampagne::gettotale).sum();
             if (nu == null)
                 nu = 0L;
             JSONObject jsonObject = new JSONObject();

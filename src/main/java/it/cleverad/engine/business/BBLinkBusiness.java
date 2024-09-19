@@ -163,7 +163,7 @@ public class BBLinkBusiness {
 
     private Specification<BBLink> getSpecification(Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {

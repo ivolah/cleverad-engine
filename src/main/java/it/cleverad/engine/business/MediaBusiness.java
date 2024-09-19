@@ -2,10 +2,7 @@ package it.cleverad.engine.business;
 
 import com.github.dozermapper.core.Mapper;
 import it.cleverad.engine.config.security.JwtUserDetailsService;
-import it.cleverad.engine.persistence.model.service.Affiliate;
-import it.cleverad.engine.persistence.model.service.Campaign;
-import it.cleverad.engine.persistence.model.service.Media;
-import it.cleverad.engine.persistence.model.service.Url;
+import it.cleverad.engine.persistence.model.service.*;
 import it.cleverad.engine.persistence.repository.service.*;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.service.tinyurl.TinyData;
@@ -156,7 +153,6 @@ public class MediaBusiness {
         media.setMediaType(mediaTypeRepository.findById(filter.typeId).orElseThrow(() -> new ElementCleveradException("Media Type", filter.typeId)));
         media.setLastModificationDate(LocalDateTime.now());
         media.setBannerCode(bannerCode);
-        //media.setStatus(true);
         if (filter.formatId != null)
             media.setDictionary(dictionaryRepository.findById(filter.formatId).orElseThrow(() -> new ElementCleveradException("Dictionary", filter.formatId)));
 
@@ -193,7 +189,6 @@ public class MediaBusiness {
 
                 final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), list.size());
                 Page<Media> page = new PageImpl<>(list.stream().distinct().collect(Collectors.toList()).subList(pageableRequest.getPageNumber(), end), pageableRequest, list.size());
-                // Page<Media> page = new PageImpl<>(list.stream().distinct().collect(Collectors.toList()).subList(pageableRequest.getPageNumber(), pageableRequest.getPageSize()), pageableRequest, list.size());
                 return page.map(media -> MediaDTO.from(media));
             } else {
                 Page<Media> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id"))));
@@ -211,11 +206,7 @@ public class MediaBusiness {
             }
 
             Set<Long> ids = new HashSet<>();
-            campaigns.stream().spliterator().forEachRemaining(campaign -> {
-                campaign.getMedias().stream().filter(media -> media.getStatus().equals(true)).forEach(media -> {
-                    ids.add(media.getId());
-                });
-            });
+            campaigns.stream().spliterator().forEachRemaining(campaign -> campaign.getMedias().stream().filter(media -> media.getStatus().equals(true)).forEach(media -> ids.add(media.getId())));
 
             Page<Media> page = repository.findByIdIn(ids, pageableRequest);
             return page.map(MediaDTO::from);
@@ -239,8 +230,6 @@ public class MediaBusiness {
         Page<Media> page = new PageImpl<>(list.stream().distinct().collect(Collectors.toList()));
         return page.map(media -> {
             MediaDTO dto = MediaDTO.from(media);
-//            if (dto.getTypeId() == 5L)
-//                dto.setTarget(setUrlTarget(dto.getTarget(), media.getId(), campaignId, 0L, 0L));
             dto.setBannerCode(generaBannerCode(dto, media.getId(), campaignId, 0L, 0L));
             return dto;
         });
@@ -263,18 +252,11 @@ public class MediaBusiness {
 
         List<Campaign> campaigns = new ArrayList<>();
         if (cc.getCampaignAffiliates() != null) {
-            campaigns = cc.getCampaignAffiliates().stream().filter(campaignAffiliate -> campaignAffiliate.getCampaign().getStatus()).map(campaignAffiliate -> {
-                Campaign ccc = campaignAffiliate.getCampaign();
-                return ccc;
-            }).collect(Collectors.toList());
+            campaigns = cc.getCampaignAffiliates().stream().map(CampaignAffiliate::getCampaign).filter(campaign -> campaign.getStatus()).collect(Collectors.toList());
         }
 
         Set<Long> ids = new HashSet<>();
-        campaigns.stream().spliterator().forEachRemaining(campaign -> {
-            campaign.getMedias().stream().filter(media -> media.getStatus().equals(true)).forEach(media -> {
-                ids.add(media.getId());
-            });
-        });
+        campaigns.stream().spliterator().forEachRemaining(campaign -> campaign.getMedias().stream().filter(media -> media.getStatus().equals(true)).forEach(media -> ids.add(media.getId())));
 
         Page<Media> page = repository.findByIdIn(ids, Pageable.ofSize(Integer.MAX_VALUE));
         List<Media> ll = page.filter(media -> media.getMediaType().getId() == 6L).stream().collect(Collectors.toList());
@@ -285,8 +267,6 @@ public class MediaBusiness {
     public MediaDTO getByIdAndCampaignID(Long mediaId, Long campaignId) {
         Media media = repository.findById(mediaId).orElseThrow(() -> new ElementCleveradException("Media", mediaId));
         MediaDTO dto = MediaDTO.from(media);
-//        if (dto.getTypeId() == 5L)
-//            dto.setTarget(setUrlTarget(dto.getTarget(), mediaId, campaignId, 0L, 0L));
         dto.setBannerCode(generaBannerCode(dto, mediaId, campaignId, 0L, 0L));
         return dto;
     }
@@ -375,7 +355,7 @@ public class MediaBusiness {
 
     public Specification<Media> getSpecification(Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {

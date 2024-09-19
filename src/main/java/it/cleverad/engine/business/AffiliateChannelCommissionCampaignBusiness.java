@@ -259,7 +259,7 @@ public class AffiliateChannelCommissionCampaignBusiness {
      **/
     private Specification<AffiliateChannelCommissionCampaign> getSpecification(AffiliateChannelCommissionCampaignBusiness.Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {

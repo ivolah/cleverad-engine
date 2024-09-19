@@ -121,7 +121,7 @@ public class RigeneraCPLBusiness {
                     // giro senza controllare IP address
                     if (cplDTO.getCpcId() == null) {
                         List<Cpc> listaSenzaIp = cpcBusiness.findByIp1HoursBeforeNoIp(cplDTO.getDate(), cplDTO.getRefferal()).stream().filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal())).collect(Collectors.toList());
-                        if (listaSenzaIp.size() > 0) {
+                        if (!listaSenzaIp.isEmpty()) {
                             //check id cpc non usato in transazioni cpl come cpcid
                             long numerositatitudine = transactionCPLBusiness.countByCpcId(listaSenzaIp.get(0).getId());
                             log.info("NO-IP CPC {} : ORIG {} --> CPC {} - used: {}", listaSenzaIp.get(0).getId(), cplDTO.getRefferal(), listaSenzaIp.get(0).getRefferal(), numerositatitudine);

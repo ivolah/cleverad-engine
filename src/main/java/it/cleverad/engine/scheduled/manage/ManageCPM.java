@@ -159,7 +159,7 @@ public class ManageCPM {
                                 transaction.setDictionaryId(49L);
                             }
 
-                            if(campaignDTO.getStatus() == false){
+                            if (campaignDTO.getStatus()) {
                                 // setto a campagna scaduta
                                 transaction.setDictionaryId(49L);
                                 scaduta = true;

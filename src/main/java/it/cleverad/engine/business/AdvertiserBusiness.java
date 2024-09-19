@@ -129,12 +129,6 @@ public class AdvertiserBusiness {
         return page.map(AdvertiserDTO::from);
     }
 
-    public Page<AdvertiserDTO> searchAll(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("name")));
-        Page<Advertiser> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(AdvertiserDTO::from);
-    }
-
     // UPDATE
     public AdvertiserDTO update(Long id, Filter filter) {
         Advertiser advertiser = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Advertiser", id));
@@ -163,7 +157,7 @@ public class AdvertiserBusiness {
      **/
     private Specification<Advertiser> getSpecification(Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {

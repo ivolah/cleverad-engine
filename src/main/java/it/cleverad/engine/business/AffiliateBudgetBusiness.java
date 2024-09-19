@@ -6,7 +6,6 @@ import it.cleverad.engine.persistence.repository.service.AffiliateBudgetReposito
 import it.cleverad.engine.persistence.repository.service.AffiliateRepository;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.web.dto.AffiliateBudgetDTO;
-import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import it.cleverad.engine.web.exception.PostgresDeleteCleveradException;
 import lombok.AllArgsConstructor;
@@ -156,7 +155,7 @@ public class AffiliateBudgetBusiness {
 
     private Specification<AffiliateBudget> getSpecification(Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {
@@ -189,14 +188,14 @@ public class AffiliateBudgetBusiness {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), request.getStartDateFrom()));
             }
             if (request.getStartDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), (request.getStartDateTo().plus(1, ChronoUnit.DAYS))));
+                predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), (request.getStartDateTo().plusDays(1))));
             }
 
             if (request.getDueDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("dueDate"), (request.getDueDateFrom())));
             }
             if (request.getDueDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), (request.getDueDateTo().plus(1, ChronoUnit.DAYS))));
+                predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), (request.getDueDateTo().plusDays(1))));
             }
 
             if (request.getDisableDueDateTo() != null) {

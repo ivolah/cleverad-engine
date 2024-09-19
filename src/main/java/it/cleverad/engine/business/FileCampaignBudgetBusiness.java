@@ -3,7 +3,6 @@ package it.cleverad.engine.business;
 import it.cleverad.engine.persistence.model.service.CampaignBudget;
 import it.cleverad.engine.persistence.model.service.FileCampaignBudgetInvoice;
 import it.cleverad.engine.persistence.model.service.FileCampaignBudgetOrder;
-import it.cleverad.engine.persistence.model.service.FilePayout;
 import it.cleverad.engine.persistence.repository.service.CampaignBudgetRepository;
 import it.cleverad.engine.persistence.repository.service.FileCampaignBudgetInvoiceRepository;
 import it.cleverad.engine.persistence.repository.service.FileCampaignBudgetOrderRepository;
@@ -20,7 +19,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,12 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.criteria.Predicate;
 import javax.validation.ConstraintViolationException;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 
@@ -123,37 +118,6 @@ public class FileCampaignBudgetBusiness {
             fil.setCampaignBudget(campaignBudgetRepository.findById(idCampaignBudget).orElseThrow(() -> new ElementCleveradException("CampaignBudget", id)));
             fileCampaignBudgetOrderRepository.save(fil);
         }
-    }
-
-    // SEARCH PAGINATED
-//    public Page<FilePayoutDTO> search(FileCampaignBudgetBusiness.Filter request, Pageable pageableRequest) {
-//        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));
-//        Page<FilePayout> page = repository.findAll(getSpecification(request), pageable);
-//        return page.map(FilePayoutDTO::from);
-//    }
-
-    /**
-     * ============================================================================================================
-     **/
-    private Specification<FilePayout> getSpecification(FileCampaignBudgetBusiness.Filter request) {
-        return (root, query, cb) -> {
-            Predicate completePredicate = null;
-            List<Predicate> predicates = new ArrayList<>();
-
-            if (request.getId() != null) {
-                predicates.add(cb.equal(root.get("id"), request.getId()));
-            }
-            if (request.getName() != null) {
-                predicates.add(cb.equal(root.get("name"), request.getName()));
-            }
-            if (request.getCampaignId() != null) {
-                predicates.add(cb.equal(root.get("campaign").get("id"), request.getCampaignId()));
-            }
-
-            completePredicate = cb.and(predicates.toArray(new Predicate[0]));
-
-            return completePredicate;
-        };
     }
 
     /**

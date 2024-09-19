@@ -3,7 +3,6 @@ package it.cleverad.engine.business;
 import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.Campaign;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
-import it.cleverad.engine.persistence.model.service.TransactionCPC;
 import it.cleverad.engine.persistence.model.service.TransactionCPM;
 import it.cleverad.engine.persistence.repository.service.CampaignRepository;
 import it.cleverad.engine.service.ReferralService;

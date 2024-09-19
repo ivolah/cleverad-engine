@@ -43,11 +43,6 @@ public class FileController {
         return business.search(request, pageable);
     }
 
-//    @PatchMapping(path = "/{id}")
-//    @ResponseStatus(HttpStatus.ACCEPTED)
-//    public FileDTO update(@PathVariable Long id, @RequestBody FileBusiness.Filter request) {
-//        return business.update(id, request);
-//    }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)

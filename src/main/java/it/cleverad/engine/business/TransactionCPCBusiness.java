@@ -152,7 +152,7 @@ public class TransactionCPCBusiness {
         return TransactionCPCDTO.from(cpcRepository.save(cpc));
     }
 
-    public TransactionCPCDTO settaScaduto( Long id) {
+    public TransactionCPCDTO settaScaduto(Long id) {
         TransactionCPC cpc = cpcRepository.findById(id).get();
         cpc.setValue(0D);
         cpc.setDictionaryStatus(dictionaryRepository.findById(127L).get());
@@ -235,12 +235,7 @@ public class TransactionCPCBusiness {
 
     // GET BY ID CPC
     public TransactionCPCDTO findByIdCPC(Long id) {
-        TransactionCPC transaction = null;
-        if (jwtUserDetailsService.getRole().equals("Admin")) {
-            transaction = cpcRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
-        } else {
-            transaction = cpcRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
-        }
+        TransactionCPC  transaction = cpcRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
         return TransactionCPCDTO.from(transaction);
     }
 
@@ -297,7 +292,7 @@ public class TransactionCPCBusiness {
         request.setDateTimeFrom(start.atStartOfDay());
         request.setDateTimeTo(LocalDateTime.of((end), LocalTime.MAX));
         request.setValueNotZero(true);
-        ArrayList not = new ArrayList<>();
+        ArrayList<Long> not = new ArrayList<>();
         not.add(74L); // RIGETTATO
         request.setNotInStatusId(not);
         return cpcRepository.findAll(getSpecificationCPC(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")))).stream().collect(Collectors.toList());
@@ -358,7 +353,7 @@ public class TransactionCPCBusiness {
 
     private Specification<TransactionCPC> getSpecificationCPC(Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {
@@ -475,10 +470,10 @@ public class TransactionCPCBusiness {
     @AllArgsConstructor
     @ToString
     public static class Filter {
-        public List<Long> notInId;
-        public List<Long> statusIdIn;
-        public List<Long> dictionaryIdIn;
-        public List<Long> notInStatusId;
+        private List<Long> notInId;
+        private List<Long> statusIdIn;
+        private List<Long> dictionaryIdIn;
+        private List<Long> notInStatusId;
         private Long id;
         private Long affiliateId;
         private Long campaignId;

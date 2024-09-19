@@ -114,7 +114,6 @@ public class CpsBusiness {
         Filter request = new Filter();
         request.setRead(false);
         request.setBlacklisted(false);
-        // LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
         request.setDatetimeFrom(LocalDate.now().atStartOfDay());
         request.setDatetimeTo(LocalDateTime.now());
         Page<Cps> page = repository.findAll(getSpecification(request), pageable);
@@ -170,7 +169,7 @@ public class CpsBusiness {
      **/
     private Specification<Cps> getSpecification(Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {

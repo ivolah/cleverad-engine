@@ -53,13 +53,11 @@ public class MailTempalteBusiness {
     // GET BY ID
     public MailTemplateDTO findById(Long id) {
         MailTemplate media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("MailTemplate", id));
-        MailTemplateDTO dto = MailTemplateDTO.from(media);
-        return dto;
+        return MailTemplateDTO.from(media);
     }
 
     // DELETE BY ID
     public void delete(Long id) {
-        MailTemplate media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("MailTemplate", id));
         repository.deleteById(id);
     }
 
@@ -86,7 +84,7 @@ public class MailTempalteBusiness {
 
     private Specification<MailTemplate> getSpecification(Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {

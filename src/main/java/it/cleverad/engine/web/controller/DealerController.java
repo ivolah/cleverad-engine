@@ -1,7 +1,6 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.DealerBusiness;
-import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.web.dto.DealerDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,9 +16,6 @@ public class DealerController {
 
     @Autowired
     private DealerBusiness business;
-
-    @Autowired
-    private JwtUserDetailsService jwtUserDetailsService;
 
     /**
      * ============================================================================================================
@@ -54,13 +50,6 @@ public class DealerController {
     public void delete(@PathVariable Long id) {
         this.business.delete(id);
     }
-
-    @GetMapping("/{id}/campaign")
-    @ResponseStatus(HttpStatus.OK)
-    public Page<DealerDTO> findByIdCampaign(@PathVariable Long id) {
-        return business.findByIdCampaign(id);
-    }
-
 
     /**
      * ============================================================================================================

@@ -48,7 +48,7 @@ public class StatCPMBusiness {
         JSONArray data = new JSONArray();
         JSONArray xSeries = new JSONArray();
         for (int i = request.getDays(); i >= 0; i--) {
-            Long nu = repository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).stream().mapToLong(totale -> totale.gettotale()).sum();
+            Long nu = repository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).stream().mapToLong(TopCampagne::gettotale).sum();
             if (nu == null)
                 nu = 0L;
             data.put(nu);
@@ -116,7 +116,7 @@ public class StatCPMBusiness {
         }
         List<Long> listaIdCamapgne = new ArrayList<>();
         for (int i = 6; i >= 0; i--) {
-            List<Long> tc = repository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).stream().limit(5).map(topCampagne -> topCampagne.getid()).collect(Collectors.toList());
+            List<Long> tc = repository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).stream().limit(5).map(TopCampagne::getid).collect(Collectors.toList());
             listaIdCamapgne.addAll(tc);
         }
 

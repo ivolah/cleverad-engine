@@ -1,6 +1,5 @@
 package it.cleverad.engine.web.dto;
 
-import it.cleverad.engine.persistence.model.service.FileAdvertiser;
 import it.cleverad.engine.persistence.model.service.FileFeed;
 import lombok.AllArgsConstructor;
 import lombok.Data;

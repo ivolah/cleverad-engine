@@ -162,7 +162,6 @@ public class CpcBusiness {
         request.setRead(false);
         request.setBlacklisted(true);
         LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
-        // request.setDatetimeFrom(oraSpaccata.toLocalDate().atStartOfDay().minusHours(3));
         request.setDatetimeFrom(oraSpaccata.toLocalDate().atStartOfDay());
         request.setDatetimeTo(LocalDateTime.now());
         Page<Cpc> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
@@ -249,7 +248,7 @@ public class CpcBusiness {
      **/
     private Specification<Cpc> getSpecification(Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {

@@ -175,11 +175,6 @@ public class AffiliateBusiness {
         return affiliate.getGlobalPixel();
     }
 
-    public String getGlobalPixelValue(Long id) {
-        Affiliate affiliate = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Affiliate", id));
-        return affiliate.getGlobalPixelValue();
-    }
-
     public List<String> listEmails(Long affiliateId) {
         List<String> lista = new ArrayList<>();
         Affiliate affiliate = repository.findById(affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", affiliateId));
@@ -303,7 +298,7 @@ public class AffiliateBusiness {
      **/
     private Specification<Affiliate> getSpecification(Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {

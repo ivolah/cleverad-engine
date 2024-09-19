@@ -212,13 +212,7 @@ public class TransactionCPLBusiness {
     // GET BY ID CPL
     public TransactionCPLDTO findByIdCPL(Long id) {
         TransactionCPL transaction = null;
-//        if (jwtUserDetailsService.isAdmin()) {
         transaction = cplRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
-//        } else {
-//            CampaignBusiness.Filter request = new CampaignBusiness.Filter();
-//            request.setId(id);
-//            transaction = cplRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
-//        }
         return TransactionCPLDTO.from(transaction);
     }
 
@@ -372,7 +366,7 @@ public class TransactionCPLBusiness {
 
     private Specification<TransactionCPL> getSpecificationCPL(Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {

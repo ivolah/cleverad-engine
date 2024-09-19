@@ -120,7 +120,7 @@ public class PayoutBusiness {
             Dictionary dictionary = dictionaryRepository.findById(18L).orElseThrow(() -> new ElementCleveradException("Dictionary", 18L));
             map.setDictionary(dictionary);
             Long dataDaSommare = Long.valueOf(affiliate.getDictionaryTermType().getDescription());
-            LocalDate ultimoDelMese = LocalDate.now().plusDays(dataDaSommare).with(TemporalAdjusters.lastDayOfMonth());;
+            LocalDate ultimoDelMese = LocalDate.now().plusDays(dataDaSommare).with(TemporalAdjusters.lastDayOfMonth());
             map.setDataScadenza(ultimoDelMese);
             map = repository.save(map);
             affiliatoPayout.put(idAffiliate, map.getId());
@@ -300,7 +300,7 @@ public class PayoutBusiness {
 
     private Specification<Payout> getSpecification(Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {

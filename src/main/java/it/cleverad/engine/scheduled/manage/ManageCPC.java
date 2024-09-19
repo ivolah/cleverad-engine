@@ -189,7 +189,7 @@ public class ManageCPC {
                             transaction.setDictionaryId(42L);
                         }
 
-                        if(campaign.getStatus() == false){
+                        if(campaign.getStatus()){
                             // setto a campagna scaduta
                             transaction.setDictionaryId(49L);
                             scaduta = true;

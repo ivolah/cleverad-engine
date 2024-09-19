@@ -12,12 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.query.Param;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,14 +45,13 @@ public class TransactionStatusBusiness {
             request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
         }
         // setto tipo
-        QueryTransaction tq = queryRepository.listaTransazioni(
+        return queryRepository.listaTransazioni(
                         request.getCreationDateFrom(), request.getCreationDateTo().atTime(23, 59, 59, 99999), request.getStatusId(),
                         request.getDictionaryId(), request.getAffiliateId(), request.getChannelId(), request.getCampaignId(),
                         request.getMediaId(), request.getCommissionId(), request.getRevenueId(), request.getPayoutPresent(),
                         request.getPayoutId(), request.getAdvertiserId(), request.getValueNotZero(), request.getInDictionaryId(),
                         request.getNotInDictionaryId(), request.getInStausId(), request.getNotInStausId(), null)
                 .stream().findFirst().orElse(null);
-        return tq;
     }
 
     public Page<QueryTransaction> searchPrefiltratoN(TransactionStatusBusiness.QueryFilter request, Pageable pageableRequest) {
@@ -84,9 +81,7 @@ public class TransactionStatusBusiness {
       List<String> orders = new ArrayList<>();
         if (request.getDataList() != null && request.getDataList().length() > 3) {
             log.info("Dentro :: ", request.getDataList());
-            Arrays.stream(request.getDataList().split(",")).distinct().forEach(s -> {
-                orders.add(s);
-            });
+            Arrays.stream(request.getDataList().split(",")).distinct().forEach(s -> orders.add(s));
         }
 
         List<QueryTransaction> listaTransazioni = new ArrayList<>();

@@ -99,7 +99,7 @@ public class FeedBusiness {
      **/
     private Specification<Feed> getSpecification(Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
             if (request.getId() != null) {
                 predicates.add(cb.equal(root.get("id"), request.getId()));

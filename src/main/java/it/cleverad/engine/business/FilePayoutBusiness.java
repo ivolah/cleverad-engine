@@ -44,6 +44,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -76,7 +77,7 @@ public class FilePayoutBusiness {
     public Long storeFile(MultipartFile file, BaseCreateRequest request) {
         try {
             Payout payout = payoutRepository.findById(request.payoutId).orElseThrow(() -> new ElementCleveradException("Payout", request.payoutId));
-            String filename = StringUtils.cleanPath(file.getOriginalFilename());
+            String filename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
             String path = fileStoreService.storeFile(payout.getAffiliate().getId(), "payout", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), file.getBytes());
 
             Dictionary dictionary = (dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
@@ -168,7 +169,7 @@ public class FilePayoutBusiness {
      **/
     private Specification<FilePayout> getSpecification(FilePayoutBusiness.Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {

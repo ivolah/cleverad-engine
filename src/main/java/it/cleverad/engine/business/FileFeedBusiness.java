@@ -150,7 +150,7 @@ public class FileFeedBusiness {
      **/
     private Specification<FileFeed> getSpecification(FileFeedBusiness.Filter request) {
         return (root, query, cb) -> {
-            Predicate completePredicate = null;
+            Predicate completePredicate;
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getId() != null) {

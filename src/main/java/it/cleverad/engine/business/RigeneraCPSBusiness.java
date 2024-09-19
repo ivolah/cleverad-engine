@@ -187,8 +187,6 @@ public class RigeneraCPSBusiness {
                                 String info = cpsDTO.getInfo();
                                 Map<String, String> infos = referralService.estrazioneInfo(info);
                                 String orderValue = infos.get("ORDER_VALUE");
-                                //orderValue = infos.get("ORDER VALUE");
-                                //orderValue = infos.get("ORDERVALUE");
                                 log.info("OrderValue: " + orderValue);
                                 if (StringUtils.isNotBlank(orderValue)) {
                                     Double valore = Double.valueOf(orderValue);
@@ -210,15 +208,15 @@ public class RigeneraCPSBusiness {
 
                             // decremento budget Affiliato
                             AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
-                            if (bb != null && bb.getBudget() != null) {
-                                // setto stato transazione a ovebudget editore se totale < 0
-                                if ((bb.getBudget() - totale) < 0) transaction.setDictionaryId(47L);
+
+                            if (bb != null && bb.getBudget() != null && (bb.getBudget() - totale) < 0) {
+                                transaction.setDictionaryId(47L);
                             }
 
                             // setto stato transazione a ovebudget editore se totale < 0
                             CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(camapignId, cpsDTO.getDate().toLocalDate()).stream().findFirst().orElse(null);
-                            if (campBudget != null && campBudget.getBudgetErogato() != null)
-                                if (campBudget.getBudgetErogato() - totale < 0) transaction.setDictionaryId(48L);
+                            if (campBudget != null && campBudget.getBudgetErogato() != null && campBudget.getBudgetErogato() - totale < 0)
+                                transaction.setDictionaryId(48L);
 
                             if (cccps.getBlacklisted() != null && cccps.getBlacklisted()) transaction.setStatusId(74L);
                             else transaction.setStatusId(72L);
