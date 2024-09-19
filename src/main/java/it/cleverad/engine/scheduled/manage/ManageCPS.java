@@ -146,7 +146,7 @@ public class ManageCPS {
                         // associo a wallet
                         Long affiliateID = refferal.getAffiliateId();
 
-                        Long walletID = null;
+                        Long walletID;
                         if (affiliateID != null) {
                             walletID = walletRepository.findByAffiliateId(affiliateID).getId();
                             transaction.setWalletId(walletID);
@@ -317,7 +317,7 @@ public class ManageCPS {
                         }
 
                         transaction.setValue(commVal * 1);
-                        transaction.setLeadNumber(Long.valueOf(1));
+                        transaction.setLeadNumber(1L);
 
                         //setto rifiutato
                         transaction.setStatusId(74L);

@@ -42,6 +42,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -68,8 +69,8 @@ public class FileAffiliateBusiness {
         try {
             Affiliate aff = affiliateRepository.findById(request.affiliateId).orElseThrow(() -> new ElementCleveradException("Affiliate", request.affiliateId));
             Dictionary dictionary = (dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
-            String filename = StringUtils.cleanPath(file.getOriginalFilename());
-            String path = fileStoreService.storeFile(aff.getId(), "affiliate", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), file.getBytes());
+            String filename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+            String path = fileStoreService.storeFile(aff.getId(), "affiliate", UUID.randomUUID() + "." + FilenameUtils.getExtension(filename), file.getBytes());
             FileAffiliate fileDB = new FileAffiliate(filename, file.getContentType(), aff, dictionary, path);
             return repository.save(fileDB).getId();
         } catch (Exception e) {

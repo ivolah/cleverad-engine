@@ -30,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.ConstraintViolationException;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.UUID;
 
 
@@ -57,16 +58,16 @@ public class FileCampaignBudgetBusiness {
         try {
             if (type.equals("INVOICE")) {
                 log.info(">> INV ::  " + request);
-                String filename = StringUtils.cleanPath(file.getOriginalFilename());
-                String path = fileStoreService.storeFile(Long.valueOf(request.getCampaignId()), "campaignBudgetInvoice", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), file.getBytes());
+                String filename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+                String path = fileStoreService.storeFile(Long.valueOf(request.getCampaignId()), "campaignBudgetInvoice", UUID.randomUUID() + "." + FilenameUtils.getExtension(filename), file.getBytes());
                 CampaignBudget campaignBudget = campaignBudgetRepository.findById(Long.valueOf(request.getCampaignBudgetId())).orElseThrow(() -> new ElementCleveradException("CampaignBudget", request.getCampaignBudgetId()));
               log.info("1");
                 FileCampaignBudgetInvoice fileDB = new FileCampaignBudgetInvoice(filename, file.getContentType(), path, campaignBudget);
                 log.info("2");
                 return fileCampaignBudgetInvoiceRepository.save(fileDB).getId();
             } else if (type.equals("ORDER")) {
-                String filename = StringUtils.cleanPath(file.getOriginalFilename());
-                String path = fileStoreService.storeFile(Long.valueOf(request.getCampaignId()), "campaignBudgetOrder", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), file.getBytes());
+                String filename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+                String path = fileStoreService.storeFile(Long.valueOf(request.getCampaignId()), "campaignBudgetOrder", UUID.randomUUID() + "." + FilenameUtils.getExtension(filename), file.getBytes());
                 CampaignBudget campaignBudget = campaignBudgetRepository.findById(Long.valueOf(request.getCampaignBudgetId())).orElseThrow(() -> new ElementCleveradException("CampaignBudget", request.getCampaignBudgetId()));
                 FileCampaignBudgetOrder fileDB = new FileCampaignBudgetOrder(filename, file.getContentType(), path, campaignBudget);
                 return fileCampaignBudgetOrderRepository.save(fileDB).getId();

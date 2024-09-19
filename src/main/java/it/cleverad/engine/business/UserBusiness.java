@@ -224,7 +224,7 @@ public class UserBusiness {
         return UserDTO.from(repository.save(wser));
     }
 
-    public UserDTO resetPassword(Long id, String password) throws Exception {
+    public UserDTO resetPassword(Long id, String password) {
         User wser = repository.findById(id).orElseThrow(() -> new ElementCleveradException("User", id));
         wser.setPassword(bcryptEncoder.encode(password));
         return UserDTO.from(repository.save(wser));

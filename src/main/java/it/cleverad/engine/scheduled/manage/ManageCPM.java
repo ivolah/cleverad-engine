@@ -168,7 +168,7 @@ public class ManageCPM {
                             // associo a wallet
                             Long affiliateID = refferal.getAffiliateId();
 
-                            Long walletID = null;
+                            Long walletID;
                             if (affiliateID != null) {
                                 try {
                                     walletID = walletRepository.findByAffiliateId(affiliateID).getId();

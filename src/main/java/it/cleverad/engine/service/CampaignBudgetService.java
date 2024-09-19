@@ -170,9 +170,9 @@ public class CampaignBudgetService {
             log.trace("CREATO :: {}", cb.getId());
 
             //  ASSEGNO INVOICE A NUOVO BUDGET
-            dto.getFileCampaignBudgetInvoices().stream().forEach(invoice -> fileCampaignBudgetBusiness.updateInterno(invoice.getId(), "INVOICE", cb.getId()));
+            dto.getFileCampaignBudgetInvoices().forEach(invoice -> fileCampaignBudgetBusiness.updateInterno(invoice.getId(), "INVOICE", cb.getId()));
             //  ASSEGNO ORDER A NUOVO BUDGET
-            dto.getFileCampaignBudgetOrders().stream().forEach(order -> fileCampaignBudgetBusiness.updateInterno(order.getId(), "ORDER", cb.getId()));
+            dto.getFileCampaignBudgetOrders().forEach(order -> fileCampaignBudgetBusiness.updateInterno(order.getId(), "ORDER", cb.getId()));
 
             // cancello
             campaignBudgetBusiness.delete(dto.getId());

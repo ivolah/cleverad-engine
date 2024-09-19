@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -92,7 +93,7 @@ public class RigeneraCPMBusiness {
         log.info(">>> RIGENERO :: (" + anno + "-" + mese + "-" + giorno + ")  :: " + campaignID + "=" + day.size() + " >>> status ::" + statusID);
 
         //trovo tutti i refferal per poi consolidare
-        List<String> refs = day.stream().filter(dto -> dto.getRefferal() != null).map(CpmDTO::getRefferal).distinct().collect(Collectors.toList());
+        List<String> refs = day.stream().map(CpmDTO::getRefferal).filter(Objects::nonNull).distinct().collect(Collectors.toList());
         //ciclo i refferal per poi creare la transazione
         refs.stream().parallel().forEach(refferal -> {
 

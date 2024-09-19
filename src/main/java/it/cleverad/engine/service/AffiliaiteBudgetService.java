@@ -52,7 +52,7 @@ public class AffiliaiteBudgetService {
 
         // 2. --- Gli AFFILAITE BUDGET attivi sulle campagne
         List<AffiliateBudgetDTO> allBudgets = new ArrayList<>();
-        campaignIdsCPL.stream().forEach(id -> {
+        campaignIdsCPL.forEach(id -> {
             List<AffiliateBudgetDTO> budgetDTOS = affiliateBudgetBusiness.getByIdCampaign(id).getContent();
             allBudgets.addAll(budgetDTOS);
         });
@@ -66,8 +66,8 @@ public class AffiliaiteBudgetService {
             LocalDate budgetStart = affiliateBudgetDTO.getStartDate();
             LocalDate budgetEnd = affiliateBudgetDTO.getDueDate();
 
-            Double totaleCPL = 0.0D;
-            Double totaleCPC = 0.0D;
+            Double totaleCPL;
+            Double totaleCPC;
             Long capCPL = 0L;
             Long capCPC = 0L;
 

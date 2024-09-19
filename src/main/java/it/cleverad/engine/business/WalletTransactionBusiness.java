@@ -100,14 +100,6 @@ public class WalletTransactionBusiness {
         return WalletTransactionDTO.from(repository.save(channel));
     }
 
-    public Page<WalletTransactionDTO> searchLast7Days(Filter request) {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")));
-        if (!jwtUserDetailsService.isAdmin()) request.setWalletId(jwtUserDetailsService.getAffiliateId());
-        Page<WalletTransaction> page = repository.findAll(getSpecification(request), pageable);
-        return page.map(WalletTransactionDTO::from);
-    }
-
-
     /**
      * ============================================================================================================
      **/

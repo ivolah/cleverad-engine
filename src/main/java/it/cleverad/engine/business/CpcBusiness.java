@@ -125,26 +125,6 @@ public class CpcBusiness {
         return CpcDTO.from(repository.save(cpc));
     }
 
-    public Page<CpcDTO> getUnread() {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal")));
-        Filter request = new Filter();
-        request.setRead(false);
-        Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
-        log.trace("UNREAD {}", page.getTotalElements());
-        return page.map(CpcDTO::from);
-    }
-
-    public Page<CpcDTO> getUnreadDayBefore() {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal")));
-        Filter request = new Filter();
-        request.setRead(false);
-        request.setDateFrom(LocalDate.now().minusDays(1));
-        request.setDateTo(LocalDate.now().minusDays(1));
-        Page<Cpc> page = repository.findAll(getSpecification(request), pageable);
-        log.info("UNREAD CPC :: {}", page.getTotalElements());
-        return page.map(CpcDTO::from);
-    }
-
     public Page<CpcDTO> getUnreadDayNotBlackilset() {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("refferal")));
         Filter request = new Filter();
@@ -168,15 +148,6 @@ public class CpcBusiness {
         return page.map(CpcDTO::from);
     }
 
-    public Page<CpcDTO> getListaNotBlacklisted(LocalDate dateFrom, LocalDate dateTo) {
-        Filter request = new Filter();
-        request.setBlacklisted(false);
-        request.setDatetimeFrom(dateFrom.atStartOfDay());
-        request.setDatetimeTo(dateTo.atTime(LocalTime.MAX));
-        Page<Cpc> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
-        return page.map(CpcDTO::from);
-    }
-
     public Page<CpcDTO> findByIp24HoursBefore(String ip, LocalDateTime dateTime, String referral) {
         Filter request = new Filter();
         request.setIp(ip);
@@ -193,24 +164,6 @@ public class CpcBusiness {
         request.setDatetimeTo(dateTime);
         request.setRefferalCheckRight(referral);
         return repository.findAll(getSpecification(request), Sort.by(Sort.Order.desc("id")));
-    }
-
-    public long countByIp2HoursBeforeNoIp(LocalDateTime dateTime, String referral) {
-        Filter request = new Filter();
-        request.setDatetimeFrom(dateTime.minusHours(2));
-        request.setDatetimeTo(dateTime);
-        request.setRefferalCheckRight(referral);
-        return repository.count(getSpecification(request));
-    }
-
-    public Page<CpcDTO> findByIpTwoHoursBefore(String ip, LocalDateTime dateTime) {
-        Filter request = new Filter();
-        request.setIp(ip);
-        request.setDatetimeFrom(dateTime.minusHours(2));
-        request.setDatetimeTo(dateTime);
-        Page<Cpc> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
-        log.trace("FIND IP CPC :: {}", page.getTotalElements());
-        return page.map(CpcDTO::from);
     }
 
     public Page<CpcDTO> getAllDayBefore() {

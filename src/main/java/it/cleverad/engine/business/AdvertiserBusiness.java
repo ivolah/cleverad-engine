@@ -73,7 +73,7 @@ public class AdvertiserBusiness {
         operatoreAdvertiser.setEmail(request.primaryMail);
         operatoreAdvertiser.setRoleId(555L);
         operatoreAdvertiser.setRole("Advertiser");
-        operatoreAdvertiser.setUsername(UUID.randomUUID().toString());
+        operatoreAdvertiser.setUsername(UUID.randomUUID());
         operatoreAdvertiser.setPassword("piciulin");
         userBusiness.create(operatoreAdvertiser);
 

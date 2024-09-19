@@ -129,12 +129,12 @@ public class ChannelBusiness {
         Channel channel = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Channel", id));
         try {
             // canello rif categorie canale
-            channel.getChannelCategories().stream().forEach(channelCategory -> channelCategoryBusiness.delete(channelCategory.getId()));
+            channel.getChannelCategories().forEach(channelCategory -> channelCategoryBusiness.delete(channelCategory.getId()));
 
             // cancello riferimento
             AffiliateChannelCommissionCampaignBusiness.Filter rr = new AffiliateChannelCommissionCampaignBusiness.Filter();
             rr.setChannelId(id);
-            accc.search(rr, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")))).stream().forEach(affiliateChannelCommissionCampaignDTO -> accc.delete(affiliateChannelCommissionCampaignDTO.getId()));
+            accc.search(rr, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")))).forEach(affiliateChannelCommissionCampaignDTO -> accc.delete(affiliateChannelCommissionCampaignDTO.getId()));
 
             // cancello Canale
             repository.deleteById(id);

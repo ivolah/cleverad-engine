@@ -85,19 +85,6 @@ public class CampaignCostBusiness {
         }
     }
 
-    public void deleteByCampaignID(Long id) {
-        Filter request = new Filter();
-        request.setCampaignId(id);
-        Page<CampaignCost> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
-        try {
-            page.stream().forEach(cc -> repository.deleteById(cc.getId()));
-        } catch (javax.validation.ConstraintViolationException ex) {
-            throw ex;
-        } catch (Exception ee) {
-            throw new PostgresDeleteCleveradException(ee);
-        }
-    }
-
     // SEARCH PAGINATED
     public Page<CampaignCostDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.asc("id")));

@@ -41,8 +41,10 @@ public class ReportBusiness {
     private QueryRepository queryRepository;
     @Autowired
     private CampaignBusiness campaignBusiness;
+
     @Autowired
     private Mapper mapper;
+
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
 
@@ -121,13 +123,13 @@ public class ReportBusiness {
             request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
         }
         Long dictId = null;
-        if (request.getDictionaryIds().size() > 0) {
+        if (!request.getDictionaryIds().isEmpty()) {
             dictId = request.getDictionaryIds().get(0);
         }
         if (request.campaignActive != null && request.campaignActive && request.getDateTimeFrom() != null) {
-            List<Long> cids = campaignBusiness.getCampaignsinDateRange(request.getDateTimeFrom(), request.getDateTimeTo()).stream().mapToLong(value -> value.getId()).boxed().collect(Collectors.toList());
+            List<Long> cids = campaignBusiness.getCampaignsinDateRange(request.getDateTimeFrom(), request.getDateTimeTo()).stream().mapToLong(CampaignDTO::getId).boxed().collect(Collectors.toList());
             log.info(cids.size() + " !!!");
-            cids.stream().forEach(aLong -> log.info("Campaign {} ", aLong));
+            cids.forEach(aLong -> log.info("Campaign {} ", aLong));
             request.setCampaignIds(cids);
         }
         List<ReportCampagneDTO> lista = reportRepository.searchReportCampaign(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(23, 59, 59, 99999), request.getStatusId(), null, request.getAffiliateid(), null, request.getCampaignId(), request.getAdvertiserId(), dictId, request.getStatusIds(), request.getCampaignIds());
@@ -163,7 +165,7 @@ public class ReportBusiness {
             ultimaThule.setEcpc(DoubleRounder.round(ecpc, 2) + "");
         }
         if (ultimaThule.getLeadNumber() != null && ultimaThule.getLeadNumber() > 0) {
-            Double ecpl = ultimaThule.getCommission().doubleValue() / ultimaThule.getLeadNumber().doubleValue();
+            Double ecpl = ultimaThule.getCommission() / ultimaThule.getLeadNumber().doubleValue();
             ultimaThule.setEcpl(DoubleRounder.round(ecpl, 2) + "");
         }
         //ultima riga calcolata
@@ -191,11 +193,11 @@ public class ReportBusiness {
             request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
         }
         Long dictId = null;
-        if (request.getDictionaryIds().size() > 0) {
+        if (!request.getDictionaryIds().isEmpty()) {
             dictId = request.getDictionaryIds().get(0);
         }
         if (request.campaignActive != null && request.campaignActive && request.getDateTimeFrom() != null) {
-            List<Long> cids = campaignBusiness.getCampaignsinDateRange(request.getDateTimeFrom(), request.getDateTimeTo()).stream().mapToLong(value -> value.getId()).boxed().collect(Collectors.toList());
+            List<Long> cids = campaignBusiness.getCampaignsinDateRange(request.getDateTimeFrom(), request.getDateTimeTo()).stream().mapToLong(CampaignDTO::getId).boxed().collect(Collectors.toList());
             request.setCampaignIds(cids);
         }
         List<ReportDailyDTO> lista = reportRepository.searchReportDaily(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(23, 59, 59, 99999), request.getStatusId(), null, request.getAffiliateid(), null, request.getCampaignId(), request.getAdvertiserId(), dictId, request.getStatusIds(), request.getCampaignIds());
@@ -238,8 +240,7 @@ public class ReportBusiness {
         //ultima riga calcolata
         lista.add(report);
         final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), lista.size());
-        Page<ReportDailyDTO> pp = new PageImpl<>(lista.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, lista.size());
-        return pp;
+        return new PageImpl<>(lista.stream().distinct().collect(Collectors.toList()).subList((int) pageableRequest.getOffset(), end), pageableRequest, lista.size());
     }
 
     /**
@@ -261,11 +262,11 @@ public class ReportBusiness {
             request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
         }
         Long dictId = null;
-        if (request.getDictionaryIds().size() > 0) {
+        if (!request.getDictionaryIds().isEmpty()) {
             dictId = request.getDictionaryIds().get(0);
         }
         if (request.campaignActive != null && request.campaignActive && request.getDateTimeFrom() != null) {
-            List<Long> cids = campaignBusiness.getCampaignsinDateRange(request.getDateTimeFrom(), request.getDateTimeTo()).stream().mapToLong(value -> value.getId()).boxed().collect(Collectors.toList());
+            List<Long> cids = campaignBusiness.getCampaignsinDateRange(request.getDateTimeFrom(), request.getDateTimeTo()).stream().mapToLong(CampaignDTO::getId).boxed().collect(Collectors.toList());
             request.setCampaignIds(cids);
         }
         List<ReportAffiliatesDTO> lista = reportRepository.searchReportAffiliate(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(23, 59, 59, 99999), request.getStatusId(), null, request.getAffiliateid(), null, request.getCampaignId(), request.getAdvertiserId(), dictId, request.getStatusIds(), request.getCampaignIds());
@@ -329,11 +330,11 @@ public class ReportBusiness {
             request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
         }
         Long dictId = null;
-        if (request.getDictionaryIds().size() > 0) {
+        if (!request.getDictionaryIds().isEmpty()) {
             dictId = request.getDictionaryIds().get(0);
 }
         if (request.campaignActive != null && request.campaignActive && request.getDateTimeFrom() != null) {
-            List<Long> cids = campaignBusiness.getCampaignsinDateRange(request.getDateTimeFrom(), request.getDateTimeTo()).stream().mapToLong(value -> value.getId()).boxed().collect(Collectors.toList());
+            List<Long> cids = campaignBusiness.getCampaignsinDateRange(request.getDateTimeFrom(), request.getDateTimeTo()).stream().mapToLong(CampaignDTO::getId).boxed().collect(Collectors.toList());
             request.setCampaignIds(cids);
         }
         List<ReportAffiliatesChannelDTO> lista = reportRepository.searchReportAffiliateChannel(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(23, 59, 59, 99999), request.getStatusId(), null, request.getAffiliateid(), null, request.getCampaignId(), request.getAdvertiserId(), dictId, request.getStatusIds(), request.getCampaignIds());
@@ -357,7 +358,7 @@ public class ReportBusiness {
         report.setRevenueRigettato(lista.stream().mapToDouble(ReportAffiliatesChannelDTO::getRevenueRigettato).sum());
         report.setMargine(report.getRevenue() - report.getCommission());
         if (report.getRevenue() != null && report.getRevenue() > 0) {
-            Double marginePC = ((report.getRevenue() - report.getCommission().doubleValue()) / report.getRevenue().doubleValue() * 100);
+            Double marginePC = ((report.getRevenue() - report.getCommission()) / report.getRevenue() * 100);
             report.setMarginePC(DoubleRounder.round(marginePC, 2));
         } else report.setMarginePC(0d);
         if (report.getImpressionNumber() != null && report.getImpressionNumber() > 0) {
@@ -394,7 +395,7 @@ public class ReportBusiness {
             dictId = request.getDictionaryIds().get(0);
         }
         if (request.campaignActive != null && request.campaignActive && request.getDateTimeFrom() != null) {
-            List<Long> cids = campaignBusiness.getCampaignsinDateRange(request.getDateTimeFrom(), request.getDateTimeTo()).stream().mapToLong(value -> value.getId()).boxed().collect(Collectors.toList());
+            List<Long> cids = campaignBusiness.getCampaignsinDateRange(request.getDateTimeFrom(), request.getDateTimeTo()).stream().mapToLong(CampaignDTO::getId).boxed().collect(Collectors.toList());
             request.setCampaignIds(cids);
         }
         List<ReportAffiliatesChannelCampaignDTO> lista = reportRepository.searchReportAffiliateChannelCampaign(request.getDateTimeFrom().atStartOfDay(), request.getDateTimeTo().atTime(23, 59, 59, 99999), request.getStatusId(), null, request.getAffiliateid(), null, request.getCampaignId(), request.getAdvertiserId(), dictId, request.getStatusIds(), request.getCampaignIds());

@@ -77,10 +77,10 @@ public class MediaBusiness {
         String bannerCode = request.getBannerCode();
         request.setVisibile(true);
         String url = request.getUrl();
-        if (StringUtils.isNotBlank(url)) bannerCode.replace("{{url}}", url);
+        if (StringUtils.isNotBlank(url)) bannerCode = bannerCode.replace("{{url}}", url);
 
         String target = request.getTarget();
-        if (StringUtils.isNotBlank(target)) bannerCode.replace("{{target}}", target);
+        if (StringUtils.isNotBlank(target)) bannerCode = bannerCode.replace("{{target}}", target);
 
         request.setBannerCode(bannerCode);
 
@@ -119,9 +119,7 @@ public class MediaBusiness {
         Media media = repository.findById(id).orElseThrow(() -> new ElementCleveradException("Media", id));
         try {
             if (media.getCampaigns() != null) {
-                media.getCampaigns().forEach(campaign -> {
-                    campaign.removeMedia(id);
-                });
+                media.getCampaigns().forEach(campaign -> campaign.removeMedia(id));
             }
             repository.deleteById(id);
         } catch (DataIntegrityViolationException ex) {
@@ -189,20 +187,17 @@ public class MediaBusiness {
 
                 final int end = (int) Math.min((pageableRequest.getOffset() + pageableRequest.getPageSize()), list.size());
                 Page<Media> page = new PageImpl<>(list.stream().distinct().collect(Collectors.toList()).subList(pageableRequest.getPageNumber(), end), pageableRequest, list.size());
-                return page.map(media -> MediaDTO.from(media));
+                return page.map(MediaDTO::from);
             } else {
                 Page<Media> page = repository.findAll(getSpecification(request), PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id"))));
-                return page.map(media -> MediaDTO.from(media));
+                return page.map(MediaDTO::from);
             }
         } else {
             Affiliate cc = affiliateRepository.findById(jwtUserDetailsService.getAffiliateId()).orElseThrow(() -> new ElementCleveradException("Affiliate", jwtUserDetailsService.getAffiliateId()));
 
             List<Campaign> campaigns = new ArrayList<>();
             if (cc.getCampaignAffiliates() != null) {
-                campaigns = cc.getCampaignAffiliates().stream().filter(campaignAffiliate -> campaignAffiliate.getCampaign().getStatus()).map(campaignAffiliate -> {
-                    Campaign ccc = campaignAffiliate.getCampaign();
-                    return ccc;
-                }).collect(Collectors.toList());
+                campaigns = cc.getCampaignAffiliates().stream().map(CampaignAffiliate::getCampaign).filter(Campaign::getStatus).collect(Collectors.toList());
             }
 
             Set<Long> ids = new HashSet<>();
@@ -215,29 +210,17 @@ public class MediaBusiness {
     }
 
     public Media getByFileId(Long fileId) {
-        Media page = repository.findByIdFile(Long.toString(fileId));
-        return page;
+        return repository.findByIdFile(Long.toString(fileId));
     }
 
     public Page<MediaDTO> getByCampaignId(Long campaignId, Pageable pageableRequest) {
         Campaign cc = campaignRepository.findById(campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", campaignId));
-        Set<Media> list = new HashSet<>();
+        Set<Media> list;
         if (jwtUserDetailsService.isAdmin()) {
             list = cc.getMedias();
         } else {
-            list = cc.getMedias().stream().filter(media -> media.getStatus().booleanValue()).collect(Collectors.toSet());
+            list = cc.getMedias().stream().filter(Media::getStatus).collect(Collectors.toSet());
         }
-        Page<Media> page = new PageImpl<>(list.stream().distinct().collect(Collectors.toList()));
-        return page.map(media -> {
-            MediaDTO dto = MediaDTO.from(media);
-            dto.setBannerCode(generaBannerCode(dto, media.getId(), campaignId, 0L, 0L));
-            return dto;
-        });
-    }
-
-    public Page<MediaDTO> getByCampaignIdBrandBuddies(Long campaignId) {
-        Campaign cc = campaignRepository.findById(campaignId).orElseThrow(() -> new ElementCleveradException("Campaign", campaignId));
-        Set<Media> list = cc.getMedias().stream().filter(media -> media.getStatus().booleanValue()).filter(media -> media.getMediaType().getId() == 6L).collect(Collectors.toSet());
         Page<Media> page = new PageImpl<>(list.stream().distinct().collect(Collectors.toList()));
         return page.map(media -> {
             MediaDTO dto = MediaDTO.from(media);
@@ -252,7 +235,7 @@ public class MediaBusiness {
 
         List<Campaign> campaigns = new ArrayList<>();
         if (cc.getCampaignAffiliates() != null) {
-            campaigns = cc.getCampaignAffiliates().stream().map(CampaignAffiliate::getCampaign).filter(campaign -> campaign.getStatus()).collect(Collectors.toList());
+            campaigns = cc.getCampaignAffiliates().stream().map(CampaignAffiliate::getCampaign).filter(Campaign::getStatus).collect(Collectors.toList());
         }
 
         Set<Long> ids = new HashSet<>();
@@ -284,21 +267,6 @@ public class MediaBusiness {
         dto.setBannerCode(generaBannerCode(dto, mediaId, campaignId, channelID, 0L));
         return dto;
     }
-
-    public MediaDTO getByIdAndCampaignIDChannelIDTargetID(Long mediaId, Long campaignId, Long channelID, Long targetId) {
-        Media media = repository.findById(mediaId).orElseThrow(() -> new ElementCleveradException("Media", mediaId));
-        MediaDTO dto = MediaDTO.from(media);
-        if (dto.getTypeId() == 5L) {
-            dto.setTarget(setUrlTarget(dto.getTarget(), mediaId, campaignId, channelID, targetId));
-            String desc = dto.getDescription();
-            desc = desc.replace("{{shorturl}}", dto.getTarget());
-            desc = desc.replace("{{linktoimage}}", dto.getUrl());
-            dto.setDescription(desc);
-        }
-        dto.setBannerCode(generaBannerCode(dto, mediaId, campaignId, channelID, targetId));
-        return dto;
-    }
-
     private String generaBannerCode(MediaDTO dto, Long mediaId, Long campaignId, Long channelID, Long targetId) {
         String bannerCode = dto.getBannerCode();
 
@@ -308,7 +276,7 @@ public class MediaBusiness {
         if (StringUtils.isNotBlank(url)) bannerCode = bannerCode.replace("{{url}}", url);
 
         List<TargetDTO> lista = targetBusiness.getByMediaIdAll(mediaId).stream().collect(Collectors.toList());
-        if (lista.size() > 0) {
+        if (!lista.isEmpty()) {
             TargetDTO tt = new TargetDTO();
             lista.forEach(targetDTO -> {
                 if (targetDTO.getId().equals(targetId)) {

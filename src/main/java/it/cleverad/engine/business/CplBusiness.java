@@ -145,29 +145,6 @@ public class CplBusiness {
             log.trace("\n\n\n >>>>>>>>>>>>>>>>>>>>>> UNREAD CPL  BEFORE :: {}:{} = {}", request.getDatetimeFrom(), request.getDatetimeTo(), page.getTotalElements());
         return page.map(CplDTO::from);
     }
-    public Page<CplDTO> getUnreadDay(LocalDate date ) {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
-        Filter request = new Filter();
-        request.setRead(false);
-        request.setBlacklisted(false);
-        request.setDatetimeFrom(date.atStartOfDay());
-        request.setDatetimeTo(date.atTime(LocalTime.MAX));
-        Page<Cpl> page = repository.findAll(getSpecification(request), pageable);
-        if (page.getTotalElements() > 0)
-            log.info("\n\n\n >>>>>>>>>>>>>>>>>>>>>> UNREAD CPL DAY :: {}:{} = {}", request.getDatetimeFrom(), request.getDatetimeTo(), page.getTotalElements());
-        return page.map(CplDTO::from);
-    }
-
-    public Page<CplDTO> getSpecial() {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
-        Filter request = new Filter();
-        request.setRead(true);
-        request.setDateFrom(LocalDate.now());
-        request.setDateTo(LocalDate.now().minusDays(111));
-        Page<Cpl> page = repository.findAll(getSpecification(request), pageable);
-        log.info("UNREAD CPL :: {}", page.getTotalElements());
-        return page.map(CplDTO::from);
-    }
 
     public Page<CplDTO> getAllDayBefore() {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));

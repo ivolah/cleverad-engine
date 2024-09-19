@@ -74,7 +74,7 @@ public class FileFeedBusiness {
             Advertiser advertiser = advertiserRepository.findById(request.advertiserId).orElseThrow(() -> new ElementCleveradException("Advertiser", request.advertiserId));
             Feed feed = feedRepository.findById(request.feedId).orElseThrow(() -> new ElementCleveradException("feedRepository", request.feedId));
             String filename = StringUtils.cleanPath(file.getOriginalFilename());
-            String path = fileStoreService.storeFileNew(advertiser.getId(), "feed", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), file.getBytes());
+            String path = fileStoreService.storeFileNew(advertiser.getId(), "feed", UUID.randomUUID() + "." + FilenameUtils.getExtension(filename), file.getBytes());
             FileFeed fileDB = new FileFeed(filename, file.getContentType(), request.note, path, LocalDateTime.now(), advertiser);
             fileDB.setAdvertiser(advertiser);
             fileDB.setFeed(feed);

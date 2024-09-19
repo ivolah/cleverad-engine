@@ -183,15 +183,6 @@ public class TrackingBusiness {
         return page.map(TrackingDTO::from);
     }
 
-    public Page<TrackingDTO> getUnread() {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")));
-        Filter request = new Filter();
-        request.setRead(false);
-        Page<Tracking> page = repository.findAll(getSpecification(request), pageable);
-        log.info("UNREAD {}", page.getTotalElements());
-        return page.map(TrackingDTO::from);
-    }
-
     /**
      * ============================================================================================================
      **/

@@ -213,7 +213,6 @@ public class TransactionCPCBusiness {
 
     public void delete(Long id) {
         try {
-            TransactionCPCDTO dto = this.findByIdCPCInterno(id);
 
             // aggiorno budge e CAP affiliato
             // aggiorno budget affiliato in modo schedulato
@@ -237,10 +236,6 @@ public class TransactionCPCBusiness {
     public TransactionCPCDTO findByIdCPC(Long id) {
         TransactionCPC  transaction = cpcRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
         return TransactionCPCDTO.from(transaction);
-    }
-
-    public TransactionCPCDTO findByIdCPCInterno(Long id) {
-        return TransactionCPCDTO.from(cpcRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id)));
     }
 
     // SEARCH PAGINATED
@@ -340,7 +335,7 @@ public class TransactionCPCBusiness {
     public List<TransactionCPC> searchLastModified() {
         TransactionCPCBusiness.Filter request = new TransactionCPCBusiness.Filter();
         request.setValueNotZero(true);
-        ArrayList not = new ArrayList<>();
+        ArrayList<Long> not = new ArrayList<>();
         not.add(74L); // RIGETTATO
         request.setNotInStatusId(not);
         request.setLastModificationDateTimeFrom(LocalDateTime.now().minusHours(24));

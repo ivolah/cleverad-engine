@@ -46,8 +46,6 @@ public class RigeneraCPLBusiness {
     @Autowired
     private CplBusiness cplBusiness;
     @Autowired
-    private WalletRepository walletRepository;
-    @Autowired
     private AffiliateBudgetBusiness affiliateBudgetBusiness;
     @Autowired
     private CampaignBusiness campaignBusiness;
@@ -57,8 +55,6 @@ public class RigeneraCPLBusiness {
     private CampaignAffiliateBusiness campaignAffiliateBusiness;
     @Autowired
     private RevenueFactorBusiness revenueFactorBusiness;
-    @Autowired
-    private RevenueFactorRepository revenueFactorRepository;
     @Autowired
     private AffiliateChannelCommissionCampaignBusiness affiliateChannelCommissionCampaignBusiness;
     @Autowired

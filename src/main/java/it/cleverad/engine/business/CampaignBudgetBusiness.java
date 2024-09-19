@@ -281,9 +281,8 @@ public class CampaignBudgetBusiness {
     // Helper method to get field value by field name using Reflection
     private double getFieldValue(Page<CampaignBudget> page, String fieldName) {
         return page.getContent().stream().mapToDouble(entity -> {
-            Field field = null;
             try {
-                field = CampaignBudget.class.getDeclaredField(fieldName);
+                Field field = CampaignBudget.class.getDeclaredField(fieldName);
                 field.setAccessible(true);
                 Object value = field.get(entity);
                 if (value instanceof Double) {
@@ -298,9 +297,8 @@ public class CampaignBudgetBusiness {
 
     private Integer getIntegerFieldValue(Page<CampaignBudget> page, String fieldName) {
         return page.getContent().stream().mapToInt(entity -> {
-            Field field = null;
             try {
-                field = CampaignBudget.class.getDeclaredField(fieldName);
+                Field field = CampaignBudget.class.getDeclaredField(fieldName);
                 field.setAccessible(true);
                 Object value = field.get(entity);
                 if (value instanceof Integer) {

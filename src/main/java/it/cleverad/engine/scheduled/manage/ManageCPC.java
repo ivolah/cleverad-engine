@@ -196,7 +196,7 @@ public class ManageCPC {
                         }
 
                         // associo a wallet
-                        Long walletID = null;
+                        Long walletID;
                         if (affiliateId != null) {
                             walletID = walletRepository.findByAffiliateId(affiliateId).getId();
                             transaction.setWalletId(walletID);

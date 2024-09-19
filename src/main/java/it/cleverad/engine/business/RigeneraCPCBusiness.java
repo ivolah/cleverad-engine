@@ -90,7 +90,7 @@ public class RigeneraCPCBusiness {
             Integer numeroGiorniBetween = dataDaGestireEnd.getDayOfYear() - dataDaGestireStart.getDayOfYear();
             for (int i = 0; i < numeroGiorniBetween; i++) {
                 listaDaDisabilitare.addAll(cpcBusiness.getListaClickMultipliDaDisabilitare(dataDaGestireStart.plusDays(i), dataDaGestireStart.plusDays(i + 1), affiliateId, campaignId));
-                if (listaDaDisabilitare.size() > 0)
+                if (!listaDaDisabilitare.isEmpty())
                     log.info("Data :: {} :: {}  disabilitati", dataDaGestireStart.plusDays(i).format(DateTimeFormatter.ISO_LOCAL_DATE), listaDaDisabilitare.size());
             }
 
@@ -276,7 +276,7 @@ public class RigeneraCPCBusiness {
                                             transaction.setCommissionId(accc.getCommissionId());
                                         } else {
                                             transaction.setCommissionId(0L);
-                                            log.trace("Transazione a commissione 0 : {} ", req.toString());
+                                            log.trace("Transazione a commissione 0 : {} ", req);
                                         }
 
                                         // calcolo valore

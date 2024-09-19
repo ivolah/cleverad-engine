@@ -151,7 +151,7 @@ public class TransactionCPMBusiness {
 
     // GET BY ID CPM
     public TransactionCPMDTO findByIdCPM(Long id) {
-        TransactionCPM transaction = null;
+        TransactionCPM transaction;
         if (jwtUserDetailsService.getRole().equals("Admin")) {
             transaction = cpmRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
         } else {
@@ -233,27 +233,6 @@ public class TransactionCPMBusiness {
         request.setAffiliateId(affiliateId);
         request.setCampaignId(campaignId);
         return cpmRepository.findAll(getSpecificationCPM(request), Pageable.ofSize(Integer.MAX_VALUE)).stream().collect(Collectors.toList());
-    }
-
-    public List<TransactionCPM> searchStatusIdAndDicIdAndDate(Long statusId, Long dicId, LocalDate dataDaGestireStart, LocalDate dataDaGestireEnd, Long affiliateId, Long campaignId) {
-        TransactionCPMBusiness.Filter request = new TransactionCPMBusiness.Filter();
-        request.setDateTimeFrom(dataDaGestireStart.atStartOfDay());
-        request.setDateTimeTo(LocalDateTime.of(dataDaGestireEnd, LocalTime.MAX));
-        request.setStatusId(statusId);
-        request.setDictionaryId(dicId);
-        request.setAffiliateId(affiliateId);
-        request.setCampaignId(campaignId);
-        return cpmRepository.findAll(getSpecificationCPM(request), Pageable.ofSize(Integer.MAX_VALUE)).stream().collect(Collectors.toList());
-    }
-
-    public List<TransactionCPM> searchForCampaignAffiliateBudget(Long campaignId, Long affiliateId, LocalDate start, LocalDate end) {
-        TransactionCPMBusiness.Filter request = new TransactionCPMBusiness.Filter();
-        request.setCampaignId(campaignId);
-        request.setAffiliateId(affiliateId);
-        request.setDateTimeFrom(start.atStartOfDay());
-        request.setDateTimeTo(LocalDateTime.of((end), LocalTime.MAX));
-        return cpmRepository.findAll(getSpecificationCPM(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id")))).stream().collect(Collectors.toList());
-
     }
 
     /**

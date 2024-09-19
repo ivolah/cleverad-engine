@@ -42,6 +42,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -72,8 +73,8 @@ public class FileCouponBusiness {
                 request.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
             Advertiser advertiser = advertiserRepository.findById(request.advertiserId).orElseThrow(() -> new ElementCleveradException("Advertiser", request.advertiserId));
 
-            String filename = StringUtils.cleanPath(file.getOriginalFilename());
-            String path = fileStoreService.storeFileNew(advertiser.getId(), "coupon", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), file.getBytes());
+            String filename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+            String path = fileStoreService.storeFileNew(advertiser.getId(), "coupon", UUID.randomUUID() + "." + FilenameUtils.getExtension(filename), file.getBytes());
 
             FileCoupon fileDB = new FileCoupon(filename, file.getContentType(), request.note, path, LocalDateTime.now(), advertiser);
             fileDB.setAdvertiser(advertiser);

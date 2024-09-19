@@ -103,7 +103,7 @@ public class AdvertiserController {
 
     @PatchMapping(path = "/{id}/operator/reset")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public UserDTO reset(@PathVariable Long id, @RequestBody UserBusiness.Confirm request) throws Exception {
+    public UserDTO reset(@PathVariable Long id, @RequestBody UserBusiness.Confirm request) {
         return userBusiness.resetPassword(id, request.getPassword());
     }
 

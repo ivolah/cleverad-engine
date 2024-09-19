@@ -59,7 +59,7 @@ public class StatCPMBusiness {
         mainObj.put("totale", totale.get());
         mainObj.put("data", data);
         mainObj.put("xSeries", xSeries);
-        log.trace("CPM {}", mainObj.toString());
+        log.trace("CPM {}", mainObj);
         return mainObj.toString();
     }
 
@@ -73,7 +73,7 @@ public class StatCPMBusiness {
         }
         JSONArray jsonArray = new JSONArray();
         for (int i = request.getDays(); i >= 0; i--) {
-            Long nu = repository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).stream().mapToLong(value -> value.gettotale()).sum();
+            Long nu = repository.totaleGiorno(i, request.getAffiliateId(), request.getAdvertiserId()).stream().mapToLong(TopCampagne::gettotale).sum();
             if (nu == null)
                 nu = 0L;
             JSONObject jsonObject = new JSONObject();
@@ -147,7 +147,7 @@ public class StatCPMBusiness {
                 } else if (jwtUserDetailsService.isAdvertiser()) {
                     filter.setAdvertiserId(jwtUserDetailsService.getAdvertiserId());
                 }
-                Long totGiornoCampagna =   repository.totaleGiornoSpecifico(gg, filter.getAffiliateId(), filter.getAdvertiserId(), campagnaId).stream().mapToLong(totale -> totale.gettotale()).sum();
+                Long totGiornoCampagna =   repository.totaleGiornoSpecifico(gg, filter.getAffiliateId(), filter.getAdvertiserId(), campagnaId).stream().mapToLong(TopCampagne::gettotale).sum();
                 if (totGiornoCampagna == null)
                     totGiornoCampagna = 0L;
 
@@ -160,9 +160,7 @@ public class StatCPMBusiness {
         });
 
         JSONArray xSeries = new JSONArray();
-        giorniDaVerificare.stream().sorted().forEach(gg -> {
-            xSeries.put(gg.toString());
-        });
+        giorniDaVerificare.stream().sorted().forEach(gg -> xSeries.put(gg.toString()));
 
         mainObj.put("series", tutti);
         mainObj.put("xSeries", xSeries);

@@ -95,7 +95,7 @@ public class CampaignAffiliateBusiness {
     }
 
     public void deleteByCampaignIdAndAffiliateId(Long campaignId, Long affiliateID) {
-        repository.findByAffiliateIdAndCampaignId(affiliateID, campaignId).stream().forEach(campaignAffiliate -> repository.deleteById(campaignAffiliate.getId()));
+        repository.findByAffiliateIdAndCampaignId(affiliateID, campaignId).forEach(campaignAffiliate -> repository.deleteById(campaignAffiliate.getId()));
     }
 
     // SEARCH PAGINATED

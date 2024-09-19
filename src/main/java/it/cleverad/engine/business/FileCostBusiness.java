@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.ConstraintViolationException;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.UUID;
 
 
@@ -49,8 +50,8 @@ public class FileCostBusiness {
     // CREATE ORDER
     public Long storeFile(MultipartFile file, BaseCreateRequest request) {
         try {
-            String filename = StringUtils.cleanPath(file.getOriginalFilename());
-            String path = fileStoreService.storeFile(Long.valueOf(request.getCampaignCostId()), "campaignCost", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), file.getBytes());
+            String filename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+            String path = fileStoreService.storeFile(Long.valueOf(request.getCampaignCostId()), "campaignCost", UUID.randomUUID() + "." + FilenameUtils.getExtension(filename), file.getBytes());
             CampaignCost campaignCost = campaignCostRepository.findById(Long.valueOf(request.getCampaignCostId())).orElseThrow(() -> new ElementCleveradException("CampaignCost", request.getCampaignCostId()));
             FileCost fileDB = new FileCost(filename, file.getContentType(), path, campaignCost);
             return fileCostRepository.save(fileDB).getId();

@@ -69,7 +69,7 @@ public class RevenueFactorBusiness {
 
     // GET BY ID
     public RevenueFactorDTO findById(Long id, Boolean interno) {
-        RevenueFactor entity = null;
+        RevenueFactor entity ;
         if (interno) {
             entity = repository.findById(id).orElse(null);
         } else {
@@ -183,13 +183,13 @@ public class RevenueFactorBusiness {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), request.getStartDateFrom()));
             }
             if (request.getStartDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), (request.getStartDateTo().plus(1, ChronoUnit.DAYS))));
+                predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), (request.getStartDateTo().plusDays(1))));
             }
             if (request.getDueDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("dueDate"), (request.getDueDateFrom())));
             }
             if (request.getDueDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), (request.getDueDateTo().plus(1, ChronoUnit.DAYS))));
+                predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), (request.getDueDateTo().plusDays(1))));
             }
             if (request.getDisableDueDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), request.getDisableDueDateTo()));

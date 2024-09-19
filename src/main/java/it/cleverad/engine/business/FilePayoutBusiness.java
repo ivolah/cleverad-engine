@@ -78,7 +78,7 @@ public class FilePayoutBusiness {
         try {
             Payout payout = payoutRepository.findById(request.payoutId).orElseThrow(() -> new ElementCleveradException("Payout", request.payoutId));
             String filename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-            String path = fileStoreService.storeFile(payout.getAffiliate().getId(), "payout", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), file.getBytes());
+            String path = fileStoreService.storeFile(payout.getAffiliate().getId(), "payout", UUID.randomUUID() + "." + FilenameUtils.getExtension(filename), file.getBytes());
 
             Dictionary dictionary = (dictionaryRepository.findById(request.dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionary", request.dictionaryId)));
             FilePayout fileDB = new FilePayout(filename, file.getContentType(), payout, dictionary, path);

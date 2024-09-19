@@ -69,9 +69,9 @@ public class PayoutBusiness {
     public List<Payout> createAll(TransactionStatusBusiness.QueryFilter request) {
         Page<QueryTransaction> results = transactionStatusBusiness.searchPrefiltratoN(request, Pageable.ofSize(Integer.MAX_VALUE));
         log.info("TOT elementi: " + results.getTotalElements());
-        List<Long> cpcs = results.stream().filter(x -> x.getTipo().equals("CPC")).map(x -> x.getid()).collect(Collectors.toList());
-        List<Long> cpls = results.stream().filter(x -> x.getTipo().equals("CPL")).map(x -> x.getid()).collect(Collectors.toList());
-        List<Long> cpss = results.stream().filter(x -> x.getTipo().equals("CPS")).map(x -> x.getid()).collect(Collectors.toList());
+        List<Long> cpcs = results.stream().filter(x -> x.getTipo().equals("CPC")).map(QueryTransaction::getid).collect(Collectors.toList());
+        List<Long> cpls = results.stream().filter(x -> x.getTipo().equals("CPL")).map(QueryTransaction::getid).collect(Collectors.toList());
+        List<Long> cpss = results.stream().filter(x -> x.getTipo().equals("CPS")).map(QueryTransaction::getid).collect(Collectors.toList());
         log.info("CPC: {} ::: CPL: {} ::: CPA: {}", cpcs.size(), cpls.size(), cpss.size());
 
         BaseCreateRequest payoutRequest = new BaseCreateRequest();
@@ -88,11 +88,11 @@ public class PayoutBusiness {
 
         //Prendo tutti gli affiliati
         List<Long> affiliatesList = new ArrayList<>();
-        request.getTransazioniCpc().stream().forEach(id -> {
+        request.getTransazioniCpc().forEach(id -> {
             TransactionCPC transaction = cpcRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction CPC", id));
             affiliatesList.add(transaction.getAffiliate().getId());
         });
-        request.getTransazioniCpl().stream().forEach(id -> {
+        request.getTransazioniCpl().forEach(id -> {
             TransactionCPL transaction = cplRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction CPL", id));
             affiliatesList.add(transaction.getAffiliate().getId());
         });
@@ -286,10 +286,10 @@ public class PayoutBusiness {
         payout.setDictionary(dictionaryRepository.findById(126L).get());
 
         // rigetto tutte le transazioni del payout
-        payout.getTransactionCPCS().stream().forEach(transaction -> transactionCPCBusiness.settaScaduto(transaction.getId()));
-        payout.getTransactionCPLS().stream().forEach(transaction -> transactionCPLBusiness.settaScaduto(transaction.getId()));
-        payout.getTransactionCPMS().stream().forEach(transaction -> transactionCPMBusiness.settaScaduto(transaction.getId()));
-        payout.getTransactionCPSS().stream().forEach(transaction -> transactionCPSBusiness.settaScaduto(transaction.getId()));
+        payout.getTransactionCPCS().forEach(transaction -> transactionCPCBusiness.settaScaduto(transaction.getId()));
+        payout.getTransactionCPLS().forEach(transaction -> transactionCPLBusiness.settaScaduto(transaction.getId()));
+        payout.getTransactionCPMS().forEach(transaction -> transactionCPMBusiness.settaScaduto(transaction.getId()));
+        payout.getTransactionCPSS().forEach(transaction -> transactionCPSBusiness.settaScaduto(transaction.getId()));
 
         return PayoutDTO.from(repository.save(payout));
     }
@@ -393,11 +393,5 @@ public class PayoutBusiness {
         private LocalDate dataScadenzaTo;
     }
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Lista {
-        HashMap<String, String> lista;
-    }
 
 }

@@ -154,7 +154,7 @@ public class RigeneraCPSBusiness {
                             // associo a wallet
                             Long affiliateID = refferal.getAffiliateId();
 
-                            Long walletID = null;
+                            Long walletID;
                             if (affiliateID != null) {
                                 walletID = walletBusiness.findByIdAffilaite(refferal.getAffiliateId()).stream().findFirst().get().getId();
                                 transaction.setWalletId(walletID);

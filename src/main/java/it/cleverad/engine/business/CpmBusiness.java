@@ -30,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -136,28 +135,10 @@ public class CpmBusiness {
         return CpmDTO.from(repository.save(mappedEntity));
     }
 
-    public Page<CpmDTO> getUnread() {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
-        Filter request = new Filter();
-        request.setRead(false);
-        Page<Cpm> page = repository.findAll(getSpecification(request), pageable);
-        log.trace("UNREAD {}", page.getTotalElements());
-        return page.map(CpmDTO::from);
-    }
-
     public void setRead(long id) {
         Cpm cpm = repository.findById(id).get();
         cpm.setRead(true);
         repository.save(cpm);
-    }
-
-    public Page<CpmDTO> getUnreadDayBefore() {
-        Filter request = new Filter();
-        request.setRead(false);
-        request.setDateFrom(LocalDate.now().minusDays(1));
-        request.setDateTo(LocalDate.now().minusDays(1));
-        Page<Cpm> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id"))));
-        return page.map(CpmDTO::from);
     }
 
     public Page<CpmDTO> getUnreadHourBefore() {
@@ -247,7 +228,7 @@ public class CpmBusiness {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("date"), request.getDateFrom().atStartOfDay()));
             }
             if (request.getDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("date"), request.getDateTo().plus(1, ChronoUnit.DAYS).atStartOfDay()));
+                predicates.add(cb.lessThanOrEqualTo(root.get("date"), request.getDateTo().plusDays(1).atStartOfDay()));
             }
             if (request.getDatetimeFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("date"), request.getDatetimeFrom()));

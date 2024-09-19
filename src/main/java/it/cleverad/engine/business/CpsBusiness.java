@@ -98,17 +98,6 @@ public class CpsBusiness {
 
     // >>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-    public Page<CpsDTO> getUnread() {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
-        Filter request = new Filter();
-        request.setRead(false);
-        request.setDateFrom(LocalDate.now().minusDays(1));
-        request.setDateTo(LocalDate.now().minusDays(1));
-        Page<Cps> page = repository.findAll(getSpecification(request), pageable);
-        log.trace("UNREAD {}", page.getTotalElements());
-        return page.map(CpsDTO::from);
-    }
-
     public Page<CpsDTO> getUnreadOneHourBefore() {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();

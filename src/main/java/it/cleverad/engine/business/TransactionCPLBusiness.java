@@ -211,7 +211,7 @@ public class TransactionCPLBusiness {
 
     // GET BY ID CPL
     public TransactionCPLDTO findByIdCPL(Long id) {
-        TransactionCPL transaction = null;
+        TransactionCPL transaction;
         transaction = cplRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
         return TransactionCPLDTO.from(transaction);
     }
@@ -224,17 +224,6 @@ public class TransactionCPLBusiness {
     /**
      * == DELETE =========================================================================================================
      **/
-
-    // DELETE BY ID
-    public void deleteInterno(Long id) {
-        try {
-            cplRepository.deleteById(id);
-        } catch (ConstraintViolationException ex) {
-            throw ex;
-        } catch (Exception ee) {
-            throw new PostgresDeleteCleveradException(ee);
-        }
-    }
 
     public void delete(Long id) {
         try {

@@ -72,7 +72,7 @@ public class FileUserBusiness {
             String filename = StringUtils.cleanPath(file.getOriginalFilename());
             byte[] bytes = file.getBytes();
             Long affiliateID = user.getAffiliate().getId();
-            String path = fileStoreService.storeFile(affiliateID, "user", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), bytes);
+            String path = fileStoreService.storeFile(affiliateID, "user", UUID.randomUUID() + "." + FilenameUtils.getExtension(filename), bytes);
             FileUser fileDB = new FileUser(filename, file.getContentType(), user, request.avatar, path);
             return repository.save(fileDB).getId();
         } catch (Exception e) {
@@ -161,7 +161,7 @@ public class FileUserBusiness {
             id= user.getAffiliate().getId();
         }
 
-        String path = fileStoreService.storeFile(id, "user", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename), file.getBytes());
+        String path = fileStoreService.storeFile(id, "user", UUID.randomUUID() + "." + FilenameUtils.getExtension(filename), file.getBytes());
         FileUser fileDB = new FileUser(filename, file.getContentType(), user, request.avatar, path);
         return repository.save(fileDB).getId();
     }

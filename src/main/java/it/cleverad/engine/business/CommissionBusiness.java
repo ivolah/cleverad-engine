@@ -56,8 +56,6 @@ public class CommissionBusiness {
     private TransactionCPLBusiness transactionCPLBusiness;
     @Autowired
     private TransactionCPCBusiness transactionCPCBusiness;
-    @Autowired
-    CampaignAffiliateBusiness campaignAffiliateBusiness;
 
     @Autowired
     private Mapper mapper;
@@ -221,13 +219,13 @@ public class CommissionBusiness {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), request.getStartDateFrom()));
             }
             if (request.getStartDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), (request.getStartDateTo().plus(1, ChronoUnit.DAYS))));
+                predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), (request.getStartDateTo().plusDays(1))));
             }
             if (request.getDueDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("dueDate"), (request.getDueDateFrom())));
             }
             if (request.getDueDateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), (request.getDueDateTo().plus(1, ChronoUnit.DAYS))));
+                predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), (request.getDueDateTo().plusDays(1))));
             }
             if (request.getDisableDueDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), request.getDisableDueDateTo()));

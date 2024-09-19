@@ -54,11 +54,6 @@ public class BotDataBusiness {
         return BotDataDTO.from(repository.findById(id).orElseThrow(() -> new ElementCleveradException("BotData", id)));
     }
 
-    // Retrieve all BotData entries
-    public List<BotDataDTO> getAll() {
-        return repository.findAll().stream().map(BotDataDTO::from).collect(Collectors.toList());
-    }
-
     // SEARCH PAGINATED
     public Page<BotDataDTO> search(Filter request, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));

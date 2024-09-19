@@ -3,10 +3,6 @@ package it.cleverad.engine.business;
 import it.cleverad.engine.config.security.JwtUserDetailsService;
 import it.cleverad.engine.persistence.model.service.TopCampagne;
 import it.cleverad.engine.persistence.repository.service.TransactionCPSRepository;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -55,7 +51,7 @@ public class StatCPSBusiness {
         mainObj.put("totale", totale.get());
         mainObj.put("data", data);
         mainObj.put("xSeries", xSeries);
-        log.info(" CPS {}", mainObj.toString());
+        log.info(" CPS {}", mainObj);
         return mainObj.toString();
     }
 
@@ -100,15 +96,5 @@ public class StatCPSBusiness {
     /**
      * ============================================================================================================
      **/
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @ToString
-    public static class FilterStatistics {
-        private Long affiliateId;
-        private Long advertiserId;
-        private Integer days;
-    }
 
 }

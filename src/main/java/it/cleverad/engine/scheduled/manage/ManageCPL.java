@@ -111,7 +111,7 @@ public class ManageCPL {
                 // prendo reffereal e lo leggo
                 Refferal refferal = referralService.decodificaReferral(cplDTO.getRefferal());
 
-                log.info(">>>> T-CPL :: {} :: ", cplDTO, refferal);
+                log.info(">>>> T-CPL :: {} :: {}", cplDTO, refferal);
 
                 //aggiorno dati CPL
                 Cpl cccpl = cplRepository.findById(cplDTO.getId()).orElseThrow(() -> new ElementCleveradException("Cpl", cplDTO.getId()));
@@ -286,7 +286,7 @@ public class ManageCPL {
                         //not manuale
                         if (transaction.getManualDate() == null) {
                             List<CampaignAffiliateDTO> campaignAffiliateDTOS = campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(refferal.getAffiliateId(), refferal.getCampaignId()).toList();
-                            campaignAffiliateDTOS.stream().forEach(campaignAffiliateDTO -> {
+                            campaignAffiliateDTOS.forEach(campaignAffiliateDTO -> {
                                 // cerco global
                                 String globalPixel = affiliateBusiness.getGlobalPixel(affiliateID);
                                 // cerco folow through
@@ -420,7 +420,7 @@ public class ManageCPL {
                         }
 
                         transaction.setValue(commVal * 1);
-                        transaction.setLeadNumber(Long.valueOf(1));
+                        transaction.setLeadNumber(1L);
 
                         //setto rifiutato
                         transaction.setStatusId(74L);

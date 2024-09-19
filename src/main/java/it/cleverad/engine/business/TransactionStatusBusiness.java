@@ -81,7 +81,7 @@ public class TransactionStatusBusiness {
       List<String> orders = new ArrayList<>();
         if (request.getDataList() != null && request.getDataList().length() > 3) {
             log.info("Dentro :: ", request.getDataList());
-            Arrays.stream(request.getDataList().split(",")).distinct().forEach(s -> orders.add(s));
+            Arrays.stream(request.getDataList().split(",")).distinct().forEach(orders::add);
         }
 
         List<QueryTransaction> listaTransazioni = new ArrayList<>();
@@ -116,10 +116,10 @@ public class TransactionStatusBusiness {
     @AllArgsConstructor
     @ToString
     public static class QueryFilter {
-        public List<Long> inDictionaryId = new ArrayList<>();
-        public List<Long> inStausId = new ArrayList<>();
-        public List<Long> notInDictionaryId = new ArrayList<>();
-        public List<Long> notInStausId = new ArrayList<>();
+        private List<Long> inDictionaryId = new ArrayList<>();
+        private List<Long> inStausId = new ArrayList<>();
+        private List<Long> notInDictionaryId = new ArrayList<>();
+        private List<Long> notInStausId = new ArrayList<>();
         private Long id;
         private String tipo;
         @DateTimeFormat(pattern = "yyyy-MM-dd")

@@ -39,8 +39,6 @@ import java.util.List;
 public class TransactionCPSBusiness {
 
     @Autowired
-    CampaignBudgetBusiness campaignBudgetBusiness;
-    @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
     @Autowired
     private TransactionCPSRepository cpsRepository;
@@ -102,60 +100,8 @@ public class TransactionCPSBusiness {
         return TransactionCPSDTO.from(cpsRepository.save(map));
     }
 
-    public TransactionCPSDTO updateCPSValue(Double value, Long id) {
-        TransactionCPS cps = cpsRepository.findById(id).get();
-        cps.setValue(value);
-        return TransactionCPSDTO.from(cpsRepository.save(cps));
-    }
-
     //  quando campbio stato devo ricalcolare i budget affilitato e campagna
     //  nuovi tre stati  : pending, approvato e rifutato
-
-    public void updateStatus(Long id, Long dictionaryId, String tipo, Boolean approved, Long statusId) {
-
-        TransactionCPS cps = cpsRepository.findById(id).get();
-        if (dictionaryId != null) {
-            Long finalDictionaryId3 = dictionaryId;
-            cps.setDictionary(dictionaryRepository.findById(dictionaryId).orElseThrow(() -> new ElementCleveradException("Dictionay", finalDictionaryId3)));
-        } else dictionaryId = 0L;
-        if (statusId != null) {
-            Long finalStatusId3 = statusId;
-            cps.setDictionaryStatus(dictionaryRepository.findById(statusId).orElseThrow(() -> new ElementCleveradException("Status", finalStatusId3)));
-        } else statusId = 0L;
-        if (approved != null) cps.setApproved(approved);
-        if (dictionaryId == 40L || statusId == 74L) {
-            // setto revenue e commission a 0
-            cps.setRevenueId(1L);
-            cps.setCommission(commissionRepository.findById(1L).orElseThrow(() -> new ElementCleveradException("Commission", 1L)));
-            cps.setValue(0D);
-        }
-        cps.setLastModificationDate(LocalDateTime.now());
-        cpsRepository.save(cps);
-    }
-
-    // GET BY ID CPs
-    public TransactionCPSDTO findByIdCPS(Long id) {
-        TransactionCPS transaction = null;
-        if (jwtUserDetailsService.getRole().equals("Admin")) {
-            transaction = cpsRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
-        } else {
-            CampaignBusiness.Filter request = new CampaignBusiness.Filter();
-            request.setId(id);
-            transaction = cpsRepository.findById(id).orElseThrow(() -> new ElementCleveradException("Transaction", id));
-        }
-        return TransactionCPSDTO.from(transaction);
-    }
-
-    // DELETE BY ID
-    public void deleteInterno(Long id) {
-        try {
-            cpsRepository.deleteById(id);
-        } catch (ConstraintViolationException ex) {
-            throw ex;
-        } catch (Exception ee) {
-            throw new PostgresDeleteCleveradException(ee);
-        }
-    }
 
     public void delete(Long id) {
         try {
@@ -180,18 +126,11 @@ public class TransactionCPSBusiness {
         return TransactionCPSDTO.from(cpsRepository.save(cpc));
     }
 
-    // SEARCH PAGINATED
-    public Page<TransactionCPSDTO> searchCps(Filter request, Pageable pageableRequest) {
-        Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
-        Page<TransactionCPS> page = cpsRepository.findAll(getSpecificationCPS(request), pageable);
-        return page.map(TransactionCPSDTO::from);
-    }
 
     public Page<TransactionCPSDTO> searchByAffiliateCps(Filter request, Long id, Pageable pageableRequest) {
         Pageable pageable = PageRequest.of(pageableRequest.getPageNumber(), pageableRequest.getPageSize(), Sort.by(Sort.Order.desc("id")));
         if (jwtUserDetailsService.getRole().equals("Admin")) {
         } else {
-            //    request.setApproved(true);
             request.setAffiliateId(jwtUserDetailsService.getAffiliateId());
         }
         Page<TransactionCPS> page = cpsRepository.findAll(getSpecificationCPS(request), pageable);
@@ -255,11 +194,6 @@ public class TransactionCPSBusiness {
             if (request.getBlacklisted() != null) {
                 predicates.add(cb.equal(root.get("blacklisted"), request.getBlacklisted()));
             }
-
-
-//            if (request.getStatusId() != null) {
-//                predicates.add(cb.equal(root.get("dictionary").get("id"), request.getStatusId()));
-//            }
 
             if (request.getPhoneVerifiedNull() != null) {
                 predicates.add(cb.isNull(root.get("phoneVerified")));

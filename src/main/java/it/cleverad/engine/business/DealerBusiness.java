@@ -34,9 +34,6 @@ public class DealerBusiness {
     private DealerRepository repository;
 
     @Autowired
-    private CampaignRepository campaignRepository;
-
-    @Autowired
     private Mapper mapper;
 
     /**
