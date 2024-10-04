@@ -20,7 +20,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Predicate;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -114,6 +114,12 @@ public class BotDataBusiness {
             }
             if (request.getTsTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("ts"), LocalDateTime.ofInstant(request.getTsTo().plus(1, ChronoUnit.DAYS), ZoneOffset.UTC)));
+            }
+            if (request.getTelefono() != null) {
+                predicates.add(cb.equal(root.get("telefono"), request.getTelefono()));
+            }
+            if (request.getCap() != null) {
+                predicates.add(cb.equal(root.get("cap"), request.getCap()));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));

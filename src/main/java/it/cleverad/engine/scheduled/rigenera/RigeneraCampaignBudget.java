@@ -16,7 +16,7 @@ public class RigeneraCampaignBudget {
     /**
      * Consolido i numeri e le percentuali dei Budget Campagne
      */
-    @Scheduled(cron = "7 7 0/1 * * ?")
+    @Scheduled(cron = "11 11 0/1 * * ?")
     public void ciclaCampaignBudget() {
         campaignBudgetService.gestisciCampaignBudget(null, true);
     }//ciclaCampaignBudget

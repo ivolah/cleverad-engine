@@ -129,7 +129,6 @@ public class RigeneraCPMBusiness {
 
                 transaction.setStatusId(statusID);
 
-
                 // gesione commisione
                 Double commVal = 0D;
 

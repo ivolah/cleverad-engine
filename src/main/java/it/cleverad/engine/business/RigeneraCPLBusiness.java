@@ -1,6 +1,5 @@
 package it.cleverad.engine.business;
 
-import it.cleverad.engine.config.model.Refferal;
 import it.cleverad.engine.persistence.model.service.Commission;
 import it.cleverad.engine.persistence.model.service.QueryTransaction;
 import it.cleverad.engine.persistence.model.service.RevenueFactor;
@@ -8,7 +7,6 @@ import it.cleverad.engine.persistence.model.tracking.Cpc;
 import it.cleverad.engine.persistence.model.tracking.Cpl;
 import it.cleverad.engine.persistence.repository.service.CommissionRepository;
 import it.cleverad.engine.persistence.repository.service.RevenueFactorRepository;
-import it.cleverad.engine.persistence.repository.service.WalletRepository;
 import it.cleverad.engine.persistence.repository.tracking.CplRepository;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.*;
@@ -132,7 +130,7 @@ public class RigeneraCPLBusiness {
                     cplBusiness.setCpcId(cplDTO.getId(), cplDTO.getCpcId());
 
                     // prendo reffereal e lo leggo
-                    Refferal refferal = referralService.decodificaReferral(cplDTO.getRefferal());
+                    ReferralService.ReferralDTO refferal = referralService.descrivi(cplDTO.getRefferal());
                     log.info(">>>>RR T-CPL :: {} :: ", cplDTO, refferal);
                     //aggiorno dati CPL
                     Cpl cccpl = cplRepository.findById(cplDTO.getId()).orElseThrow(() -> new ElementCleveradException("Cpl", cplDTO.getId()));
@@ -246,10 +244,12 @@ public class RigeneraCPLBusiness {
                                     req.setBlocked(false);
                                     AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
                                     if (acccFirst != null) {
+                                        log.info(acccFirst.getCommissionValue() + "::" + acccFirst.getCommissionId());
                                         commVal = acccFirst.getCommissionValue();
                                         commissionId = acccFirst.getCommissionId();
                                     } else
-                                        log.warn("Rignera - No Commission CPL (campagna {} e affilitato {}), setto default ({})", refferal.getCampaignId(), refferal.getAffiliateId(), cplDTO.getRefferal());
+                                        log.warn("Rignera - No Commission CPL (campagna {}, affilitato {} er canale {}), setto default ({})",
+                                                refferal.getCampaignId(), refferal.getAffiliateId(), refferal.getChannelId(), cplDTO.getRefferal());
                                 }
                                 transaction.setCommissionId(commissionId);
 
@@ -280,48 +280,46 @@ public class RigeneraCPLBusiness {
 
                             // creo la transazione
                             TransactionCPLDTO cpl = transactionCPLBusiness.createCpl(transaction);
-                            log.info(">>>RIGENERATO LEAD :::: {} ", cpl.getId());
+                            log.info(">>>RIGENERATO LEAD :::: {}", cpl.getId());
 
                             // verifico il Postback ed eventualemnte faccio chiamata solo se campagna attiva
                             if (postback) {
                                 if (transaction.getDictionaryId() != 49L) {
-                                    //not manuale
-                                    if (transaction.getManualDate() == null) {
-                                        List<CampaignAffiliateDTO> campaignAffiliateDTOS = campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(refferal.getAffiliateId(), refferal.getCampaignId()).toList();
-                                        campaignAffiliateDTOS.forEach(campaignAffiliateDTO -> {
-                                            // cerco global
-                                            String globalPixel = affiliateBusiness.getGlobalPixel(affiliateID);
-                                            // cerco folow through
-                                            String followT = campaignAffiliateDTO.getFollowThrough();
-                                            String info = cplDTO.getInfo();
-                                            String data = cplDTO.getData();
-                                            String url = "";
-                                            log.trace("RCPLB POST BACK ::: " + followT + " :: " + globalPixel + " :: " + info + " :: " + data);
-                                            if (StringUtils.isNotBlank(globalPixel)) {
-                                                url = globalPixel;
-                                            } else if (StringUtils.isNotBlank(followT)) {
-                                                url = followT;
+                                    List<CampaignAffiliateDTO> campaignAffiliateDTOS = campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(refferal.getAffiliateId(), refferal.getCampaignId()).toList();
+                                    log.trace(campaignAffiliateDTOS.size() + " size caff" + refferal.getAffiliateId() + " " + refferal.getCampaignId());
+                                    campaignAffiliateDTOS.forEach(campaignAffiliateDTO -> {
+                                        // cerco global
+                                        String globalPixel = affiliateBusiness.getGlobalPixel(affiliateID);
+                                        // cerco folow through
+                                        String followT = campaignAffiliateDTO.getFollowThrough();
+                                        String info = cplDTO.getInfo();
+                                        String data = cplDTO.getData();
+                                        String url = "";
+                                        log.info("RCPLB POST BACK ::: " + followT + " :: " + globalPixel + " :: " + info + " :: " + data);
+                                        if (StringUtils.isNotBlank(globalPixel)) {
+                                            url = globalPixel;
+                                        } else if (StringUtils.isNotBlank(followT)) {
+                                            url = followT;
+                                        }
+                                        if (StringUtils.isNotBlank(url)) {
+                                            // trovo tutte le chiavi
+                                            Map<String, String> keyValueMap = referralService.estrazioneInfo(info);
+                                            // aggiungo order_id / transaction_id
+                                            keyValueMap.put("orderid", data);
+                                            keyValueMap.put("order_id", data);
+                                            url = referralService.replacePlaceholders(url, keyValueMap);
+                                            log.trace("RCPLB URL :: " + url);
+                                            try {
+                                                URL urlGet = new URL(url);
+                                                HttpURLConnection con = (HttpURLConnection) urlGet.openConnection();
+                                                con.setRequestMethod("GET");
+                                                con.getInputStream();
+                                                log.info("RCPLB Chiamo PB  :: " + con.getResponseCode() + " :: " + url + " :: GP:" + globalPixel + " :: INFO :" + info + " :: DATA:" + data);
+                                            } catch (Exception e) {
+                                                log.error("RCPLB Eccezione chianata Post Back", e);
                                             }
-                                            if (StringUtils.isNotBlank(url)) {
-                                                // trovo tutte le chiavi
-                                                Map<String, String> keyValueMap = referralService.estrazioneInfo(info);
-                                                // aggiungo order_id / transaction_id
-                                                keyValueMap.put("orderid", data);
-                                                keyValueMap.put("order_id", data);
-                                                url = referralService.replacePlaceholders(url, keyValueMap);
-                                                log.trace("RCPLB URL :: " + url);
-                                                try {
-                                                    URL urlGet = new URL(url);
-                                                    HttpURLConnection con = (HttpURLConnection) urlGet.openConnection();
-                                                    con.setRequestMethod("GET");
-                                                    con.getInputStream();
-                                                    log.info("RCPLB Chiamo PB  :: " + con.getResponseCode() + " :: " + url + " :: GP:" + globalPixel + " :: INFO :" + info + " :: DATA:" + data);
-                                                } catch (Exception e) {
-                                                    log.error("RCPLB Eccezione chianata Post Back", e);
-                                                }
-                                            }
-                                        });
-                                    }
+                                        }
+                                    });
                                 } else {
                                     log.warn("Campagna scaduta non faccio postback :: {}", cpl.getId());
                                 }
@@ -338,7 +336,7 @@ public class RigeneraCPLBusiness {
                 });
             }// ciclo se prendo in considerazione tutto il mese
 
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             log.error("CUSTOM Eccezione Scheduler CPL --  {} - " + anno + "-" + mese + "-" + giorno + " ::: " + affiliateId + " e " + camapignId, e.getMessage(), e);
         }
     }

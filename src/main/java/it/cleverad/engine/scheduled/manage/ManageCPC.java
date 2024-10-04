@@ -189,7 +189,7 @@ public class ManageCPC {
                             transaction.setDictionaryId(42L);
                         }
 
-                        if(campaign.getStatus()){
+                        if(!campaign.getStatus()){
                             // setto a campagna scaduta
                             transaction.setDictionaryId(49L);
                             scaduta = true;
@@ -206,7 +206,6 @@ public class ManageCPC {
                         Double commVal = 0D;
 
                         if (scaduta) {
-                            log.debug("Campagna {} : {} scaduta", campaign.getId(), campaign.getName());
                             transaction.setRevenueId(1L);
                             transaction.setCommissionId(0L);
                             transaction.setStatusId(74L); // rigettato

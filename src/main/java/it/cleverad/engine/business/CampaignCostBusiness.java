@@ -23,7 +23,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -103,6 +103,15 @@ public class CampaignCostBusiness {
     public Page<CampaignCostDTO> searchByCampaignIdUnpaged(Long campaignId) {
         Filter request = new Filter();
         request.setCampaignId(campaignId);
+        Page<CampaignCost> page = repository.findAll(getSpecification(request), Pageable.unpaged());
+        return page.map(CampaignCostDTO::from);
+    }
+
+    public Page<CampaignCostDTO> searchByCampaignIdDate(Long campaignId, LocalDate from, LocalDate to) {
+        Filter request = new Filter();
+        request.setCampaignId(campaignId);
+        request.setStartDateFrom(from);
+        request.setEndDateTo(to);
         Page<CampaignCost> page = repository.findAll(getSpecification(request), Pageable.unpaged());
         return page.map(CampaignCostDTO::from);
     }

@@ -137,7 +137,7 @@ public class ManageCPS {
                             transaction.setDictionaryId(42L);
                         }
 
-                        if(campaignDTO.getStatus()){
+                        if(!campaignDTO.getStatus()){
                             // setto a campagna scaduta
                             transaction.setDictionaryId(49L);
                             scaduta = true;

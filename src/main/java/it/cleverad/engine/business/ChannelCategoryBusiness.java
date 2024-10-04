@@ -24,7 +24,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Predicate;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -99,7 +99,7 @@ public class ChannelCategoryBusiness {
             Page<ChannelCategory> page = repository.findAll(getSpecification(request), PageRequest.ofSize(Integer.MAX_VALUE));
 
             page.stream().forEach(channelCategory -> repository.deleteById(channelCategory.getId()));
-        } catch (javax.validation.ConstraintViolationException ex) {
+        } catch (jakarta.validation.ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             log.error(">>> " + ee.getMessage(), ee);

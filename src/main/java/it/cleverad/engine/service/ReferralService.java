@@ -112,6 +112,7 @@ public class ReferralService {
             refferal.setSuccess(continua);
             return refferal;
         }
+        log.warn("REFFERAL NULLO");
         return null;
     }
 

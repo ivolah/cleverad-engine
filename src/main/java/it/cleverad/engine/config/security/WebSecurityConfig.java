@@ -4,21 +4,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig {
 
     @Autowired
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -29,61 +33,76 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private JwtRequestFilter jwtRequestFilter;
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        // configure AuthenticationManager so that it knows from where to load
-        // user for matching credentials Use BCryptPasswordEncoder
-        auth.userDetailsService(jwtUserDetailsService).passwordEncoder(passwordEncoder());
-    }
-
+    // Define the PasswordEncoder bean
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    // Define the AuthenticationManager bean
     @Bean
-    @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
     }
 
-    @Override
-    protected void configure(HttpSecurity httpSecurity) throws Exception {
-        // CSFR
-        httpSecurity.csrf().disable().
-                // SESSIONE STATELESS
-                        sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                // NON AUTENTICO LA CHIAMATE DI AUTENTICAZIONE
-                .authorizeRequests().antMatchers(
-                        "/authenticate",
-                        "/target",
-                        "/botdata",
-                        "/file/encoded",
-                        "/file/*/download",
-                        "/register",
-                        "/register/brandbuddies",
-                        "/register/types/*",
-                        "/register/types/brandbuddies/platform",
-                        "/register/user/",
-                        "/register/user/confirm",
-                        "/register/user/request",
-                        "/register/user/*",
-                        "/user/reset/request",
-                        "/user/reset/user",
-                        "/reset/request",
-                        "/reset/user",
-                        "/short/*",
-                        "/whatsapp/check"
-                ).permitAll().
-                // TUTTE LE ALTRE RICHIESTO SONO AUTENTICATE
-                        anyRequest().authenticated().and().
-                // session won't be used to store user's state.
-                        exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint);
+    // Define the SecurityFilterChain bean
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                // Disable CSRF as we are using tokens
+                .csrf(csrf -> csrf.disable())
 
-        // Add a filter to validate the tokens with every request
-        httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
-        httpSecurity.headers().cacheControl();
-        httpSecurity.cors();
+                // Set session management to stateless
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // Handle unauthorized access
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint))
+
+                // Define URL authorization rules
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers(
+                                "/authenticate",
+                                "/target",
+                                "/botdata",
+                                "/file/encoded",
+                                "/file/*/download",
+                                "/register/**",
+                                "/user/reset/request",
+                                "/user/reset/user",
+                                "/reset/request",
+                                "/reset/user",
+                                "/short/**",
+                                "/whatsapp/check",
+                                "/actuator/**"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
+
+                // Add JWT filter before UsernamePasswordAuthenticationFilter
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
+
+                // Enable cache control headers
+                .headers(headers -> headers.cacheControl(Customizer.withDefaults()))
+
+                // Enable CORS
+                .cors(Customizer.withDefaults());
+
+        return http.build();
     }
+
+    // CORS Configuration Bean (Customize as needed)
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration configuration = new CorsConfiguration();
+//        configuration.setAllowedOrigins(Arrays.asList("https://yourfrontend.com")); // Replace with your frontend URL
+//        configuration.setAllowedMethods(Arrays.asList("GET","POST", "PUT", "DELETE", "OPTIONS"));
+//        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+//        configuration.setExposedHeaders(Arrays.asList("Authorization"));
+//        configuration.setAllowCredentials(true);
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", configuration);
+//        return source;
+//    }
 
 }

@@ -36,8 +36,9 @@ public class CampaignBudgetService {
     private CampaignCostBusiness campaignCostBusiness;
 
     public void gestisciCampaignBudget(Long id, Boolean interno) {
-        DoubleRounder br = new DoubleRounder(2);
+        log.info("Rigenero Campaign Budget");
 
+        DoubleRounder br = new DoubleRounder(2);
         List<CampaignBudgetDTO> budgets = new ArrayList<>();
         if (id == null) {
             // listo i budget attivi
@@ -87,7 +88,7 @@ public class CampaignBudgetService {
             double scarto = 0D;
             if (dto.getScarto() != null) scarto = dto.getScarto();
 
-            //round
+            // round
             budgetErogato = br.round(budgetErogato);
             commissioniErogate = br.round(commissioniErogate);
 
@@ -141,34 +142,49 @@ public class CampaignBudgetService {
             request.setRevenuePCPS(rpcps);
 
             request.setRevenueDay(br.round(revenue / LocalDate.now().getDayOfMonth()));
+
             request.setId(null);
             request.setStatus(true);
             request.setRevenue(br.round(revenue));
-
             request.setStatoPagato(dto.getStatoPagato());
             request.setStatoFatturato(dto.getStatoFatturato());
             request.setInvoiceDueDate(dto.getInvoiceDueDate());
 
-            Double costiProduzione = campaignCostBusiness.searchByCampaignIdUnpaged(dto.getId()).toList().stream().mapToDouble(CampaignCostDTO::getCosto).sum();
-            request.setCostiProduzione(costiProduzione);
+            // COSTI
+            Double costiProduzione = campaignCostBusiness.searchByCampaignIdDate(dto.getCampaignId(), dto.getStartDate(), dto.getEndDate()).toList().stream().mapToDouble(CampaignCostDTO::getCosto).sum();
+            if (costiProduzione != null)
+                request.setCostiProduzione(br.round(costiProduzione));
+            else
+                costiProduzione= 0D;
 
-            request.setCostiAltri(dto.getCostiAltri());
-            Double totaleCosti = costiProduzione + dto.getCostiAltri();
-            request.setCostiTotale(totaleCosti);
+            Double altriCosti = dto.getCostiAltri();
+            if (altriCosti != null)
+                request.setCostiAltri(br.round(altriCosti));
+            else
+                altriCosti= 0D;
+
+            Double totaleCosti = costiProduzione + altriCosti;
+            log.trace(totaleCosti + "> TOTALE COSTI + " + costiProduzione + " " + altriCosti);
+            if (totaleCosti != null)
+                request.setCostiTotale(br.round(totaleCosti));
 
             // trovare le transazioni di quel peridodo che hanno un payout associato e sommarne il valore
-            Double payoutGenerati = null;
-            request.setPayoutGenerati(payoutGenerati);
+            Double valueCPLS = 0D;
+            if (cpls.parallelStream().filter(TransactionCPL::getPayoutPresent).mapToDouble(TransactionCPL::getValue).sum() > 0)
+                valueCPLS = cpls.parallelStream().filter(TransactionCPL::getPayoutPresent).mapToDouble(TransactionCPL::getValue).sum();
+            Double valueCPCS = 0D;
+            if (cpcs.parallelStream().filter(TransactionCPC::getPayoutPresent).mapToDouble(TransactionCPC::getValue).sum() > 0)
+                valueCPCS = cpcs.parallelStream().filter(TransactionCPC::getPayoutPresent).mapToDouble(TransactionCPC::getValue).sum();
+            Double payoutGenerati = valueCPLS + valueCPCS;
+            request.setPayoutGenerati(br.round(payoutGenerati));
 
             Double margine = dto.getFatturato() - totaleCosti;
-            request.setMargineContribuzione(margine);
+            request.setMargineContribuzione(br.round(margine));
 
             Double marginePC = margine / dto.getFatturato();
-            request.setMargineContribuzionePc(marginePC);
+            request.setMargineContribuzionePc(br.round(marginePC));
 
             CampaignBudgetDTO cb = campaignBudgetBusiness.create(request);
-            log.trace("CREATO :: {}", cb.getId());
-
             //  ASSEGNO INVOICE A NUOVO BUDGET
             dto.getFileCampaignBudgetInvoices().forEach(invoice -> fileCampaignBudgetBusiness.updateInterno(invoice.getId(), "INVOICE", cb.getId()));
             //  ASSEGNO ORDER A NUOVO BUDGET
@@ -177,7 +193,6 @@ public class CampaignBudgetService {
             // cancello
             campaignBudgetBusiness.delete(dto.getId());
         }
-        log.trace("END");
     }
 
 }

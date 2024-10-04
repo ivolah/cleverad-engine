@@ -52,7 +52,6 @@ public class AuthenticationController {
         } else {
             return ResponseEntity.ok(new JwtResponse(token, 0L, 0L));
         }
-
     }
 
     private void authenticate(String username, String password) throws DisabledException, BadCredentialsException {

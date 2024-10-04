@@ -2,7 +2,7 @@ package it.cleverad.engine.persistence.model.service;
 
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 

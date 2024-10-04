@@ -27,7 +27,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -160,7 +160,7 @@ public class CpcBusiness {
 
     public List<Cpc> findByIp1HoursBeforeNoIp(LocalDateTime dateTime, String referral) {
         Filter request = new Filter();
-        request.setDatetimeFrom(dateTime.minusHours(1));
+        request.setDatetimeFrom(dateTime.minusMinutes(15));
         request.setDatetimeTo(dateTime);
         request.setRefferalCheckRight(referral);
         return repository.findAll(getSpecification(request), Sort.by(Sort.Order.desc("id")));

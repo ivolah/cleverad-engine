@@ -97,19 +97,8 @@ public class WalletService {
         filter.setTotal(totale);
         filter.setResidual(totale - totalePayouts);
         walletBusiness.update(walletID, filter);
-    }
 
-    /**
-     * filter.setDateTimeFrom(dataDaGestireStart.atStartOfDay());
-     * filter.setDateTimeTo(LocalDateTime.of(dataDaGestireEnd, LocalTime.MAX));
-     * <p>
-     * int year = 2023;
-     * int month = 12;
-     * int combinedNumber = year * 100 + month;
-     * // Extracting year and month from the combined number
-     * int extractedYear = combinedNumber / 100;
-     * int extractedMonth = combinedNumber % 100;
-     **/
+    }
 
     @Data
     @NoArgsConstructor

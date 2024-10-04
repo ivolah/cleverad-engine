@@ -86,7 +86,7 @@ public class ManageCPL {
 
                 // leggo sempre i cpc precedenti per trovare il click riferito alla lead
                 cpcBusiness.findByIp24HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal()).stream().filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal())).forEach(cpcDTO -> {
-                    log.info("CPC : {} : ORIG {} --> CPC {}", cpcDTO.getId(), cplDTO.getRefferal(), cpcDTO.getRefferal());
+                    log.trace("IP-CPC : {} : ORIG {} --> CPC {}", cpcDTO.getId(), cplDTO.getRefferal(), cpcDTO.getRefferal());
                     cplDTO.setRefferal(cpcDTO.getRefferal());
                     cplDTO.setCpcId(cpcDTO.getId());
                 });
@@ -106,11 +106,10 @@ public class ManageCPL {
                 }
 
                 Long idCpc = cplDTO.getCpcId();
-                log.trace("Refferal :: {} con ID CPC {}", cplDTO.getRefferal(), idCpc);
+                log.info("Refferal :: {} con ID CPC {}", cplDTO.getRefferal(), idCpc);
                 cplBusiness.setCpcId(cplDTO.getId(), idCpc);
                 // prendo reffereal e lo leggo
                 Refferal refferal = referralService.decodificaReferral(cplDTO.getRefferal());
-
                 log.info(">>>> T-CPL :: {} :: {}", cplDTO, refferal);
 
                 //aggiorno dati CPL
@@ -164,7 +163,7 @@ public class ManageCPL {
                         transaction.setDictionaryId(42L);
                     }
 
-                    if (campaignDTO.getStatus()) {
+                    if (!campaignDTO.getStatus()) {
                         // setto a campagna scaduta
                         transaction.setDictionaryId(49L);
                         scaduta = true;
@@ -277,8 +276,8 @@ public class ManageCPL {
                     transaction.setCplId(cplDTO.getId());
 
                     // creo la transazione
-                    TransactionCPLDTO cpl = transactionCPLBusiness.createCpl(transaction);
-                    log.info(">>> CREATO TRANSAZIONE :::: CPL :::: {} ", cpl.getId());
+                    TransactionCPLDTO cplT = transactionCPLBusiness.createCpl(transaction);
+                    log.info(">>> CREATO TRANSAZIONE :::: CPL :::: {} da {}", cplT.getId(), cplDTO.getCplId());
 
                     // verifico il Postback ed eventualemnte faccio chiamata
                     // solo se campagna attiva
@@ -315,14 +314,14 @@ public class ManageCPL {
                                         con.getInputStream();
                                         log.info("Post Back (" + con.getResponseCode() + ") : " + url + " :::: GP (" + globalPixel + ") :: INFO (" + info + ") :: DATA (" + data + "");
                                     } catch (Exception e) {
-                                        log.error("Eccezione chianata Post Back", e);
-                                        throw new RuntimeException(e);
+                                        log.error("Eccezione chianata Post Back : NON FACCIO NULLA :", e);
+                                        //throw new RuntimeException(e);
                                     }
                                 }
                             });
                         }
                     } else {
-                        log.warn("Campagna scaduta non faccio postback :: {}", cpl.getId());
+                        log.warn("Campagna scaduta non faccio postback :: {}", cplT.getId());
                     }
 
                 }// creo solo se ho affiliate

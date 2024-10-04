@@ -21,7 +21,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Predicate;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -73,7 +73,7 @@ public class AdvertiserBusiness {
         operatoreAdvertiser.setEmail(request.primaryMail);
         operatoreAdvertiser.setRoleId(555L);
         operatoreAdvertiser.setRole("Advertiser");
-        operatoreAdvertiser.setUsername(UUID.randomUUID());
+        operatoreAdvertiser.setUsername(UUID.randomUUID().toString());
         operatoreAdvertiser.setPassword("piciulin");
         userBusiness.create(operatoreAdvertiser);
 

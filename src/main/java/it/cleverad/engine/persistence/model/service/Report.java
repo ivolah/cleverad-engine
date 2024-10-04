@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @NamedNativeQuery(name = "Report.searchReportDaily",
         query = "With trans as (SELECT row_number() OVER ()                                                     AS rn,  " +

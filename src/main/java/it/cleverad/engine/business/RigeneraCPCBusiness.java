@@ -14,6 +14,7 @@ import it.cleverad.engine.web.dto.AffiliateChannelCommissionCampaignDTO;
 import it.cleverad.engine.web.dto.CampaignBudgetDTO;
 import it.cleverad.engine.web.dto.TransactionCPCDTO;
 import it.cleverad.engine.web.dto.tracking.CpcDTO;
+import it.cleverad.engine.web.exception.CleveradInterruptedException;
 import it.cleverad.engine.web.exception.ElementCleveradException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -135,7 +136,7 @@ public class RigeneraCPCBusiness {
             not.add(74L); // RIGETTATO
             request.setNotInStausId(not);
             Page<QueryTransaction> ls = transactionStatusBusiness.searchPrefiltratoN(request, Pageable.ofSize(Integer.MAX_VALUE));
-            log.info(">>> TOT :: " + ls.getTotalElements());
+            log.trace(">>> TOT :: " + ls.getTotalElements());
             for (QueryTransaction tcpl : ls) {
                 log.info("CANCELLO PER RIGENERA CPC :: {} : {} :: {}", tcpl.getid(), tcpl.getValue(), tcpl.getDateTime());
                 transactionCPCBusiness.delete(tcpl.getid());
@@ -146,6 +147,8 @@ public class RigeneraCPCBusiness {
             this.gestisci(anno, mese, giorno, affiliateId, campaignId, 72L, false, dataDaGestireStart, dataDaGestireEnd);
 
             // ==========================================================================================================================================
+        } catch (CleveradInterruptedException e) {
+            throw new RuntimeException(e);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
