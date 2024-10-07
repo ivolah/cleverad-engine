@@ -20,7 +20,6 @@ public class CplDTO {
     private String data;
     private LocalDateTime date;
     private Boolean read;
-
     private Long campaignId;
     private String campaignName;
     private Long affiliateId;
@@ -31,15 +30,13 @@ public class CplDTO {
     private String country;
     private Long targetId;
     private Long mediaId;
-
     private Boolean blacklisted;
     private Boolean multiple;
-
     private Long cpcId;
-    private Long cplId;
     private String actionId;
+    private String source;
 
-    public CplDTO(long id, String refferal, String ip, String agent, String data, LocalDateTime date, Boolean read, String info, String country, Long mediaId, Long campaignId, Long affiliateId, Long channelId, Long targetId, Boolean blacklisted, Boolean multiple, Long cpcId, String actionId) {
+    public CplDTO(long id, String refferal, String ip, String agent, String data, LocalDateTime date, Boolean read, String info, String country, Long mediaId, Long campaignId, Long affiliateId, Long channelId, Long targetId, Boolean blacklisted, Boolean multiple, Long cpcId, String actionId, String source) {
         this.id = id;
         this.refferal = refferal;
         this.ip = ip;
@@ -58,10 +55,11 @@ public class CplDTO {
         this.multiple = multiple;
         this.cpcId = cpcId;
         this.actionId = actionId;
+        this.source = source;
     }
 
     public static CplDTO from(Cpl cpl) {
-        return new CplDTO(cpl.getId(), cpl.getRefferal(), cpl.getIp(), cpl.getAgent(), cpl.getData(), cpl.getDate(), cpl.getRead(), cpl.getInfo(), cpl.getCountry(), cpl.getMediaId(), cpl.getCampaignId(), cpl.getAffiliateId(), cpl.getChannelId(), cpl.getTargetId(), cpl.getBlacklisted(), cpl.getMultiple(), cpl.getCpcId(), cpl.getActionId());
+        return new CplDTO(cpl.getId(), cpl.getRefferal(), cpl.getIp(), cpl.getAgent(), cpl.getData(), cpl.getDate(), cpl.getRead(), cpl.getInfo(), cpl.getCountry(), cpl.getMediaId(), cpl.getCampaignId(), cpl.getAffiliateId(), cpl.getChannelId(), cpl.getTargetId(), cpl.getBlacklisted(), cpl.getMultiple(), cpl.getCpcId(), cpl.getActionId(), cpl.getSource());
     }
 
 }

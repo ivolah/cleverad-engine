@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import javax.persistence.Column;
 import java.time.LocalDateTime;
 
 @Data
@@ -30,8 +31,10 @@ public class CpcDTO {
     private Long mediaId;
     private Long targetId;
     private Boolean blacklisted;
+    private Long rndTrs;
+    private String transactionId;
 
-    public CpcDTO(Long id, String refferal, String ip, String agent, LocalDateTime date, Boolean read, String htmlReferral, String info, String country, Long mediaId, Long campaignId, Long affiliateId, Long channelId, Long targetId, Boolean blacklisted) {
+    public CpcDTO(Long id, String refferal, String ip, String agent, LocalDateTime date, Boolean read, String htmlReferral, String info, String country, Long mediaId, Long campaignId, Long affiliateId, Long channelId, Long targetId, Boolean blacklisted, Long rndTrs, String transactionId) {
         this.id = id;
         this.refferal = refferal;
         this.ip = ip;
@@ -47,10 +50,12 @@ public class CpcDTO {
         this.channelId = channelId;
         this.targetId = targetId;
         this.blacklisted = blacklisted;
+        this.rndTrs = rndTrs;
+        this.transactionId = transactionId;
     }
 
     public static CpcDTO from(Cpc cpc) {
         return new CpcDTO(cpc.getId(), cpc.getRefferal(), cpc.getIp(), cpc.getAgent(), cpc.getDate(), cpc.getRead(), cpc.getHtmlReferral(), cpc.getInfo(), cpc.getCountry(),
-                cpc.getMediaId(), cpc.getCampaignId(), cpc.getAffiliateId(), cpc.getChannelId(), cpc.getTargetId(), cpc.getBlacklisted());
+                cpc.getMediaId(), cpc.getCampaignId(), cpc.getAffiliateId(), cpc.getChannelId(), cpc.getTargetId(), cpc.getBlacklisted(), cpc.getRndTrs(), cpc.getTransactionId());
     }
 }

@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -47,4 +47,8 @@ public class Cpc {
     private Boolean blacklisted = false;
     private Boolean multiple = false;
 
+    @Column(name = "rnd_trs")
+    private Long rndTrs;
+    @Column(name = "transaction_id")
+    private String transactionId;
 }

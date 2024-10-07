@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -47,5 +47,5 @@ public class Cpl {
     private Long cpcId;
     @Column(name = "action_id")
     private String actionId;
-
+    private String source;
 }

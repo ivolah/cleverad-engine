@@ -27,7 +27,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.persistence.criteria.Predicate;
+import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -158,7 +158,25 @@ public class CpcBusiness {
         return page.map(CpcDTO::from);
     }
 
+    public Page<CpcDTO> findByIp2HoursBefore(String ip, LocalDateTime dateTime, String referral) {
+        Filter request = new Filter();
+        request.setIp(ip);
+        request.setDatetimeFrom(dateTime.minusHours(24));
+        request.setDatetimeTo(dateTime);
+        request.setRefferalCheckRight(referral);
+        Page<Cpc> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE));
+        return page.map(CpcDTO::from);
+    }
+
     public List<Cpc> findByIp1HoursBeforeNoIp(LocalDateTime dateTime, String referral) {
+        Filter request = new Filter();
+        request.setDatetimeFrom(dateTime.minusMinutes(60));
+        request.setDatetimeTo(dateTime);
+        request.setRefferalCheckRight(referral);
+        return repository.findAll(getSpecification(request), Sort.by(Sort.Order.desc("id")));
+    }
+
+    public List<Cpc> findByIp15MinutesBeforeNoIp(LocalDateTime dateTime, String referral) {
         Filter request = new Filter();
         request.setDatetimeFrom(dateTime.minusMinutes(15));
         request.setDatetimeTo(dateTime);
@@ -196,6 +214,12 @@ public class CpcBusiness {
         repository.save(cpc);
     }
 
+    public List<Cpc> findByRndTrs(Long rdnTrs) {
+        Filter request = new Filter();
+        request.setRndTrs(rdnTrs);
+        return repository.findAll(getSpecification(request), Sort.by(Sort.Order.desc("id")));
+    }
+
     /**
      * ============================================================================================================
      **/
@@ -207,14 +231,12 @@ public class CpcBusiness {
             if (request.getId() != null) {
                 predicates.add(cb.equal(root.get("id"), request.getId()));
             }
-
             if (request.getRefferal() != null) {
                 predicates.add(cb.like(root.get("refferal"), "%" + request.getRefferal() + "%"));
             }
             if (request.getRefferalCheckRight() != null) {
                 predicates.add(cb.like(root.get("refferal"), request.getRefferalCheckRight() + "%"));
             }
-
             if (request.getRead() != null) {
                 predicates.add(cb.equal(root.get("read"), request.getRead()));
             }
@@ -227,14 +249,12 @@ public class CpcBusiness {
             if (request.getDateTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("date"), LocalDateTime.of(request.getDateTo(), LocalTime.MAX)));
             }
-
             if (request.getDatetimeFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("date"), request.getDatetimeFrom()));
             }
             if (request.getDatetimeTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("date"), request.getDatetimeTo()));
             }
-
             if (request.getAffiliateid() != null) {
                 predicates.add(cb.equal(root.get("affiliateId"), request.getAffiliateid()));
             }
@@ -244,12 +264,14 @@ public class CpcBusiness {
             if (request.getChannelId() != null) {
                 predicates.add(cb.equal(root.get("channelId"), request.getChannelId()));
             }
-
             if (request.getBlacklisted() != null && request.getBlacklisted()) {
                 predicates.add(cb.isTrue(root.get("blacklisted")));
             }
             if (request.getBlacklisted() != null && !request.getBlacklisted()) {
                 predicates.add(cb.isFalse(root.get("blacklisted")));
+            }
+            if (request.getRndTrs() != null ) {
+                predicates.add(cb.equal(root.get("rndTrs"), request.getRndTrs()));
             }
 
             completePredicate = cb.and(predicates.toArray(new Predicate[0]));
@@ -308,6 +330,8 @@ public class CpcBusiness {
         private Boolean blacklisted;
 
         private String refferalCheckRight;
+
+        private Long rndTrs;
 
     }
 

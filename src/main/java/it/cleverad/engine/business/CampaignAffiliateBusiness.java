@@ -24,7 +24,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.persistence.criteria.Predicate;
+import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,7 +87,7 @@ public class CampaignAffiliateBusiness {
         Page<CampaignAffiliate> page = repository.findAll(getSpecification(request), PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
         try {
             page.stream().forEach(campaignAffiliate -> repository.deleteById(campaignAffiliate.getId()));
-        } catch (jakarta.validation.ConstraintViolationException ex) {
+        } catch (javax.validation.ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);

@@ -22,7 +22,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.persistence.criteria.Predicate;
+import javax.persistence.criteria.Predicate;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -101,7 +101,7 @@ public class CampaignCategoryBusiness {
         Page<CampaignCategory> page = repository.findAll(getSpecification(request), PageRequest.of(0,Integer.MAX_VALUE, Sort.by(Sort.Order.asc("id"))));
         try {
             page.stream().forEach(campaignCategory ->  repository.deleteById(campaignCategory.getId()));
-        } catch (jakarta.validation.ConstraintViolationException ex) {
+        } catch (javax.validation.ConstraintViolationException ex) {
             throw ex;
         } catch (Exception ee) {
             throw new PostgresDeleteCleveradException(ee);

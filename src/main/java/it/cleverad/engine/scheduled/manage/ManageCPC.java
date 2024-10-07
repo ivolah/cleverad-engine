@@ -31,6 +31,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -67,7 +69,7 @@ public class ManageCPC {
      * ============================================================================================================
      **/
 
-    @Scheduled(cron = "2 */22 * * * ?")
+    @Scheduled(cron = "3 */3 * * * ?")
     @Async
     public void gestiusciTransazioni() {
 
@@ -150,8 +152,8 @@ public class ManageCPC {
                         cccp.setTargetId(refferal.getTargetId());
                     }
                 }
-                repository.save(cccp);
 
+                repository.save(cccp);
             });
 
             mappa.forEach((ref, numer) -> {
@@ -189,7 +191,7 @@ public class ManageCPC {
                             transaction.setDictionaryId(42L);
                         }
 
-                        if(!campaign.getStatus()){
+                        if (!campaign.getStatus()) {
                             // setto a campagna scaduta
                             transaction.setDictionaryId(49L);
                             scaduta = true;

@@ -1,6 +1,7 @@
 package it.cleverad.engine.web.controller;
 
 import it.cleverad.engine.business.CpcBusiness;
+import it.cleverad.engine.persistence.model.tracking.Cpc;
 import it.cleverad.engine.web.dto.tracking.CpcDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -8,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @CrossOrigin
 @RestController
@@ -57,6 +60,13 @@ public class CpcController {
         this.business.delete(id);
     }
 
+
+    @GetMapping(path = "/rndtrs/{id}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public List<Cpc> findByRndTrs(@PathVariable Long id) {
+        return business.findByRndTrs(id);
+    }
+    
     /**
      * ============================================================================================================
      **/

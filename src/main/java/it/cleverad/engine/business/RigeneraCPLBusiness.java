@@ -7,6 +7,7 @@ import it.cleverad.engine.persistence.model.tracking.Cpc;
 import it.cleverad.engine.persistence.model.tracking.Cpl;
 import it.cleverad.engine.persistence.repository.service.CommissionRepository;
 import it.cleverad.engine.persistence.repository.service.RevenueFactorRepository;
+import it.cleverad.engine.persistence.repository.tracking.CpcRepository;
 import it.cleverad.engine.persistence.repository.tracking.CplRepository;
 import it.cleverad.engine.service.ReferralService;
 import it.cleverad.engine.web.dto.*;
@@ -30,6 +31,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -69,6 +72,8 @@ public class RigeneraCPLBusiness {
     private WalletBusiness walletBusiness;
     @Autowired
     private RevenueFactorRepository revenueFactorRepositorye;
+    @Autowired
+    private CpcRepository cpcRepository;
 
     public void rigenera(Integer anno, Integer mese, Integer giorno, Long affiliateId, Long camapignId, Boolean postback) {
         try {
@@ -106,22 +111,91 @@ public class RigeneraCPLBusiness {
 
                     log.info("ID {}", cplDTO.getId());
 
-                    // leggo sempre i cpc precedenti per trovare il click riferito alla lead
-                    cpcBusiness.findByIp24HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal()).stream().filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal())).forEach(cpcDTO -> {
-                        cplDTO.setRefferal(cpcDTO.getRefferal());
-                        cplDTO.setCpcId(cpcDTO.getId());
-                    });
+                    String info = cplDTO.getInfo();
+                    String source = cplDTO.getSource();
+                    Pattern rndTrsPattern = Pattern.compile("rndTrs: (\\d+)");
+                    Matcher rndTrsMatcher = rndTrsPattern.matcher(info);
+                    String rndTrs = rndTrsMatcher.find() ? rndTrsMatcher.group(1).trim() : null;
 
-                    // giro senza controllare IP address
-                    if (cplDTO.getCpcId() == null) {
-                        List<Cpc> listaSenzaIp = cpcBusiness.findByIp1HoursBeforeNoIp(cplDTO.getDate(), cplDTO.getRefferal()).stream().filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal())).collect(Collectors.toList());
-                        if (!listaSenzaIp.isEmpty()) {
-                            //check id cpc non usato in transazioni cpl come cpcid
-                            long numerositatitudine = transactionCPLBusiness.countByCpcId(listaSenzaIp.get(0).getId());
-                            log.info("NO-IP CPC {} : ORIG {} --> CPC {} - used: {}", listaSenzaIp.get(0).getId(), cplDTO.getRefferal(), listaSenzaIp.get(0).getRefferal(), numerositatitudine);
-                            if (numerositatitudine == 0) {
-                                cplDTO.setRefferal(listaSenzaIp.get(0).getRefferal());
-                                cplDTO.setCpcId(listaSenzaIp.get(0).getId());
+                    if (source.equals("pixel")) {
+
+                        Cpc cpc = null;
+
+                        if (rndTrs != null) {
+                            // Fetch CPC by rndTrs only if found
+                            List<Cpc> cpcList = cpcBusiness.findByRndTrs(Long.parseLong(rndTrs));
+                            if (!cpcList.isEmpty()) {
+                                cpc = cpcList.get(0);
+                                log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>> TROVATO CPC {} CON RNDTRS {} e referral {} <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<", cpc.getId(), cpc.getRndTrs(), cpc.getRefferal());
+                                cplDTO.setRefferal(cpc.getRefferal());
+                                cplDTO.setCpcId(cpc.getId());
+                            }
+                        }
+
+                        if (cpc == null) {
+                            // Search for CPC by IP in the last 2 hours
+                            cpcBusiness.findByIp2HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal()).stream()
+                                    .filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal()))
+                                    .findFirst()
+                                    .ifPresent(cpcDTO -> {
+                                        log.info("PIXEL IP-CPC: Found CPC ID {} with referral {}", cpcDTO.getId(), cpcDTO.getRefferal());
+                                        cplDTO.setRefferal(cpcDTO.getRefferal());
+                                        cplDTO.setCpcId(cpcDTO.getId());
+                                    });
+                        }
+
+                    } else if (source.equals("s2s")) {
+                        //S2S -  giro senza controllare IP address
+
+                        Cpc cpc = null;
+                        if (rndTrs != null) {
+                            // Fetch CPC by rndTrs only if found
+                            List<Cpc> cpcList = cpcBusiness.findByRndTrs(Long.parseLong(rndTrs));
+                            if (!cpcList.isEmpty()) {
+                                cpc = cpcList.get(0);
+                                log.info(">>> TROVATO CPC {} CON RNDTRS {} e referral {} <<<", cpc.getId(), cpc.getRndTrs(), cpc.getRefferal());
+                                cplDTO.setRefferal(cpc.getRefferal());
+                                cplDTO.setCpcId(cpc.getId());
+                            }
+                        }
+
+                        if (cpc == null) {
+                            // Search CPC without checking IP for transactions 15 minutes before
+                            List<Cpc> cpcListWithoutIp = cpcBusiness.findByIp15MinutesBeforeNoIp(cplDTO.getDate(), cplDTO.getRefferal())
+                                    .stream()
+                                    .filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal()))
+                                    .collect(Collectors.toList());
+
+                            if (!cpcListWithoutIp.isEmpty()) {
+                                Cpc firstCpc = cpcListWithoutIp.get(0);
+                                long transactionCount = transactionCPLBusiness.countByCpcId(firstCpc.getId());
+                                log.info("NO-IP CPC {} : ORIG {} --> CPC {} - used {} times", firstCpc.getId(), cplDTO.getRefferal(), firstCpc.getRefferal(), transactionCount);
+                                if (transactionCount == 0) {
+                                    cplDTO.setRefferal(firstCpc.getRefferal());
+                                    cplDTO.setCpcId(firstCpc.getId());
+                                }
+                            }
+                        }
+                    } else if (source == null || source.equals("")) {
+
+                        //vecchio giro
+                        // leggo sempre i cpc precedenti per trovare il click riferito alla lead
+                        cpcBusiness.findByIp2HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal()).stream().filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal())).forEach(cpcDTO -> {
+                            cplDTO.setRefferal(cpcDTO.getRefferal());
+                            cplDTO.setCpcId(cpcDTO.getId());
+                        });
+
+                        // giro senza controllare IP address
+                        if (cplDTO.getCpcId() == null) {
+                            List<Cpc> listaSenzaIp = cpcBusiness.findByIp15MinutesBeforeNoIp(cplDTO.getDate(), cplDTO.getRefferal()).stream().filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal())).collect(Collectors.toList());
+                            if (!listaSenzaIp.isEmpty()) {
+                                //check id cpc non usato in transazioni cpl come cpcid
+                                long numerositatitudine = transactionCPLBusiness.countByCpcId(listaSenzaIp.get(0).getId());
+                                log.info("NO-IP CPC {} : ORIG {} --> CPC {} - used: {}", listaSenzaIp.get(0).getId(), cplDTO.getRefferal(), listaSenzaIp.get(0).getRefferal(), numerositatitudine);
+                                if (numerositatitudine == 0) {
+                                    cplDTO.setRefferal(listaSenzaIp.get(0).getRefferal());
+                                    cplDTO.setCpcId(listaSenzaIp.get(0).getId());
+                                }
                             }
                         }
                     }
@@ -131,7 +205,7 @@ public class RigeneraCPLBusiness {
 
                     // prendo reffereal e lo leggo
                     ReferralService.ReferralDTO refferal = referralService.descrivi(cplDTO.getRefferal());
-                    log.info(">>>>RR T-CPL :: {} :: ", cplDTO, refferal);
+                    log.trace(">>>>RR T-CPL :: {} :: ", cplDTO, refferal);
                     //aggiorno dati CPL
                     Cpl cccpl = cplRepository.findById(cplDTO.getId()).orElseThrow(() -> new ElementCleveradException("Cpl", cplDTO.getId()));
                     cccpl.setMediaId(refferal.getMediaId());
@@ -161,6 +235,7 @@ public class RigeneraCPLBusiness {
                         if (StringUtils.isNotBlank(cplDTO.getAgent())) transaction.setAgent(cplDTO.getAgent());
                         else transaction.setAgent("");
 
+
                         // controlla data scadneza camapgna
                         try {
                             CampaignDTO campaignDTO = campaignBusiness.findByIdAdmin(refferal.getCampaignId());
@@ -182,6 +257,13 @@ public class RigeneraCPLBusiness {
                                 Long walletID = walletBusiness.findByIdAffilaite(refferal.getAffiliateId()).stream().findFirst().get().getId();
                                 transaction.setWalletId(walletID);
                             }
+
+//
+//                            //                    HACK
+                            if (!scaduta && cplDTO.getData() != null && cplDTO.getData().contains("%pord=!?")) {
+                                scaduta = true;
+                            }
+
 
                             if (scaduta) {
                                 log.debug("Campagna {} : {} scaduta", campaignDTO.getId(), campaignDTO.getName());
@@ -280,7 +362,7 @@ public class RigeneraCPLBusiness {
 
                             // creo la transazione
                             TransactionCPLDTO cpl = transactionCPLBusiness.createCpl(transaction);
-                            log.info(">>>RIGENERATO LEAD :::: {}", cpl.getId());
+                            log.info(">>>RIGENERATO LEAD :::: {} :::::: {}", cpl.getId(), cplDTO);
 
                             // verifico il Postback ed eventualemnte faccio chiamata solo se campagna attiva
                             if (postback) {
@@ -292,7 +374,6 @@ public class RigeneraCPLBusiness {
                                         String globalPixel = affiliateBusiness.getGlobalPixel(affiliateID);
                                         // cerco folow through
                                         String followT = campaignAffiliateDTO.getFollowThrough();
-                                        String info = cplDTO.getInfo();
                                         String data = cplDTO.getData();
                                         String url = "";
                                         log.info("RCPLB POST BACK ::: " + followT + " :: " + globalPixel + " :: " + info + " :: " + data);
@@ -324,7 +405,7 @@ public class RigeneraCPLBusiness {
                                     log.warn("Campagna scaduta non faccio postback :: {}", cpl.getId());
                                 }
                             } else {
-                                log.info("================================ no postback");
+                                log.info("===== no postback");
                             }
                         } catch (Exception ecc) {
                             log.error("ECCEZIONE CPL :> ", ecc);

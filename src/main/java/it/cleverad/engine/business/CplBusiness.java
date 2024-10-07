@@ -25,7 +25,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.persistence.criteria.Predicate;
+import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -132,18 +132,15 @@ public class CplBusiness {
         repository.save(media);
     }
 
-    public Page<CplDTO> getUnreadOneHourBefore( ) {
+    public Page<CplDTO> getUnreadFromStartOfTheDay( ) {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("id")));
         Filter request = new Filter();
         request.setRead(false);
         request.setBlacklisted(false);
         LocalDateTime oraSpaccata = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
         request.setDatetimeFrom(oraSpaccata.toLocalDate().atStartOfDay());
-        request.setDatetimeTo(LocalDateTime.now());
-        Page<Cpl> page = repository.findAll(getSpecification(request), pageable);
-        if (page.getTotalElements() > 0)
-            log.trace("\n\n\n >>>>>>>>>>>>>>>>>>>>>> UNREAD CPL  BEFORE :: {}:{} = {}", request.getDatetimeFrom(), request.getDatetimeTo(), page.getTotalElements());
-        return page.map(CplDTO::from);
+        request.setDatetimeTo(LocalDateTime.now().minusMinutes(7));
+        return repository.findAll(getSpecification(request), pageable).map(CplDTO::from);
     }
 
     public Page<CplDTO> getAllDayBefore() {

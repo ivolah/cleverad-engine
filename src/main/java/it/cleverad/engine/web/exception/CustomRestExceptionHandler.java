@@ -20,18 +20,18 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
 
 @ControllerAdvice
-public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler implements InterfaceCustomRestExceptionHandler {
+public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 
     // 400
 
     @Override
-    public ResponseEntity<Object> handleMethodArgumentNotValid(final MethodArgumentNotValidException ex, final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(final MethodArgumentNotValidException ex, final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
         logger.info(ex.getClass().getName() + " " + ex);
 
         final List<String> errors = new ArrayList<>();
@@ -46,7 +46,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler i
     }
 
     @Override
-    public ResponseEntity<Object> handleBindException(final BindException ex, final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
+    protected ResponseEntity<Object> handleBindException(final BindException ex, final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
         logger.info(ex.getClass().getName() + " " + ex);
 
         final List<String> errors = new ArrayList<>();
@@ -61,7 +61,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler i
     }
 
     @Override
-    public ResponseEntity<Object> handleTypeMismatch(final TypeMismatchException ex, final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
+    protected ResponseEntity<Object> handleTypeMismatch(final TypeMismatchException ex, final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
         logger.info(ex.getClass().getName() + " " + ex);
 
         final String error = ex.getValue() + " value for " + ex.getPropertyName() + " should be of type " + ex.getRequiredType();
@@ -71,7 +71,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler i
     }
 
     @Override
-    public ResponseEntity<Object> handleMissingServletRequestPart(final MissingServletRequestPartException ex, final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
+    protected ResponseEntity<Object> handleMissingServletRequestPart(final MissingServletRequestPartException ex, final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
         logger.info(ex.getClass().getName() + " " + ex);
 
         final String error = ex.getRequestPartName() + " part is missing";
@@ -80,7 +80,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler i
     }
 
     @Override
-    public ResponseEntity<Object> handleMissingServletRequestParameter(final MissingServletRequestParameterException ex, final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
+    protected ResponseEntity<Object> handleMissingServletRequestParameter(final MissingServletRequestParameterException ex, final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
         logger.info(ex.getClass().getName() + " " + ex);
 
         final String error = ex.getParameterName() + " parameter is missing";
@@ -91,7 +91,6 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler i
     //    //    //    //
 
     @ExceptionHandler({MethodArgumentTypeMismatchException.class})
-    @Override
     public ResponseEntity<Object> handleMethodArgumentTypeMismatch(final MethodArgumentTypeMismatchException ex, final WebRequest request) {
         logger.info(ex.getClass().getName() + " " + ex);
 
@@ -102,7 +101,6 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler i
     }
 
     @ExceptionHandler({ConstraintViolationException.class})
-    @Override
     public ResponseEntity<Object> handleConstraintViolation(final ConstraintViolationException ex, final WebRequest request) {
         logger.info(ex.getClass().getName() + " " + ex);
 
@@ -118,7 +116,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler i
     // 404
 
     @Override
-    public ResponseEntity<Object> handleNoHandlerFoundException(final NoHandlerFoundException ex, final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
+    protected ResponseEntity<Object> handleNoHandlerFoundException(final NoHandlerFoundException ex, final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
         logger.info(ex.getClass().getName() + " " + ex);
         final String error = "No handler found for " + ex.getHttpMethod() + " " + ex.getRequestURL();
 
@@ -129,7 +127,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler i
     // 405
 
     @Override
-    public ResponseEntity<Object> handleHttpRequestMethodNotSupported(final HttpRequestMethodNotSupportedException ex, final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
+    protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(final HttpRequestMethodNotSupportedException ex, final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
         logger.info(ex.getClass().getName() + " " + ex);
         final StringBuilder builder = new StringBuilder();
         builder.append(ex.getMethod());
@@ -143,7 +141,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler i
     // 415
 
     @Override
-    public ResponseEntity<Object> handleHttpMediaTypeNotSupported(final HttpMediaTypeNotSupportedException ex, final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
+    protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(final HttpMediaTypeNotSupportedException ex, final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
         logger.info(ex.getClass().getName() + " " + ex.getLocalizedMessage());
         final StringBuilder builder = new StringBuilder();
         builder.append(ex.getContentType());
@@ -157,7 +155,6 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler i
     // 500
 
     @ExceptionHandler({Exception.class})
-    @Override
     public ResponseEntity<Object> handleAll(final Exception ex, final WebRequest request) {
         logger.error(ex.getClass().getName() + " ", ex);
         final ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, ex.getLocalizedMessage(), "error occurred");
@@ -166,8 +163,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler i
 
 
     @ExceptionHandler({ElementCleveradException.class})
-    @Override
-    public ResponseEntity<Object> handleElementCleveradException(final ElementCleveradException ex, final WebRequest request) {
+    protected ResponseEntity<Object> handleElementCleveradException(final ElementCleveradException ex, final WebRequest request) {
         logger.error(ex.getClass().getName() + " " + ex.getMessage(), ex);
         final ApiError apiError = new ApiError(HttpStatus.NOT_FOUND, ex.getLocalizedMessage(), ex.getMessage());
         return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
@@ -175,15 +171,13 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler i
 
 
     @ExceptionHandler({PostgresDeleteCleveradException.class})
-    @Override
-    public ResponseEntity<Object> handlePostgresDeleteCleveradException(final PostgresDeleteCleveradException ex, final WebRequest request) {
+    protected ResponseEntity<Object> handlePostgresDeleteCleveradException(final PostgresDeleteCleveradException ex, final WebRequest request) {
         logger.error(ex.getClass().getName() + " ", ex);
         final ApiError apiError = new ApiError(HttpStatus.CONFLICT, "Conflict in deleting the entity :" + ex.getLocalizedMessage(), ex.getMessage());
         return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
     }
 
     @ExceptionHandler({DataIntegrityViolationException.class})
-    @Override
     public ResponseEntity<Object> handleDataIntegrityViolationException(final DataIntegrityViolationException ex, final WebRequest request) {
         logger.error(ex.getClass().getName() + " :: " + ex.getMostSpecificCause(), ex);
         final ApiError apiError = new ApiError(HttpStatus.CONFLICT, "Conflict in the requested behaviour :" + ex.getMostSpecificCause(), ex.getMessage());

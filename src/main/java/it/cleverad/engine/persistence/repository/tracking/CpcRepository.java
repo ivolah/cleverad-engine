@@ -29,4 +29,7 @@ public interface CpcRepository extends JpaRepository<Cpc, Long>, JpaSpecificatio
                     "  and blacklisted = false ")
     List<ClickMultipli> getListaClickMultipliDaDisabilitare(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, @Param("affiliateId") Long affiliateId, @Param("campaignid") Long campaignid);
 
+
+    Cpc findByRndTrs(Long rndTrs);
+
 }

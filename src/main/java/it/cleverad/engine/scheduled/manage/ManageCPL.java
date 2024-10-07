@@ -27,6 +27,9 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -68,7 +71,7 @@ public class ManageCPL {
      * ============================================================================================================
      **/
 
-    @Scheduled(cron = "3 */3 * * * ?")
+    @Scheduled(cron = "4 */4 * * * ?")
     @Async
     public void gestisciTransazioni() {
         trasformaTrackingCPL();
@@ -82,62 +85,145 @@ public class ManageCPL {
     @Async
     public void trasformaTrackingCPL() {
         try {
-            cplBusiness.getUnreadOneHourBefore().stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
+            cplBusiness.getUnreadFromStartOfTheDay().stream().filter(cplDTO -> StringUtils.isNotBlank(cplDTO.getRefferal())).forEach(cplDTO -> {
+                log.info("-->-->--> CPL {}", cplDTO.getId());
 
-                // leggo sempre i cpc precedenti per trovare il click riferito alla lead
-                cpcBusiness.findByIp24HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal()).stream().filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal())).forEach(cpcDTO -> {
-                    log.trace("IP-CPC : {} : ORIG {} --> CPC {}", cpcDTO.getId(), cplDTO.getRefferal(), cpcDTO.getRefferal());
-                    cplDTO.setRefferal(cpcDTO.getRefferal());
-                    cplDTO.setCpcId(cpcDTO.getId());
-                });
+                String info = cplDTO.getInfo();
+                String source = cplDTO.getSource();
+                String rndTrs =null;
+                if(!info.isEmpty()) {
+                    Pattern rndTrsPattern = Pattern.compile("rndTrs: (\\d+)");
+                    Matcher rndTrsMatcher = rndTrsPattern.matcher(info);
+                    rndTrs = rndTrsMatcher.find() ? rndTrsMatcher.group(1).trim() : null;
+                }
+                if (source.equals("pixel")) {
+                    Cpc cpc = null;
 
-                // giro senza controllare IP address
-                if (cplDTO.getCpcId() == null) {
-                    List<Cpc> listaSenzaIp = cpcBusiness.findByIp1HoursBeforeNoIp(cplDTO.getDate(), cplDTO.getRefferal()).stream().filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal())).collect(Collectors.toList());
-                    if (!listaSenzaIp.isEmpty()) {
-                        //check id cpc non usato in transazioni cpl come cpcid
-                        long numerositatitudine = transactionCPLBusiness.countByCpcId(listaSenzaIp.get(0).getId());
-                        log.info("NO-IP CPC {} : ORIG {} --> CPC {} - used: {}", listaSenzaIp.get(0).getId(), cplDTO.getRefferal(), listaSenzaIp.get(0).getRefferal(), numerositatitudine);
-                        if (numerositatitudine == 0) {
-                            cplDTO.setRefferal(listaSenzaIp.get(0).getRefferal());
-                            cplDTO.setCpcId(listaSenzaIp.get(0).getId());
+                    if (rndTrs != null) {
+                        // Fetch CPC by rndTrs only if found
+                        List<Cpc> cpcList = cpcBusiness.findByRndTrs(Long.parseLong(rndTrs));
+                        if (!cpcList.isEmpty()) {
+                            cpc = cpcList.get(0);
+                            log.info(">>> TROVATO CPC {} CON RNDTRS {} e referral {} <<<", cpc.getId(), cpc.getRndTrs(), cpc.getRefferal());
+                            cplDTO.setRefferal(cpc.getRefferal());
+                            cplDTO.setCpcId(cpc.getId());
+                        }
+                    }
+
+                    if (cplDTO.getCpcId() == null) {
+                        // Search for CPC by IP in the last 2 hours
+                        cpcBusiness.findByIp2HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal()).stream()
+                                .filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal()))
+                                .findFirst()
+                                .ifPresent(cpcDTO -> {
+                                    log.info("PIXEL IP-CPC: Found CPC ID {} with referral {}", cpcDTO.getId(), cpcDTO.getRefferal());
+                                    cplDTO.setRefferal(cpcDTO.getRefferal());
+                                    cplDTO.setCpcId(cpcDTO.getId());
+                                });
+                    }
+
+                } else if (source.equals("s2s")) {
+                    //S2S -  giro senza controllare IP address
+                    log.info("S2S S2S S2S S2S S2S S2S");
+
+                    Cpc cpc = null;
+                    if (rndTrs != null) {
+                        // Fetch CPC by rndTrs only if found
+                        List<Cpc> cpcList = cpcBusiness.findByRndTrs(Long.parseLong(rndTrs));
+                        if (!cpcList.isEmpty()) {
+                            cpc = cpcList.get(0);
+                            log.info(">>> TROVATO CPC {} CON RNDTRS {} e referral {} <<<", cpc.getId(), cpc.getRndTrs(), cpc.getRefferal());
+                            cplDTO.setRefferal(cpc.getRefferal());
+                            cplDTO.setCpcId(cpc.getId());
+                        }
+                    }
+
+                    if (cpc == null) {
+                        // Search CPC without checking IP for transactions 15 minutes before
+                        List<Cpc> cpcListWithoutIp = cpcBusiness.findByIp15MinutesBeforeNoIp(cplDTO.getDate(), cplDTO.getRefferal())
+                                .stream()
+                                .filter(cpcDTO -> StringUtils.isNotBlank(cpcDTO.getRefferal()))
+                                .collect(Collectors.toList());
+
+                        if (!cpcListWithoutIp.isEmpty()) {
+                            Cpc firstCpc = cpcListWithoutIp.get(0);
+                            long transactionCount = transactionCPLBusiness.countByCpcId(firstCpc.getId());
+                            log.info("NO-IP CPC {} : ORIG {} --> CPC {} - used {} times", firstCpc.getId(), cplDTO.getRefferal(), firstCpc.getRefferal(), transactionCount);
+                            if (transactionCount == 0) {
+                                cplDTO.setRefferal(firstCpc.getRefferal());
+                                cplDTO.setCpcId(firstCpc.getId());
+                            }
                         }
                     }
                 }
 
                 Long idCpc = cplDTO.getCpcId();
-                log.info("Refferal :: {} con ID CPC {}", cplDTO.getRefferal(), idCpc);
                 cplBusiness.setCpcId(cplDTO.getId(), idCpc);
-                // prendo reffereal e lo leggo
-                Refferal refferal = referralService.decodificaReferral(cplDTO.getRefferal());
-                log.info(">>>> T-CPL :: {} :: {}", cplDTO, refferal);
+                // Decode referral
+                Refferal referral = referralService.decodificaReferral(cplDTO.getRefferal());
 
-                //aggiorno dati CPL
-                Cpl cccpl = cplRepository.findById(cplDTO.getId()).orElseThrow(() -> new ElementCleveradException("Cpl", cplDTO.getId()));
-                cccpl.setMediaId(refferal.getMediaId());
-                cccpl.setCampaignId(refferal.getCampaignId());
-                cccpl.setAffiliateId(refferal.getAffiliateId());
-                cccpl.setChannelId(refferal.getChannelId());
-                cccpl.setTargetId(refferal.getTargetId());
-                if (cccpl.getData().equals("[REPLACE]")) {
-                    cccpl.setData("");
-                    cplDTO.setData("");
-                }
-                if (StringUtils.isBlank(cccpl.getInfo()) && idCpc != null) {
-                    CpcDTO cpc = cpcBusiness.findById(idCpc);
-                    cccpl.setInfo(cpc.getInfo());
-                    cplDTO.setInfo(cpc.getInfo());
-                }
-                cplRepository.save(cccpl);
+                log.trace("Refferal :: {} -- ID CPC {}", cplDTO.getRefferal(), idCpc);
+                log.trace(">>>> T-CPL :: {} :: {}", cplDTO, referral);
 
-                if (refferal != null && refferal.getAffiliateId() != null) {
+                if (referral != null) {
+                    // Fetch CPL and check for presence
+                    Cpl cpl = cplRepository.findById(cplDTO.getId())
+                            .orElseThrow(() -> new ElementCleveradException("Cpl", cplDTO.getId()));
+
+                    // Update CPL fields if necessary
+                    boolean isUpdated = false;
+
+                    // Safely update CPL fields by checking nulls from Refferal
+                    if (!Objects.equals(referral.getMediaId(), cpl.getMediaId())) {
+                        cpl.setMediaId(referral.getMediaId());
+                        isUpdated = true;
+                    }
+                    if (!Objects.equals(referral.getCampaignId(), cpl.getCampaignId())) {
+                        cpl.setCampaignId(referral.getCampaignId());
+                        isUpdated = true;
+                    }
+                    if (!Objects.equals(referral.getAffiliateId(), cpl.getAffiliateId())) {
+                        cpl.setAffiliateId(referral.getAffiliateId());
+                        isUpdated = true;
+                    }
+                    if (!Objects.equals(referral.getChannelId(), cpl.getChannelId())) {
+                        cpl.setChannelId(referral.getChannelId());
+                        isUpdated = true;
+                    }
+                    if (!Objects.equals(referral.getTargetId(), cpl.getTargetId())) {
+                        cpl.setTargetId(referral.getTargetId());
+                        isUpdated = true;
+                    }
+
+                    // Replace placeholder data if necessary
+                    if ("[REPLACE]".equals(cpl.getData())) {
+                        cpl.setData("");
+                        cplDTO.setData("");
+                        isUpdated = true;
+                    }
+
+                    // Check and update `info` only if CPC ID is not null and `info` is blank
+                    if (StringUtils.isBlank(cpl.getInfo()) && idCpc != null) {
+                        String cpcInfo = cpcBusiness.findById(idCpc).getInfo();
+                        cpl.setInfo(cpcInfo);
+                        cplDTO.setInfo(cpcInfo);
+                        isUpdated = true;
+                    }
+
+                    // Save CPL only if there are updates
+                    if (isUpdated) {
+                        cplRepository.save(cpl);
+                    }
+                }
+                
+                if (referral != null && referral.getAffiliateId() != null) {
                     // setta transazione
                     TransactionCPLBusiness.BaseCreateRequest transaction = new TransactionCPLBusiness.BaseCreateRequest();
                     transaction.setRefferal(cplDTO.getRefferal());
-                    transaction.setAffiliateId(refferal.getAffiliateId());
-                    transaction.setCampaignId(refferal.getCampaignId());
-                    transaction.setChannelId(refferal.getChannelId());
-                    transaction.setMediaId(refferal.getMediaId());
+                    transaction.setAffiliateId(referral.getAffiliateId());
+                    transaction.setCampaignId(referral.getCampaignId());
+                    transaction.setChannelId(referral.getChannelId());
+                    transaction.setMediaId(referral.getMediaId());
                     transaction.setDateTime(cplDTO.getDate());
                     transaction.setApproved(true);
                     transaction.setPayoutPresent(false);
@@ -148,10 +234,10 @@ public class ManageCPL {
 
                     transaction.setIp(cplDTO.getIp());
                     transaction.setData(cplDTO.getData().trim().replace("[REPLACE]", ""));
-                    transaction.setMediaId(refferal.getMediaId());
+                    transaction.setMediaId(referral.getMediaId());
 
                     // controlla data scadneza camapgna
-                    CampaignDTO campaignDTO = campaignBusiness.findByIdAdmin(refferal.getCampaignId());
+                    CampaignDTO campaignDTO = campaignBusiness.findByIdAdmin(referral.getCampaignId());
                     Boolean scaduta = false;
                     LocalDate endDate = campaignDTO.getEndDate();
                     if (endDate.isBefore(LocalDate.now())) {
@@ -170,12 +256,20 @@ public class ManageCPL {
                     }
 
                     // associo a wallet
-                    Long affiliateID = refferal.getAffiliateId();
+                    Long affiliateID = referral.getAffiliateId();
                     Long walletID;
                     if (affiliateID != null) {
                         walletID = walletRepository.findByAffiliateId(affiliateID).getId();
                         transaction.setWalletId(walletID);
                     }
+
+//
+//                    //                    HACK
+                    if (!scaduta && cplDTO.getData() != null && cplDTO.getData().contains("%pord=!?")) {
+                        scaduta = true;
+                    }
+
+
 
                     if (scaduta) {
                         log.debug("Campagna {} : {} scaduta", campaignDTO.getId(), campaignDTO.getName());
@@ -206,11 +300,11 @@ public class ManageCPL {
                         }
                         if (!checkAction) {
                             // GIRO STANDARD
-                            RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 11L);
+                            RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(referral.getCampaignId(), 11L);
                             if (rf != null) {
                                 transaction.setRevenueId(rf.getId());
                             } else {
-                                log.warn("Non trovato revenue factor di tipo 11 per campagna {} , setto default", refferal.getCampaignId());
+                                log.warn("Non trovato revenue factor di tipo 11 per campagna {} , setto default", referral.getCampaignId());
                                 transaction.setRevenueId(2L);
                             }
                         }
@@ -232,9 +326,9 @@ public class ManageCPL {
                         }
                         if (!checkAction) {
                             // non è settato l'actionId allora faccio il solito giro
-                            req.setAffiliateId(refferal.getAffiliateId());
-                            req.setChannelId(refferal.getChannelId());
-                            req.setCampaignId(refferal.getCampaignId());
+                            req.setAffiliateId(referral.getAffiliateId());
+                            req.setChannelId(referral.getChannelId());
+                            req.setCampaignId(referral.getCampaignId());
                             req.setBlocked(false);
                             req.setCommissionDicId(11L);
                             AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
@@ -242,7 +336,7 @@ public class ManageCPL {
                                 commVal = acccFirst.getCommissionValue();
                                 commissionId = acccFirst.getCommissionId();
                             } else
-                                log.warn("No Commission CPL (campagna {} e affilitato {}), setto default ({})", refferal.getCampaignId(), refferal.getAffiliateId(), cplDTO.getRefferal());
+                                log.warn("No Commission CPL (campagna {} e affilitato {}), setto default ({})", referral.getCampaignId(), referral.getAffiliateId(), cplDTO.getRefferal());
                         }
                         transaction.setCommissionId(commissionId);
 
@@ -252,12 +346,12 @@ public class ManageCPL {
                         // incemento valore schedled
 
                         // decremento budget Affiliato
-                        AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(refferal.getCampaignId(), refferal.getAffiliateId()).stream().findFirst().orElse(null);
+                        AffiliateBudgetDTO bb = affiliateBudgetBusiness.getByIdCampaignAndIdAffiliate(referral.getCampaignId(), referral.getAffiliateId()).stream().findFirst().orElse(null);
                         if (bb != null && bb.getBudget() != null && (bb.getBudget() - totale) < 0)
                             transaction.setDictionaryId(47L);
 
                         // Stato Budget Campagna
-                        CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(refferal.getCampaignId(), transaction.getDateTime().toLocalDate()).stream().findFirst().orElse(null);
+                        CampaignBudgetDTO campBudget = campaignBudgetBusiness.searchByCampaignAndDate(referral.getCampaignId(), transaction.getDateTime().toLocalDate()).stream().findFirst().orElse(null);
                         if (campBudget != null && campBudget.getBudgetErogato() != null) {
                             Double budgetCampagna = campBudget.getBudgetErogato() - totale;
                             // setto stato transazione a ovebudget editore se totale < 0
@@ -277,20 +371,20 @@ public class ManageCPL {
 
                     // creo la transazione
                     TransactionCPLDTO cplT = transactionCPLBusiness.createCpl(transaction);
-                    log.info(">>> CREATO TRANSAZIONE :::: CPL :::: {} da {}", cplT.getId(), cplDTO.getCplId());
+                    log.info(">>> LEAD ({}-->{}) :::::: {}", cplDTO.getId(), cplT.getId(), cplDTO);
+
 
                     // verifico il Postback ed eventualemnte faccio chiamata
                     // solo se campagna attiva
                     if (transaction.getDictionaryId() != 49L) {
                         //not manuale
                         if (transaction.getManualDate() == null) {
-                            List<CampaignAffiliateDTO> campaignAffiliateDTOS = campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(refferal.getAffiliateId(), refferal.getCampaignId()).toList();
+                            List<CampaignAffiliateDTO> campaignAffiliateDTOS = campaignAffiliateBusiness.searchByAffiliateIdAndCampaignId(referral.getAffiliateId(), referral.getCampaignId()).toList();
                             campaignAffiliateDTOS.forEach(campaignAffiliateDTO -> {
                                 // cerco global
                                 String globalPixel = affiliateBusiness.getGlobalPixel(affiliateID);
                                 // cerco folow through
                                 String followT = campaignAffiliateDTO.getFollowThrough();
-                                String info = cplDTO.getInfo();
                                 String data = cplDTO.getData();
                                 String url = "";
                                 log.trace("POST BACK ::: " + followT + " :: " + globalPixel + " :: " + info + " :: " + data);
@@ -325,8 +419,8 @@ public class ManageCPL {
                     }
 
                 }// creo solo se ho affiliate
-                else if (refferal != null && !refferal.getSuccess()) {
-                    log.warn("Errore decodifica refferal :: {}", cplDTO.getRefferal());
+                else if (referral != null && !referral.getSuccess()) {
+                    log.warn("Errore decodifica referral :: {}", cplDTO.getRefferal());
                     cplBusiness.setRead(cplDTO.getId());
                 }
 
@@ -349,32 +443,32 @@ public class ManageCPL {
 
                 if (cplDTO.getRefferal().length() < 6) {
                     // cerco da cpc
-                    List<CpcDTO> ips = cpcBusiness.findByIp24HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal()).stream().collect(Collectors.toList());
+                    List<CpcDTO> ips = cpcBusiness.findByIp2HoursBefore(cplDTO.getIp(), cplDTO.getDate(), cplDTO.getRefferal()).stream().collect(Collectors.toList());
                     // prendo ultimo ip
                     for (CpcDTO dto : ips)
                         if (StringUtils.isNotBlank(dto.getRefferal())) cplDTO.setRefferal(dto.getRefferal());
                 }
 
                 // prendo reffereal e lo leggo
-                Refferal refferal = referralService.decodificaReferral(cplDTO.getRefferal());
-                if (refferal != null && refferal.getAffiliateId() != null) {
-                    log.debug(">>>> BLACLISTED CPL :: {} :: {}", cplDTO, refferal);
+                Refferal referral = referralService.decodificaReferral(cplDTO.getRefferal());
+                if (referral != null && referral.getAffiliateId() != null) {
+                    log.debug(">>>> BLACLISTED CPL :: {} :: {}", cplDTO, referral);
 
                     //aggiorno dati CPL
                     Cpl cccpl = cplRepository.findById(cplDTO.getId()).orElseThrow(() -> new ElementCleveradException("Cpl", cplDTO.getId()));
-                    cccpl.setMediaId(refferal.getMediaId());
-                    cccpl.setCampaignId(refferal.getCampaignId());
-                    cccpl.setAffiliateId(refferal.getAffiliateId());
-                    cccpl.setChannelId(refferal.getChannelId());
-                    cccpl.setTargetId(refferal.getTargetId());
+                    cccpl.setMediaId(referral.getMediaId());
+                    cccpl.setCampaignId(referral.getCampaignId());
+                    cccpl.setAffiliateId(referral.getAffiliateId());
+                    cccpl.setChannelId(referral.getChannelId());
+                    cccpl.setTargetId(referral.getTargetId());
                     cplRepository.save(cccpl);
 
                     // setta transazione
                     TransactionCPLBusiness.BaseCreateRequest transaction = new TransactionCPLBusiness.BaseCreateRequest();
-                    transaction.setAffiliateId(refferal.getAffiliateId());
-                    transaction.setCampaignId(refferal.getCampaignId());
-                    transaction.setChannelId(refferal.getChannelId());
-                    transaction.setMediaId(refferal.getMediaId());
+                    transaction.setAffiliateId(referral.getAffiliateId());
+                    transaction.setCampaignId(referral.getCampaignId());
+                    transaction.setChannelId(referral.getChannelId());
+                    transaction.setMediaId(referral.getMediaId());
                     transaction.setDateTime(cplDTO.getDate());
                     transaction.setApproved(false);
                     transaction.setPayoutPresent(false);
@@ -384,37 +478,37 @@ public class ManageCPL {
 
                     transaction.setIp(cplDTO.getIp());
                     transaction.setData(cplDTO.getData().trim().replace("[REPLACE]", ""));
-                    transaction.setMediaId(refferal.getMediaId());
+                    transaction.setMediaId(referral.getMediaId());
 
                     try {
                         // associo a wallet
-                        Long affiliateID = refferal.getAffiliateId();
+                        Long affiliateID = referral.getAffiliateId();
                         if (affiliateID != null) {
                             transaction.setWalletId(walletRepository.findByAffiliateId(affiliateID).getId());
                         }
 
                         // trovo revenue
-                        RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(refferal.getCampaignId(), 11L);
+                        RevenueFactor rf = revenueFactorBusiness.getbyIdCampaignAndDictionrayId(referral.getCampaignId(), 11L);
                         if (rf != null) {
                             transaction.setRevenueId(rf.getId());
                         } else {
-                            log.warn("Non trovato revenue factor di tipo 11 per campagna {} , setto default", refferal.getCampaignId());
+                            log.warn("Non trovato revenue factor di tipo 11 per campagna {} , setto default", referral.getCampaignId());
                             transaction.setRevenueId(2L);
                         }
 
                         // gesione commisione
                         Double commVal = 0D;
                         AffiliateChannelCommissionCampaignBusiness.Filter req = new AffiliateChannelCommissionCampaignBusiness.Filter();
-                        req.setAffiliateId(refferal.getAffiliateId());
-                        req.setChannelId(refferal.getChannelId());
-                        req.setCampaignId(refferal.getCampaignId());
+                        req.setAffiliateId(referral.getAffiliateId());
+                        req.setChannelId(referral.getChannelId());
+                        req.setCampaignId(referral.getCampaignId());
                         req.setCommissionDicId(11L);
                         AffiliateChannelCommissionCampaignDTO acccFirst = affiliateChannelCommissionCampaignBusiness.search(req).stream().findFirst().orElse(null);
                         if (acccFirst != null) {
                             commVal = acccFirst.getCommissionValue();
                             transaction.setCommissionId(acccFirst.getCommissionId());
                         } else {
-                            log.warn("Non trovato Commission di tipo 10 per campagna {}, setto default", refferal.getCampaignId());
+                            log.warn("Non trovato Commission di tipo 10 per campagna {}, setto default", referral.getCampaignId());
                             transaction.setCommissionId(0L);
                         }
 
@@ -436,8 +530,8 @@ public class ManageCPL {
                         log.error("BLACKLIS ECCEZIONE CPL :> ", ecc);
                     }
                 }// creo solo se ho affiliate
-                else if (refferal != null && !refferal.getSuccess()) {
-                    log.warn("Errore decodifica refferal :: {}", cplDTO.getRefferal());
+                else if (referral != null && !referral.getSuccess()) {
+                    log.warn("Errore decodifica referral :: {}", cplDTO.getRefferal());
                     cplBusiness.setRead(cplDTO.getId());
                 }
 
