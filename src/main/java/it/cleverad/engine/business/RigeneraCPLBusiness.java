@@ -113,9 +113,12 @@ public class RigeneraCPLBusiness {
 
                     String info = cplDTO.getInfo();
                     String source = cplDTO.getSource();
-                    Pattern rndTrsPattern = Pattern.compile("rndTrs: (\\d+)");
-                    Matcher rndTrsMatcher = rndTrsPattern.matcher(info);
-                    String rndTrs = rndTrsMatcher.find() ? rndTrsMatcher.group(1).trim() : null;
+                    String rndTrs =null;
+                    if(!info.isEmpty()) {
+                        Pattern rndTrsPattern = Pattern.compile("rndTrs: (\\d+)");
+                        Matcher rndTrsMatcher = rndTrsPattern.matcher(info);
+                        rndTrs = rndTrsMatcher.find() ? rndTrsMatcher.group(1).trim() : null;
+                    }
 
                     if (source.equals("pixel")) {
 
